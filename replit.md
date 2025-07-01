@@ -102,6 +102,14 @@ The application uses PostgreSQL with the following main entities:
 ```
 Changelog:
 - July 01, 2025. Initial setup
+- July 01, 2025. Added scaffolding for advanced features:
+  * Test system with anti-cheat protection
+  * Report management with file upload support
+  * Real-time WebSocket chat for support
+  * Business logic for application restrictions
+  * Security framework with rate limiting
+  * Enhanced UI components for transfers and leave
+  * Public homepage and FAQ system
 ```
 
 ## User Preferences

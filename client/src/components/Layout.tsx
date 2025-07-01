@@ -37,6 +37,7 @@ export function Layout({ children }: LayoutProps) {
     { path: '/dashboard', label: 'Dashboard', icon: Shield },
     { path: '/departments', label: 'Departments', icon: Building },
     { path: '/applications', label: 'Applications', icon: FileText },
+    { path: '/reports', label: 'Reports', icon: FileText },
     { path: '/support', label: 'Support', icon: Headphones },
   ];
 

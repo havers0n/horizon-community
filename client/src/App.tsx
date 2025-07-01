@@ -14,12 +14,22 @@ import Departments from "@/pages/Departments";
 import Applications from "@/pages/Applications";
 import Support from "@/pages/Support";
 import AdminPanel from "@/pages/AdminPanel";
+import Reports from "@/pages/Reports";
+import TestExam from "@/pages/TestExam";
+import Homepage from "@/pages/Homepage";
+import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       {/* Public routes */}
+      <Route path="/">
+        <Homepage />
+      </Route>
+      <Route path="/faq">
+        <FAQ />
+      </Route>
       <Route path="/login">
         {isAuthenticated() ? <Redirect to="/dashboard" /> : <Login />}
       </Route>
@@ -43,20 +53,25 @@ function Router() {
           <Applications />
         </ProtectedRoute>
       </Route>
+      <Route path="/reports">
+        <ProtectedRoute>
+          <Reports />
+        </ProtectedRoute>
+      </Route>
       <Route path="/support">
         <ProtectedRoute>
           <Support />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/test/:id">
+        <ProtectedRoute>
+          <TestExam />
         </ProtectedRoute>
       </Route>
       <Route path="/admin">
         <ProtectedRoute>
           <AdminPanel />
         </ProtectedRoute>
-      </Route>
-      
-      {/* Root redirect */}
-      <Route path="/">
-        {isAuthenticated() ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
       </Route>
       
       {/* 404 fallback */}
