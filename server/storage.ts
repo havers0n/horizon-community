@@ -135,6 +135,51 @@ export class MemStorage implements IStorage {
       gameWarnings: 0,
       adminWarnings: 0
     });
+
+    // Create supervisor user
+    const supervisorUser = await this.createUser({
+      username: "supervisor",
+      email: "supervisor@cadsystem.com",
+      passwordHash: await this.hashPassword("super123"),
+      role: "supervisor",
+      status: "active",
+      departmentId: lspd.id,
+      rank: "Lieutenant",
+      division: "Patrol",
+      qualifications: ["Leadership", "Training"],
+      gameWarnings: 0,
+      adminWarnings: 0
+    });
+
+    // Create member user
+    const memberUser = await this.createUser({
+      username: "member",
+      email: "member@cadsystem.com",
+      passwordHash: await this.hashPassword("member123"),
+      role: "member",
+      status: "active",
+      departmentId: lsfd.id,
+      rank: "Firefighter",
+      division: "Emergency Response",
+      qualifications: ["First Aid", "Emergency Response"],
+      gameWarnings: 0,
+      adminWarnings: 0
+    });
+
+    // Create candidate user
+    const candidateUser = await this.createUser({
+      username: "candidate",
+      email: "candidate@cadsystem.com",
+      passwordHash: await this.hashPassword("candidate123"),
+      role: "candidate",
+      status: "active",
+      departmentId: ems.id,
+      rank: "Trainee",
+      division: "Training",
+      qualifications: [],
+      gameWarnings: 0,
+      adminWarnings: 0
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
