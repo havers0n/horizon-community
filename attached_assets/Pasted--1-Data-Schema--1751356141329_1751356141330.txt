@@ -1,0 +1,212 @@
+Часть 1: Спецификация базы данных (Data Schema)
+Этот документ описывает структуру данных. Он является единым источником правды для бэкенда и фронтенда.
+
+
+Сущности (Коллекции/Таблицы):
+
+
+User (Пользователь)
+_id: ObjectID — Уникальный идентификатор
+username: String — Имя пользователя на сайте
+email: String (unique) — E-mail для входа
+passwordHash: String — Хэш пароля
+role: String (Enum: candidate, member, supervisor, admin) — Роль в системе
+status: String (Enum: active, on_leave, banned) — Текущий статус
+departmentId: ObjectID (ссылка на Department) — Основной департамент
+secondaryDepartmentId: ObjectID (ссылка на Department, nullable) — Департамент по совмещению
+rank: String — Звание
+division: String (nullable) - Подразделение
+qualifications: Array<String> — Список полученных квалификаций
+gameWarnings: Number (default: 0) — Кол-во игровых предупреждений
+adminWarnings: Number (default: 0) — Кол-во административных предупреждений
+createdAt: Date — Дата регистрации
+
+2. Department (Департамент)
+_id: ObjectID
+name: String (e.g., "LSPD")
+fullName: String (e.g., "Los Santos Police Department")
+logoUrl: String — URL до логотипа
+description: String — Краткая информация
+gallery: Array<String> — Массив URL-адресов скриншотов
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3.Application (Заявка)
+_id: ObjectID
+authorId: ObjectID (ссылка на User)
+type: String (Enum: entry, promotion, qualification, transfer_dept, transfer_div, leave, joint_primary, joint_secondary, joint_remove)
+status: String (Enum: pending, approved, rejected, closed)
+data: Object — Полезная нагрузка с полями заявки (например, { desiredRank: "Sergeant", lastPromotionDate: "..." })
+result: Object (nullable) - Результаты, если применимо (например, { testScore: 17, testMaxScore: 20 })
+reviewerId: ObjectID (ссылка на User, nullable) — Кто рассмотрел заявку
+reviewComment: String (nullable) - Комментарий проверяющего
+createdAt: Date
+updatedAt: Date
+
+4. SupportTicket (Тикет в службу поддержки)
+_id: ObjectID
+authorId: ObjectID (ссылка на User)
+status: String (Enum: open, closed)
+handlerId: ObjectID (ссылка на User с ролью admin, nullable)
+messages: Array<Object> — Массив сообщений: { senderId, content, mediaUrl, timestamp }
+createdAt: Date
+
+5. Complaint (Жалоба)
+_id: ObjectID
+authorId: ObjectID (ссылка на User)
+status: String (Enum: pending, in_progress, resolved, declined)
+incidentDate: Date
+incidentType: String (Enum: game, admin)
+participants: String — Описание участников
+description: String
+evidenceUrl: String (nullable)
+
+6. Report (Рапорт)
+_id: ObjectID
+authorId: ObjectID (ссылка на User)
+status: String (Enum: pending, approved, rejected)
+fileUrl: String — Ссылка на загруженный файл рапорта
+supervisorComment: String (nullable)
+createdAt: Date
+
+
+
+
+
+
+7. Notification (Уведомление)
+_id: ObjectID
+recipientId: ObjectID (ссылка на User)
+content: String — Текст уведомления (напр., "Ваша заявка №123 одобрена")
+link: String — Ссылка для перехода (напр., /applications/123)
+isRead: Boolean (default: false)
+createdAt: Date
+
+8. Test (Тест)
+_id: ObjectID
+title: String
+relatedTo: Object (напр., { type: 'promotion', departmentId: '...', rank: '...' })
+durationMinutes: Number
+questions: Array<Object> — Массив вопросов: { questionText, options: [String], correctOptionIndex: Number }
+
+
+Часть 2: ТЗ на Бэкенд (Backend API)
+Стек: Node.js + Express.js (или аналоги), MongoDB (или другая NoSQL БД).
+Аутентификация: JWT (JSON Web Tokens).
+API Endpoints:
+1. Аутентификация (
+POST /register: Принимает username, email, password. Создает User с role: 'candidate'.
+POST /login: Принимает email, password. Возвращает JWT токен.
+GET /me: Возвращает данные текущего пользователя (требует JWT).
+2. Публичные данные (
+GET /departments: Возвращает список всех департаментов (_id, name, logoUrl, description).
+GET /departments/:id: Возвращает полную информацию о департаменте, включая gallery.
+GET /faq: Возвращает список вопросов-ответов.
+3. Профиль и действия пользователя ( - все эндпоинты требуют JWT
+GET /applications: Возвращает список всех заявок текущего пользователя.
+POST /applications: Создает новую заявку. Тело запроса: { type, data }.
+Бизнес-логика: Проверка лимитов (3 в месяц для entry, 2 для leave и т.д.).
+
+
+GET /reports: Возвращает список рапортов пользователя.
+POST /reports: Загрузка файла рапорта.
+GET /notifications: Возвращает уведомления пользователя.
+PUT /notifications/:id/read: Помечает уведомление как прочитанное.
+POST /complaints: Подача жалобы.
+
+
+
+4. Тестирование ( - требует JWT
+GET /applications/:id/test: Получает информацию о тесте, привязанном к одобренной заявке (название, кол-во вопросов, время).
+POST /applications/:id/test/start: Начинает тест, запускает таймер на сервере.
+POST /applications/:id/test/submit: Принимает ответы, завершает тест, сохраняет результат в Application.result, меняет статус заявки.
+5. Служба поддержки ( - требует JWT
+GET /tickets: Возвращает список тикетов пользователя.
+POST /tickets: Создает новый тикет.
+GET /tickets/:id: Возвращает историю сообщений в тикете.
+POST /tickets/:id/message: Отправляет новое сообщение в тикет.
+6. Панель Администратора/Супервайзера ( - требует JWT с ролью 
+GET /applications: Получение всех заявок с возможностью фильтрации по типу и статусу.
+PUT /applications/:id: Обновление статуса заявки (approved, rejected), добавление комментария.
+GET /users: Список всех пользователей с фильтрами.
+PUT /users/:id: Обновление данных пользователя (роль, звание, департамент, предупреждения).
+GET /tickets: Список всех тикетов поддержки.
+POST /tickets/:id/reply: Ответ в тикет от лица поддержки.
+... и так далее для управления жалобами, рапортами, контентом департаментов.
+
+Часть 3: ТЗ на Фронтенд (Frontend)
+Стек: React.js / Vue.js (или другой современный фреймворк).
+Структура (Страницы и Компоненты):
+1. Общедоступные страницы (Public)
+Главная (:
+Компонент Header (кнопки Вход/Регистрация, ссылки).
+Компонент DepartmentsGrid: Отображает логотипы департаментов (данные с GET /api/public/departments).
+Компонент GalleryPreview: Превью галереи.
+
+
+Страница Департамента (: Полная информация о департаменте.
+Страница FAQ (: Отображение списка вопросов-ответов.
+Страницы Входа/Регистрации (: Формы для вызова POST /api/auth/*.
+2. Личный кабинет (Private, требуется вход)
+Компонент : Обертка для всех приватных страниц, перенаправляет на /login если нет JWT.
+Главная панель (:
+Компонент ProfileCard: Отображает информацию о пользователе из GET /api/auth/me.
+Компонент ActionButtons: Кнопки "Подать жалобу", "Перевод", "Отпуск", открывающие модальные окна с формами.
+Компонент MyApplicationsList: Список заявок (данные с GET /api/profile/applications).
+
+Страница "Мои Заявки" (:
+Полный список заявок с фильтрами и пагинацией.
+Кнопка "Подать новую заявку".
+
+Страница Деталей Заявки (:
+Показывает все данные заявки.
+Если заявка одобрена и требует теста, здесь будет кнопка "Пройти тестирование".
+
+Страница Тестирования (:
+Интерфейс теста с таймером и вопросами.
+Реализовать логику отслеживания сворачивания окна (document.addEventListener('visibilitychange', ...)).
+
+Страница Службы Поддержки (:
+Список тикетов слева, окно чата справа.
+
+Страница Документации (.
+
+Часть 4: Взаимодействие систем
+
+
+Пример сценария: "Пользователь подает заявку на повышение"
+Фронтенд: Пользователь на странице /dashboard нажимает "Заявки на повышение" -> "Подать заявку".
+Фронтенд: Открывается форма. Пользователь заполняет поля (желаемое звание и т.д.).
+Фронтенд: При нажатии "Отправить" формируется POST запрос на api/profile/applications с телом { type: 'promotion', data: { desiredRank: '...', ...} } и JWT токеном в заголовке Authorization.
+Бэкенд: API получает запрос, валидирует JWT, проверяет права пользователя и лимиты.
+Бэкенд: Если все в порядке, создает новый документ в коллекции Applications в Базе данных со статусом pending.
+Бэкенд: (Опционально) Создает документ в коллекции Notifications для всех supervisor.
+Бэкенд: Отправляет ответ 201 Created на Фронтенд.
+Фронтенд: Получив успешный ответ, показывает сообщение "Заявка отправлена" и перенаправляет пользователя на страницу /applications.
+
+
+
+
+
+
+
+Пример сценария: "Супервайзер одобряет заявку"
+Фронтенд (Админ-панель): Супервайзер видит новую заявку в списке.
+Фронтенд: Нажимает "Одобрить".
+Фронтенд: Отправляет PUT запрос на api/admin/applications/:id с телом { status: 'approved' }.
+Бэкенд: Получает запрос, проверяет права супервайзера.
+Бэкенд: Обновляет документ в коллекции Applications в Базе данных, меняя status на approved.
+Бэкенд: Создает документ в коллекции Notifications для автора заявки с текстом "Ваша заявка на повышение одобрена. Вам доступен тест." и link: '/applications/:id'.
+Бэкенд: Отправляет ответ 200 OK на Фронтенд.
+Фронтенд: Обновляет интерфейс, заявка меняет цвет на зеленый. Пользователь-автор при следующем входе увидит уведомление и новую кнопку в своей заявке.
