@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -6,15 +8,16 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterData } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { setAuthState } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Shield } from "lucide-react";
 
 export default function Register() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { signUp } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
@@ -25,30 +28,24 @@ export default function Register() {
     }
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: RegisterData) => {
-      const response = await apiRequest('POST', '/api/auth/register', data);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setAuthState(data.user, data.token);
+  const onSubmit = async (data: RegisterData) => {
+    setIsLoading(true);
+    try {
+      await signUp(data.email, data.password, data.username);
       toast({
         title: "Success",
-        description: "Account created successfully"
+        description: "Account created successfully! Please check your email for verification."
       });
       setLocation('/dashboard');
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Registration failed",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
-  });
-
-  const onSubmit = (data: RegisterData) => {
-    mutation.mutate(data);
   };
 
   return (
@@ -58,9 +55,9 @@ export default function Register() {
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('register.title', 'Create Account')}</CardTitle>
           <CardDescription>
-            Join the CAD System to get started
+            {t('register.subtitle', 'Join the CAD System to get started')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -71,9 +68,9 @@ export default function Register() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>{t('register.username', 'Username')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your username" {...field} />
+                      <Input placeholder={t('register.username_placeholder', 'Enter your username')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -85,9 +82,9 @@ export default function Register() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t('register.email', 'Email')}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
+                      <Input type="email" placeholder={t('register.email_placeholder', 'Enter your email')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -99,26 +96,26 @@ export default function Register() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t('register.password', 'Password')}</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter your password" {...field} />
+                      <Input type="password" placeholder={t('register.password_placeholder', 'Enter your password')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Creating Account...' : 'Create Account'}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? t('register.creating_account', 'Creating Account...') : t('register.create_account', 'Create Account')}
               </Button>
             </form>
           </Form>
           
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
+              {t('register.have_account', 'Already have an account?')}{' '}
               <Link href="/login" className="font-medium text-primary hover:text-primary/90">
-                Sign in
+                {t('register.sign_in', 'Sign in')}
               </Link>
             </p>
           </div>

@@ -20,13 +20,16 @@ const applicationSchema = z.object({
 });
 
 type ApplicationFormData = z.infer<typeof applicationSchema>;
-
 interface ApplicationModalProps {
   children?: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function ApplicationModal({ children }: ApplicationModalProps) {
-  const [open, setOpen] = useState(false);
+export function ApplicationModal({ children, isOpen, onOpenChange }: ApplicationModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = typeof isOpen === 'boolean' ? isOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -109,7 +112,6 @@ export function ApplicationModal({ children }: ApplicationModalProps) {
                 </FormItem>
               )}
             />
-            
             <FormField
               control={form.control}
               name="data.details"
@@ -127,7 +129,6 @@ export function ApplicationModal({ children }: ApplicationModalProps) {
                 </FormItem>
               )}
             />
-            
             <div className="flex justify-end space-x-3">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancel

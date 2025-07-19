@@ -1,441 +1,363 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
-import { verifyToken } from './auth';
-import { IStorage } from './storage';
+import { db } from './db/index.js';
+import { activeUnits, call911, callAttachments } from '../shared/schema.js';
+import { eq } from 'drizzle-orm';
 
-interface AuthenticatedWebSocket extends WebSocket {
+interface CADClient {
+  ws: WebSocket;
   userId?: number;
-  userRole?: string;
+  departmentId?: number;
+  isDispatcher?: boolean;
+  subscriptions: string[];
 }
 
-interface ChatMessage {
-  id: string;
-  ticketId: number;
-  senderId: number;
-  senderName: string;
-  senderRole: string;
-  message: string;
-  timestamp: Date;
-  type: 'text' | 'file' | 'system';
-  fileUrl?: string;
-  fileName?: string;
+interface CADEvent {
+  type: string;
+  data: any;
+  timestamp: number;
 }
 
-interface OnlineUser {
-  userId: number;
-  username: string;
-  role: string;
-  lastSeen: Date;
-}
-
-export class WebSocketManager {
+class CADWebSocketServer {
   private wss: WebSocketServer;
-  private storage: IStorage;
-  private clients: Map<number, AuthenticatedWebSocket> = new Map();
-  private onlineUsers: Map<number, OnlineUser> = new Map();
-  private chatHistory: Map<number, ChatMessage[]> = new Map(); // ticketId -> messages
+  private clients: Map<string, CADClient> = new Map();
+  private heartbeatInterval!: NodeJS.Timeout;
 
-  constructor(server: Server, storage: IStorage) {
-    this.storage = storage;
-    this.wss = new WebSocketServer({ 
-      server,
-      path: '/ws'
-    });
-
-    this.initialize();
+  constructor(server: Server) {
+    this.wss = new WebSocketServer({ server });
+    this.setupWebSocket();
+    this.startHeartbeat();
   }
 
-  private initialize() {
-    this.wss.on('connection', (ws: AuthenticatedWebSocket, request) => {
-      console.log('WebSocket connection attempt');
-      
-      // Extract token from query params or headers
-      const url = new URL(request.url!, `http://${request.headers.host}`);
-      const token = url.searchParams.get('token') || request.headers.authorization?.replace('Bearer ', '');
+  private setupWebSocket() {
+    this.wss.on('connection', (ws: WebSocket, request) => {
+      const clientId = this.generateClientId();
+      const client: CADClient = {
+        ws,
+        subscriptions: []
+      };
 
-      if (!token) {
-        ws.close(1008, 'Authentication required');
-        return;
-      }
+      this.clients.set(clientId, client);
 
-      // Verify JWT token
-      this.authenticateConnection(ws, token);
-    });
+      console.log(`CAD Client connected: ${clientId}`);
 
-    // Cleanup inactive connections every 30 seconds
-    setInterval(() => this.cleanupInactiveConnections(), 30000);
-  }
-
-  private async authenticateConnection(ws: AuthenticatedWebSocket, token: string) {
-    try {
-      // In real implementation, verify JWT token
-      // const decoded = verifyToken(token);
-      // const user = await this.storage.getUser(decoded.userId);
-      
-      // Mock authentication for demonstration
-      const mockUserId = 1; // Would come from JWT
-      const user = await this.storage.getUser(mockUserId);
-      
-      if (!user) {
-        ws.close(1008, 'Invalid user');
-        return;
-      }
-
-      ws.userId = user.id;
-      ws.userRole = user.role;
-      
-      this.clients.set(user.id, ws);
-      this.onlineUsers.set(user.id, {
-        userId: user.id,
-        username: user.username,
-        role: user.role,
-        lastSeen: new Date()
-      });
-
-      console.log(`User ${user.username} connected via WebSocket`);
-
-      // Send connection success
-      this.sendToUser(user.id, {
-        type: 'connection',
-        data: { status: 'connected', userId: user.id }
-      });
-
-      // Broadcast online users update
-      this.broadcastOnlineUsers();
-
-      // Setup message handlers
-      this.setupMessageHandlers(ws);
-
-    } catch (error) {
-      console.error('WebSocket authentication failed:', error);
-      ws.close(1008, 'Authentication failed');
-    }
-  }
-
-  private setupMessageHandlers(ws: AuthenticatedWebSocket) {
-    ws.on('message', async (data) => {
-      try {
-        const message = JSON.parse(data.toString());
-        await this.handleMessage(ws, message);
+      ws.on('message', (message: string) => {
+        try {
+          const data = JSON.parse(message);
+          this.handleMessage(clientId, data);
       } catch (error) {
-        console.error('Error handling WebSocket message:', error);
-        this.sendToUser(ws.userId!, {
-          type: 'error',
-          data: { message: 'Invalid message format' }
-        });
+          console.error('Failed to parse message:', error);
+          this.sendError(clientId, 'Invalid message format');
       }
     });
 
     ws.on('close', () => {
-      if (ws.userId) {
-        console.log(`User ${ws.userId} disconnected`);
-        this.clients.delete(ws.userId);
-        this.onlineUsers.delete(ws.userId);
-        this.broadcastOnlineUsers();
-      }
+        console.log(`CAD Client disconnected: ${clientId}`);
+        this.clients.delete(clientId);
     });
 
     ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
-    });
+        console.error(`CAD Client error: ${clientId}`, error);
+        this.clients.delete(clientId);
+      });
 
-    // Heartbeat to detect broken connections
-    ws.on('pong', () => {
-      if (ws.userId) {
-        const onlineUser = this.onlineUsers.get(ws.userId);
-        if (onlineUser) {
-          onlineUser.lastSeen = new Date();
-        }
-      }
+      // Отправляем приветственное сообщение
+      this.sendToClient(clientId, {
+        type: 'welcome',
+        data: {
+          clientId,
+          message: 'Connected to CAD WebSocket Server'
+        },
+        timestamp: Date.now()
+      });
     });
   }
 
-  private async handleMessage(ws: AuthenticatedWebSocket, message: any) {
-    const { type, data } = message;
+  private handleMessage(clientId: string, message: any) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
 
-    switch (type) {
-      case 'chat_message':
-        await this.handleChatMessage(ws, data);
+    switch (message.type) {
+      case 'authenticate':
+        this.handleAuthentication(clientId, message.data);
         break;
       
-      case 'join_ticket':
-        await this.handleJoinTicket(ws, data);
+      case 'subscribe':
+        this.handleSubscription(clientId, message.data);
         break;
       
-      case 'leave_ticket':
-        await this.handleLeaveTicket(ws, data);
+      case 'unsubscribe':
+        this.handleUnsubscription(clientId, message.data);
         break;
       
-      case 'typing':
-        await this.handleTyping(ws, data);
-        break;
-      
-      case 'heartbeat':
-        this.sendToUser(ws.userId!, { type: 'heartbeat', data: { timestamp: new Date() } });
+      case 'ping':
+        this.sendToClient(clientId, {
+          type: 'pong',
+          data: { timestamp: Date.now() },
+          timestamp: Date.now()
+        });
         break;
       
       default:
-        console.log('Unknown message type:', type);
+        this.sendError(clientId, `Unknown message type: ${message.type}`);
     }
   }
 
-  private async handleChatMessage(ws: AuthenticatedWebSocket, data: any) {
-    const { ticketId, message, type = 'text', fileUrl, fileName } = data;
-    
-    if (!ws.userId || !ticketId || !message) {
+  private handleAuthentication(clientId: string, data: any) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    const { token, isDispatcher = false } = data;
+
+    if (!token) {
+      this.sendError(clientId, 'Authentication token required');
       return;
     }
 
-    // Verify user has access to this ticket
-    const ticket = await this.storage.getSupportTicket(ticketId);
-    if (!ticket) {
-      this.sendToUser(ws.userId, {
-        type: 'error',
-        data: { message: 'Ticket not found' }
+    // Здесь должна быть проверка токена через базу данных
+    // Для демонстрации используем простую проверку
+    if (token === 'demo-token') {
+      client.userId = 1;
+      client.departmentId = 1;
+      client.isDispatcher = isDispatcher;
+      
+      this.sendToClient(clientId, {
+        type: 'authenticated',
+        data: {
+          userId: client.userId,
+          departmentId: client.departmentId,
+          isDispatcher: client.isDispatcher
+        },
+        timestamp: Date.now()
       });
+
+      console.log(`Client ${clientId} authenticated as user ${client.userId}`);
+    } else {
+      this.sendError(clientId, 'Invalid authentication token');
+    }
+  }
+
+  private handleSubscription(clientId: string, data: any) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    const { channels } = data;
+
+    if (!Array.isArray(channels)) {
+      this.sendError(clientId, 'Channels must be an array');
       return;
     }
 
-    // Check if user is ticket author or has admin/supervisor role
-    const canAccess = ticket.authorId === ws.userId || 
-                     ['admin', 'supervisor'].includes(ws.userRole!);
-    
-    if (!canAccess) {
-      this.sendToUser(ws.userId, {
-        type: 'error',
-        data: { message: 'Access denied' }
-      });
+    // Добавляем подписки
+    channels.forEach((channel: string) => {
+      if (!client.subscriptions.includes(channel)) {
+        client.subscriptions.push(channel);
+      }
+    });
+
+    this.sendToClient(clientId, {
+      type: 'subscribed',
+      data: { channels: client.subscriptions },
+      timestamp: Date.now()
+    });
+
+    console.log(`Client ${clientId} subscribed to: ${channels.join(', ')}`);
+  }
+
+  private handleUnsubscription(clientId: string, data: any) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    const { channels } = data;
+
+    if (!Array.isArray(channels)) {
+      this.sendError(clientId, 'Channels must be an array');
       return;
     }
 
-    const user = await this.storage.getUser(ws.userId);
-    if (!user) return;
+    // Удаляем подписки
+    client.subscriptions = client.subscriptions.filter(
+      sub => !channels.includes(sub)
+    );
 
-    // Create chat message
-    const chatMessage: ChatMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ticketId,
-      senderId: user.id,
-      senderName: user.username,
-      senderRole: user.role,
-      message,
-      timestamp: new Date(),
-      type,
-      fileUrl,
-      fileName
-    };
-
-    // Store message in memory (in real implementation, store in database)
-    if (!this.chatHistory.has(ticketId)) {
-      this.chatHistory.set(ticketId, []);
-    }
-    this.chatHistory.get(ticketId)!.push(chatMessage);
-
-    // Update ticket messages in storage
-    const existingMessages = ticket.messages as ChatMessage[] || [];
-    const updatedMessages = [...existingMessages, chatMessage];
-    
-    await this.storage.updateSupportTicket(ticketId, {
-      messages: updatedMessages as any
+    this.sendToClient(clientId, {
+      type: 'unsubscribed',
+      data: { channels: client.subscriptions },
+      timestamp: Date.now()
     });
 
-    // Broadcast message to all users with access to this ticket
-    this.broadcastToTicket(ticketId, {
-      type: 'chat_message',
-      data: chatMessage
-    });
-
-    // Create notification for other participants
-    if (ticket.handlerId && ticket.handlerId !== user.id) {
-      await this.storage.createNotification({
-        recipientId: ticket.handlerId,
-        content: `New message in support ticket #${ticketId}`,
-        link: `/support/tickets/${ticketId}`,
-        isRead: false
-      });
-    }
-
-    if (ticket.authorId !== user.id) {
-      await this.storage.createNotification({
-        recipientId: ticket.authorId,
-        content: `New message in your support ticket #${ticketId}`,
-        link: `/support/tickets/${ticketId}`,
-        isRead: false
-      });
-    }
+    console.log(`Client ${clientId} unsubscribed from: ${channels.join(', ')}`);
   }
 
-  private async handleJoinTicket(ws: AuthenticatedWebSocket, data: any) {
-    const { ticketId } = data;
-    
-    if (!ws.userId || !ticketId) return;
-
-    // Verify access and send chat history
-    const ticket = await this.storage.getSupportTicket(ticketId);
-    if (!ticket) return;
-
-    const canAccess = ticket.authorId === ws.userId || 
-                     ['admin', 'supervisor'].includes(ws.userRole!);
-    
-    if (!canAccess) return;
-
-    // Send chat history
-    const messages = this.chatHistory.get(ticketId) || [];
-    this.sendToUser(ws.userId, {
-      type: 'chat_history',
-      data: { ticketId, messages }
-    });
-
-    // Notify others that user joined
-    this.broadcastToTicket(ticketId, {
-      type: 'user_joined',
-      data: { userId: ws.userId, ticketId }
-    }, ws.userId);
-  }
-
-  private async handleLeaveTicket(ws: AuthenticatedWebSocket, data: any) {
-    const { ticketId } = data;
-    
-    if (!ws.userId || !ticketId) return;
-
-    // Notify others that user left
-    this.broadcastToTicket(ticketId, {
-      type: 'user_left',
-      data: { userId: ws.userId, ticketId }
-    }, ws.userId);
-  }
-
-  private async handleTyping(ws: AuthenticatedWebSocket, data: any) {
-    const { ticketId, isTyping } = data;
-    
-    if (!ws.userId || !ticketId) return;
-
-    // Broadcast typing indicator to other users in ticket
-    this.broadcastToTicket(ticketId, {
-      type: 'typing',
-      data: { userId: ws.userId, ticketId, isTyping }
-    }, ws.userId);
-  }
-
-  private async broadcastToTicket(ticketId: number, message: any, excludeUserId?: number) {
-    const ticket = await this.storage.getSupportTicket(ticketId);
-    if (!ticket) return;
-
-    // Send to ticket author
-    if (ticket.authorId !== excludeUserId) {
-      this.sendToUser(ticket.authorId, message);
-    }
-
-    // Send to handler
-    if (ticket.handlerId && ticket.handlerId !== excludeUserId) {
-      this.sendToUser(ticket.handlerId, message);
-    }
-
-    // Send to all supervisors/admins
-    const users = await this.storage.getAllUsers();
-    users
-      .filter(user => 
-        ['admin', 'supervisor'].includes(user.role) && 
-        user.id !== excludeUserId &&
-        user.id !== ticket.authorId &&
-        user.id !== ticket.handlerId
-      )
-      .forEach(user => this.sendToUser(user.id, message));
-  }
-
-  private sendToUser(userId: number, message: any) {
-    const client = this.clients.get(userId);
-    if (client && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message));
-    }
-  }
-
-  private broadcastOnlineUsers() {
-    const onlineUsersList = Array.from(this.onlineUsers.values());
-    const message = {
-      type: 'online_users',
-      data: { users: onlineUsersList }
-    };
-
-    this.clients.forEach((client, userId) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
+  // Методы для отправки событий всем подписчикам
+  public broadcastEvent(event: CADEvent, channels: string[] = []) {
+    this.clients.forEach((client, clientId) => {
+      if (this.shouldSendToClient(client, event.type, channels)) {
+        this.sendToClient(clientId, event);
       }
     });
   }
 
-  private cleanupInactiveConnections() {
-    const now = new Date();
-    const timeout = 5 * 60 * 1000; // 5 minutes
+  private shouldSendToClient(client: CADClient, eventType: string, channels: string[]): boolean {
+    // Если клиент не аутентифицирован, не отправляем события
+    if (!client.userId) return false;
 
-    // Ping all connections to check if they're alive
-    this.clients.forEach((client, userId) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.ping();
-        
-        // Check if user has been inactive too long
-        const onlineUser = this.onlineUsers.get(userId);
-        if (onlineUser && (now.getTime() - onlineUser.lastSeen.getTime()) > timeout) {
-          console.log(`Cleaning up inactive connection for user ${userId}`);
-          client.terminate();
-          this.clients.delete(userId);
-          this.onlineUsers.delete(userId);
+    // Проверяем подписки клиента
+    if (channels.length > 0) {
+      return channels.some(channel => client.subscriptions.includes(channel));
+    }
+
+    // Проверяем тип события
+    switch (eventType) {
+      case 'unit_status_update':
+        return client.subscriptions.includes('units') || client.subscriptions.includes('all');
+      
+      case 'unit_location_update':
+        return client.subscriptions.includes('units') || client.subscriptions.includes('all');
+      
+      case 'new_call':
+        return client.subscriptions.includes('calls') || client.subscriptions.includes('all');
+      
+      case 'call_status_update':
+        return client.subscriptions.includes('calls') || client.subscriptions.includes('all');
+      
+      case 'panic_alert':
+        return client.subscriptions.includes('alerts') || client.subscriptions.includes('all');
+      
+      case 'bolo_alert':
+        return client.subscriptions.includes('alerts') || client.subscriptions.includes('all');
+      
+      default:
+        return client.subscriptions.includes('all');
+    }
+  }
+
+  // Специфичные методы для CAD событий
+  public broadcastUnitStatusUpdate(unitId: number, status: string, location?: any) {
+    this.broadcastEvent({
+      type: 'unit_status_update',
+      data: { unitId, status, location },
+      timestamp: Date.now()
+    }, ['units']);
+  }
+
+  public broadcastUnitLocationUpdate(unitId: number, location: any) {
+    this.broadcastEvent({
+      type: 'unit_location_update',
+      data: { unitId, location },
+      timestamp: Date.now()
+    }, ['units']);
+  }
+
+  public broadcastNewCall(callData: any) {
+    this.broadcastEvent({
+      type: 'new_call',
+      data: callData,
+      timestamp: Date.now()
+    }, ['calls']);
+  }
+
+  public broadcastCallStatusUpdate(callId: number, status: string) {
+    this.broadcastEvent({
+      type: 'call_status_update',
+      data: { callId, status },
+      timestamp: Date.now()
+    }, ['calls']);
+  }
+
+  public broadcastPanicAlert(unitId: number, location: any) {
+    this.broadcastEvent({
+      type: 'panic_alert',
+      data: { unitId, location, priority: 'high' },
+      timestamp: Date.now()
+    }, ['alerts']);
+  }
+
+  public broadcastBOLOAlert(vehiclePlate: string, description: string) {
+    this.broadcastEvent({
+      type: 'bolo_alert',
+      data: { vehiclePlate, description, priority: 'medium' },
+      timestamp: Date.now()
+    }, ['alerts']);
+  }
+
+  // Вспомогательные методы
+  private sendToClient(clientId: string, event: CADEvent) {
+    const client = this.clients.get(clientId);
+    if (!client || client.ws.readyState !== WebSocket.OPEN) return;
+
+    try {
+      client.ws.send(JSON.stringify(event));
+    } catch (error) {
+      console.error(`Failed to send message to client ${clientId}:`, error);
+      this.clients.delete(clientId);
+    }
+  }
+
+  private sendError(clientId: string, message: string) {
+    this.sendToClient(clientId, {
+      type: 'error',
+      data: { message },
+      timestamp: Date.now()
+    });
+  }
+
+  private generateClientId(): string {
+    return `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private startHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      this.clients.forEach((client, clientId) => {
+        if (client.ws.readyState === WebSocket.OPEN) {
+          this.sendToClient(clientId, {
+            type: 'heartbeat',
+            data: { timestamp: Date.now() },
+            timestamp: Date.now()
+          });
         }
-      } else {
-        // Remove dead connections
-        this.clients.delete(userId);
-        this.onlineUsers.delete(userId);
+      });
+    }, 30000); // Каждые 30 секунд
+  }
+
+  public stop() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+    }
+    
+    this.clients.forEach((client) => {
+      if (client.ws.readyState === WebSocket.OPEN) {
+        client.ws.close();
       }
     });
-
-    this.broadcastOnlineUsers();
+    
+    this.wss.close();
   }
 
-  /**
-   * Get online users count
-   */
-  getOnlineUsersCount(): number {
-    return this.onlineUsers.size;
-  }
-
-  /**
-   * Get chat history for a ticket
-   */
-  getChatHistory(ticketId: number): ChatMessage[] {
-    return this.chatHistory.get(ticketId) || [];
-  }
-
-  /**
-   * Send system message to ticket
-   */
-  async sendSystemMessage(ticketId: number, message: string) {
-    const systemMessage: ChatMessage = {
-      id: `sys_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ticketId,
-      senderId: 0, // System user
-      senderName: 'System',
-      senderRole: 'system',
-      message,
-      timestamp: new Date(),
-      type: 'system'
+  // Метод для получения статистики
+  public getStats() {
+    return {
+      totalClients: this.clients.size,
+      authenticatedClients: Array.from(this.clients.values()).filter(c => c.userId).length,
+      dispatchers: Array.from(this.clients.values()).filter(c => c.isDispatcher).length
     };
-
-    if (!this.chatHistory.has(ticketId)) {
-      this.chatHistory.set(ticketId, []);
-    }
-    this.chatHistory.get(ticketId)!.push(systemMessage);
-
-    this.broadcastToTicket(ticketId, {
-      type: 'chat_message',
-      data: systemMessage
-    });
   }
 }
 
-// Export singleton instance (would be initialized in main server file)
-export let wsManager: WebSocketManager;
+// Создаем глобальный экземпляр для использования в других модулях
+let cadWebSocketServer: CADWebSocketServer | null = null;
 
-export function initializeWebSocket(server: Server, storage: IStorage) {
-  wsManager = new WebSocketManager(server, storage);
-  return wsManager;
+export function initializeCADWebSocket(server: Server): CADWebSocketServer {
+  if (cadWebSocketServer) {
+    cadWebSocketServer.stop();
+  }
+  
+  cadWebSocketServer = new CADWebSocketServer(server);
+  return cadWebSocketServer;
 }
+
+export function getCADWebSocket(): CADWebSocketServer | null {
+  return cadWebSocketServer;
+}
+
+export default CADWebSocketServer;

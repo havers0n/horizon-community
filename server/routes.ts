@@ -1,37 +1,63 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import jwt from "jsonwebtoken";
+import { createClient } from '@supabase/supabase-js';
 import { loginSchema, registerSchema, insertApplicationSchema, insertComplaintSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
+import { getAuthenticatedUser, requireAuthentication } from "./utils/auth";
+import { createTestRoutes } from "./routes/tests";
+import { createSchedulerRoutes } from "./routes/scheduler";
+import { BusinessLogic } from "./businessLogic";
+import { Scheduler } from "./scheduler";
+import cadRoutes from "./routes/cad";
+import { initializeCADWebSocket } from "./websocket";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const supabaseAdmin = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-interface AuthRequest extends Request {
-  user?: User;
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+);
+
+interface AuthenticatedRequest extends Request {
+  user: User;
+  authUser?: any;
 }
 
 // Middleware to verify JWT token
 const authenticateToken = async (req: any, res: any, next: any) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
-  }
-
+  console.log('🔍 authenticateToken middleware called');
+  console.log('  URL:', req.url);
+  console.log('  Method:', req.method);
+  console.log('  Headers:', req.headers);
+  
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
-    const user = await storage.getUser(decoded.userId);
+    const user = await getAuthenticatedUser(req);
+    console.log('  User result:', user ? `${user.email} (ID: ${user.id})` : 'null');
     
     if (!user) {
-      return res.status(401).json({ message: 'Invalid token' });
+      console.log('❌ No user found, returning 401');
+      return res.status(401).json({ message: 'Access token required' });
     }
     
     req.user = user;
+    console.log('✅ User authenticated, proceeding to route');
+    
+    // Также получаем Supabase auth user для backward compatibility
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token) {
+      const { data: { user: authUser } } = await supabase.auth.getUser(token);
+      req.authUser = authUser;
+    }
+    
     next();
   } catch (error) {
-    return res.status(403).json({ message: 'Invalid token' });
+    console.error('❌ Authentication error:', error);
+    return res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
@@ -62,52 +88,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Username already taken' });
       }
       
-      const passwordHash = await storage.hashPassword(password);
+      // Создать пользователя в Supabase Auth
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true
+      });
+      
+      if (authError) return res.status(400).json({ error: authError.message });
+      
+      // Создать запись в таблице users
       const user = await storage.createUser({
         username,
         email,
-        passwordHash,
+        passwordHash: '', // Больше не нужен
         role: 'candidate',
         status: 'active',
         gameWarnings: 0,
-        adminWarnings: 0
+        adminWarnings: 0,
+        authId: authData.user.id
       });
       
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET);
       const { passwordHash: _, ...userWithoutPassword } = user;
       
-      res.status(201).json({ user: userWithoutPassword, token });
+      res.status(201).json({ user: userWithoutPassword, authUser: authData.user });
     } catch (error) {
+      console.error('Registration error:', error);
       res.status(400).json({ message: 'Invalid request data' });
     }
   });
 
   app.post('/api/auth/login', async (req, res) => {
     try {
+      console.log('LOGIN BODY:', req.body);
       const { email, password } = loginSchema.parse(req.body);
       
-      const user = await storage.getUserByEmail(email);
+      // Authenticate with Supabase using admin client
+      const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      
+      console.log('Auth successful, user ID:', authData.user.id);
+      console.log('Looking for user with auth_id:', authData.user.id);
+      
+      // Get user from our database
+      const user = await storage.getUserByAuthId(authData.user.id);
+      
       if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        console.error('User not found in database with auth_id:', authData.user.id);
+        // Попробуем найти по email
+        const userByEmail = await storage.getUserByEmail(email);
+        console.log('User by email search result:', userByEmail);
+        return res.status(401).json({ message: 'User not found' });
       }
       
-      const isValidPassword = await storage.validatePassword(password, user.passwordHash);
-      if (!isValidPassword) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-      
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET);
       const { passwordHash: _, ...userWithoutPassword } = user;
-      
-      res.json({ user: userWithoutPassword, token });
+      res.json({ 
+        user: userWithoutPassword, 
+        authUser: authData.user,
+        session: authData.session
+      });
     } catch (error) {
+      console.error('LOGIN ERROR:', error);
       res.status(400).json({ message: 'Invalid request data' });
     }
   });
 
   app.get('/api/auth/me', authenticateToken, async (req: any, res) => {
     const { passwordHash: _, ...userWithoutPassword } = req.user;
-    res.json(userWithoutPassword);
+    // Получаем всех персонажей пользователя
+    const characters = await storage.getCharactersByOwner(req.user.id);
+    res.json({ user: userWithoutPassword, characters });
+  });
+
+  app.post('/api/auth/logout', authenticateToken, async (req: any, res) => {
+    try {
+      // Supabase handles logout on the client side
+      // We just return success here
+      res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: 'Logout failed' });
+    }
   });
 
   // Public routes
@@ -168,6 +236,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(notifications);
   });
 
+  app.get('/api/application-limits/:type', authenticateToken, async (req: any, res) => {
+    const { type } = req.params;
+    const businessLogic = new BusinessLogic(storage);
+    
+    console.log('🔍 API Application Limits Debug:');
+    console.log('  User ID:', req.user.id);
+    console.log('  User Email:', req.user.email);
+    console.log('  Application Type:', type);
+    
+    try {
+      const restriction = await businessLogic.canSubmitApplication(req.user.id, type);
+      const stats = await businessLogic.getUserApplicationStats(req.user.id);
+      
+      console.log('  Restriction Result:', restriction);
+      console.log('  Stats Result:', stats);
+      
+      res.json({
+        restriction,
+        stats
+      });
+    } catch (error) {
+      console.error('  Error:', error);
+      res.status(500).json({ message: 'Failed to check application limits' });
+    }
+  });
+
   app.put('/api/notifications/:id/read', authenticateToken, async (req: any, res) => {
     const id = parseInt(req.params.id);
     const notification = await storage.markNotificationAsRead(id);
@@ -177,6 +271,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.json(notification);
+  });
+
+  app.put('/api/notifications/read-all', authenticateToken, async (req: any, res) => {
+    const notifications = await storage.markAllNotificationsAsRead(req.user.id);
+    res.json({ message: 'All notifications marked as read', count: notifications.length });
+  });
+
+  app.delete('/api/notifications/:id', authenticateToken, async (req: any, res) => {
+    const id = parseInt(req.params.id);
+    const notification = await storage.getNotification(id);
+    
+    if (!notification || notification.recipientId !== req.user.id) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    
+    await storage.deleteNotification(id);
+    res.json({ message: 'Notification deleted' });
   });
 
   app.post('/api/complaints', authenticateToken, async (req: any, res) => {
@@ -243,25 +354,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/applications/:id', authenticateToken, requireSupervisor, async (req: any, res) => {
     const id = parseInt(req.params.id);
     const { status, reviewComment } = req.body;
-    
-    const application = await storage.updateApplication(id, {
-      status,
-      reviewComment,
-      reviewerId: req.user.id
-    });
-    
+
+    // Получаем заявку
+    const application = await storage.getApplication(id);
     if (!application) {
       return res.status(404).json({ message: 'Application not found' });
     }
-    
+
+    let updatedApplication = application;
+
+    if (status === 'approved') {
+      // Создаем персонажа на основе данных заявки
+      const data = application.data as {
+        firstName: string;
+        lastName: string;
+        departmentId: number;
+        rank?: string;
+        insuranceNumber?: string;
+        address?: string;
+      };
+      const newCharacter = await storage.createCharacter({
+        ownerId: application.authorId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        departmentId: data.departmentId,
+        rank: data.rank || '',
+        status: 'active',
+        insuranceNumber: data.insuranceNumber || '',
+        address: data.address || ''
+      });
+      // Обновляем заявку: статус, reviewer, комментарий, characterId
+      updatedApplication = await storage.updateApplication(id, {
+        status,
+        reviewComment,
+        reviewerId: req.user.id,
+        characterId: newCharacter.id
+      }) ?? application;
+    } else {
+      // Просто обновляем статус и комментарий
+      updatedApplication = await storage.updateApplication(id, {
+        status,
+        reviewComment,
+        reviewerId: req.user.id
+      }) ?? application;
+    }
+
     // Create notification for applicant
     await storage.createNotification({
       recipientId: application.authorId,
       content: `Your ${application.type} application has been ${status}`,
       link: `/applications/${application.id}`
     });
-    
-    res.json(application);
+
+    res.json(updatedApplication);
   });
 
   app.get('/api/admin/users', authenticateToken, requireSupervisor, async (req, res) => {
@@ -304,6 +449,217 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(stats);
   });
 
+  // CAD/MDT routes
+  app.use('/api/cad', cadRoutes);
+
+  // Test routes
+  const businessLogic = new BusinessLogic(storage);
+  const testRoutes = createTestRoutes(storage, businessLogic);
+  app.use('/api/tests', testRoutes);
+
+  // Joint positions routes
+  app.get('/api/joint-positions', authenticateToken, async (req: any, res) => {
+    try {
+      const activeJoints = await businessLogic.getActiveJointPositions(req.user.id);
+      res.json(activeJoints);
+    } catch (error) {
+      console.error('Error getting joint positions:', error);
+      res.status(500).json({ message: 'Failed to get joint positions' });
+    }
+  });
+
+  // Leave statistics route
+  app.get('/api/leave-stats', authenticateToken, async (req: any, res) => {
+    try {
+      const leaveStats = await businessLogic.getUserLeaveStats(req.user.id);
+      res.json(leaveStats);
+    } catch (error) {
+      console.error('Error getting leave stats:', error);
+      res.status(500).json({ message: 'Failed to get leave statistics' });
+    }
+  });
+
+  app.delete('/api/joint-positions/:userId', authenticateToken, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { reason } = req.body;
+
+      // Проверяем, что пользователь удаляет свое собственное совмещение
+      if (userId !== req.user.id) {
+        return res.status(403).json({ message: 'You can only remove your own joint position' });
+      }
+
+      await businessLogic.removeJointPosition(userId, reason);
+      res.json({ message: 'Joint position removed successfully' });
+    } catch (error) {
+      console.error('Error removing joint position:', error);
+      res.status(500).json({ message: 'Failed to remove joint position' });
+    }
+  });
+
+  // Admin joint position management
+  app.get('/api/admin/joint-applications', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const applications = await storage.getAllApplications();
+      const jointApplications = applications.filter(app => 
+        app.type === 'joint_primary' || app.type === 'joint_secondary'
+      );
+      
+      const users = await storage.getAllUsers();
+      const departments = await storage.getAllDepartments();
+      
+      const applicationsWithDetails = jointApplications.map(app => {
+        const author = users.find(u => u.id === app.authorId);
+        const secondaryDepartment = departments.find(d => d.id === (app.data as any)?.secondaryDepartmentId);
+        
+        return {
+          ...app,
+          author: author ? { id: author.id, username: author.username, rank: author.rank } : null,
+          secondaryDepartment: secondaryDepartment ? { id: secondaryDepartment.id, name: secondaryDepartment.name, fullName: secondaryDepartment.fullName } : null
+        };
+      });
+      
+      res.json(applicationsWithDetails);
+    } catch (error) {
+      console.error('Error getting joint applications:', error);
+      res.status(500).json({ message: 'Failed to get joint applications' });
+    }
+  });
+
+  app.put('/api/admin/joint-applications/:id', authenticateToken, requireSupervisor, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { approved, comment } = req.body;
+
+      await businessLogic.processJointApplication(id, approved, req.user.id, comment);
+      
+      res.json({ message: `Joint application ${approved ? 'approved' : 'rejected'} successfully` });
+    } catch (error) {
+      console.error('Error processing joint application:', error);
+      res.status(500).json({ message: 'Failed to process joint application' });
+    }
+  });
+
+  // Admin leave management routes
+  app.get('/api/admin/leave-applications', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const applications = await storage.getAllApplications();
+      const leaveApplications = applications.filter(app => app.type === 'leave');
+      
+      const users = await storage.getAllUsers();
+      const departments = await storage.getAllDepartments();
+      
+      const applicationsWithDetails = leaveApplications.map(app => {
+        const author = users.find(u => u.id === app.authorId);
+        const department = departments.find(d => d.id === author?.departmentId);
+        
+        return {
+          ...app,
+          author: author ? { 
+            id: author.id, 
+            username: author.username, 
+            rank: author.rank,
+            department: department ? { id: department.id, name: department.name } : null
+          } : null
+        };
+      });
+      
+      res.json(applicationsWithDetails);
+    } catch (error) {
+      console.error('Error getting leave applications:', error);
+      res.status(500).json({ message: 'Failed to get leave applications' });
+    }
+  });
+
+  app.get('/api/admin/leave-stats', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const applications = await storage.getAllApplications();
+      const leaveApplications = applications.filter(app => app.type === 'leave');
+      const users = await storage.getAllUsers();
+      const departments = await storage.getAllDepartments();
+
+      // Статистика по департаментам
+      const departmentStats: Record<number, {
+        name: string;
+        totalLeaves: number;
+        approvedLeaves: number;
+        pendingLeaves: number;
+        totalDays: number;
+        leaveTypes: Record<string, number>;
+      }> = {};
+
+      for (const dept of departments) {
+        const deptUsers = users.filter(u => u.departmentId === dept.id);
+        const deptLeaves = leaveApplications.filter(app => 
+          deptUsers.some(u => u.id === app.authorId)
+        );
+
+        const approvedLeaves = deptLeaves.filter(app => app.status === 'approved');
+        const pendingLeaves = deptLeaves.filter(app => app.status === 'pending');
+
+        let totalDays = 0;
+        const leaveTypes: Record<string, number> = {};
+
+        for (const leave of approvedLeaves) {
+          const data = leave.data as any;
+          const startDate = new Date(data.startDate);
+          const endDate = new Date(data.endDate);
+          const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          
+          totalDays += days;
+          leaveTypes[data.leaveType] = (leaveTypes[data.leaveType] || 0) + days;
+        }
+
+        departmentStats[dept.id] = {
+          name: dept.name,
+          totalLeaves: deptLeaves.length,
+          approvedLeaves: approvedLeaves.length,
+          pendingLeaves: pendingLeaves.length,
+          totalDays,
+          leaveTypes
+        };
+      }
+
+      // Общая статистика
+      const totalStats = {
+        totalApplications: leaveApplications.length,
+        approvedApplications: leaveApplications.filter(app => app.status === 'approved').length,
+        pendingApplications: leaveApplications.filter(app => app.status === 'pending').length,
+        rejectedApplications: leaveApplications.filter(app => app.status === 'rejected').length,
+        totalDays: leaveApplications
+          .filter(app => app.status === 'approved')
+          .reduce((total, app) => {
+            const data = app.data as any;
+            const startDate = new Date(data.startDate);
+            const endDate = new Date(data.endDate);
+            const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            return total + days;
+          }, 0)
+      };
+
+      res.json({
+        totalStats,
+        departmentStats
+      });
+    } catch (error) {
+      console.error('Error getting leave stats:', error);
+      res.status(500).json({ message: 'Failed to get leave statistics' });
+    }
+  });
+
+  // Scheduler routes
+  const scheduler = new Scheduler(businessLogic, storage, {
+    resetLimitsCron: "0 0 1 * *",
+    leaveProcessingCron: "0 9 * * *",
+    timezone: "Europe/Moscow"
+  });
+  const schedulerRoutes = createSchedulerRoutes(scheduler);
+  app.use('/api/scheduler', schedulerRoutes);
+
   const httpServer = createServer(app);
+  
+  // Initialize CAD WebSocket
+  initializeCADWebSocket(httpServer);
+  
   return httpServer;
 }

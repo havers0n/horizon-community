@@ -1,9 +1,11 @@
 import { Layout } from "@/components/Layout";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { Shield, Flame, Ambulance, Star, Building } from "lucide-react";
 
 export default function Departments() {
+  const { t } = useTranslation();
   
   const { data: departments, isLoading } = useQuery({
     queryKey: ['/api/departments']
@@ -42,8 +44,8 @@ export default function Departments() {
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Departments</h1>
-          <p className="text-gray-600">Explore all available departments and their information.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('departments.title', 'Departments')}</h1>
+          <p className="text-gray-600">{t('departments.subtitle', 'Explore all available departments and their information.')}</p>
         </div>
 
         {/* Departments Grid */}
@@ -74,7 +76,7 @@ export default function Departments() {
                 
                 {department.gallery && department.gallery.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Gallery</h4>
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">{t('departments.gallery', 'Gallery')}</h4>
                     <div className="grid grid-cols-3 gap-2">
                       {department.gallery.slice(0, 3).map((image: string, index: number) => (
                         <img 
@@ -95,8 +97,8 @@ export default function Departments() {
         {(!departments || departments.length === 0) && (
           <div className="text-center py-12">
             <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Departments Available</h3>
-            <p className="text-gray-600">Departments will be displayed here once they are created.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('departments.no_departments', 'No Departments Available')}</h3>
+            <p className="text-gray-600">{t('departments.no_departments_desc', 'Departments will be displayed here once they are created.')}</p>
           </div>
         )}
       </div>

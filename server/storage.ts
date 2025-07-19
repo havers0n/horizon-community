@@ -1,17 +1,40 @@
 import { 
-  users, departments, applications, supportTickets, complaints, reports, notifications, tests,
+  users, departments, applications, supportTickets, complaints, reports, notifications, tests, testSessions, testResults,
   type User, type InsertUser, type Department, type InsertDepartment, 
   type Application, type InsertApplication, type SupportTicket, type InsertSupportTicket,
   type Complaint, type InsertComplaint, type Report, type InsertReport,
-  type Notification, type InsertNotification, type Test, type InsertTest
+  type Notification, type InsertNotification, type Test, type InsertTest,
+  type TestSession, type InsertTestSession, type TestResult, type InsertTestResult
 } from "@shared/schema";
 import bcrypt from "bcrypt";
+import { PgStorage } from "./db/PgStorage";
+import { SupabaseStorage } from "./db/SupabaseStorage";
+
+// --- CHARACTERS ---
+export interface Character {
+  id: number;
+  ownerId: number;
+  firstName: string;
+  lastName: string;
+  departmentId: number;
+  rank?: string;
+  status: string;
+  insuranceNumber?: string;
+  address?: string;
+  createdAt: Date;
+}
+
+export interface InsertCharacter extends Omit<Character, 'id' | 'createdAt'> {}
 
 export interface IStorage {
+  // Character operations
+  getCharactersByOwner(ownerId: number): Promise<Character[]>;
+  createCharacter(character: InsertCharacter): Promise<Character>;
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByAuthId(authId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
@@ -53,11 +76,25 @@ export interface IStorage {
   getNotificationsByUser(userId: number): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: number): Promise<Notification | undefined>;
+  getNotification(id: number): Promise<Notification | undefined>;
+  markAllNotificationsAsRead(userId: number): Promise<Notification[]>;
+  deleteNotification(id: number): Promise<void>;
   
   // Test operations
   getTest(id: number): Promise<Test | undefined>;
   getAllTests(): Promise<Test[]>;
   createTest(test: InsertTest): Promise<Test>;
+  getApplicationsByType(type: string): Promise<Application[]>;
+  
+  // Test session operations
+  createTestSession(session: InsertTestSession): Promise<TestSession>;
+  getActiveTestSession(userId: number, testId: number): Promise<TestSession | undefined>;
+  updateTestSession(id: number, updates: Partial<TestSession>): Promise<TestSession | undefined>;
+  
+  // Test result operations
+  createTestResult(result: InsertTestResult): Promise<TestResult>;
+  getTestAttempts(userId: number, testId: number): Promise<TestResult[]>;
+  getTestResults(userId: number, testId: number): Promise<TestResult[]>;
   
   // Auth operations
   validatePassword(password: string, hash: string): Promise<boolean>;
@@ -65,6 +102,8 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private characters: Map<number, Character> = new Map();
+  private currentCharacterId = 1;
   private users: Map<number, User> = new Map();
   private departments: Map<number, Department> = new Map();
   private applications: Map<number, Application> = new Map();
@@ -73,6 +112,8 @@ export class MemStorage implements IStorage {
   private reports: Map<number, Report> = new Map();
   private notifications: Map<number, Notification> = new Map();
   private tests: Map<number, Test> = new Map();
+  private testSessions: Map<number, TestSession> = new Map();
+  private testResults: Map<number, TestResult> = new Map();
   
   private currentUserId = 1;
   private currentDepartmentId = 1;
@@ -82,104 +123,30 @@ export class MemStorage implements IStorage {
   private currentReportId = 1;
   private currentNotificationId = 1;
   private currentTestId = 1;
+  private currentTestSessionId = 1;
+  private currentTestResultId = 1;
 
   constructor() {
     this.initializeData();
   }
 
   private async initializeData() {
-    // Create default departments
-    const lspd = await this.createDepartment({
-      name: "LSPD",
-      fullName: "Los Santos Police Department",
-      logoUrl: "https://cdn-icons-png.flaticon.com/512/194/194279.png",
-      description: "Protecting and serving the citizens of Los Santos",
-      gallery: []
-    });
+    // ...existing code...
+    // (Можно добавить тестовых персонажей при необходимости)
+  }
+  async getCharactersByOwner(ownerId: number): Promise<Character[]> {
+    return Array.from(this.characters.values()).filter(c => c.ownerId === ownerId);
+  }
 
-    const lsfd = await this.createDepartment({
-      name: "LSFD",
-      fullName: "Los Santos Fire Department",
-      logoUrl: "https://cdn-icons-png.flaticon.com/512/1827/1827926.png",
-      description: "Fire rescue and emergency medical services",
-      gallery: []
-    });
-
-    const ems = await this.createDepartment({
-      name: "EMS",
-      fullName: "Emergency Medical Services",
-      logoUrl: "https://cdn-icons-png.flaticon.com/512/1827/1827928.png",
-      description: "Medical emergency response and healthcare",
-      gallery: []
-    });
-
-    const bcso = await this.createDepartment({
-      name: "BCSO",
-      fullName: "Blaine County Sheriff's Office",
-      logoUrl: "https://cdn-icons-png.flaticon.com/512/1827/1827924.png",
-      description: "Law enforcement for Blaine County",
-      gallery: []
-    });
-
-    // Create admin user
-    const adminUser = await this.createUser({
-      username: "admin",
-      email: "admin@cadsystem.com",
-      passwordHash: await this.hashPassword("admin123"),
-      role: "admin",
-      status: "active",
-      departmentId: lspd.id,
-      rank: "Chief",
-      division: "Administration",
-      qualifications: ["Leadership", "Management"],
-      gameWarnings: 0,
-      adminWarnings: 0
-    });
-
-    // Create supervisor user
-    const supervisorUser = await this.createUser({
-      username: "supervisor",
-      email: "supervisor@cadsystem.com",
-      passwordHash: await this.hashPassword("super123"),
-      role: "supervisor",
-      status: "active",
-      departmentId: lspd.id,
-      rank: "Lieutenant",
-      division: "Patrol",
-      qualifications: ["Leadership", "Training"],
-      gameWarnings: 0,
-      adminWarnings: 0
-    });
-
-    // Create member user
-    const memberUser = await this.createUser({
-      username: "member",
-      email: "member@cadsystem.com",
-      passwordHash: await this.hashPassword("member123"),
-      role: "member",
-      status: "active",
-      departmentId: lsfd.id,
-      rank: "Firefighter",
-      division: "Emergency Response",
-      qualifications: ["First Aid", "Emergency Response"],
-      gameWarnings: 0,
-      adminWarnings: 0
-    });
-
-    // Create candidate user
-    const candidateUser = await this.createUser({
-      username: "candidate",
-      email: "candidate@cadsystem.com",
-      passwordHash: await this.hashPassword("candidate123"),
-      role: "candidate",
-      status: "active",
-      departmentId: ems.id,
-      rank: "Trainee",
-      division: "Training",
-      qualifications: [],
-      gameWarnings: 0,
-      adminWarnings: 0
-    });
+  async createCharacter(character: InsertCharacter): Promise<Character> {
+    const id = this.currentCharacterId++;
+    const newCharacter: Character = {
+      ...character,
+      id,
+      createdAt: new Date(),
+    };
+    this.characters.set(id, newCharacter);
+    return newCharacter;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -194,12 +161,27 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
+  async getUserByAuthId(authId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.authId === authId);
+  }
+
   async createUser(user: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const newUser: User = {
       ...user,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      departmentId: user.departmentId || null,
+      secondaryDepartmentId: user.secondaryDepartmentId || null,
+      rank: user.rank || null,
+      division: user.division || null,
+      qualifications: user.qualifications || [],
+      gameWarnings: user.gameWarnings || 0,
+      adminWarnings: user.adminWarnings || 0,
+      role: user.role || 'candidate',
+      status: user.status || 'active',
+      authId: user.authId || null,
+      cadToken: user.cadToken || null
     };
     this.users.set(id, newUser);
     return newUser;
@@ -228,7 +210,13 @@ export class MemStorage implements IStorage {
 
   async createDepartment(department: InsertDepartment): Promise<Department> {
     const id = this.currentDepartmentId++;
-    const newDepartment: Department = { ...department, id };
+    const newDepartment: Department = { 
+      ...department, 
+      id,
+      logoUrl: department.logoUrl || null,
+      description: department.description || null,
+      gallery: department.gallery || null
+    };
     this.departments.set(id, newDepartment);
     return newDepartment;
   }
@@ -251,7 +239,13 @@ export class MemStorage implements IStorage {
       ...application,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      status: application.status || 'pending',
+      characterId: application.characterId || null,
+      result: application.result || null,
+      reviewerId: application.reviewerId || null,
+      reviewComment: application.reviewComment || null,
+      statusHistory: application.statusHistory || []
     };
     this.applications.set(id, newApplication);
     return newApplication;
@@ -260,7 +254,7 @@ export class MemStorage implements IStorage {
   async updateApplication(id: number, updates: Partial<Application>): Promise<Application | undefined> {
     const application = this.applications.get(id);
     if (!application) return undefined;
-    
+    // Разрешаем обновлять characterId
     const updatedApplication = { ...application, ...updates, updatedAt: new Date() };
     this.applications.set(id, updatedApplication);
     return updatedApplication;
@@ -283,7 +277,10 @@ export class MemStorage implements IStorage {
     const newTicket: SupportTicket = {
       ...ticket,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      status: ticket.status || 'open',
+      handlerId: ticket.handlerId || null,
+      messages: ticket.messages || []
     };
     this.supportTickets.set(id, newTicket);
     return newTicket;
@@ -315,7 +312,9 @@ export class MemStorage implements IStorage {
     const newComplaint: Complaint = {
       ...complaint,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      status: complaint.status || 'pending',
+      evidenceUrl: complaint.evidenceUrl || null
     };
     this.complaints.set(id, newComplaint);
     return newComplaint;
@@ -347,7 +346,9 @@ export class MemStorage implements IStorage {
     const newReport: Report = {
       ...report,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      status: report.status || 'pending',
+      supervisorComment: report.supervisorComment || null
     };
     this.reports.set(id, newReport);
     return newReport;
@@ -373,7 +374,9 @@ export class MemStorage implements IStorage {
     const newNotification: Notification = {
       ...notification,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      link: notification.link || null,
+      isRead: notification.isRead || false
     };
     this.notifications.set(id, newNotification);
     return newNotification;
@@ -386,6 +389,28 @@ export class MemStorage implements IStorage {
     const updatedNotification = { ...notification, isRead: true };
     this.notifications.set(id, updatedNotification);
     return updatedNotification;
+  }
+
+  async getNotification(id: number): Promise<Notification | undefined> {
+    return this.notifications.get(id);
+  }
+
+  async markAllNotificationsAsRead(userId: number): Promise<Notification[]> {
+    const userNotifications = Array.from(this.notifications.values())
+      .filter(notification => notification.recipientId === userId && !notification.isRead);
+    
+    const updatedNotifications: Notification[] = [];
+    for (const notification of userNotifications) {
+      const updatedNotification = { ...notification, isRead: true };
+      this.notifications.set(notification.id, updatedNotification);
+      updatedNotifications.push(updatedNotification);
+    }
+    
+    return updatedNotifications;
+  }
+
+  async deleteNotification(id: number): Promise<void> {
+    this.notifications.delete(id);
   }
 
   async getTest(id: number): Promise<Test | undefined> {
@@ -403,6 +428,65 @@ export class MemStorage implements IStorage {
     return newTest;
   }
 
+  async getApplicationsByType(type: string): Promise<Application[]> {
+    return Array.from(this.applications.values()).filter(app => app.type === type);
+  }
+
+  async createTestSession(session: InsertTestSession): Promise<TestSession> {
+    const id = this.currentTestSessionId++;
+    const newSession: TestSession = {
+      ...session,
+      id,
+      createdAt: new Date(),
+      status: session.status || 'in_progress',
+      applicationId: session.applicationId || null,
+      endTime: session.endTime || null
+    };
+    this.testSessions.set(id, newSession);
+    return newSession;
+  }
+
+  async getActiveTestSession(userId: number, testId: number): Promise<TestSession | undefined> {
+    return Array.from(this.testSessions.values()).find(
+      session => session.userId === userId && session.testId === testId && session.status === 'in_progress'
+    );
+  }
+
+  async updateTestSession(id: number, updates: Partial<TestSession>): Promise<TestSession | undefined> {
+    const session = this.testSessions.get(id);
+    if (!session) return undefined;
+    
+    const updatedSession = { ...session, ...updates };
+    this.testSessions.set(id, updatedSession);
+    return updatedSession;
+  }
+
+  async createTestResult(result: InsertTestResult): Promise<TestResult> {
+    const id = this.currentTestResultId++;
+    const newResult: TestResult = {
+      ...result,
+      id,
+      createdAt: new Date(),
+      applicationId: result.applicationId || null,
+      focusLostCount: result.focusLostCount || 0,
+      warningsCount: result.warningsCount || 0
+    };
+    this.testResults.set(id, newResult);
+    return newResult;
+  }
+
+  async getTestAttempts(userId: number, testId: number): Promise<TestResult[]> {
+    return Array.from(this.testResults.values()).filter(
+      result => result.userId === userId && result.testId === testId
+    );
+  }
+
+  async getTestResults(userId: number, testId: number): Promise<TestResult[]> {
+    return Array.from(this.testResults.values()).filter(
+      result => result.userId === userId && result.testId === testId
+    );
+  }
+
   async validatePassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
   }
@@ -412,4 +496,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Выбираем storage в зависимости от наличия DATABASE_URL
+const useSupabaseStorage = !process.env.DATABASE_URL || process.env.DATABASE_URL.includes('[YOUR-PASSWORD]');
+
+export const storage = useSupabaseStorage ? new SupabaseStorage() : new PgStorage();

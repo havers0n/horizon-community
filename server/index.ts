@@ -1,43 +1,58 @@
-import express, { type Request, Response, NextFunction } from "express";
+import 'dotenv/config'; // Убедись, что эта строка есть и она первая
+
+import express, { type Request, type Response, type NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
+import { BusinessLogic } from "./businessLogic";
+import { Scheduler } from "./scheduler";
+import { setupVite } from "./vite";
+import { serveStatic } from "./vite";
+import { log } from "./vite";
 
 const app = express();
+
+// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
+// CORS
 app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
 });
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // Инициализация планировщика
+  const businessLogic = new BusinessLogic(storage);
+  const scheduler = new Scheduler(businessLogic, storage, {
+    resetLimitsCron: "0 0 1 * *", // 1 число каждого месяца в 00:00
+    leaveProcessingCron: "0 9 * * *", // каждый день в 9:00
+    timezone: "Europe/Moscow"
+  });
+
+  // Запуск планировщика
+  scheduler.start();
+
+  // Graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('🛑 Shutting down gracefully...');
+    scheduler.stop();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('🛑 Shutting down gracefully...');
+    scheduler.stop();
+    process.exit(0);
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -62,8 +77,7 @@ app.use((req, res, next) => {
   const port = 5000;
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: "127.0.0.1",
   }, () => {
     log(`serving on port ${port}`);
   });

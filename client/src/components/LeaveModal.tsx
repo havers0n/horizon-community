@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CalendarIcon, Clock, AlertTriangle, Plane } from "lucide-react";
+import { CalendarIcon, Clock, AlertTriangle, Plane } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient } from "@/lib/queryClient";

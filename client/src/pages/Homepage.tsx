@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,20 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Users, Award, Clock, Star, Search, Filter } from "lucide-react";
+import { 
+  Shield, 
+  Users, 
+  Award, 
+  Clock, 
+  Star, 
+  Search, 
+  Filter, 
+  MessageCircle, 
+  ExternalLink,
+  Heart,
+  Calendar,
+  MapPin
+} from "lucide-react";
 import { Department } from "@shared/schema";
 
 interface CommunityStats {
@@ -75,10 +89,31 @@ const mockGallery: GalleryItem[] = [
     author: "Chief Williams",
     date: "2024-12-25",
     likes: 89
+  },
+  {
+    id: 5,
+    title: "BCSO Patrol Training",
+    description: "Blaine County Sheriff's Office conducting rural patrol training",
+    imageUrl: "/gallery/bcso-patrol.jpg",
+    department: "BCSO",
+    author: "Deputy Martinez",
+    date: "2024-12-20",
+    likes: 38
+  },
+  {
+    id: 6,
+    title: "Dispatch Center Operations",
+    description: "Our dispatch team managing emergency calls during peak hours",
+    imageUrl: "/gallery/dispatch-center.jpg",
+    department: "DD",
+    author: "Dispatcher Davis",
+    date: "2024-12-18",
+    likes: 52
   }
 ];
 
 export default function Homepage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
 
@@ -100,31 +135,60 @@ export default function Homepage() {
     return matchesSearch && matchesDepartment;
   });
 
+  const handleDiscordClick = () => {
+    window.open('https://discord.gg/your-server', '_blank');
+  };
+
+  const handleVKClick = () => {
+    window.open('https://vk.com/your-group', '_blank');
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 py-20">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            Los Santos CAD System
+            {t('homepage.title', 'Los Santos Roleplay Community')}
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Professional roleplay management system for law enforcement, fire department, 
-            and emergency medical services. Join our community today.
+            {t('homepage.subtitle', 'Профессиональное ролевое сообщество для правоохранительных органов, пожарной службы и скорой медицинской помощи. Присоединяйтесь к нашему сообществу сегодня.')}
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center mb-8">
             <Link href="/register">
               <Button size="lg" className="gap-2">
                 <Users className="h-5 w-5" />
-                Join Community
+                {t('homepage.join', 'Присоединиться')}
               </Button>
             </Link>
             <Link href="/departments">
               <Button size="lg" variant="outline" className="gap-2">
                 <Shield className="h-5 w-5" />
-                View Departments
+                {t('homepage.view_departments', 'Департаменты')}
               </Button>
             </Link>
+          </div>
+          
+          {/* Social Media Buttons */}
+          <div className="flex gap-4 justify-center">
+            <Button 
+              onClick={handleDiscordClick}
+              variant="outline" 
+              size="lg" 
+              className="gap-2 bg-[#5865F2] text-white hover:bg-[#4752C4] border-[#5865F2]"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Наш Discord
+            </Button>
+            <Button 
+              onClick={handleVKClick}
+              variant="outline" 
+              size="lg" 
+              className="gap-2 bg-[#4C75A3] text-white hover:bg-[#3B5998] border-[#4C75A3]"
+            >
+              <ExternalLink className="h-5 w-5" />
+              Группа ВК
+            </Button>
           </div>
         </div>
       </section>
@@ -137,7 +201,7 @@ export default function Homepage() {
               <CardContent className="p-6 text-center">
                 <Users className="h-12 w-12 mx-auto mb-4 text-blue-600" />
                 <div className="text-3xl font-bold mb-2">{mockStats.totalMembers.toLocaleString()}</div>
-                <p className="text-muted-foreground">Active Members</p>
+                <p className="text-muted-foreground">{t('homepage.active_members', 'Активных участников')}</p>
               </CardContent>
             </Card>
             
@@ -145,7 +209,7 @@ export default function Homepage() {
               <CardContent className="p-6 text-center">
                 <Shield className="h-12 w-12 mx-auto mb-4 text-green-600" />
                 <div className="text-3xl font-bold mb-2">{mockStats.activeDepartments}</div>
-                <p className="text-muted-foreground">Departments</p>
+                <p className="text-muted-foreground">{t('homepage.departments', 'Департаментов')}</p>
               </CardContent>
             </Card>
             
@@ -153,7 +217,7 @@ export default function Homepage() {
               <CardContent className="p-6 text-center">
                 <Award className="h-12 w-12 mx-auto mb-4 text-yellow-600" />
                 <div className="text-3xl font-bold mb-2">{mockStats.totalApplications.toLocaleString()}</div>
-                <p className="text-muted-foreground">Applications Processed</p>
+                <p className="text-muted-foreground">{t('homepage.applications_processed', 'Обработано заявок')}</p>
               </CardContent>
             </Card>
             
@@ -161,7 +225,7 @@ export default function Homepage() {
               <CardContent className="p-6 text-center">
                 <Clock className="h-12 w-12 mx-auto mb-4 text-purple-600" />
                 <div className="text-3xl font-bold mb-2">{mockStats.averageResponseTime}</div>
-                <p className="text-muted-foreground">Avg Response Time</p>
+                <p className="text-muted-foreground">{t('homepage.avg_response_time', 'Среднее время ответа')}</p>
               </CardContent>
             </Card>
           </div>
@@ -172,31 +236,42 @@ export default function Homepage() {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Our Departments</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('homepage.our_departments', 'Наши департаменты')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join one of our professional departments and start your roleplay career in Los Santos.
+              {t('homepage.departments_subtitle', 'Присоединитесь к одному из наших профессиональных департаментов и начните свою ролевую карьеру в Лос-Сантосе.')}
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {departments.map((dept) => (
-              <Card key={dept.id} className="hover:shadow-lg transition-shadow">
+              <Card key={dept.id} className="hover:shadow-lg transition-shadow group">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Shield className="h-8 w-8 text-primary" />
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    {dept.logoUrl ? (
+                      <img src={dept.logoUrl} alt={dept.name} className="w-12 h-12 object-contain" />
+                    ) : (
+                      <Shield className="h-10 w-10 text-white" />
+                    )}
                   </div>
-                  <CardTitle className="text-lg">{dept.name}</CardTitle>
-                  <CardDescription>{dept.fullName}</CardDescription>
+                  <CardTitle className="text-xl">{dept.name}</CardTitle>
+                  <CardDescription className="text-base">{dept.fullName}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                  <p className="text-sm text-muted-foreground mb-6 line-clamp-3">
                     {dept.description}
                   </p>
-                  <Link href={`/departments`}>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Learn More
-                    </Button>
-                  </Link>
+                  <div className="space-y-3">
+                    <Link href={`/departments`}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        {t('homepage.learn_more', 'Узнать больше')}
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button size="sm" className="w-full">
+                        {t('homepage.apply_now', 'Подать заявку')}
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -204,73 +279,69 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* Community Gallery */}
+      {/* Gallery Section */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Community Gallery</h2>
+            <h2 className="text-3xl font-bold mb-4">Галерея сообщества</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore highlights from our community activities, training exercises, and memorable moments.
+              Посмотрите на лучшие моменты из жизни нашего сообщества. Скриншоты и фотографии с активных смен, тренировок и мероприятий.
             </p>
           </div>
 
           {/* Gallery Filters */}
-          <div className="mb-8 flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="flex-1">
               <Input
-                placeholder="Search gallery..."
+                placeholder="Поиск по галерее..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="max-w-md"
               />
             </div>
-            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.name}>{dept.name}</SelectItem>
-                ))}
-                <SelectItem value="Multi-Agency">Multi-Agency</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Все департаменты" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все департаменты</SelectItem>
+                  <SelectItem value="LSPD">LSPD</SelectItem>
+                  <SelectItem value="BCSO">BCSO</SelectItem>
+                  <SelectItem value="LSFD">LSFD</SelectItem>
+                  <SelectItem value="EMS">EMS</SelectItem>
+                  <SelectItem value="DD">DD</SelectItem>
+                  <SelectItem value="Multi-Agency">Совместные операции</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Gallery Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGallery.map((item) => (
-              <Card key={item.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
-                <div className="aspect-video bg-muted relative overflow-hidden">
-                  {/* Placeholder for image */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                    <Shield className="h-16 w-16 text-white/50" />
-                  </div>
-                  <div className="absolute top-4 left-4">
-                    <Badge variant="secondary">{item.department}</Badge>
+              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <Shield className="h-16 w-16 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-500">{item.title}</p>
                   </div>
                 </div>
-                
-                <CardHeader>
-                  <CardTitle className="text-lg line-clamp-1">{item.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {item.description}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>By {item.author}</span>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4" />
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline">{item.department}</Badge>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Heart className="h-4 w-4" />
                       <span>{item.likes}</span>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {new Date(item.date).toLocaleDateString()}
+                  <h3 className="font-semibold mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    {item.description}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Автор: {item.author}</span>
+                    <span>{new Date(item.date).toLocaleDateString('ru-RU')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -279,35 +350,36 @@ export default function Homepage() {
 
           {filteredGallery.length === 0 && (
             <div className="text-center py-12">
-              <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No items found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filter criteria.</p>
+              <Search className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-500">По вашему запросу ничего не найдено</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-primary text-primary-foreground">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Your Career?</h2>
-          <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Join thousands of players in Los Santos' most professional roleplay community. 
-            Choose your path and make a difference.
+          <h2 className="text-3xl font-bold mb-4">Готовы присоединиться к нам?</h2>
+          <p className="text-xl mb-8 opacity-90">
+            Станьте частью профессионального ролевого сообщества и начните свою карьеру в Лос-Сантосе
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/register">
               <Button size="lg" variant="secondary" className="gap-2">
                 <Users className="h-5 w-5" />
-                Create Account
+                Подать заявку
               </Button>
             </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline" className="gap-2 text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                <Shield className="h-5 w-5" />
-                Sign In
-              </Button>
-            </Link>
+            <Button 
+              onClick={handleDiscordClick}
+              size="lg" 
+              variant="outline" 
+              className="gap-2 border-white text-white hover:bg-white hover:text-blue-600"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Присоединиться к Discord
+            </Button>
           </div>
         </div>
       </section>
