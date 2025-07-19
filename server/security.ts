@@ -1,6 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 
 interface SecurityConfig {
   rateLimiting: {
@@ -46,6 +47,18 @@ export class SecurityManager {
   private securityLogs: SecurityLog[] = [];
   private blockedIPs: Set<string> = new Set();
   private failedAttempts: Map<string, { count: number; lastAttempt: Date }> = new Map();
+
+  /**
+   * Проверка и декодирование JWT-токена
+   */
+  verifyToken(token: string): any | null {
+    try {
+      const secret = process.env.JWT_SECRET || 'default_jwt_secret';
+      return jwt.verify(token, secret);
+    } catch (err) {
+      return null;
+    }
+  }
 
   constructor(config: Partial<SecurityConfig> = {}) {
     this.config = {

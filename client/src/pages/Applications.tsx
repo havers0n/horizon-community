@@ -1,17 +1,28 @@
 import { Layout } from "@/components/Layout";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ApplicationModal } from "@/components/ApplicationModal";
+import { useCheckLimit } from "@/hooks/useCheckLimit";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, UserPlus, RefreshCw, Calendar, Plus } from "lucide-react";
+import { useLocation } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Applications() {
+  const { t } = useTranslation();
+  const [, navigate] = useLocation();
   
-  const { data: applications, isLoading } = useQuery({
+  const { data: applicationsRaw, isLoading } = useQuery({
     queryKey: ['/api/applications']
   });
+  const applications: any[] = Array.isArray(applicationsRaw) ? applicationsRaw : [];
+
+  // Проверка лимита на подачу заявки типа 'entry' (или другой, если нужно)
+  const { isLimitReached, isLoading: isLimitLoading, reason: limitReason } = useCheckLimit('entry');
+  const [modalOpen, setModalOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -33,10 +44,9 @@ export default function Applications() {
     }
   };
 
+
   const formatApplicationType = (type: string) => {
-    return type.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    return t(`applications.type.${type}`, type);
   };
 
   if (isLoading) {
@@ -59,19 +69,28 @@ export default function Applications() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Applications</h1>
-            <p className="text-gray-600">Track the status of your submitted applications.</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('applications.title', 'My Applications')}</h1>
+            <p className="text-gray-600">{t('applications.subtitle', 'Track the status of your submitted applications.')}</p>
           </div>
-          <ApplicationModal>
-            <Button>
+          <div className="flex flex-col items-end">
+            <Button
+              onClick={() => setModalOpen(true)}
+              disabled={isLimitLoading || isLimitReached}
+              title={isLimitReached ? (limitReason || t('applications.limit_reached', 'Limit reached')) : ''}
+            >
               <Plus className="h-4 w-4 mr-2" />
-              New Application
+              {isLimitReached
+                ? t('applications.limit_reached', 'Limit reached')
+                : t('applications.new_application', 'New Application')}
             </Button>
-          </ApplicationModal>
+            <ApplicationModal isOpen={modalOpen} onOpenChange={setModalOpen} />
+            {isLimitReached && limitReason && (
+              <span className="text-xs text-red-600 mt-1">{limitReason}</span>
+            )}
+          </div>
         </div>
 
         {/* Applications List */}
@@ -92,20 +111,24 @@ export default function Applications() {
                           {formatApplicationType(application.type)}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          Application #{application.id}
+                          {t('applications.application_id', {id: application.id, defaultValue: 'Application #{{id}}'})}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Submitted {formatDistanceToNow(new Date(application.createdAt), { addSuffix: true })}
+                          {t('applications.submitted', 'Submitted')} {formatDistanceToNow(new Date(application.createdAt), { addSuffix: true })}
                         </p>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-4">
-                      <Badge className={getStatusColor(application.status)}>
-                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                      </Badge>
-                      <Button variant="outline" size="sm">
-                        View Details
+          <Badge className={getStatusColor(application.status)}>
+            {String(t(`applications.status.${application.status}`, application.status))}
+          </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/applications/${application.id}`)}
+                      >
+                        {t('applications.view_details', 'View Details')}
                       </Button>
                     </div>
                   </div>
@@ -113,7 +136,7 @@ export default function Applications() {
                   {application.data?.details && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-700">
-                        <strong>Details:</strong> {application.data.details}
+                        <strong>{t('applications.details', 'Details')}:</strong> {application.data.details}
                       </p>
                     </div>
                   )}
@@ -121,7 +144,7 @@ export default function Applications() {
                   {application.reviewComment && (
                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm text-blue-800">
-                        <strong>Review Comment:</strong> {application.reviewComment}
+                        <strong>{t('applications.review_comment', 'Review Comment')}:</strong> {application.reviewComment}
                       </p>
                     </div>
                   )}
@@ -132,14 +155,14 @@ export default function Applications() {
             <Card>
               <CardContent className="text-center py-12">
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('applications.no_applications', 'No Applications Yet')}</h3>
                 <p className="text-gray-600 mb-6">
-                  You haven't submitted any applications yet. Start by creating your first application.
+                  {t('applications.no_applications_desc', "You haven't submitted any applications yet. Start by creating your first application.")}
                 </p>
                 <ApplicationModal>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Submit Your First Application
+                    {t('applications.submit_first', 'Submit Your First Application')}
                   </Button>
                 </ApplicationModal>
               </CardContent>

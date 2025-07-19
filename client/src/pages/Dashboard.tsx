@@ -1,10 +1,13 @@
 import { Layout } from "@/components/Layout";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ApplicationModal } from "@/components/ApplicationModal";
 import { ComplaintModal } from "@/components/ComplaintModal";
 import { SupportModal } from "@/components/SupportModal";
+import { EntryApplicationModal } from "@/components/EntryApplicationModal";
+import { JointModal } from "@/components/JointModal";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthState } from "@/lib/auth";
 import { 
@@ -15,6 +18,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user } = getAuthState();
   
   const { data: stats } = useQuery({
@@ -77,9 +81,9 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.username}
+            {t('dashboard.welcome', 'Welcome back')}, {user?.username}
           </h1>
-          <p className="text-gray-600">Manage your departments, applications, and system operations.</p>
+          <p className="text-gray-600">{t('dashboard.manage', 'Manage your departments, applications, and system operations.')}</p>
         </div>
 
         {/* Quick Stats Cards */}
@@ -93,7 +97,7 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.total_users', 'Total Users')}</dt>
                       <dd className="text-2xl font-bold text-gray-900">{stats.totalUsers}</dd>
                     </dl>
                   </div>
@@ -109,7 +113,7 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Pending Applications</dt>
+                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.pending_applications', 'Pending Applications')}</dt>
                       <dd className="text-2xl font-bold text-gray-900">{stats.pendingApplications}</dd>
                     </dl>
                   </div>
@@ -125,7 +129,7 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Active Departments</dt>
+                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.active_departments', 'Active Departments')}</dt>
                       <dd className="text-2xl font-bold text-gray-900">{stats.activeDepartments}</dd>
                     </dl>
                   </div>
@@ -141,7 +145,7 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Open Tickets</dt>
+                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.open_tickets', 'Open Tickets')}</dt>
                       <dd className="text-2xl font-bold text-gray-900">{stats.openTickets}</dd>
                     </dl>
                   </div>
@@ -160,14 +164,14 @@ export default function Dashboard() {
             {/* Recent Applications */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Recent Applications</CardTitle>
+                <CardTitle>{t('dashboard.recent_applications', 'Recent Applications')}</CardTitle>
                 <a href="/applications" className="text-primary hover:text-primary/90 text-sm font-medium">
-                  View All
+                  {t('dashboard.view_all', 'View All')}
                 </a>
               </CardHeader>
               <CardContent>
                 {recentApplications.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">No applications yet</p>
+                  <p className="text-gray-500 text-center py-4">{t('dashboard.no_applications', 'No applications yet')}</p>
                 ) : (
                   <div className="space-y-4">
                     {recentApplications.map((application: any) => (
@@ -180,7 +184,7 @@ export default function Dashboard() {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900 capitalize">
-                              {application.type.replace('_', ' ')}
+                              {t(`applications.type.${application.type}`, application.type)}
                             </p>
                             <p className="text-sm text-gray-500">
                               by {user?.username}
@@ -188,9 +192,9 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <Badge className={getStatusColor(application.status)}>
-                            {application.status}
-                          </Badge>
+                            <Badge className={getStatusColor(application.status)}>
+                              {t(`applications.status.${application.status}`, application.status)}
+                            </Badge>
                           <span className="text-xs text-gray-500">
                             {formatDistanceToNow(new Date(application.createdAt), { addSuffix: true })}
                           </span>
@@ -205,9 +209,9 @@ export default function Dashboard() {
             {/* Departments Overview */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Departments</CardTitle>
+                <CardTitle>{t('dashboard.departments', 'Departments')}</CardTitle>
                 <a href="/departments" className="text-primary hover:text-primary/90 text-sm font-medium">
-                  View All
+                  {t('dashboard.view_all', 'View All')}
                 </a>
               </CardHeader>
               <CardContent>
@@ -232,7 +236,7 @@ export default function Dashboard() {
             {/* User Profile Card */}
             <Card>
               <CardHeader>
-                <CardTitle>My Profile</CardTitle>
+                <CardTitle>{t('dashboard.my_profile', 'My Profile')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-6">
@@ -247,15 +251,15 @@ export default function Dashboard() {
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Role:</span>
-                    <span className="text-sm font-medium text-gray-900 capitalize">{user?.role}</span>
+                    <span className="text-sm text-gray-500">{t('dashboard.role', 'Role:')}</span>
+                    <span className="text-sm font-medium text-gray-900 capitalize">{t(`dashboard.user_role.${user?.role}`, user?.role)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Status:</span>
-                    <Badge className="bg-green-100 text-green-800 capitalize">{user?.status}</Badge>
+                    <span className="text-sm text-gray-500">{t('dashboard.status', 'Status:')}</span>
+                    <Badge className="bg-green-100 text-green-800 capitalize">{t(`dashboard.user_status.${user?.status}`, user?.status)}</Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Member Since:</span>
+                    <span className="text-sm text-gray-500">{t('dashboard.member_since', 'Member Since:')}</span>
                     <span className="text-sm font-medium text-gray-900">
                       {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                     </span>
@@ -267,34 +271,45 @@ export default function Dashboard() {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>{t('dashboard.quick_actions', 'Quick Actions')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <ApplicationModal />
-                <ComplaintModal />
-                <SupportModal />
+                {/* Показываем заявку на вступление только кандидатам */}
+                {user?.role === 'candidate' && (
+                  <EntryApplicationModal />
+                )}
                 
-                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <Upload className="h-4 w-4 text-success" />
-                    <span className="text-sm font-medium text-gray-900">Upload Report</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
-                </button>
+                {/* Показываем остальные действия только участникам и выше */}
+                {(user?.role === 'member' || user?.role === 'supervisor' || user?.role === 'admin') && (
+                  <>
+                    <ApplicationModal />
+                    <JointModal />
+                    <ComplaintModal />
+                    <SupportModal />
+                    
+                    <button className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <Upload className="h-4 w-4 text-success" />
+                        <span className="text-sm font-medium text-gray-900">{t('dashboard.upload_report', 'Upload Report')}</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                    </button>
+                  </>
+                )}
               </CardContent>
             </Card>
 
             {/* Recent Notifications */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Notifications</CardTitle>
+                <CardTitle>{t('dashboard.notifications', 'Notifications')}</CardTitle>
                 <a href="/notifications" className="text-primary hover:text-primary/90 text-sm font-medium">
-                  View All
+                  {t('dashboard.view_all', 'View All')}
                 </a>
               </CardHeader>
               <CardContent className="space-y-3">
                 {recentNotifications.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">No notifications</p>
+                  <p className="text-gray-500 text-center py-4">{t('dashboard.no_notifications', 'No notifications')}</p>
                 ) : (
                   recentNotifications.map((notification: any) => (
                     <div key={notification.id} className={`flex items-start space-x-3 p-3 rounded-lg ${

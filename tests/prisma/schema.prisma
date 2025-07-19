@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://horizon_ips_usr:YP1nJ9bI734cOrh0@194.87.141.14:3306/horizon_ips"
+}
+
+model ts_tests {
+  id         Int @unique(map: "id") @default(autoincrement())
+  name       String
+  owner      Int
+  status     Int
+  access     Json
+  color String?
+  cover String?
+  questions  ts_questions[]
+  group Int?
+  time  Int
+}
+model ts_results {
+  id         Int @unique(map: "id") @default(autoincrement())
+  testId     Int
+  testInfo   Json
+  status     Int
+  answers    Json
+  user       Int
+  start      Int
+  end        Int
+  lastKA     Int
+  warned     Int @default(0)
+}
+model ts_questions {
+  id        Int @unique(map: "id") @default(autoincrement())
+  question  String
+  type      Int
+  image     String?
+  answers   Json
+  status    Int
+  test      ts_tests @relation(fields: [testId], references: [id])
+  testId    Int
+  correct   Json @default("[]")
+}
+
+model ts_groups {
+  id Int @unique(map: "id") @default(autoincrement())
+  name String
+  status Int
+  createdBy Int
+  createdAt DateTime
+}
+
+model core_members_known_devices {
+  device_key    String  @default("") @db.VarChar(32)
+  member_id     Int  @default(0)
+  user_agent    String? @db.Text
+  login_key     String? @db.VarChar(32)
+  last_seen     Int     @default(0) @db.UnsignedInt
+  anonymous     Int     @default(0) @db.UnsignedTinyInt
+  login_handler String? @db.VarChar(32)
+
+  @@id([device_key, member_id])
+  @@index([last_seen], map: "last_seen")
+  @@index([member_id, last_seen], map: "member_id")
+}
+
+model core_members {
+  member_id                 Int   @id @default(autoincrement())
+  name                      String   @default("") @db.VarChar(255)
+  member_group_id           Int      @default(0) @db.SmallInt
+  email                     String   @default("") @db.VarChar(150)
+  joined                    Int      @default(0)
+  ip_address                String   @default("") @db.VarChar(46)
+  skin                      Int?     @db.SmallInt
+  warn_level                Int?
+  warn_lastwarn             Int      @default(0)
+  language                  Int?     @db.MediumInt
+  restrict_post             Int      @default(0)
+  bday_day                  Int?
+  bday_month                Int?
+  bday_year                 Int?
+  msg_count_new             Int      @default(0)
+  msg_count_total           Int      @default(0)
+  msg_count_reset           Int      @default(0)
+  msg_show_notification     Int      @default(0)
+  last_visit                Int?     @default(0)
+  last_activity             Int?     @default(0)
+  mod_posts                 Int      @default(0)
+  auto_track                String?  @default("0") @db.VarChar(256)
+  temp_ban                  Int?     @default(0)
+  mgroup_others             String   @default("") @db.VarChar(245)
+  members_seo_name          String   @default("") @db.VarChar(255)
+  members_cache             String?  @db.MediumText
+  failed_logins             String?  @db.Text
+  failed_login_count        Int      @default(0) @db.SmallInt
+  members_profile_views     Int      @default(0) @db.UnsignedInt
+  members_pass_hash         String?  @db.VarChar(255)
+  members_pass_salt         String?  @db.VarChar(22)
+  members_bitoptions        Int      @default(0) @db.UnsignedInt
+  members_day_posts         String   @default("0,0") @db.VarChar(32)
+  notification_cnt          Int      @default(0) @db.MediumInt
+  pp_last_visitors          String?  @db.Text
+  pp_main_photo             String?  @db.Text
+  pp_main_width             Int?
+  pp_main_height            Int?
+  pp_thumb_photo            String?  @db.Text
+  pp_thumb_width            Int?
+  pp_thumb_height           Int?
+  pp_setting_count_comments Int?
+  pp_reputation_points      Int?
+  pp_photo_type             String?  @db.VarChar(20)
+  signature                 String?  @db.Text
+  pconversation_filters     String?  @db.Text
+  pp_customization          String?  @db.MediumText
+  timezone                  String?  @db.VarChar(64)
+  pp_cover_photo            String   @default("") @db.VarChar(255)
+  profilesync               String?  @db.Text
+  profilesync_lastsync      Int      @default(0)
+  allow_admin_mails         Boolean? @default(dbgenerated("(b'0')")) @db.Bit(1)
+  members_bitoptions2       Int      @default(0) @db.UnsignedInt
+  create_menu               String?  @db.Text
+  members_disable_pm        Int      @default(0) @db.UnsignedTinyInt
+  marked_site_read          Int?     @default(0) @db.UnsignedInt
+  pp_cover_offset           Int      @default(0)
+  acp_language              Int?     @db.MediumInt
+  member_title              String?  @db.VarChar(64)
+  member_posts              Int      @default(0) @db.MediumInt
+  member_last_post          Int?
+  member_streams            String?  @db.Text
+  photo_last_update         Int?
+  mfa_details               String?  @db.Text
+  failed_mfa_attempts       Int?     @default(0) @db.UnsignedSmallInt
+  permission_array          String?  @db.Text
+  completed                 Boolean  @default(dbgenerated("(b'0')")) @db.Bit(1)
+
+  @@index([allow_admin_mails], map: "allow_admin_mails")
+  @@index([bday_day], map: "bday_day")
+  @@index([bday_month], map: "bday_month")
+  @@index([completed, temp_ban], map: "completed")
+  @@index([email], map: "email")
+  @@index([failed_login_count], map: "failed_login_count")
+  @@index([ip_address], map: "ip_address")
+  @@index([joined], map: "joined")
+  @@index([last_activity], map: "last_activity")
+  @@index([member_posts, member_id], map: "member_posts")
+  @@index([members_bitoptions], map: "members_bitoptions")
+  @@index([member_id, member_group_id], map: "mgroup")
+  @@index([mod_posts], map: "mod_posts")
+  @@index([photo_last_update], map: "photo_last_update")
+}

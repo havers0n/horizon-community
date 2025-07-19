@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,7 +62,8 @@ const mockTemplates: ReportTemplate[] = [
   }
 ];
 
-export default function Reports() {
+function Reports() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -221,27 +223,27 @@ export default function Reports() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-96">Loading reports...</div>;
+    return <div className="flex items-center justify-center min-h-96">{t('reports.loading', 'Loading reports...')}</div>;
   }
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Reports</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('reports.title', 'Reports')}</h1>
         <p className="text-muted-foreground">
-          Submit and manage your incident reports, documentation, and official forms.
+          {t('reports.subtitle', 'Submit and manage your incident reports, documentation, and official forms.')}
         </p>
       </div>
 
       <Tabs defaultValue="my-reports" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="my-reports">My Reports</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="my-reports">{t('reports.my_reports', 'My Reports')}</TabsTrigger>
+          <TabsTrigger value="templates">{t('reports.templates', 'Templates')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="my-reports" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Submitted Reports</h2>
+            <h2 className="text-xl font-semibold">{t('reports.submitted_reports', 'Submitted Reports')}</h2>
             <Dialog open={isSubmitModalOpen} onOpenChange={setIsSubmitModalOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -251,29 +253,29 @@ export default function Reports() {
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Submit New Report</DialogTitle>
+                  <DialogTitle>{t('reports.submit_new', 'Submit New Report')}</DialogTitle>
                   <DialogDescription>
-                    Upload your completed report for supervisor review.
+                    {t('reports.upload_for_review', 'Upload your completed report for supervisor review.')}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmitReport} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="report-type">Report Type</Label>
+                    <Label htmlFor="report-type">{t('reports.report_type', 'Report Type')}</Label>
                     <Select defaultValue="incident">
                       <SelectTrigger>
-                        <SelectValue placeholder="Select report type" />
+                        <SelectValue placeholder={t('reports.select_type', 'Select report type')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="incident">Incident Report</SelectItem>
-                        <SelectItem value="arrest">Arrest Report</SelectItem>
-                        <SelectItem value="vehicle">Vehicle Report</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="incident">{t('reports.incident_report', 'Incident Report')}</SelectItem>
+                        <SelectItem value="arrest">{t('reports.arrest_report', 'Arrest Report')}</SelectItem>
+                        <SelectItem value="vehicle">{t('reports.vehicle_report', 'Vehicle Report')}</SelectItem>
+                        <SelectItem value="other">{t('reports.other', 'Other')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="report-file">Report File</Label>
+                    <Label htmlFor="report-file">{t('reports.report_file', 'Report File')}</Label>
                     <Input
                       id="report-file"
                       type="file"
@@ -289,7 +291,7 @@ export default function Reports() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Additional Notes</Label>
+                    <Label htmlFor="notes">{t('reports.additional_notes', 'Additional Notes')}</Label>
                     <Textarea
                       id="notes"
                       placeholder="Any additional information for the supervisor..."
@@ -303,13 +305,13 @@ export default function Reports() {
                       variant="outline"
                       onClick={() => setIsSubmitModalOpen(false)}
                     >
-                      Cancel
+                      {t('reports.cancel', 'Cancel')}
                     </Button>
                     <Button
                       type="submit"
                       disabled={!selectedFile || submitReportMutation.isPending}
                     >
-                      {submitReportMutation.isPending ? 'Submitting...' : 'Submit'}
+                      {submitReportMutation.isPending ? t('reports.submitting', 'Submitting...') : t('reports.submit', 'Submit')}
                     </Button>
                   </div>
                 </form>
@@ -322,12 +324,12 @@ export default function Reports() {
               <Card>
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">No Reports Submitted</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('reports.no_reports', 'No Reports Submitted')}</h3>
                   <p className="text-muted-foreground mb-4">
-                    You haven't submitted any reports yet. Use the templates to get started.
+                    {t('reports.no_reports_desc', "You haven't submitted any reports yet. Use the templates to get started.")}
                   </p>
                   <Button onClick={() => setIsSubmitModalOpen(true)}>
-                    Submit Your First Report
+                    {t('reports.submit_first', 'Submit Your First Report')}
                   </Button>
                 </CardContent>
               </Card>
@@ -340,16 +342,16 @@ export default function Reports() {
                         <div className="flex items-center gap-3">
                           <FileText className="h-5 w-5 text-muted-foreground" />
                           <span className="font-medium">
-                            Report #{report.id.toString().padStart(3, '0')}
+                            {t('reports.report_id', {id: report.id.toString().padStart(3, '0'), defaultValue: 'Report #{{id}}'})}
                           </span>
                           {getStatusBadge(report.status)}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Submitted: {new Date(report.createdAt).toLocaleDateString()}
+                          {t('reports.submitted', 'Submitted')}: {new Date(report.createdAt).toLocaleDateString()}
                         </p>
                         {report.supervisorComment && (
                           <div className="mt-3 p-3 bg-muted rounded-lg">
-                            <p className="text-sm font-medium mb-1">Supervisor Comment:</p>
+                            <p className="text-sm font-medium mb-1">{t('reports.supervisor_comment', 'Supervisor Comment:')}</p>
                             <p className="text-sm">{report.supervisorComment}</p>
                           </div>
                         )}
@@ -390,9 +392,9 @@ export default function Reports() {
 
         <TabsContent value="templates" className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-2">Report Templates</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('reports.templates_title', 'Report Templates')}</h2>
             <p className="text-muted-foreground">
-              Download official templates to ensure your reports meet department standards.
+              {t('reports.templates_desc', 'Download official templates to ensure your reports meet department standards.')}
             </p>
           </div>
 
@@ -412,7 +414,7 @@ export default function Reports() {
                       variant="outline"
                     >
                       <Download className="h-4 w-4" />
-                      Download Template
+                      {t('reports.download_template', 'Download Template')}
                     </Button>
                   </div>
                 </CardContent>
@@ -426,22 +428,22 @@ export default function Reports() {
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Report Details</DialogTitle>
+            <DialogTitle>{t('reports.details', 'Report Details')}</DialogTitle>
             <DialogDescription>
-              Report #{selectedReport?.id.toString().padStart(3, '0')}
+              {t('reports.report_id', {id: selectedReport?.id?.toString().padStart(3, '0') || '', defaultValue: 'Report #{{id}}'})}
             </DialogDescription>
           </DialogHeader>
           {selectedReport && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Status</Label>
+                  <Label>{t('reports.status', 'Status')}</Label>
                   <div className="mt-1">
                     {getStatusBadge(selectedReport.status)}
                   </div>
                 </div>
                 <div>
-                  <Label>Submitted</Label>
+                  <Label>{t('reports.submitted', 'Submitted')}</Label>
                   <p className="text-sm mt-1">
                     {new Date(selectedReport.createdAt).toLocaleDateString()}
                   </p>
@@ -450,7 +452,7 @@ export default function Reports() {
               
               {selectedReport.supervisorComment && (
                 <div>
-                  <Label>Supervisor Comment</Label>
+                  <Label>{t('reports.supervisor_comment', 'Supervisor Comment')}</Label>
                   <div className="mt-1 p-3 bg-muted rounded-lg">
                     <p className="text-sm">{selectedReport.supervisorComment}</p>
                   </div>
@@ -468,10 +470,10 @@ export default function Reports() {
                     department: '' 
                   })}
                 >
-                  Download File
+                  {t('reports.download_file', 'Download File')}
                 </Button>
                 <Button onClick={() => setIsViewModalOpen(false)}>
-                  Close
+                  {t('reports.close', 'Close')}
                 </Button>
               </div>
             </div>
@@ -481,3 +483,5 @@ export default function Reports() {
     </div>
   );
 }
+
+export default Reports;

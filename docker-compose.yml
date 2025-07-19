@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: horizon_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: horizon_db
+      POSTGRES_USER: horizon_user
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5434:5432"  # <-- УБЕДИТЕСЬ, ЧТО ЗДЕСЬ 5434
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
