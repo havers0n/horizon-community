@@ -66,9 +66,9 @@ app.use((req, res, next) => {
   console.log(`🌍 Environment: ${app.get("env")}`);
   console.log(`🔧 NODE_ENV: ${process.env.NODE_ENV}`);
   
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development" || app.get("env") === "development") {
     console.log("🚀 Setting up Vite for development...");
-    const { setupVite } = await import("./vite");
+    const { setupVite } = await import("./development");
     await setupVite(app, server);
   } else {
     console.log("📦 Setting up static file serving for production...");
