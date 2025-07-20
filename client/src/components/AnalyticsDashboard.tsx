@@ -63,6 +63,13 @@ interface ApplicationStats {
   pending: number;
 }
 
+interface OverallStats {
+  totalUsers: number;
+  activeToday: number;
+  pendingApplications: number;
+  avgRating: number;
+}
+
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export function AnalyticsDashboard({ isOpen, onOpenChange }: AnalyticsDashboardProps) {
@@ -85,7 +92,7 @@ export function AnalyticsDashboard({ isOpen, onOpenChange }: AnalyticsDashboardP
     enabled: !!isOpen
   });
 
-  const { data: overallStats } = useQuery({
+  const { data: overallStats } = useQuery<OverallStats>({
     queryKey: ['/api/analytics/overall-stats'],
     enabled: !!isOpen
   });
@@ -154,7 +161,7 @@ export function AnalyticsDashboard({ isOpen, onOpenChange }: AnalyticsDashboardP
       </div>
 
       {/* Общая статистика */}
-      {overallStats && (
+      {overallStats && typeof overallStats === 'object' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="card-hover">
             <CardContent className="p-6">

@@ -1,34 +1,34 @@
 import { Switch, Route, Redirect } from "wouter";
-// import ApplicationDetails from "@/pages/ApplicationDetails";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { LazyPage } from "@/components/LazyPage";
 
-// Pages
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import Dashboard from "@/pages/Dashboard";
-import Departments from "@/pages/Departments";
-import Applications from "@/pages/Applications";
-import Support from "@/pages/Support";
-import AdminPanel from "@/pages/AdminPanel";
-import SupportPage from "@/pages/admin/SupportPage";
-import AdminTicketDetails from "@/pages/admin/AdminTicketDetails";
-import UserTicketDetails from "@/pages/UserTicketDetails";
-import Reports from "@/pages/Reports";
-import JointPositions from "@/pages/JointPositions";
-import LeaveManagement from "@/pages/LeaveManagement";
-import AdminLeaveManagement from "@/pages/AdminLeaveManagement";
-import AdminReports from "@/pages/AdminReports";
-import TestExam from "@/pages/TestExam";
-import Homepage from "@/pages/Homepage";
-import FAQ from "@/pages/FAQ";
-import NotFound from "@/pages/not-found";
-import CAD from "@/pages/CAD";
-import DesignSystemDemo from "@/components/DesignSystemDemo";
+// Lazy loaded pages
+const Login = () => import("@/pages/Login");
+const Register = () => import("@/pages/Register");
+const Dashboard = () => import("@/pages/Dashboard");
+const Departments = () => import("@/pages/Departments");
+const Applications = () => import("@/pages/Applications");
+const Support = () => import("@/pages/Support");
+const AdminPanel = () => import("@/pages/AdminPanel");
+const SupportPage = () => import("@/pages/admin/SupportPage");
+const AdminTicketDetails = () => import("@/pages/admin/AdminTicketDetails");
+const UserTicketDetails = () => import("@/pages/UserTicketDetails");
+const Reports = () => import("@/pages/Reports");
+const JointPositions = () => import("@/pages/JointPositions");
+const LeaveManagement = () => import("@/pages/LeaveManagement");
+const AdminLeaveManagement = () => import("@/pages/AdminLeaveManagement");
+const AdminReports = () => import("@/pages/AdminReports");
+const TestExam = () => import("@/pages/TestExam");
+const Homepage = () => import("@/pages/Homepage");
+const FAQ = () => import("@/pages/FAQ");
+const NotFound = () => import("@/pages/not-found");
+const CAD = () => import("@/pages/CAD");
+const DesignSystemDemo = () => import("@/components/DesignSystemDemo");
 
 function Router() {
   const { user, loading } = useAuth();
@@ -41,78 +41,78 @@ function Router() {
     <Switch>
       {/* Public routes */}
       <Route path="/">
-        <Homepage />
+        <LazyPage component={Homepage} />
       </Route>
       <Route path="/faq">
-        <FAQ />
+        <LazyPage component={FAQ} />
       </Route>
       <Route path="/login">
-        <Login />
+        <LazyPage component={Login} />
       </Route>
       <Route path="/register">
-        <Register />
+        <LazyPage component={Register} />
       </Route>
       <Route path="/design-system">
-        <DesignSystemDemo />
+        <LazyPage component={DesignSystemDemo} />
       </Route>
       
       {/* Protected routes */}
       <Route path="/dashboard">
-        <Dashboard />
+        <LazyPage component={Dashboard} />
       </Route>
       <Route path="/departments">
-        <Departments />
+        <LazyPage component={Departments} />
       </Route>
       <Route path="/applications">
-        <Applications />
+        <LazyPage component={Applications} />
       </Route>
       <Route path="/applications/:id">
         <div />
       </Route>
       <Route path="/joint-positions">
-        <JointPositions />
+        <LazyPage component={JointPositions} />
       </Route>
       <Route path="/leave-management">
-        <LeaveManagement />
+        <LazyPage component={LeaveManagement} />
       </Route>
       <Route path="/admin-leave-management">
-        <AdminLeaveManagement />
+        <LazyPage component={AdminLeaveManagement} />
       </Route>
       <Route path="/admin-reports">
-        <AdminReports />
+        <LazyPage component={AdminReports} />
       </Route>
       <Route path="/reports">
-        <Reports />
+        <LazyPage component={Reports} />
       </Route>
       <Route path="/support">
-        <SupportPage />
+        <LazyPage component={SupportPage} />
       </Route>
       <Route path="/cad">
-        <CAD />
+        <LazyPage component={CAD} />
       </Route>
       <Route path="/test/:id">
-        <TestExam />
+        <LazyPage component={TestExam} />
       </Route>
 
       <Route path="/admin/support">
-        <SupportPage />
+        <LazyPage component={SupportPage} />
       </Route>
 
       <Route path="/admin">
-        <AdminPanel />
+        <LazyPage component={AdminPanel} />
       </Route>
 
       <Route path="/admin/tickets/:id">
-        <AdminTicketDetails />
+        <LazyPage component={AdminTicketDetails} />
       </Route>
 
       <Route path="/tickets/:id">
-        <UserTicketDetails />
+        <LazyPage component={UserTicketDetails} />
       </Route>
 
       {/* 404 route */}
       <Route>
-        <NotFound />
+        <LazyPage component={NotFound} />
       </Route>
     </Switch>
   );
