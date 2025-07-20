@@ -8,6 +8,7 @@
     "dev:client": "vite",
     "build": "vite build && npm run build:server",
     "build:production": "npm run build",
+    "build:server-only": "npm run build:server",
     "build:server": "esbuild server/production-entry.ts --platform=node --packages=external --bundle --format=esm --minify --outfile=dist/server.js",
     "build:analyze": "cross-env NODE_ENV=production vite build",
     "start": "set NODE_ENV=production && node dist/server.js",
