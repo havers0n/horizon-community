@@ -72,6 +72,17 @@ jobs:
             # Распаковываем архив
             tar -xzf deployment.tar.gz
             
+            # Создаем .env из GitHub Secrets
+            echo "🔐 Создаем .env из GitHub Secrets..."
+            echo "NODE_ENV=production" > .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+            echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+            echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+            echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
+            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
             
             # Безопасный рестарт приложения
             if pm2 list | grep -q "roleplayidentity"; then
