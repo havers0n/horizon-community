@@ -4,31 +4,29 @@ import { db } from '../db/index.js';
 import { 
   characters, vehicles, weapons, pets, records, call911, activeUnits, callAttachments,
   createCharacterSchema, updateCharacterSchema, createVehicleSchema, createWeaponSchema,
-  createCall911Schema, goOnDutySchema, updateUnitStatusSchema
+  createCall911Schema, goOnDutySchema, updateUnitStatusSchema, departments
 } from '../../shared/schema.js';
 import { eq, and, or, like, desc, asc } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { nanoid } from 'nanoid';
+import { users } from '../../shared/schema.js';
 
 const router = Router();
 
 // Middleware для проверки CAD токена (для игровой интеграции)
 const authenticateCadToken = async (req: any, res: any, next: any) => {
   const token = req.headers['x-cad-token'] || req.query.token;
-  
   if (!token) {
     return res.status(401).json({ error: 'CAD token required' });
   }
-
   try {
+    // Исправлено: используем cadToken
     const user = await db.query.users.findFirst({
-      where: eq(db.query.users.cadToken, token)
+      where: eq(users.cadToken, token)
     });
-
     if (!user) {
       return res.status(401).json({ error: 'Invalid CAD token' });
     }
-
     req.user = user;
     next();
   } catch (error) {
@@ -36,24 +34,51 @@ const authenticateCadToken = async (req: any, res: any, next: any) => {
   }
 };
 
+/**
+ * Интерфейс пользователя (User)
+ */
+interface User {
+  id: number;
+  email: string;
+  passwordHash: string;
+  siteRole: string;
+  discordId?: string;
+  apiToken?: string;
+  cadToken?: string;
+}
+
+/**
+ * Интерфейс персонажа (Character)
+ */
+interface Character {
+  id: number;
+  ownerId: number;
+  firstName: string;
+  lastName: string;
+  departmentId: number;
+  rank?: string;
+  status: string;
+  insuranceNumber?: string;
+  address?: string;
+  createdAt: Date;
+}
+
 // ===== ПЕРСОНАЖИ =====
 
 // Создать нового персонажа
 router.post('/characters', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const validatedData = createCharacterSchema.parse(req.body);
-    
     // Генерируем уникальный номер страховки
-    const insuranceNumber = await db.execute(
-      'SELECT generate_insurance_number() as insurance_number'
-    );
-    
+    const insuranceNumber = await db.execute('SELECT generate_insurance_number() as insurance_number');
     const newCharacter = await db.insert(characters).values({
       ownerId: req.user.id,
-      insuranceNumber: insuranceNumber[0].insurance_number,
+      insuranceNumber: (insuranceNumber as any)[0]?.insurance_number,
       ...validatedData
     }).returning();
-
     res.status(201).json(newCharacter[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -66,11 +91,13 @@ router.post('/characters', authenticateToken, async (req, res) => {
 // Получить список персонажей пользователя
 router.get('/characters', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const userCharacters = await db.query.characters.findMany({
       where: eq(characters.ownerId, req.user.id),
       orderBy: [desc(characters.createdAt)]
     });
-
     res.json(userCharacters);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch characters' });
@@ -80,6 +107,9 @@ router.get('/characters', authenticateToken, async (req, res) => {
 // Получить персонажа по ID
 router.get('/characters/:id', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const character = await db.query.characters.findFirst({
       where: and(
         eq(characters.id, parseInt(req.params.id)),
@@ -96,11 +126,9 @@ router.get('/characters/:id', authenticateToken, async (req, res) => {
         }
       }
     });
-
     if (!character) {
       return res.status(404).json({ error: 'Character not found' });
     }
-
     res.json(character);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch character' });
@@ -110,8 +138,10 @@ router.get('/characters/:id', authenticateToken, async (req, res) => {
 // Обновить персонажа
 router.put('/characters/:id', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const validatedData = updateCharacterSchema.parse(req.body);
-    
     const updatedCharacter = await db.update(characters)
       .set(validatedData)
       .where(and(
@@ -119,11 +149,9 @@ router.put('/characters/:id', authenticateToken, async (req, res) => {
         eq(characters.ownerId, req.user.id)
       ))
       .returning();
-
     if (updatedCharacter.length === 0) {
       return res.status(404).json({ error: 'Character not found' });
     }
-
     res.json(updatedCharacter[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -155,11 +183,15 @@ router.get('/characters/search/:query', authenticateToken, async (req, res) => {
 
 // ===== ТРАНСПОРТНЫЕ СРЕДСТВА =====
 
-// Создать транспортное средство
+/**
+ * Создать транспортное средство
+ */
 router.post('/vehicles', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const validatedData = createVehicleSchema.parse(req.body);
-    
     // Проверяем, что персонаж принадлежит пользователю
     const character = await db.query.characters.findFirst({
       where: and(
@@ -167,19 +199,16 @@ router.post('/vehicles', authenticateToken, async (req, res) => {
         eq(characters.ownerId, req.user.id)
       )
     });
-
     if (!character) {
       return res.status(404).json({ error: 'Character not found' });
     }
-
     // Генерируем уникальный VIN
     const vin = await db.execute('SELECT generate_vin() as vin');
-    
     const newVehicle = await db.insert(vehicles).values({
       ...validatedData,
-      vin: vin[0].vin
+      ownerId: validatedData.ownerId,
+      vin: (vin as any)[0]?.vin
     }).returning();
-
     res.status(201).json(newVehicle[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -211,11 +240,15 @@ router.get('/vehicles/plate/:plate', authenticateToken, async (req, res) => {
 
 // ===== ОРУЖИЕ =====
 
-// Создать оружие
+/**
+ * Создать оружие
+ */
 router.post('/weapons', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const validatedData = createWeaponSchema.parse(req.body);
-    
     // Проверяем, что персонаж принадлежит пользователю
     const character = await db.query.characters.findFirst({
       where: and(
@@ -223,19 +256,16 @@ router.post('/weapons', authenticateToken, async (req, res) => {
         eq(characters.ownerId, req.user.id)
       )
     });
-
     if (!character) {
       return res.status(404).json({ error: 'Character not found' });
     }
-
     // Генерируем уникальный серийный номер
     const serialNumber = await db.execute('SELECT generate_weapon_serial() as serial_number');
-    
     const newWeapon = await db.insert(weapons).values({
       ...validatedData,
-      serialNumber: serialNumber[0].serial_number
+      ownerId: validatedData.ownerId,
+      serialNumber: (serialNumber as any)[0]?.serial_number
     }).returning();
-
     res.status(201).json(newWeapon[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -267,11 +297,15 @@ router.get('/weapons/serial/:serial', authenticateToken, async (req, res) => {
 
 // ===== АКТИВНЫЕ ЮНИТЫ =====
 
-// Выйти на смену
+/**
+ * Выйти на смену (активировать юнита)
+ */
 router.post('/onduty', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const validatedData = goOnDutySchema.parse(req.body);
-    
     // Проверяем, что персонаж принадлежит пользователю
     const character = await db.query.characters.findFirst({
       where: and(
@@ -279,44 +313,35 @@ router.post('/onduty', authenticateToken, async (req, res) => {
         eq(characters.ownerId, req.user.id)
       )
     });
-
     if (!character) {
       return res.status(404).json({ error: 'Character not found' });
     }
-
     // Проверяем, что персонаж уже не на смене
     const existingUnit = await db.query.activeUnits.findFirst({
       where: eq(activeUnits.characterId, validatedData.characterId)
     });
-
     if (existingUnit) {
       return res.status(400).json({ error: 'Character is already on duty' });
     }
-
     // Получаем информацию о департаменте для генерации позывного
     const department = await db.query.departments.findFirst({
-      where: eq(db.query.departments.id, validatedData.departmentId)
+      where: eq(departments.id, validatedData.departmentId)
     });
-
     if (!department) {
       return res.status(404).json({ error: 'Department not found' });
     }
-
     // Генерируем позывной
     const callsign = await db.execute(
-      'SELECT generate_callsign($1) as callsign',
-      [department.name]
+      `SELECT generate_callsign('${department.name}') as callsign`
     );
-
     const newUnit = await db.insert(activeUnits).values({
       characterId: validatedData.characterId,
-      callsign: callsign[0].callsign,
+      callsign: (callsign as any)[0]?.callsign,
       location: { x: 0, y: 0, z: 0 },
       partnerId: validatedData.partnerId,
       vehicleId: validatedData.vehicleId,
       departmentId: validatedData.departmentId
     }).returning();
-
     res.status(201).json(newUnit[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -326,11 +351,15 @@ router.post('/onduty', authenticateToken, async (req, res) => {
   }
 });
 
-// Изменить статус юнита
+/**
+ * Изменить статус юнита
+ */
 router.put('/status', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const validatedData = updateUnitStatusSchema.parse(req.body);
-    
     const updatedUnit = await db.update(activeUnits)
       .set({
         status: validatedData.status,
@@ -339,11 +368,9 @@ router.put('/status', authenticateToken, async (req, res) => {
       })
       .where(eq(activeUnits.characterId, req.user.id))
       .returning();
-
     if (updatedUnit.length === 0) {
       return res.status(404).json({ error: 'Active unit not found' });
     }
-
     res.json(updatedUnit[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -353,17 +380,20 @@ router.put('/status', authenticateToken, async (req, res) => {
   }
 });
 
-// Закончить смену
+/**
+ * Закончить смену (деактивировать юнита)
+ */
 router.post('/offduty', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const deletedUnit = await db.delete(activeUnits)
       .where(eq(activeUnits.characterId, req.user.id))
       .returning();
-
     if (deletedUnit.length === 0) {
       return res.status(404).json({ error: 'Active unit not found' });
     }
-
     res.json({ message: 'Successfully went off duty' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to go off duty' });
@@ -388,18 +418,21 @@ router.get('/active', authenticateToken, async (req, res) => {
   }
 });
 
-// Активировать кнопку паники
+/**
+ * Активировать кнопку паники
+ */
 router.post('/panic', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const updatedUnit = await db.update(activeUnits)
       .set({ isPanic: true, lastUpdate: new Date() })
       .where(eq(activeUnits.characterId, req.user.id))
       .returning();
-
     if (updatedUnit.length === 0) {
       return res.status(404).json({ error: 'Active unit not found' });
     }
-
     res.json(updatedUnit[0]);
   } catch (error) {
     res.status(500).json({ error: 'Failed to activate panic button' });
@@ -408,7 +441,9 @@ router.post('/panic', authenticateToken, async (req, res) => {
 
 // ===== ВЫЗОВЫ 911 =====
 
-// Создать вызов 911
+/**
+ * Создать вызов 911
+ */
 router.post('/calls', authenticateToken, async (req, res) => {
   try {
     const validatedData = createCall911Schema.parse(req.body);
@@ -424,7 +459,9 @@ router.post('/calls', authenticateToken, async (req, res) => {
   }
 });
 
-// Получить список вызовов
+/**
+ * Получить список вызовов
+ */
 router.get('/calls', authenticateToken, async (req, res) => {
   try {
     const status = req.query.status as string;
@@ -464,7 +501,9 @@ router.get('/calls', authenticateToken, async (req, res) => {
   }
 });
 
-// Прикрепить юнит к вызову
+/**
+ * Прикрепить юнит к вызову
+ */
 router.put('/calls/:id/attach', authenticateToken, async (req, res) => {
   try {
     const callId = parseInt(req.params.id);
@@ -506,7 +545,9 @@ router.put('/calls/:id/attach', authenticateToken, async (req, res) => {
   }
 });
 
-// Изменить статус вызова
+/**
+ * Изменить статус вызова
+ */
 router.put('/calls/:id/status', authenticateToken, async (req, res) => {
   try {
     const callId = parseInt(req.params.id);
@@ -533,15 +574,18 @@ router.put('/calls/:id/status', authenticateToken, async (req, res) => {
 
 // ===== ОТЧЕТЫ =====
 
-// Создать отчет (арест, штраф)
+/**
+ * Создать отчет (арест, штраф)
+ */
 router.post('/records', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const { characterId, type, charges, description, date } = req.body;
-
     if (!characterId || !type || !charges || !description || !date) {
       return res.status(400).json({ error: 'All fields required' });
     }
-
     // Получаем активный юнит пользователя
     const activeUnit = await db.query.activeUnits.findFirst({
       where: eq(activeUnits.characterId, req.user.id),
@@ -549,20 +593,17 @@ router.post('/records', authenticateToken, async (req, res) => {
         character: true
       }
     });
-
     if (!activeUnit) {
       return res.status(400).json({ error: 'Must be on duty to create records' });
     }
-
     const newRecord = await db.insert(records).values({
       characterId,
-      officerId: activeUnit.character.id,
+      officerId: (activeUnit.character as any).id,
       type,
       charges,
       description,
       date: new Date(date)
     }).returning();
-
     res.status(201).json(newRecord[0]);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create record' });
@@ -571,31 +612,38 @@ router.post('/records', authenticateToken, async (req, res) => {
 
 // ===== ИГРОВАЯ ИНТЕГРАЦИЯ =====
 
-// Генерация CAD токена для пользователя
+/**
+ * Генерация CAD токена для пользователя
+ */
 router.post('/generate-token', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const token = nanoid(32);
-    
-    await db.update(db.query.users)
+    await db.update(users)
       .set({ cadToken: token })
-      .where(eq(db.query.users.id, req.user.id));
-
+      .where(eq(users.id, req.user.id));
     res.json({ token });
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate token' });
   }
 });
 
-// Получить данные пользователя по CAD токену
+/**
+ * Получить данные пользователя по CAD токену
+ */
 router.get('/me', authenticateCadToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const user = await db.query.users.findFirst({
-      where: eq(db.query.users.id, req.user.id),
+      where: eq(users.id, req.user.id),
       with: {
         characters: true
       }
     });
-
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch user data' });

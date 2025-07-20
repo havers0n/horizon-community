@@ -74,7 +74,7 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
       // Убираем правильные ответы из вопросов для безопасности
       const safeTest = {
         ...test,
-        questions: test.questions.map(q => ({
+        questions: (test.questions as any[]).map((q: any) => ({
           ...q,
           correctAnswer: undefined
         }))
@@ -159,7 +159,7 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
         session,
         test: {
           ...test,
-          questions: test.questions.map(q => ({
+          questions: (test.questions as any[]).map((q: any) => ({
             ...q,
             correctAnswer: undefined
           }))
@@ -212,7 +212,7 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
       let maxScore = 0;
       const results = [];
 
-      for (const question of test.questions) {
+      for (const question of test.questions as any[]) {
         maxScore += question.points;
         const userAnswer = validatedData.answers.find(a => a.questionId === question.id);
         
@@ -225,7 +225,7 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
             const correctAnswers = Array.isArray(question.correctAnswer) ? question.correctAnswer : [];
             const userAnswers = Array.isArray(userAnswer.answer) ? userAnswer.answer : [];
             isCorrect = correctAnswers.length === userAnswers.length && 
-                       correctAnswers.every(ans => userAnswers.includes(ans));
+                                               correctAnswers.every((ans: any) => userAnswers.includes(ans));
           } else if (question.type === 'text') {
             // Для текстовых вопросов нужна ручная проверка
             isCorrect = false; // По умолчанию неправильно
@@ -337,7 +337,7 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
       // Ищем тест, связанный с этой заявкой
       const tests = await storage.getAllTests();
       const relatedTest = tests.find(test => 
-        test.relatedTo.applicationId === applicationId
+        (test.relatedTo as any).applicationId === applicationId
       );
 
       if (!relatedTest) {
@@ -351,7 +351,7 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
       res.json({ 
         test: {
           ...relatedTest,
-          questions: relatedTest.questions.map(q => ({
+          questions: (relatedTest.questions as any[]).map((q: any) => ({
             ...q,
             correctAnswer: undefined
           }))

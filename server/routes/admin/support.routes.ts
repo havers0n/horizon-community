@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { verifyJWT, requireAdminOrSupervisor } from '../../middleware/auth.middleware';
-import { SupportTicket } from '../../db/schema/supportTickets';
+import { supportTickets } from '../../db/schema/supportTickets';
+import { db } from '../../db';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
@@ -19,26 +21,28 @@ router.post('/tickets/:ticketId/reply', verifyJWT, requireAdminOrSupervisor, asy
     }
 
     // Найти тикет
-    const ticket = await SupportTicket.findById(ticketId);
+    const ticket = await db.query.supportTickets.findFirst({
+      where: eq(supportTickets.id, parseInt(ticketId))
+    });
     if (!ticket) {
       return res.status(404).json({ error: 'Тикет не найден' });
     }
 
-    // Добавить сообщение
+    // Обновить тикет с новым сообщением
     const message = {
       senderId: userId,
       content: content.trim(),
       timestamp: new Date(),
       senderRole: 'admin'
     };
-    ticket.messages.push(message);
 
-    // Открыть тикет, если был закрыт
-    if (ticket.status === 'closed') {
-      ticket.status = 'open';
-    }
-
-    await ticket.save();
+    const updatedTicket = await db.update(supportTickets)
+      .set({
+        status: (ticket.status === 'closed' ? 'open' : ticket.status) as 'open' | 'closed',
+        messages: JSON.stringify([...(JSON.parse(typeof ticket.messages === 'string' ? ticket.messages : '[]') as any[]), message] as any[])
+      })
+      .where(eq(supportTickets.id, parseInt(ticketId)))
+      .returning();
 
     // (Опционально) Создать уведомление для автора тикета
     // await Notification.create({
@@ -46,7 +50,7 @@ router.post('/tickets/:ticketId/reply', verifyJWT, requireAdminOrSupervisor, asy
     //   text: `Вам ответили в тикете поддержки №${ticket._id}`
     // });
 
-    res.status(200).json(ticket);
+    res.status(200).json(updatedTicket[0]);
   } catch (err) {
     res.status(500).json({ error: 'Ошибка сервера' });
   }

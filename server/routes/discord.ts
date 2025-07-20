@@ -18,7 +18,7 @@ const webhookSchema = z.object({
   type: z.enum(['application', 'achievement', 'badge', 'notification']),
   userId: z.number(),
   username: z.string(),
-  data: z.record(z.any()),
+  data: z.record(z.unknown()),
 });
 
 // Discord OAuth2 авторизация
@@ -116,7 +116,7 @@ router.post('/webhook', async (req, res) => {
         embed.description = `Поздравляем ${username} с получением достижения!`;
         embed.fields = [
           { name: 'Достижение', value: data.name, inline: true },
-          { name: 'Очки', value: data.points.toString(), inline: true },
+          { name: 'Очки', value: String((data as any).points), inline: true },
         ];
         embed.color = 0xFFD700;
         break;

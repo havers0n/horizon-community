@@ -4,10 +4,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useQuery } from "@tanstack/react-query";
 import { Shield, Flame, Ambulance, Star, Building, Headphones, Users } from "lucide-react";
 
+interface Department {
+  id: number;
+  name: string;
+  fullName: string;
+  description: string;
+  logoUrl?: string;
+  gallery?: string[];
+}
+
 export default function Departments() {
   const { t } = useTranslation();
   
-  const { data: departments, isLoading } = useQuery({
+  const { data: departments, isLoading } = useQuery<Department[]>({
     queryKey: ['/api/departments']
   });
 
@@ -71,7 +80,7 @@ export default function Departments() {
 
         {/* Departments Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {departments?.map((department: any) => {
+          {departments?.map((department: Department) => {
             const style = getDepartmentStyle(department.name);
             return (
               <Card 

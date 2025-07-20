@@ -612,6 +612,7 @@ export const createCharacterSchema = z.object({
 export const updateCharacterSchema = createCharacterSchema.partial();
 
 export const createVehicleSchema = z.object({
+  ownerId: z.number().min(1, "Owner ID is required"),
   plate: z.string().min(1),
   model: z.string().min(1),
   color: z.string().min(1),
@@ -620,6 +621,7 @@ export const createVehicleSchema = z.object({
 });
 
 export const createWeaponSchema = z.object({
+  ownerId: z.number().min(1, "Owner ID is required"),
   serialNumber: z.string().min(1),
   model: z.string().min(1),
   registration: z.enum(["valid", "expired"]).default("valid"),
