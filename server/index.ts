@@ -5,9 +5,7 @@ import { registerRoutes } from "./routes";
 import { storage } from "./storage";
 import { BusinessLogic } from "./businessLogic";
 import { Scheduler } from "./scheduler";
-import { setupVite } from "./vite";
-import { serveStatic } from "./vite";
-import { log } from "./vite";
+import { log, serveStatic } from "./production";
 
 const app = express();
 
@@ -70,6 +68,7 @@ app.use((req, res, next) => {
   
   if (app.get("env") === "development") {
     console.log("🚀 Setting up Vite for development...");
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
     console.log("📦 Setting up static file serving for production...");
