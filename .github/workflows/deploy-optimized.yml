@@ -84,26 +84,26 @@ jobs:
             echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
             echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
             
-            # Создаем ecosystem файл для PM2
+            # Создаем ecosystem файл для PM2 в формате JSON
             echo "📝 Создаем ecosystem файл для PM2..."
-            cat > ecosystem.config.js << 'EOL'
-            module.exports = {
-              apps: [{
-                name: 'roleplayidentity',
-                script: 'dist/index.js',
-                env: {
-                  NODE_ENV: 'production',
-                  PORT: '${{ secrets.PORT }}',
-                  SUPABASE_URL: '${{ secrets.SUPABASE_URL }}',
-                  SUPABASE_ANON_KEY: '${{ secrets.SUPABASE_ANON_KEY }}',
-                  SUPABASE_SERVICE_ROLE_KEY: '${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}',
-                  DATABASE_URL: '${{ secrets.DATABASE_URL }}',
-                  JWT_SECRET: '${{ secrets.JWT_SECRET }}',
-                  VITE_SUPABASE_URL: '${{ secrets.VITE_SUPABASE_URL }}',
-                  VITE_SUPABASE_ANON_KEY: '${{ secrets.VITE_SUPABASE_ANON_KEY }}'
+            cat > ecosystem.config.json << 'EOL'
+            {
+              "apps": [{
+                "name": "roleplayidentity",
+                "script": "dist/index.js",
+                "env": {
+                  "NODE_ENV": "production",
+                  "PORT": "${{ secrets.PORT }}",
+                  "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
+                  "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}",
+                  "SUPABASE_SERVICE_ROLE_KEY": "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}",
+                  "DATABASE_URL": "${{ secrets.DATABASE_URL }}",
+                  "JWT_SECRET": "${{ secrets.JWT_SECRET }}",
+                  "VITE_SUPABASE_URL": "${{ secrets.VITE_SUPABASE_URL }}",
+                  "VITE_SUPABASE_ANON_KEY": "${{ secrets.VITE_SUPABASE_ANON_KEY }}"
                 }
               }]
-            };
+            }
             EOL
             
             # Безопасный рестарт приложения
@@ -113,7 +113,7 @@ jobs:
             fi
             
             echo "🚀 Запускаем приложение с ecosystem файлом..."
-            pm2 start ecosystem.config.js
+            pm2 start ecosystem.config.json
             
             # Сохраняем конфигурацию PM2
             pm2 save
