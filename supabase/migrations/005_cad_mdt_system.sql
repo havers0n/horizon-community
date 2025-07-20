@@ -227,12 +227,12 @@ DECLARE
 BEGIN
     -- Определяем префикс на основе департамента
     CASE department_name
-        WHEN 'LSPD' THEN prefix := 'ADAM'
-        WHEN 'BCSO' THEN prefix := 'LINCOLN'
+        WHEN 'PD' THEN prefix := 'ADAM'
         WHEN 'SAHP' THEN prefix := 'MARY'
-        WHEN 'LSSD' THEN prefix := 'DAVID'
-        WHEN 'EMS' THEN prefix := 'ECHO'
-        WHEN 'FD' THEN prefix := 'FOXTROT'
+        WHEN 'SAMS' THEN prefix := 'ECHO'
+        WHEN 'SAFR' THEN prefix := 'FOXTROT'
+        WHEN 'DD' THEN prefix := 'DAVID'
+        WHEN 'CD' THEN prefix := 'CIVIL'
         ELSE prefix := 'UNKNOWN'
     END CASE;
     

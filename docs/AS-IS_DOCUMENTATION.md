@@ -179,8 +179,8 @@ CAD System - это веб-приложение для управления де
 ### 3.2 Предустановленные данные
 
 **Департаменты:**
-- LSPD (Los Santos Police Department)
-- LSFD (Los Santos Fire Department)  
+- LSPD (Horizon Police Department)
+- LSFD (Horizon Fire Department)  
 - EMS (Emergency Medical Services)
 - BCSO (Blaine County Sheriff's Office)
 

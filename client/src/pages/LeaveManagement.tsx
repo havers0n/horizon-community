@@ -9,6 +9,7 @@ import { Calendar, CalendarIcon, Clock, CheckCircle, XCircle, Plane, CalendarDay
 import { format, differenceInDays, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval } from "date-fns";
 import { ru } from "date-fns/locale";
 import { LeaveModal } from "@/components/LeaveModal";
+import { Layout } from "@/components/Layout";
 
 interface LeaveApplication {
   id: number;
@@ -144,13 +145,14 @@ function LeaveManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Управление отпусками</h1>
-        <p className="text-muted-foreground">
-          Планируйте и отслеживайте ваши отпуска и время отдыха.
-        </p>
-      </div>
+    <Layout>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Управление отпусками</h1>
+          <p className="text-muted-foreground">
+            Планируйте и отслеживайте ваши отпуска и время отдыха.
+          </p>
+        </div>
 
       <Tabs defaultValue="calendar" className="space-y-6">
         <TabsList>
@@ -484,7 +486,7 @@ function LeaveManagement() {
                 <div className="space-y-2">
                   <div className="font-medium text-yellow-800">Политика отпусков:</div>
                   <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Подавайте заявки на отпуск минимум за 2 недели</li>
+                    <li>• Подавайте заявки на отпуск минимум за 5 дней</li>
                     <li>• Экстренные и больничные отпуска можно подавать задним числом</li>
                     <li>• Максимум 2 заявки на отпуск в месяц</li>
                     <li>• Требуется одобрение супервайзера</li>
@@ -496,7 +498,8 @@ function LeaveManagement() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </Layout>
   );
 }
 

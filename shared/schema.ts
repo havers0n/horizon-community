@@ -17,6 +17,11 @@ export const users = pgTable("users", {
   gameWarnings: integer("game_warnings").notNull().default(0),
   adminWarnings: integer("admin_warnings").notNull().default(0),
   cadToken: text("cad_token").unique(), // Токен для авторизации из игры
+  // Discord интеграция
+  discordId: text("discord_id").unique(),
+  discordUsername: text("discord_username"),
+  discordAccessToken: text("discord_access_token"),
+  discordRefreshToken: text("discord_refresh_token"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   authId: text("auth_id").unique(), // UUID reference to auth.users(id)
 });
@@ -30,7 +35,47 @@ export const departments = pgTable("departments", {
   gallery: text("gallery").array().default([]),
 });
 
-// CAD/MDT таблицы
+// ===== НОВАЯ СИСТЕМА ПЕРСОНАЖЕЙ =====
+
+// Звания и должности
+export const ranks = pgTable("ranks", {
+  id: serial("id").primaryKey(),
+  departmentId: integer("department_id").notNull().references(() => departments.id),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // rank - звание, position - должность
+  orderIndex: integer("order_index").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Подразделения
+export const divisions = pgTable("divisions", {
+  id: serial("id").primaryKey(),
+  departmentId: integer("department_id").notNull().references(() => departments.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Квалификации
+export const qualifications = pgTable("qualifications", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  departmentId: integer("department_id").references(() => departments.id),
+  divisionId: integer("division_id").references(() => divisions.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Юниты
+export const units = pgTable("units", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  departmentId: integer("department_id").notNull().references(() => departments.id),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Обновленная таблица персонажей
 export const characters = pgTable("characters", {
   id: serial("id").primaryKey(),
   ownerId: integer("owner_id").notNull().references(() => users.id),
@@ -40,13 +85,49 @@ export const characters = pgTable("characters", {
   dob: date("dob").notNull(),
   address: text("address").notNull(),
   insuranceNumber: text("insurance_number").notNull().unique(),
-  licenses: jsonb("licenses").notNull().default({}), // { driver: 'valid', weapon: 'expired', ... }
-  medicalInfo: jsonb("medical_info").notNull().default({}), // { bloodType, allergies, history, ... }
+  licenses: jsonb("licenses").notNull().default({}),
+  medicalInfo: jsonb("medical_info").notNull().default({}),
   mugshotUrl: text("mugshot_url"),
   isUnit: boolean("is_unit").notNull().default(false),
-  unitInfo: jsonb("unit_info"), // { badgeNumber, callsign, rank, division, departmentId, qualifications }
+  unitInfo: jsonb("unit_info"),
+  // Новые поля для карьеры
+  departmentId: integer("department_id").references(() => departments.id),
+  rankId: integer("rank_id").references(() => ranks.id),
+  divisionId: integer("division_id").references(() => divisions.id),
+  unitId: integer("unit_id").references(() => units.id),
+  badgeNumber: text("badge_number"),
+  employeeId: text("employee_id"),
+  hireDate: date("hire_date"),
+  terminationDate: date("termination_date"),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Связь персонажей с квалификациями
+export const characterQualifications = pgTable("character_qualifications", {
+  id: serial("id").primaryKey(),
+  characterId: integer("character_id").notNull().references(() => characters.id),
+  qualificationId: integer("qualification_id").notNull().references(() => qualifications.id),
+  obtainedDate: date("obtained_date").notNull(),
+  expiresDate: date("expires_date"),
+  issuedBy: integer("issued_by").references(() => characters.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// История карьеры персонажа
+export const characterCareerHistory = pgTable("character_career_history", {
+  id: serial("id").primaryKey(),
+  characterId: integer("character_id").notNull().references(() => characters.id),
+  departmentId: integer("department_id").notNull().references(() => departments.id),
+  rankId: integer("rank_id").references(() => ranks.id),
+  divisionId: integer("division_id").references(() => divisions.id),
+  unitId: integer("unit_id").references(() => units.id),
+  actionType: text("action_type").notNull(), // hire, promotion, transfer, demotion, termination
+  effectiveDate: date("effective_date").notNull(),
+  reason: text("reason"),
+  approvedBy: integer("approved_by").references(() => characters.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const vehicles = pgTable("vehicles", {
@@ -171,6 +252,45 @@ export const reports = pgTable("reports", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Новая таблица для шаблонов рапортов
+export const reportTemplates = pgTable("report_templates", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  departmentId: integer("department_id").references(() => departments.id),
+  createdBy: integer("created_by").notNull().references(() => users.id),
+  isActive: boolean("is_active").notNull().default(true),
+  status: text("status").notNull().default("draft"), // draft, ready - черновик для админов, готовый для пользователей
+  // Новые поля для расширенной информации
+  category: text("category").notNull().default("general"), // general, police, fire, ems, admin
+  subcategory: text("subcategory"), // incident, arrest, traffic, etc.
+  purpose: text("purpose"), // Назначение формы
+  whoFills: text("who_fills"), // Кто заполняет
+  whenUsed: text("when_used"), // Когда используется
+  templateExample: text("template_example"), // Ссылка на пример шаблона
+  filledExample: text("filled_example"), // Ссылка на заполненный пример
+  difficulty: text("difficulty").default("medium"), // easy, medium, hard
+  estimatedTime: integer("estimated_time"), // Время заполнения в минутах
+  requiredFields: text("required_fields").array().default([]), // Обязательные поля
+  tags: text("tags").array().default([]), // Теги для поиска
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Новая таблица для заполненных рапортов
+export const filledReports = pgTable("filled_reports", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").notNull().references(() => reportTemplates.id),
+  authorId: integer("author_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  content: text("content").notNull(), // Заполненный рапорт
+  status: text("status").notNull().default("draft"), // draft, submitted, approved, rejected
+  supervisorComment: text("supervisor_comment"),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   recipientId: integer("recipient_id").notNull(),
@@ -233,6 +353,67 @@ export const testResults = pgTable("test_results", {
   answers: jsonb("answers").notNull(),
   results: jsonb("results").notNull(), // детальные результаты по каждому вопросу
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  category: text("category").notNull(), // activity, skill, social, special
+  points: integer("points").notNull().default(0),
+  requirements: jsonb("requirements").notNull(), // { type: "applications_submitted", count: 10 }
+  isHidden: boolean("is_hidden").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id),
+  unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
+  progress: integer("progress").notNull().default(0), // Текущий прогресс
+  isCompleted: boolean("is_completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const badges = pgTable("badges", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  rarity: text("rarity").notNull(), // common, rare, epic, legendary
+  category: text("category").notNull(), // department, event, special
+  requirements: jsonb("requirements").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userBadges = pgTable("user_badges", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  badgeId: integer("badge_id").notNull().references(() => badges.id),
+  awardedAt: timestamp("awarded_at").defaultNow().notNull(),
+  awardedBy: integer("awarded_by").references(() => users.id),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id).unique(),
+  applicationsSubmitted: integer("applications_submitted").notNull().default(0),
+  applicationsApproved: integer("applications_approved").notNull().default(0),
+  reportsSubmitted: integer("reports_submitted").notNull().default(0),
+  reportsApproved: integer("reports_approved").notNull().default(0),
+  complaintsSubmitted: integer("complaints_submitted").notNull().default(0),
+  daysActive: integer("days_active").notNull().default(0),
+  totalPoints: integer("total_points").notNull().default(0),
+  level: integer("level").notNull().default(1),
+  experience: integer("experience").notNull().default(0),
+  lastActivity: timestamp("last_activity").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Insert schemas
@@ -308,6 +489,18 @@ export const insertReportSchema = createInsertSchema(reports).omit({
   createdAt: true,
 });
 
+export const insertReportTemplateSchema = createInsertSchema(reportTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFilledReportSchema = createInsertSchema(filledReports).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,
   createdAt: true,
@@ -329,6 +522,63 @@ export const insertJointPositionHistorySchema = createInsertSchema(jointPosition
 });
 
 export const insertTestResultSchema = createInsertSchema(testResults).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBadgeSchema = createInsertSchema(badges).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserBadgeSchema = createInsertSchema(userBadges).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserStatsSchema = createInsertSchema(userStats).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Новые схемы для системы персонажей
+export const insertRankSchema = createInsertSchema(ranks).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDivisionSchema = createInsertSchema(divisions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertQualificationSchema = createInsertSchema(qualifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUnitSchema = createInsertSchema(units).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCharacterQualificationSchema = createInsertSchema(characterQualifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCharacterCareerHistorySchema = createInsertSchema(characterCareerHistory).omit({
   id: true,
   createdAt: true,
 });
@@ -408,7 +658,7 @@ export const entryApplicationSchema = z.object({
   motivation: z.string().min(20, "Мотивация должна содержать минимум 20 символов"),
   hasMicrophone: z.boolean(),
   meetsSystemRequirements: z.boolean(),
-  systemRequirementsLink: z.string().url("Укажите корректную ссылку на системные требования"),
+  systemRequirementsLink: z.string().url("Укажите корректную ссылку на системные требования").optional(),
   sourceOfInformation: z.string().min(1, "Укажите откуда узнали о сообществе"),
   inOtherCommunities: z.boolean(),
   wasInOtherCommunities: z.boolean(),
@@ -420,6 +670,21 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Department = typeof departments.$inferSelect;
 export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
+
+// Новые типы для системы персонажей
+export type Rank = typeof ranks.$inferSelect;
+export type InsertRank = z.infer<typeof insertRankSchema>;
+export type Division = typeof divisions.$inferSelect;
+export type InsertDivision = z.infer<typeof insertDivisionSchema>;
+export type Qualification = typeof qualifications.$inferSelect;
+export type InsertQualification = z.infer<typeof insertQualificationSchema>;
+export type Unit = typeof units.$inferSelect;
+export type InsertUnit = z.infer<typeof insertUnitSchema>;
+export type CharacterQualification = typeof characterQualifications.$inferSelect;
+export type InsertCharacterQualification = z.infer<typeof insertCharacterQualificationSchema>;
+export type CharacterCareerHistory = typeof characterCareerHistory.$inferSelect;
+export type InsertCharacterCareerHistory = z.infer<typeof insertCharacterCareerHistorySchema>;
+
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
 export type Vehicle = typeof vehicles.$inferSelect;
@@ -444,6 +709,10 @@ export type Complaint = typeof complaints.$inferSelect;
 export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;
+export type ReportTemplate = typeof reportTemplates.$inferSelect;
+export type InsertReportTemplate = z.infer<typeof insertReportTemplateSchema>;
+export type FilledReport = typeof filledReports.$inferSelect;
+export type InsertFilledReport = z.infer<typeof insertFilledReportSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Test = typeof tests.$inferSelect;
@@ -454,6 +723,16 @@ export type JointPositionHistory = typeof jointPositionsHistory.$inferSelect;
 export type InsertJointPositionHistory = z.infer<typeof insertJointPositionHistorySchema>;
 export type TestResult = typeof testResults.$inferSelect;
 export type InsertTestResult = z.infer<typeof insertTestResultSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type Badge = typeof badges.$inferSelect;
+export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+export type UserBadge = typeof userBadges.$inferSelect;
+export type InsertUserBadge = z.infer<typeof insertUserBadgeSchema>;
+export type UserStats = typeof userStats.$inferSelect;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
 
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;

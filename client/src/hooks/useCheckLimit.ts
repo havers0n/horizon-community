@@ -36,43 +36,52 @@ export function useCheckLimit(type: string): CheckLimitResult {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const res = await fetch(`/api/application-limits/${encodeURIComponent(type)}`, {
-        credentials: "include",
-        headers
-      });
-      
-      console.log(`🔍 Статус ответа:`, res.status);
-      
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        console.log(`❌ Ошибка API:`, json);
-        throw new Error(json.message || res.statusText);
+      try {
+        const res = await fetch(`/api/application-limits/${encodeURIComponent(type)}`, {
+          credentials: "include",
+          headers
+        });
+        
+        console.log(`🔍 Статус ответа:`, res.status);
+        
+        if (!res.ok) {
+          const json = await res.json().catch(() => ({}));
+          console.log(`❌ Ошибка API:`, json);
+          throw new Error(json.message || res.statusText);
+        }
+        
+        const result = await res.json();
+        console.log(`📊 Результат проверки лимитов:`, result);
+        return result;
+      } catch (error) {
+        console.log(`❌ Ошибка запроса:`, error);
+        // Если есть ошибка, разрешаем подачу заявки
+        return { restriction: { allowed: true, reason: null } };
       }
-      
-      const result = await res.json();
-      console.log(`📊 Результат проверки лимитов:`, result);
-      return result;
     },
     enabled: !!type && !!user,
-    staleTime: 1000, // Данные считаются свежими 1 секунду
-    gcTime: 5000, // Кэш хранится 5 секунд
+    staleTime: 30000, // Данные считаются свежими 30 секунд
+    gcTime: 60000, // Кэш хранится 1 минуту
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchInterval: 5000 // Обновляем каждые 5 секунд
+    refetchOnWindowFocus: false,
+    retry: 1 // Пробуем только 1 раз
   });
 
   let isLimitReached = false;
   let reason: string | undefined = undefined;
 
   if (isError) {
-    isLimitReached = true;
-    reason = (error as Error).message;
-    console.log(`❌ Ошибка проверки лимитов:`, reason);
+    // При ошибке разрешаем подачу заявки
+    isLimitReached = false;
+    reason = undefined;
+    console.log(`❌ Ошибка проверки лимитов, разрешаем подачу заявки:`, (error as Error).message);
   } else if (data && data.restriction && data.restriction.allowed === false) {
     isLimitReached = true;
     reason = data.restriction.reason;
     console.log(`🚫 Лимит исчерпан:`, reason);
   } else {
+    isLimitReached = false;
+    reason = undefined;
     console.log(`✅ Лимит доступен:`, data?.restriction);
   }
 

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import LanguageDropdown from "@/components/ui/LanguageDropdown";
 import { NotificationsModal } from "@/components/NotificationsModal";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -99,15 +100,15 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Navigation Header */}
-      <nav className="bg-white shadow-md border-b border-gray-200 fixed w-full top-0 z-50">
+      <nav className="bg-card shadow-lg border-b border-border fixed w-full top-0 z-50 transition-colors duration-300">
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <Shield className="text-primary text-2xl mr-3" />
-                <span className="text-xl font-bold text-gray-900">Los Santos RP</span>
+                <span className="text-xl font-bold text-foreground">Horizon Community</span>
               </div>
               
               {/* Desktop Navigation */}
@@ -118,10 +119,10 @@ export function Layout({ children }: LayoutProps) {
                     <Link
                       key={item.path}
                       href={item.path}
-                      className={`py-4 px-1 text-sm font-medium transition-colors ${
+                      className={`py-4 px-1 text-sm font-medium transition-colors duration-200 ${
                         isActive 
                           ? 'text-primary border-b-2 border-primary' 
-                          : 'text-gray-500 hover:text-gray-700'
+                          : 'text-muted-foreground hover:text-primary'
                       }`}
                     >
                       {item.label}
@@ -138,7 +139,7 @@ export function Layout({ children }: LayoutProps) {
                   variant="ghost" 
                   size="sm" 
                   onClick={handleDiscordClick}
-                  className="text-[#5865F2] hover:bg-[#5865F2] hover:text-white"
+                  className="text-[#5865F2] hover:bg-[#5865F2] hover:text-white transition-colors duration-200"
                 >
                   <MessageCircle className="h-4 w-4" />
                 </Button>
@@ -146,11 +147,14 @@ export function Layout({ children }: LayoutProps) {
                   variant="ghost" 
                   size="sm" 
                   onClick={handleVKClick}
-                  className="text-[#4C75A3] hover:bg-[#4C75A3] hover:text-white"
+                  className="text-[#4C75A3] hover:bg-[#4C75A3] hover:text-white transition-colors duration-200"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </div>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               {/* Notifications */}
               <NotificationsModal />
@@ -161,19 +165,19 @@ export function Layout({ children }: LayoutProps) {
               {/* User Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                  <Button variant="ghost" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-accent transition-colors duration-200">
                     <Avatar className="w-8 h-8">
-                      <AvatarFallback className="bg-primary text-white text-sm font-medium">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
                         {user ? getUserInitials(user.email || '') : 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:block text-left">
-                      <div className="text-sm font-medium text-gray-900">{getUserDisplayName()}</div>
-                      <div className="text-xs text-gray-500 capitalize">
+                      <div className="text-sm font-medium text-foreground">{getUserDisplayName()}</div>
+                      <div className="text-xs text-muted-foreground capitalize">
                         {getUserRoleDisplay()}
                       </div>
                     </div>
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">

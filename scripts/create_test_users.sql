@@ -3,9 +3,9 @@
 
 -- Создаем департаменты для тестирования
 INSERT INTO departments (name, full_name, description) VALUES
-('LSPD', 'Los Santos Police Department', 'Полицейский департамент Лос-Сантоса'),
-('LSFD', 'Los Santos Fire Department', 'Пожарный департамент Лос-Сантоса'),
-('LSMC', 'Los Santos Medical Center', 'Медицинский центр Лос-Сантоса')
+('LSPD', 'Horizon Police Department', 'Полицейский департамент Horizon'),
+('LSFD', 'Horizon Fire Department', 'Пожарный департамент Horizon'),
+('LSMC', 'Horizon Medical Center', 'Медицинский центр Horizon')
 ON CONFLICT DO NOTHING;
 
 -- Создание тестовых пользователей

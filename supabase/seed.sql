@@ -2,10 +2,12 @@
 
 -- Insert test departments
 INSERT INTO departments (name, full_name, description, logo_url, gallery) VALUES
-('LSPD', 'Los Santos Police Department', 'Полицейский департамент Лос-Сантоса', 'https://example.com/lspd_logo.png', '{}'),
-('LSFD', 'Los Santos Fire Department', 'Пожарный департамент Лос-Сантоса', 'https://example.com/lsfd_logo.png', '{}'),
-('LSMD', 'Los Santos Medical Department', 'Медицинский департамент Лос-Сантоса', 'https://example.com/lsmd_logo.png', '{}'),
-('GOV', 'Government', 'Правительство Лос-Сантоса', 'https://example.com/gov_logo.png', '{}');
+('PD', 'Police Department', 'Полицейский департамент', 'https://example.com/pd_logo.png', '{}'),
+('SAHP', 'San Andreas Highway Patrol', 'Патрульная служба шоссе Сан-Андреас', 'https://example.com/sahp_logo.png', '{}'),
+('SAMS', 'San Andreas Medical Services', 'Медицинская служба Сан-Андреас', 'https://example.com/sams_logo.png', '{}'),
+('SAFR', 'San Andreas Fire & Rescue', 'Пожарная служба и спасение Сан-Андреас', 'https://example.com/safr_logo.png', '{}'),
+('DD', 'Dispatch Department', 'Департамент диспетчеризации', 'https://example.com/dd_logo.png', '{}'),
+('CD', 'Civilian Department', 'Гражданский департамент', 'https://example.com/cd_logo.png', '{}');
 
 -- Insert test users
 INSERT INTO users (username, email, password_hash, role, status, department_id, rank, division, qualifications, game_warnings, admin_warnings) VALUES

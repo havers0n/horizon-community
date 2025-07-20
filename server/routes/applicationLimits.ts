@@ -17,4 +17,19 @@ router.get("/check-limit", async (req: any, res) => {
   res.json(result);
 });
 
+// Проверка лимита заявок/отпусков для текущего пользователя (новый endpoint)
+router.get("/:type", async (req: any, res) => {
+  if (!req.user) return res.status(401).json({ restriction: { allowed: false, reason: "Unauthorized" } });
+  const { type } = req.params;
+  if (!type) return res.status(400).json({ restriction: { allowed: false, reason: "Type required" } });
+  
+  try {
+    const result = await logic.canSubmitApplication(req.user.id, String(type));
+    res.json({ restriction: result });
+  } catch (error) {
+    console.error('Error checking application limit:', error);
+    res.status(500).json({ restriction: { allowed: false, reason: "Internal server error" } });
+  }
+});
+
 export default router;

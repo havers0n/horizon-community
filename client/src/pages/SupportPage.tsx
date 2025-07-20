@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
 // import SupportModal from '../components/SupportModal'; // Раскомментируйте, если SupportModal уже реализован
 
 interface Ticket {
@@ -20,12 +21,13 @@ export default function SupportPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Мои тикеты</h1>
-        {/* <SupportModal /> */}
-        <button className="px-4 py-2 bg-blue-600 text-white rounded">Создать тикет</button>
-      </div>
+    <Layout>
+      <div className="max-w-2xl mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Мои тикеты</h1>
+          {/* <SupportModal /> */}
+          <button className="px-4 py-2 bg-blue-600 text-white rounded">Создать тикет</button>
+        </div>
       {isLoading && <div>Загрузка...</div>}
       {isError && <div className="text-red-600">Ошибка загрузки тикетов</div>}
       {data && data.length === 0 && <div className="text-gray-500">У вас нет тикетов</div>}
@@ -44,6 +46,7 @@ export default function SupportPage() {
           ))}
         </ul>
       )}
-    </div>
+      </div>
+    </Layout>
   );
 }

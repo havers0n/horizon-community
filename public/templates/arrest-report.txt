@@ -1,0 +1,65 @@
+LSPD ARREST REPORT TEMPLATE
+============================
+
+Report Number: _______________
+Date: _______________
+Time: _______________
+Location: _______________
+
+ARRESTING OFFICER:
+Name: _______________
+Badge Number: _______________
+Department: LSPD
+Rank: _______________
+
+SUSPECT INFORMATION:
+Name: _______________
+Date of Birth: _______________
+Address: _______________
+Phone: _______________
+ID Number: _______________
+
+CHARGES:
+Primary Charge: _______________
+Secondary Charges: _______________
+Bail Amount: _______________
+
+ARREST CIRCUMSTANCES:
+Reason for Stop: _______________
+Probable Cause: _______________
+Evidence Found: _______________
+
+USE OF FORCE:
+Force Used: _______________
+Reason for Force: _______________
+Injuries to Suspect: _______________
+Injuries to Officer: _______________
+
+PROPERTY SEIZED:
+- Weapons: _______________
+- Drugs: _______________
+- Money: _______________
+- Other Items: _______________
+
+TRANSPORTATION:
+Transporting Officer: _______________
+Destination: _______________
+Time of Arrival: _______________
+
+BOOKING INFORMATION:
+Booking Number: _______________
+Cell Assignment: _______________
+Medical Screening: _______________
+
+WITNESS STATEMENTS:
+Witness 1: _______________
+Witness 2: _______________
+Witness 3: _______________
+
+SUPERVISOR REVIEW:
+Reviewed By: _______________
+Date: _______________
+Comments: _______________
+
+============================
+END OF REPORT 

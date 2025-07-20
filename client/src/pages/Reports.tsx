@@ -10,477 +10,505 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Upload, FileText, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
+import { Download, Upload, FileText, Clock, CheckCircle, XCircle, Eye, Plus, Settings, ArrowLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Report } from "@shared/schema";
+import { Report, ReportTemplate, FilledReport, Department } from "@shared/schema";
+import { Layout } from "@/components/Layout";
+import { useAuth } from "@/contexts/AuthContext";
+import TemplateEditor from "@/components/TemplateEditor";
+import ReportFiller from "@/components/ReportFiller";
+import InteractivePDFForm from "@/components/InteractivePDFForm";
+import TemplateManager from "@/components/TemplateManager";
+import TemplateBrowser from "@/components/TemplateBrowser";
 
-interface ReportTemplate {
-  id: string;
-  name: string;
-  description: string;
-  fileUrl: string;
-  department: string;
-}
-
-// Mock templates - would come from API
-const mockTemplates: ReportTemplate[] = [
-  {
-    id: "incident-report",
-    name: "Incident Report",
-    description: "Standard incident documentation form",
-    fileUrl: "/templates/incident-report.pdf",
-    department: "LSPD"
-  },
-  {
-    id: "arrest-report",
-    name: "Arrest Report",
-    description: "Detailed arrest documentation",
-    fileUrl: "/templates/arrest-report.pdf", 
-    department: "LSPD"
-  },
-  {
-    id: "vehicle-report",
-    name: "Vehicle Inspection Report",
-    description: "Vehicle condition and inspection details",
-    fileUrl: "/templates/vehicle-report.pdf",
-    department: "LSPD"
-  },
-  {
-    id: "fire-report",
-    name: "Fire Incident Report",
-    description: "Fire department incident documentation",
-    fileUrl: "/templates/fire-report.pdf",
-    department: "LSFD"
-  },
-  {
-    id: "medical-report",
-    name: "Medical Response Report",
-    description: "EMS response and treatment documentation",
-    fileUrl: "/templates/medical-report.pdf",
-    department: "EMS"
-  }
-];
+type ViewMode = 'browse' | 'fill' | 'manage' | 'edit' | 'my-reports' | 'interactive';
 
 function Reports() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { user } = useAuth();
+  const [viewMode, setViewMode] = useState<ViewMode>('browse');
+  const [selectedTemplate, setSelectedTemplate] = useState<ReportTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<ReportTemplate | null>(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [selectedReport, setSelectedReport] = useState<FilledReport | null>(null);
 
-  // Fetch user's reports
-  const { data: reports = [], isLoading } = useQuery<Report[]>({
-    queryKey: ['/api/reports'],
-    enabled: false // Will be enabled when real API is ready
-  });
+  // Проверяем права администратора
+  const isAdmin = user?.role === 'admin' || user?.role === 'supervisor';
 
-  // Fetch available templates
-  const { data: templates = mockTemplates } = useQuery<ReportTemplate[]>({
+  // Загружаем шаблоны рапортов
+  const { data: templates = [], isLoading: templatesLoading } = useQuery<ReportTemplate[]>({
     queryKey: ['/api/report-templates'],
-    enabled: false // Will be enabled when real API is ready
+    enabled: true
   });
 
-  // Mock reports data for demonstration
-  const mockReports: Report[] = [
-    {
-      id: 1,
-      authorId: 1,
-      fileUrl: "/uploads/reports/incident-001.pdf",
-      status: "pending",
-      supervisorComment: null,
-      createdAt: new Date('2025-01-01T10:00:00')
-    },
-    {
-      id: 2,
-      authorId: 1,
-      fileUrl: "/uploads/reports/arrest-002.pdf", 
-      status: "approved",
-      supervisorComment: "Well documented incident. Good work.",
-      createdAt: new Date('2024-12-28T14:30:00')
-    },
-    {
-      id: 3,
-      authorId: 1,
-      fileUrl: "/uploads/reports/vehicle-003.pdf",
-      status: "rejected",
-      supervisorComment: "Missing vehicle identification details. Please resubmit with complete information.",
-      createdAt: new Date('2024-12-25T09:15:00')
-    }
-  ];
+  // Загружаем департаменты
+  const { data: departments = [] } = useQuery<Department[]>({
+    queryKey: ['/api/departments'],
+    enabled: true
+  });
 
-  const displayReports = reports.length > 0 ? reports : mockReports;
+  // Загружаем заполненные рапорты пользователя
+  const { data: filledReports = [], isLoading: reportsLoading } = useQuery<FilledReport[]>({
+    queryKey: ['/api/filled-reports'],
+    enabled: true
+  });
 
-  // Submit report mutation
-  const submitReportMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      // This would upload file and create report: POST /api/reports
-      const response = await apiRequest('POST', '/api/reports', data);
+  // Мутация для создания шаблона
+  const createTemplateMutation = useMutation({
+    mutationFn: async (templateData: Partial<ReportTemplate>) => {
+      const response = await apiRequest('POST', '/api/report-templates', templateData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/reports'] });
-      setIsSubmitModalOpen(false);
-      setSelectedFile(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/report-templates'] });
+      setViewMode('manage');
       toast({
-        title: "Report Submitted",
-        description: "Your report has been submitted for review."
+        title: "Шаблон создан",
+        description: "Новый шаблон рапорта успешно создан"
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to submit report. Please try again.",
+        title: "Ошибка",
+        description: "Не удалось создать шаблон",
         variant: "destructive"
       });
     }
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type and size
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      const maxSize = 10 * 1024 * 1024; // 10MB
-
-      if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "Invalid File Type",
-          description: "Please upload a PDF or Word document.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (file.size > maxSize) {
-        toast({
-          title: "File Too Large",
-          description: "File size must be less than 10MB.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setSelectedFile(file);
-    }
-  };
-
-  const handleSubmitReport = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    
-    if (!selectedFile) {
+  // Мутация для обновления шаблона
+  const updateTemplateMutation = useMutation({
+    mutationFn: async (templateData: Partial<ReportTemplate>) => {
+      const response = await apiRequest('PUT', `/api/report-templates/${editingTemplate?.id}`, templateData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/report-templates'] });
+      setViewMode('manage');
+      setEditingTemplate(null);
       toast({
-        title: "No File Selected",
-        description: "Please select a file to upload.",
+        title: "Шаблон обновлен",
+        description: "Шаблон рапорта успешно обновлен"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить шаблон",
         variant: "destructive"
       });
-      return;
     }
+  });
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('type', 'incident'); // Would get from form
-    
-    // Mock submission for demonstration
-    toast({
-      title: "Report Submitted",
-      description: "Your report has been submitted for review."
-    });
-    setIsSubmitModalOpen(false);
-    setSelectedFile(null);
-    
-    // In real implementation: submitReportMutation.mutate(formData);
+  // Мутация для удаления шаблона
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (templateId: number) => {
+      await apiRequest('DELETE', `/api/report-templates/${templateId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/report-templates'] });
+      toast({
+        title: "Шаблон удален",
+        description: "Шаблон рапорта успешно удален"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить шаблон",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Мутация для отправки заполненного рапорта
+  const submitFilledReportMutation = useMutation({
+    mutationFn: async (reportData: {
+      templateId: number;
+      title: string;
+      content: string;
+    }) => {
+      const response = await apiRequest('POST', '/api/filled-reports', reportData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/filled-reports'] });
+      setViewMode('my-reports');
+      toast({
+        title: "Рапорт отправлен",
+        description: "Ваш рапорт успешно отправлен на рассмотрение"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось отправить рапорт",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleCreateTemplate = () => {
+    setEditingTemplate(null);
+    setViewMode('edit');
   };
 
-  const handleDownloadTemplate = (template: ReportTemplate) => {
-    // In real implementation, this would download the actual file
-    toast({
-      title: "Download Started",
-      description: `Downloading ${template.name} template...`
-    });
-    
-    // Mock download
-    const link = document.createElement('a');
-    link.href = template.fileUrl;
-    link.download = `${template.name}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleEditTemplate = (template: ReportTemplate) => {
+    setEditingTemplate(template);
+    setViewMode('edit');
+  };
+
+  const handleDeleteTemplate = (templateId: number) => {
+    deleteTemplateMutation.mutate(templateId);
+  };
+
+  const handleSaveTemplate = (templateData: Partial<ReportTemplate>) => {
+    if (editingTemplate) {
+      updateTemplateMutation.mutate(templateData);
+    } else {
+      createTemplateMutation.mutate(templateData);
+    }
+  };
+
+  const handleSelectTemplate = (template: ReportTemplate) => {
+    setSelectedTemplate(template);
+    setViewMode('fill');
+  };
+
+  const handleSubmitFilledReport = async (reportData: {
+    templateId: number;
+    title: string;
+    content: string;
+  }) => {
+    await submitFilledReportMutation.mutateAsync(reportData);
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3" /> Pending</Badge>;
+      case 'draft':
+        return <Badge variant="outline" className="gap-1"><FileText className="h-3 w-3" /> Черновик</Badge>;
+      case 'submitted':
+        return <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3" /> Отправлен</Badge>;
       case 'approved':
-        return <Badge variant="default" className="gap-1 bg-green-600"><CheckCircle className="h-3 w-3" /> Approved</Badge>;
+        return <Badge variant="default" className="gap-1 bg-green-600"><CheckCircle className="h-3 w-3" /> Одобрен</Badge>;
       case 'rejected':
-        return <Badge variant="destructive" className="gap-1"><XCircle className="h-3 w-3" /> Rejected</Badge>;
+        return <Badge variant="destructive" className="gap-1"><XCircle className="h-3 w-3" /> Отклонен</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center min-h-96">{t('reports.loading', 'Loading reports...')}</div>;
-  }
-
-  return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">{t('reports.title', 'Reports')}</h1>
-        <p className="text-muted-foreground">
-          {t('reports.subtitle', 'Submit and manage your incident reports, documentation, and official forms.')}
-        </p>
-      </div>
-
-      <Tabs defaultValue="my-reports" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="my-reports">{t('reports.my_reports', 'My Reports')}</TabsTrigger>
-          <TabsTrigger value="templates">{t('reports.templates', 'Templates')}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="my-reports" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">{t('reports.submitted_reports', 'Submitted Reports')}</h2>
-            <Dialog open={isSubmitModalOpen} onOpenChange={setIsSubmitModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Submit Report
+  const renderView = () => {
+    switch (viewMode) {
+      case 'browse':
+        return (
+          <TemplateBrowser
+            templates={templates}
+            departments={departments}
+            onSelectTemplate={handleSelectTemplate}
+            userDepartmentId={(user as any)?.departmentId}
+          />
+        );
+      
+      case 'fill':
+        if (!selectedTemplate) {
+          setViewMode('browse');
+          return null;
+        }
+        // Используем новый интерактивный компонент для пользователей
+        // Админы могут использовать старый компонент для тестирования
+        if (isAdmin) {
+          return (
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setViewMode('browse')}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Назад к шаблонам
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>{t('reports.submit_new', 'Submit New Report')}</DialogTitle>
-                  <DialogDescription>
-                    {t('reports.upload_for_review', 'Upload your completed report for supervisor review.')}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmitReport} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="report-type">{t('reports.report_type', 'Report Type')}</Label>
-                    <Select defaultValue="incident">
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('reports.select_type', 'Select report type')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="incident">{t('reports.incident_report', 'Incident Report')}</SelectItem>
-                        <SelectItem value="arrest">{t('reports.arrest_report', 'Arrest Report')}</SelectItem>
-                        <SelectItem value="vehicle">{t('reports.vehicle_report', 'Vehicle Report')}</SelectItem>
-                        <SelectItem value="other">{t('reports.other', 'Other')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    // Переключаемся на интерактивную форму
+                    setViewMode('interactive');
+                  }}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Интерактивная форма
+                </Button>
+              </div>
+              <ReportFiller
+                template={selectedTemplate}
+                onBack={() => setViewMode('browse')}
+                onSubmit={handleSubmitFilledReport}
+              />
+            </div>
+          );
+        }
+        return (
+          <InteractivePDFForm
+            template={selectedTemplate}
+            onBack={() => setViewMode('browse')}
+            onSubmit={handleSubmitFilledReport}
+          />
+        );
+      
+      case 'interactive':
+        if (!selectedTemplate) {
+          setViewMode('browse');
+          return null;
+        }
+        return (
+          <InteractivePDFForm
+            template={selectedTemplate}
+            onBack={() => setViewMode('browse')}
+            onSubmit={handleSubmitFilledReport}
+          />
+        );
+      
+      case 'manage':
+        if (!isAdmin) {
+          setViewMode('browse');
+          return null;
+        }
+        return (
+          <TemplateManager
+            templates={templates}
+            departments={departments}
+            onEdit={handleEditTemplate}
+            onDelete={handleDeleteTemplate}
+            onCreate={handleCreateTemplate}
+          />
+        );
+      
+      case 'edit':
+        if (!isAdmin) {
+          setViewMode('browse');
+          return null;
+        }
+        return (
+          <TemplateEditor
+            template={editingTemplate || undefined}
+            onSave={handleSaveTemplate}
+            onCancel={() => setViewMode('manage')}
+            departments={departments}
+          />
+        );
+      
+      case 'my-reports':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Мои рапорты</h2>
+                <p className="text-muted-foreground">
+                  Просмотр и управление отправленными рапортами
+                </p>
+              </div>
+              <Button onClick={() => setViewMode('browse')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Создать новый рапорт
+              </Button>
+            </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="report-file">{t('reports.report_file', 'Report File')}</Label>
-                    <Input
-                      id="report-file"
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleFileSelect}
-                      required
-                    />
-                    {selectedFile && (
-                      <p className="text-sm text-muted-foreground">
-                        Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">{t('reports.additional_notes', 'Additional Notes')}</Label>
-                    <Textarea
-                      id="notes"
-                      placeholder="Any additional information for the supervisor..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsSubmitModalOpen(false)}
-                    >
-                      {t('reports.cancel', 'Cancel')}
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={!selectedFile || submitReportMutation.isPending}
-                    >
-                      {submitReportMutation.isPending ? t('reports.submitting', 'Submitting...') : t('reports.submit', 'Submit')}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="grid gap-4">
-            {displayReports.length === 0 ? (
+            {filledReports.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">{t('reports.no_reports', 'No Reports Submitted')}</h3>
+                  <h3 className="text-lg font-semibold mb-2">Рапорты не найдены</h3>
                   <p className="text-muted-foreground mb-4">
-                    {t('reports.no_reports_desc', "You haven't submitted any reports yet. Use the templates to get started.")}
+                    Вы еще не создавали рапорты. Начните с выбора шаблона.
                   </p>
-                  <Button onClick={() => setIsSubmitModalOpen(true)}>
-                    {t('reports.submit_first', 'Submit Your First Report')}
+                  <Button onClick={() => setViewMode('browse')}>
+                    Выбрать шаблон
                   </Button>
                 </CardContent>
               </Card>
             ) : (
-              displayReports.map((report) => (
-                <Card key={report.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-muted-foreground" />
-                          <span className="font-medium">
-                            {t('reports.report_id', {id: report.id.toString().padStart(3, '0'), defaultValue: 'Report #{{id}}'})}
-                          </span>
-                          {getStatusBadge(report.status)}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {t('reports.submitted', 'Submitted')}: {new Date(report.createdAt).toLocaleDateString()}
-                        </p>
-                        {report.supervisorComment && (
-                          <div className="mt-3 p-3 bg-muted rounded-lg">
-                            <p className="text-sm font-medium mb-1">{t('reports.supervisor_comment', 'Supervisor Comment:')}</p>
-                            <p className="text-sm">{report.supervisorComment}</p>
+              <div className="grid gap-4">
+                {filledReports.map((report) => (
+                  <Card key={report.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                            <span className="font-medium">{report.title}</span>
+                            {getStatusBadge(report.status)}
                           </div>
-                        )}
+                          <p className="text-sm text-muted-foreground">
+                            Создан: {new Date(report.createdAt).toLocaleDateString('ru-RU')}
+                            {report.submittedAt && (
+                              <span className="ml-4">
+                                Отправлен: {new Date(report.submittedAt).toLocaleDateString('ru-RU')}
+                              </span>
+                            )}
+                          </p>
+                          {report.supervisorComment && (
+                            <div className="mt-3 p-3 bg-muted rounded-lg">
+                              <p className="text-sm font-medium mb-1">Комментарий руководителя:</p>
+                              <p className="text-sm">{report.supervisorComment}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedReport(report);
+                              setIsViewModalOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const blob = new Blob([report.content], { type: 'text/plain;charset=utf-8' });
+                              const url = URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = `${report.title}.txt`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              URL.revokeObjectURL(url);
+                            }}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedReport(report);
-                            setIsViewModalOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadTemplate({ 
-                            id: report.id.toString(), 
-                            name: `Report-${report.id}`, 
-                            description: '', 
-                            fileUrl: report.fileUrl, 
-                            department: '' 
-                          })}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
           </div>
-        </TabsContent>
+        );
+      
+      default:
+        return null;
+    }
+  };
 
-        <TabsContent value="templates" className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">{t('reports.templates_title', 'Report Templates')}</h2>
-            <p className="text-muted-foreground">
-              {t('reports.templates_desc', 'Download official templates to ensure your reports meet department standards.')}
-            </p>
-          </div>
+  if (templatesLoading || reportsLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-96">
+          {t('reports.loading', 'Loading reports...')}
+        </div>
+      </Layout>
+    );
+  }
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.map((template) => (
-              <Card key={template.id}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
-                  <CardDescription>{template.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Badge variant="outline">{template.department}</Badge>
-                    <Button
-                      onClick={() => handleDownloadTemplate(template)}
-                      className="w-full gap-2"
-                      variant="outline"
-                    >
-                      <Download className="h-4 w-4" />
-                      {t('reports.download_template', 'Download Template')}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+  return (
+    <Layout>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">{t('reports.title', 'Reports')}</h1>
+          <p className="text-muted-foreground">
+            {t('reports.subtitle', 'Create and manage incident reports using templates.')}
+          </p>
+        </div>
 
-      {/* View Report Modal */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t('reports.details', 'Report Details')}</DialogTitle>
-            <DialogDescription>
-              {t('reports.report_id', {id: selectedReport?.id?.toString().padStart(3, '0') || '', defaultValue: 'Report #{{id}}'})}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedReport && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>{t('reports.status', 'Status')}</Label>
-                  <div className="mt-1">
-                    {getStatusBadge(selectedReport.status)}
-                  </div>
-                </div>
-                <div>
-                  <Label>{t('reports.submitted', 'Submitted')}</Label>
-                  <p className="text-sm mt-1">
-                    {new Date(selectedReport.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              
-              {selectedReport.supervisorComment && (
-                <div>
-                  <Label>{t('reports.supervisor_comment', 'Supervisor Comment')}</Label>
-                  <div className="mt-1 p-3 bg-muted rounded-lg">
-                    <p className="text-sm">{selectedReport.supervisorComment}</p>
-                  </div>
-                </div>
+        {/* Навигация */}
+        <div className="mb-6">
+          <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)}>
+            <TabsList>
+              <TabsTrigger value="browse">Шаблоны</TabsTrigger>
+              <TabsTrigger value="my-reports">Мои рапорты</TabsTrigger>
+              {isAdmin && (
+                <TabsTrigger value="manage">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Управление
+                </TabsTrigger>
               )}
+            </TabsList>
+          </Tabs>
+        </div>
 
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => handleDownloadTemplate({ 
-                    id: selectedReport.id.toString(), 
-                    name: `Report-${selectedReport.id}`, 
-                    description: '', 
-                    fileUrl: selectedReport.fileUrl, 
-                    department: '' 
-                  })}
-                >
-                  {t('reports.download_file', 'Download File')}
-                </Button>
-                <Button onClick={() => setIsViewModalOpen(false)}>
-                  {t('reports.close', 'Close')}
-                </Button>
+        {/* Основной контент */}
+        {renderView()}
+
+        {/* Модальное окно просмотра рапорта */}
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Просмотр рапорта</DialogTitle>
+              <DialogDescription>
+                {selectedReport?.title}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedReport && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Статус</Label>
+                    <div className="mt-1">
+                      {getStatusBadge(selectedReport.status)}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Создан</Label>
+                    <p className="text-sm mt-1">
+                      {new Date(selectedReport.createdAt).toLocaleDateString('ru-RU')}
+                    </p>
+                  </div>
+                </div>
+                
+                {selectedReport.supervisorComment && (
+                  <div>
+                    <Label>Комментарий руководителя</Label>
+                    <div className="mt-1 p-3 bg-muted rounded-lg">
+                      <p className="text-sm">{selectedReport.supervisorComment}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label>Содержание рапорта</Label>
+                  <pre className="mt-1 whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-md max-h-96 overflow-y-auto">
+                    {selectedReport.content}
+                  </pre>
+                </div>
+
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const blob = new Blob([selectedReport.content], { type: 'text/plain;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${selectedReport.title}.txt`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Скачать
+                  </Button>
+                  <Button onClick={() => setIsViewModalOpen(false)}>
+                    Закрыть
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </Layout>
   );
 }
 

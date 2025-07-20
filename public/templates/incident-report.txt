@@ -1,0 +1,52 @@
+LSPD INCIDENT REPORT TEMPLATE
+================================
+
+Report Number: _______________
+Date: _______________
+Time: _______________
+Location: _______________
+
+OFFICER INFORMATION:
+Name: _______________
+Badge Number: _______________
+Department: LSPD
+Rank: _______________
+
+INCIDENT DETAILS:
+Type of Incident: _______________
+Description: _______________
+
+PARTIES INVOLVED:
+Suspect(s): _______________
+Victim(s): _______________
+Witness(es): _______________
+
+EVIDENCE COLLECTED:
+- Photos: _______________
+- Videos: _______________
+- Physical Evidence: _______________
+- Statements: _______________
+
+ACTIONS TAKEN:
+- Arrests Made: _______________
+- Citations Issued: _______________
+- Warnings Given: _______________
+- Other Actions: _______________
+
+DAMAGES/INJURIES:
+Property Damage: _______________
+Injuries: _______________
+Medical Attention Required: _______________
+
+FOLLOW-UP REQUIRED:
+- Investigation: _______________
+- Court Date: _______________
+- Additional Reports: _______________
+
+SUPERVISOR REVIEW:
+Reviewed By: _______________
+Date: _______________
+Comments: _______________
+
+================================
+END OF REPORT 

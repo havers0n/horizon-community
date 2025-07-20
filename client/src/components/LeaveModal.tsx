@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInDays, addDays } from "date-fns";
+import { ru } from "date-fns/locale";
 
 const leaveSchema = z.object({
   leaveType: z.enum(["vacation", "sick", "personal", "emergency", "medical", "maternity", "bereavement"]),
@@ -248,9 +249,9 @@ export function LeaveModal({ children }: LeaveModalProps) {
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(field.value, "PPP", { locale: ru })
                             ) : (
-                              <span>Pick start date</span>
+                              <span>Выберите дату начала</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -270,6 +271,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
                             return date < new Date();
                           }}
                           initialFocus
+                          locale={ru}
                         />
                       </PopoverContent>
                     </Popover>
@@ -295,9 +297,9 @@ export function LeaveModal({ children }: LeaveModalProps) {
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(field.value, "PPP", { locale: ru })
                             ) : (
-                              <span>Pick end date</span>
+                              <span>Выберите дату окончания</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -316,6 +318,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
                             return date < (startDate || new Date());
                           }}
                           initialFocus
+                          locale={ru}
                         />
                       </PopoverContent>
                     </Popover>
@@ -369,17 +372,17 @@ export function LeaveModal({ children }: LeaveModalProps) {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-blue-800">Leave Duration</span>
+                                      <span className="font-medium text-blue-800">Продолжительность отпуска</span>
                 </div>
                 <div className="space-y-1 text-sm">
                   <div>
-                    <span className="text-blue-700">Total Days: </span>
+                    <span className="text-blue-700">Всего дней: </span>
                     <Badge className={`${getLeaveTypeColor(leaveType || "")}`}>
-                      {totalDays} {totalDays === 1 ? 'day' : 'days'}
+                      {totalDays} {totalDays === 1 ? 'день' : totalDays < 5 ? 'дня' : 'дней'}
                     </Badge>
                   </div>
                   <div className="text-blue-600">
-                    From {format(startDate, "EEEE, MMMM d, yyyy")} to {format(endDate, "EEEE, MMMM d, yyyy")}
+                    С {format(startDate, "EEEE, d MMMM yyyy", { locale: ru })} по {format(endDate, "EEEE, d MMMM yyyy", { locale: ru })}
                   </div>
                 </div>
               </div>
@@ -500,11 +503,11 @@ export function LeaveModal({ children }: LeaveModalProps) {
                 <div className="space-y-1">
                   <div className="font-medium text-yellow-800">Leave Policy Reminders:</div>
                   <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Submit vacation requests at least 2 weeks in advance</li>
-                    <li>• Emergency and sick leave can be submitted retroactively</li>
-                    <li>• Maximum 2 leave applications per month</li>
-                    <li>• Supervisor approval required for all leave requests</li>
-                    <li>• Extended leave (7+ days) may require additional documentation</li>
+                    <li>• Подавайте заявки на отпуск минимум за 5 дней</li>
+                    <li>• Экстренные и больничные отпуска можно подавать задним числом</li>
+                    <li>• Максимум 2 заявки на отпуск в месяц</li>
+                    <li>• Требуется одобрение супервайзера</li>
+                    <li>• Длительные отпуска (7+ дней) могут требовать дополнительных документов</li>
                   </ul>
                 </div>
               </div>

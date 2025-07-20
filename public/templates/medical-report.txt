@@ -1,0 +1,86 @@
+EMS MEDICAL RESPONSE REPORT TEMPLATE
+=====================================
+
+Report Number: _______________
+Date: _______________
+Time: _______________
+Location: _______________
+
+PARAMEDIC INFORMATION:
+Name: _______________
+Badge Number: _______________
+Department: EMS
+Rank: _______________
+
+PATIENT INFORMATION:
+Name: _______________
+Date of Birth: _______________
+Gender: _______________
+Address: _______________
+Emergency Contact: _______________
+
+INCIDENT DETAILS:
+Type of Call: _______________
+Chief Complaint: _______________
+Mechanism of Injury: _______________
+Scene Safety: _______________
+
+VITAL SIGNS:
+Blood Pressure: _______________
+Heart Rate: _______________
+Respiratory Rate: _______________
+Temperature: _______________
+Oxygen Saturation: _______________
+Pain Scale: _______________
+
+ASSESSMENT:
+Primary Survey: _______________
+Secondary Survey: _______________
+Neurological Status: _______________
+Cardiovascular: _______________
+Respiratory: _______________
+Abdomen: _______________
+Extremities: _______________
+
+TREATMENT PROVIDED:
+- Oxygen Therapy: _______________
+- IV Access: _______________
+- Medications: _______________
+- Splinting: _______________
+- Other Interventions: _______________
+
+TRANSPORT:
+Destination: _______________
+Mode of Transport: _______________
+Condition During Transport: _______________
+Handoff Report: _______________
+
+EQUIPMENT USED:
+- Monitor: _______________
+- Ventilator: _______________
+- Splints: _______________
+- Other: _______________
+
+MEDICATIONS ADMINISTERED:
+Drug 1: _______________
+Dose: _______________
+Route: _______________
+Time: _______________
+
+Drug 2: _______________
+Dose: _______________
+Route: _______________
+Time: _______________
+
+COOPERATING AGENCIES:
+- Police: _______________
+- Fire: _______________
+- Other: _______________
+
+SUPERVISOR REVIEW:
+Reviewed By: _______________
+Date: _______________
+Comments: _______________
+
+=====================================
+END OF REPORT 
