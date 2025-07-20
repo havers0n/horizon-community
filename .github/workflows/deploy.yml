@@ -96,7 +96,7 @@ EOL
               pm2 reload roleplayidentity
             else
               echo "🚀 Запускаем приложение впервые..."
-              pm2 start dist/index.js --name roleplayidentity --env production
+              NODE_ENV=production pm2 start dist/server.js --name roleplayidentity
             fi
             
             # Сохраняем конфигурацию PM2

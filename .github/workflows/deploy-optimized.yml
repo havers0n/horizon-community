@@ -90,7 +90,7 @@ jobs:
             fi
             
             echo "🚀 Запускаем приложение..."
-            NODE_ENV=production pm2 start dist/index.js --name roleplayidentity
+            NODE_ENV=production pm2 start dist/server.js --name roleplayidentity
             
             # Сохраняем конфигурацию PM2
             pm2 save

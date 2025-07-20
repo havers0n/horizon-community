@@ -175,7 +175,7 @@ sudo journalctl -u roleplayidentity -f
 ### Команды PM2 (альтернатива):
 ```bash
 # Запуск
-pm2 start dist/index.js --name roleplayidentity
+pm2 start dist/server.js --name roleplayidentity
 
 # Остановка
 pm2 stop roleplayidentity

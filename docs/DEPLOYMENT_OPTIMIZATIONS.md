@@ -57,7 +57,7 @@ README.md       # README
 ```bash
 pm2 stop roleplayidentity
 pm2 delete roleplayidentity
-pm2 start dist/index.js --name roleplayidentity --env production
+pm2 start dist/server.js --name roleplayidentity --env production
 ```
 
 **Новый подход:**
@@ -65,7 +65,7 @@ pm2 start dist/index.js --name roleplayidentity --env production
 if pm2 list | grep -q "roleplayidentity"; then
   pm2 reload roleplayidentity  # Безопасный рестарт
 else
-  pm2 start dist/index.js --name roleplayidentity --env production
+  pm2 start dist/server.js --name roleplayidentity --env production
 fi
 ```
 
