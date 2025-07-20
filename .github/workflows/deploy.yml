@@ -24,16 +24,6 @@ jobs:
 
       - name: Build application
         run: npm run build:production
-        env:
-          NODE_ENV: ${{ secrets.NODE_ENV }}
-          PORT: ${{ secrets.PORT }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Install production dependencies
         run: npm ci --production
@@ -76,19 +66,16 @@ jobs:
             # Распаковываем архив
             tar -xzf deployment.tar.gz
             
-            # Создаем .env из GitHub Secrets
-            echo "🔐 Создаем .env из GitHub Secrets..."
-            cat > .env <<EOL
-NODE_ENV=${{ secrets.NODE_ENV }}
-PORT=${{ secrets.PORT }}
-SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-DATABASE_URL=${{ secrets.DATABASE_URL }}
-JWT_SECRET=${{ secrets.JWT_SECRET }}
-VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
-VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
-EOL
+            # Проверяем наличие .env файла
+            echo "🔍 Проверяем .env файл..."
+            if [ -f .env ]; then
+              echo "✅ .env файл найден"
+              echo "📋 Содержимое .env (первые 3 строки):"
+              head -3 .env
+            else
+              echo "❌ .env файл не найден"
+              exit 1
+            fi
             
             # Безопасный рестарт приложения
             if pm2 list | grep -q "roleplayidentity"; then
