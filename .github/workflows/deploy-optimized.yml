@@ -87,11 +87,11 @@ jobs:
             # Безопасный рестарт приложения
             if pm2 list | grep -q "roleplayidentity"; then
               echo "🔄 Перезапускаем приложение..."
-              pm2 reload roleplayidentity
-            else
-              echo "🚀 Запускаем приложение впервые..."
-              pm2 start dist/index.js --name roleplayidentity --env production
+              pm2 delete roleplayidentity
             fi
+            
+            echo "🚀 Запускаем приложение..."
+            NODE_ENV=production pm2 start dist/index.js --name roleplayidentity
             
             # Сохраняем конфигурацию PM2
             pm2 save
