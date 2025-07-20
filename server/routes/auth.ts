@@ -23,14 +23,16 @@ export function authRoutes(app: Express) {
     if (authError) return res.status(400).json({ error: authError.message });
     
     // Создать запись в таблице users
-    const { error: userError } = await storage.createUser({
-      email,
-      username,
-      authId: authData.user.id,
-      passwordHash: '' // Больше не нужен
-    });
-    
-    if (userError) return res.status(400).json({ error: userError.message });
+    try {
+      await storage.createUser({
+        email,
+        username,
+        authId: authData.user.id,
+        passwordHash: '' // Больше не нужен
+      });
+    } catch (userError) {
+      return res.status(400).json({ error: (userError as Error).message });
+    }
     
     res.json({ user: authData.user });
   });

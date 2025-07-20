@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db';
-import { filledReports, reportTemplates, users } from '@shared/schema';
+import { filledReports, reportTemplates, users } from '../../shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth.middleware';
 
@@ -14,7 +14,14 @@ router.get('/', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    let query = db
+    let whereConditions = [];
+    
+    // Если пользователь не админ/супервайзер, показываем только его рапорты
+    if (!['admin', 'supervisor'].includes(user.role)) {
+      whereConditions.push(eq(filledReports.authorId, user.id));
+    }
+
+    const reports = await db
       .select({
         id: filledReports.id,
         templateId: filledReports.templateId,
@@ -32,14 +39,8 @@ router.get('/', authenticateToken, async (req, res) => {
       .from(filledReports)
       .leftJoin(reportTemplates, eq(filledReports.templateId, reportTemplates.id))
       .leftJoin(users, eq(filledReports.authorId, users.id))
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
       .orderBy(desc(filledReports.createdAt));
-
-    // Если пользователь не админ/супервайзер, показываем только его рапорты
-    if (!['admin', 'supervisor'].includes(user.role)) {
-      query = query.where(eq(filledReports.authorId, user.id));
-    }
-
-    const reports = await query;
 
     res.json(reports);
   } catch (error) {

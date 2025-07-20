@@ -17,24 +17,53 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+interface Stats {
+  totalUsers: number;
+  pendingApplications: number;
+  activeDepartments: number;
+  openTickets: number;
+}
+
+interface Application {
+  id: number;
+  type: string;
+  status: string;
+  createdAt: string;
+  author?: {
+    username: string;
+  };
+}
+
+interface Department {
+  id: number;
+  name: string;
+  fullName: string;
+}
+
+interface Notification {
+  id: number;
+  message: string;
+  createdAt: string;
+}
+
 export default function Dashboard() {
   const { t } = useTranslation();
   const { user } = getAuthState();
   
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<Stats>({
     queryKey: ['/api/stats'],
     enabled: user?.role === 'supervisor' || user?.role === 'admin'
   });
 
-  const { data: departments } = useQuery({
+  const { data: departments } = useQuery<Department[]>({
     queryKey: ['/api/departments']
   });
 
-  const { data: applications } = useQuery({
+  const { data: applications } = useQuery<Application[]>({
     queryKey: ['/api/applications']
   });
 
-  const { data: notifications } = useQuery({
+  const { data: notifications } = useQuery<Notification[]>({
     queryKey: ['/api/notifications']
   });
 
@@ -186,7 +215,7 @@ export default function Dashboard() {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground capitalize">
-                              {t(`applications.type.${application.type}`, application.type)}
+                              {String(t(`applications.type.${application.type}`, application.type))}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               by {user?.username}
@@ -195,7 +224,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center space-x-3">
                             <Badge className={getStatusColor(application.status)}>
-                              {t(`applications.status.${application.status}`, application.status)}
+                              {String(t(`applications.status.${application.status}`, application.status))}
                             </Badge>
                           <span className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(application.createdAt), { addSuffix: true })}
@@ -254,11 +283,11 @@ export default function Dashboard() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">{t('dashboard.role', 'Role:')}</span>
-                    <span className="text-sm font-medium text-foreground capitalize">{t(`dashboard.user_role.${user?.role}`, user?.role)}</span>
+                    <span className="text-sm font-medium text-foreground capitalize">{String(t(`dashboard.user_role.${user?.role || 'user'}`, user?.role || 'user'))}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">{t('dashboard.status', 'Status:')}</span>
-                    <Badge className="status-badge approved capitalize">{t(`dashboard.user_status.${user?.status}`, user?.status)}</Badge>
+                    <Badge className="status-badge approved capitalize">{String(t(`dashboard.user_status.${user?.status || 'active'}`, user?.status || 'active'))}</Badge>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">{t('dashboard.member_since', 'Member Since:')}</span>

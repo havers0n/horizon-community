@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CalendarIcon, ArrowRightLeft, AlertTriangle } from "lucide-react";
+import { CalendarIcon, ArrowRightLeft, AlertTriangle } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -334,7 +335,7 @@ export function TransferModal({ children }: TransferModalProps) {
                           field.onChange(date);
                           setCalendarOpen(false);
                         }}
-                        disabled={(date) =>
+                        disabled={(date: Date) =>
                           date < new Date()
                         }
                         initialFocus

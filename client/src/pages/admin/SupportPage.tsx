@@ -54,7 +54,7 @@ export default function SupportPage() {
       if (!res.ok) throw new Error('Ошибка загрузки тикетов');
       return res.json();
     },
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   if (isLoading) return <div>Загрузка...</div>;

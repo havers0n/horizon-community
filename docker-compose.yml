@@ -4,11 +4,11 @@ services:
     container_name: horizon_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: horizon_db
-      POSTGRES_USER: horizon_user
-      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5434:5432"  # <-- УБЕДИТЕСЬ, ЧТО ЗДЕСЬ 5434
+      - "54322:5432"  # Исправлено на 54322 для соответствия коду
     volumes:
       - pgdata:/var/lib/postgresql/data
 volumes:

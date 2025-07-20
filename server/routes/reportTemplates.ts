@@ -1,6 +1,6 @@
 import express from 'express';
 import { db } from '../db';
-import { reportTemplates } from '@shared/schema';
+import { reportTemplates } from '../../shared/schema';
 import { eq, and, or, like, inArray } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth.middleware';
 
@@ -48,22 +48,18 @@ router.get('/', authenticateToken, async (req, res) => {
       whereConditions.push(
         or(
           like(reportTemplates.title, searchTerm),
-          like(reportTemplates.purpose || '', searchTerm),
           like(reportTemplates.body, searchTerm)
-        )
+        )!
       );
     }
 
     // Фильтр по тегам
     if (tags && Array.isArray(tags)) {
       // Поиск шаблонов, содержащих хотя бы один из указанных тегов
-      whereConditions.push(
-        or(
-          ...tags.map(tag => 
-            like(reportTemplates.tags || [], `%${tag}%`)
-          )
-        )
+      const tagConditions = tags.map(tag => 
+        like(reportTemplates.tags || '', `%${tag}%`)
       );
+      whereConditions.push(or(...tagConditions)!);
     }
 
     const templates = await db
@@ -263,7 +259,8 @@ router.get('/stats/overview', authenticateToken, async (req, res) => {
     }, {} as Record<string, number>);
 
     const difficultyStats = stats.reduce((acc, s) => {
-      acc[s.difficulty] = (acc[s.difficulty] || 0) + 1;
+      const difficulty = s.difficulty || 'unknown';
+      acc[difficulty] = (acc[difficulty] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 

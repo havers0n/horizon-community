@@ -33,7 +33,7 @@ interface Character {
   mugshotUrl?: string;
   isUnit: boolean;
   unitInfo?: any;
-  records?: Record[];
+  records?: CharacterRecord[];
 }
 
 interface Vehicle {
@@ -55,7 +55,7 @@ interface Weapon {
   owner: Character;
 }
 
-interface Record {
+interface CharacterRecord {
   id: number;
   type: 'arrest' | 'ticket' | 'warning';
   charges: string[];

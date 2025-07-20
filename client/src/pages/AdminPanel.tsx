@@ -21,6 +21,33 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+interface Stats {
+  pendingApplications: number;
+  totalUsers: number;
+  activeDepartments: number;
+  openTickets: number;
+}
+
+interface Application {
+  id: number;
+  type: string;
+  status: string;
+  createdAt: string;
+  author?: {
+    username: string;
+    rank: string;
+  };
+}
+
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminPanel() {
   const { user } = getAuthState();
   const { toast } = useToast();
@@ -43,15 +70,15 @@ export default function AdminPanel() {
     );
   }
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<Stats>({
     queryKey: ['/api/stats']
   });
 
-  const { data: applications, isLoading: applicationsLoading } = useQuery({
+  const { data: applications, isLoading: applicationsLoading } = useQuery<Application[]>({
     queryKey: ['/api/admin/applications']
   });
 
-  const { data: users } = useQuery({
+  const { data: users } = useQuery<User[]>({
     queryKey: ['/api/admin/users']
   });
 
@@ -231,7 +258,7 @@ export default function AdminPanel() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {applications.map((app: any) => (
+                    {applications.map((app: Application) => (
                       <TableRow key={app.id} className="hover:bg-gray-50">
                         <TableCell>
                           <div className="flex items-center">
@@ -331,7 +358,7 @@ export default function AdminPanel() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.slice(0, 10).map((user: any) => (
+                    {users.slice(0, 10).map((user: User) => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div className="flex items-center">

@@ -181,7 +181,11 @@ export class MemStorage implements IStorage {
       role: user.role || 'candidate',
       status: user.status || 'active',
       authId: user.authId || null,
-      cadToken: user.cadToken || null
+      cadToken: user.cadToken || null,
+      discordId: user.discordId || null,
+      discordUsername: user.discordUsername || null,
+      discordAccessToken: user.discordAccessToken || null,
+      discordRefreshToken: user.discordRefreshToken || null
     };
     this.users.set(id, newUser);
     return newUser;

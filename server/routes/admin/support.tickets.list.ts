@@ -29,7 +29,7 @@ router.get('/tickets', verifyJWT, requireAdminOrSupervisor, async (req, res) => 
         .offset((page - 1) * limit),
       db.execute(sql`SELECT count(*)::int as count FROM support_tickets ${status ? sql`WHERE status = ${status}` : sql``}`)
     ]);
-    const total = totalResult?.[0]?.count ?? 0;
+    const total = (totalResult as any)?.[0]?.count ?? 0;
 
     res.status(200).json({
       tickets,

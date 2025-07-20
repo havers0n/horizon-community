@@ -72,8 +72,17 @@ interface Department {
   logoUrl?: string;
 }
 
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  rank?: string;
+}
+
 const CAD: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -385,12 +394,12 @@ const CAD: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.avatar} />
+                  <AvatarImage src={user?.avatar || undefined} />
                   <AvatarFallback>{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="text-sm">
                   <p className="font-medium">{user?.username}</p>
-                  <p className="text-gray-500">{user?.rank}</p>
+                  <p className="text-gray-500">{user?.rank || 'N/A'}</p>
                 </div>
               </div>
               
