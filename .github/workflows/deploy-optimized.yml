@@ -72,39 +72,16 @@ jobs:
             # Распаковываем архив
             tar -xzf deployment.tar.gz
             
-            # Создаем .env из GitHub Secrets
-            echo "🔐 Создаем .env из GitHub Secrets..."
-            echo "NODE_ENV=production" > .env
-            echo "PORT=${{ secrets.PORT }}" >> .env
-            echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-            echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
-            echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
-            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
-            
-            # Создаем ecosystem файл для PM2 в формате JSON
-            echo "📝 Создаем ecosystem файл для PM2..."
-            cat > ecosystem.config.json << 'EOL'
-            {
-              "apps": [{
-                "name": "roleplayidentity",
-                "script": "dist/index.js",
-                "env": {
-                  "NODE_ENV": "production",
-                  "PORT": "${{ secrets.PORT }}",
-                  "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
-                  "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}",
-                  "SUPABASE_SERVICE_ROLE_KEY": "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}",
-                  "DATABASE_URL": "${{ secrets.DATABASE_URL }}",
-                  "JWT_SECRET": "${{ secrets.JWT_SECRET }}",
-                  "VITE_SUPABASE_URL": "${{ secrets.VITE_SUPABASE_URL }}",
-                  "VITE_SUPABASE_ANON_KEY": "${{ secrets.VITE_SUPABASE_ANON_KEY }}"
-                }
-              }]
-            }
-            EOL
+            # Проверяем наличие .env файла
+            echo "🔍 Проверяем .env файл..."
+            if [ -f .env ]; then
+              echo "✅ .env файл найден"
+              echo "📋 Содержимое .env (первые 3 строки):"
+              head -3 .env
+            else
+              echo "❌ .env файл не найден"
+              exit 1
+            fi
             
             # Безопасный рестарт приложения
             if pm2 list | grep -q "roleplayidentity"; then
@@ -112,8 +89,8 @@ jobs:
               pm2 delete roleplayidentity
             fi
             
-            echo "🚀 Запускаем приложение с ecosystem файлом..."
-            pm2 start ecosystem.config.json
+            echo "🚀 Запускаем приложение..."
+            NODE_ENV=production pm2 start dist/index.js --name roleplayidentity
             
             # Сохраняем конфигурацию PM2
             pm2 save
