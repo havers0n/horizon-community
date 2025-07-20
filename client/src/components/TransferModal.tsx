@@ -39,10 +39,12 @@ interface TransferModalProps {
 
 // Mock divisions data - would come from API
 const divisionsByDepartment: Record<string, string[]> = {
-  "LSPD": ["Patrol", "Detective", "SWAT", "Traffic", "K9", "Training"],
-  "LSFD": ["Engine Company", "Ladder Company", "Rescue Squad", "Hazmat", "EMS"],
-  "EMS": ["Ambulance", "Supervisor", "Training", "Air Rescue"],
-  "BCSO": ["Patrol", "Detective", "Traffic", "Court Security"]
+  "PD": ["Patrol", "Detective", "SWAT", "Traffic", "K9", "Training"],
+  "SAHP": ["Highway Patrol", "Traffic Enforcement", "Special Operations"],
+  "SAMS": ["Ambulance", "Supervisor", "Training", "Air Rescue"],
+  "SAFR": ["Engine Company", "Ladder Company", "Rescue Squad", "Hazmat"],
+  "DD": ["Dispatch", "Supervisor", "Training"],
+  "CD": ["Civilian", "Volunteer", "Support"]
 };
 
 export function TransferModal({ children }: TransferModalProps) {

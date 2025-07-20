@@ -65,10 +65,10 @@
 ## 4. Структура департаментов
 
 ### ✅ Реализованные департаменты:
-- **LSPD** (Los Santos Police Department)
-- **BCSO** (Blaine County Sheriff's Office)  
-- **LSFD** (Los Santos Fire Department)
-- **EMS** (Emergency Medical Services)
+- **PD** (Police Department)
+- **SAHP** (San Andreas Highway Patrol)
+- **SAMS** (San Andreas Medical Services)
+- **SAFR** (San Andreas Fire & Rescue)
 - **DD** (Dispatch Department)
 - **CD** (Civilian Department)
 

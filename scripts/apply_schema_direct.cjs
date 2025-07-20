@@ -62,21 +62,21 @@ async function insertSeedData() {
     const departments = [
       {
         name: 'LSPD',
-        full_name: 'Los Santos Police Department',
+        full_name: 'Horizon Police Department',
         description: 'Полицейский департамент Лос-Сантоса',
         logo_url: 'https://example.com/lspd_logo.png',
         gallery: []
       },
       {
         name: 'LSFD',
-        full_name: 'Los Santos Fire Department',
+        full_name: 'Horizon Fire Department',
         description: 'Пожарный департамент Лос-Сантоса',
         logo_url: 'https://example.com/lsfd_logo.png',
         gallery: []
       },
       {
         name: 'LSMD',
-        full_name: 'Los Santos Medical Department',
+        full_name: 'Horizon Medical Department',
         description: 'Медицинский департамент Лос-Сантоса',
         logo_url: 'https://example.com/lsmd_logo.png',
         gallery: []

@@ -136,7 +136,7 @@ async function createTestData() {
       .from('departments')
       .insert({
         name: 'LSPD',
-        fullName: 'Los Santos Police Department',
+        fullName: 'Horizon Police Department',
         description: 'Тестовый департамент полиции',
         logoUrl: 'https://example.com/lspd-logo.png'
       })
@@ -180,7 +180,7 @@ async function createTestData() {
         firstName: 'Джон',
         lastName: 'Доу',
         dob: '1990-01-01',
-        address: '123 Main St, Los Santos',
+        address: '123 Main St, Horizon City',
         insuranceNumber: 'INS-2024-00001',
         isUnit: true,
         unitInfo: {
@@ -225,7 +225,7 @@ async function createTestData() {
     const { data: call, error: callError } = await supabase
       .from('call911')
       .insert({
-        location: '123 Test Street, Los Santos',
+        location: '123 Test Street, Horizon City',
         description: 'Тестовый вызов 911',
         type: 'police',
         priority: 2,

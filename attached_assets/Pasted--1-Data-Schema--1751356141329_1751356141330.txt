@@ -24,7 +24,7 @@ createdAt: Date — Дата регистрации
 2. Department (Департамент)
 _id: ObjectID
 name: String (e.g., "LSPD")
-fullName: String (e.g., "Los Santos Police Department")
+fullName: String (e.g., "Horizon Police Department")
 logoUrl: String — URL до логотипа
 description: String — Краткая информация
 gallery: Array<String> — Массив URL-адресов скриншотов

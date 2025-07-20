@@ -11,6 +11,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Layout } from '../components/Layout';
 
 interface FAQItem {
   id: number;
@@ -194,15 +195,16 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Layout>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <div className="bg-card shadow-sm border-b border-border">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-foreground mb-4">
               Часто задаваемые вопросы
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Найдите ответы на самые популярные вопросы о нашем ролевом сообществе
             </p>
           </div>
@@ -214,12 +216,12 @@ const FAQ: React.FC = () => {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Поиск по вопросам..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 input-gold"
               />
             </div>
             <div className="flex gap-2">
@@ -229,6 +231,7 @@ const FAQ: React.FC = () => {
                   variant={selectedCategory === key ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory(key as any)}
+                  className={selectedCategory === key ? "btn-gold" : ""}
                 >
                   {label}
                 </Button>
@@ -240,27 +243,27 @@ const FAQ: React.FC = () => {
         {/* FAQ Items */}
         <div className="space-y-4">
           {filteredFAQ.map((item) => (
-            <Card key={item.id} className="hover:shadow-md transition-shadow">
+            <Card key={item.id} className="card-hover card-gold">
               <CardHeader 
                 className="cursor-pointer pb-2"
                 onClick={() => toggleItem(item.id)}
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <HelpCircle className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-lg flex items-center gap-2 text-foreground">
+                    <HelpCircle className="h-5 w-5 text-primary" />
                     {item.question}
                   </CardTitle>
                   {expandedItems.has(item.id) ? (
-                    <ChevronUp className="h-5 w-5 text-gray-400" />
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
                   )}
                 </div>
               </CardHeader>
               {expandedItems.has(item.id) && (
                 <CardContent className="pt-0">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-gray-700 leading-relaxed">
+                  <div className="bg-muted rounded-lg p-4">
+                    <p className="text-foreground leading-relaxed">
                       {item.answer}
                     </p>
                   </div>
@@ -273,17 +276,17 @@ const FAQ: React.FC = () => {
         {/* No results */}
         {filteredFAQ.length === 0 && (
           <div className="text-center py-12">
-            <Search className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-semibold mb-2">Вопрос не найден</h3>
-            <p className="text-gray-500 mb-6">
+            <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2 text-foreground">Вопрос не найден</h3>
+            <p className="text-muted-foreground mb-6">
               Попробуйте изменить поисковый запрос или обратитесь к нам напрямую
             </p>
             <div className="flex gap-4 justify-center">
-              <Button onClick={handleVKClick} variant="outline">
+              <Button onClick={handleVKClick} variant="outline" className="btn-gold-outline">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Группа ВК
               </Button>
-              <Button onClick={handleDiscordClick}>
+              <Button onClick={handleDiscordClick} className="btn-gold">
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Discord
               </Button>
@@ -293,19 +296,19 @@ const FAQ: React.FC = () => {
 
         {/* Contact Section */}
         <div className="mt-12">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+          <Card className="card-gold bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
             <CardContent className="p-6">
               <div className="text-center">
-                <h3 className="text-xl font-semibold mb-4">
+                <h3 className="text-xl font-semibold mb-4 text-foreground">
                   Не нашли ответ на свой вопрос?
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-muted-foreground mb-6">
                   Свяжитесь с нами через Discord или группу ВКонтакте, и мы обязательно поможем вам
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Button 
                     onClick={handleDiscordClick}
-                    className="bg-[#5865F2] hover:bg-[#4752C4]"
+                    className="btn-gold"
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Наш Discord
@@ -313,7 +316,7 @@ const FAQ: React.FC = () => {
                   <Button 
                     onClick={handleVKClick}
                     variant="outline"
-                    className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                    className="btn-gold-outline"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Группа ВК
@@ -327,20 +330,20 @@ const FAQ: React.FC = () => {
         {/* Quick Links */}
         {!user && (
           <div className="mt-8">
-            <Card>
+            <Card className="card-gold">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-4">
+                  <h3 className="text-lg font-semibold mb-4 text-foreground">
                     Готовы присоединиться к нам?
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     Подайте заявку и станьте частью нашего сообщества
                   </p>
                   <div className="flex gap-4 justify-center">
-                    <Button asChild>
+                    <Button asChild className="btn-gold">
                       <a href="/register">Подать заявку</a>
                     </Button>
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild className="btn-gold-outline">
                       <a href="/departments">Узнать о департаментах</a>
                     </Button>
                   </div>
@@ -350,7 +353,8 @@ const FAQ: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

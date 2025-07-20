@@ -204,12 +204,12 @@ export class BusinessLogic {
   }
 
   /**
-   * Check minimum advance notice for vacation leave (2 weeks)
+   * Check minimum advance notice for vacation leave (5 days)
    */
   private checkMinimumAdvanceNotice(startDate: string): ApplicationRestriction {
     const start = new Date(startDate);
     const now = new Date();
-    const minAdvanceDays = 14; // 2 недели
+    const minAdvanceDays = 5; // 5 дней
     const daysUntilStart = Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysUntilStart < minAdvanceDays) {

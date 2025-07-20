@@ -149,7 +149,7 @@ export default function Homepage() {
       <section className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 py-20">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            {t('homepage.title', 'Los Santos Roleplay Community')}
+            {t('homepage.title', 'Horizon Community')}
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             {t('homepage.subtitle', 'Профессиональное ролевое сообщество для правоохранительных органов, пожарной службы и скорой медицинской помощи. Присоединяйтесь к нашему сообществу сегодня.')}

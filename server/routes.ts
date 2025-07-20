@@ -10,7 +10,12 @@ import { createSchedulerRoutes } from "./routes/scheduler";
 import { BusinessLogic } from "./businessLogic";
 import { Scheduler } from "./scheduler";
 import cadRoutes from "./routes/cad";
+import discordRoutes from "./routes/discord";
+import reportTemplatesRoutes from "./routes/reportTemplates";
+import filledReportsRoutes from "./routes/filledReports";
 import { initializeCADWebSocket } from "./websocket";
+import fs from 'fs/promises';
+import path from 'path';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -231,6 +236,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(reports);
   });
 
+  // Создание нового рапорта с загрузкой файла
+  app.post('/api/reports', authenticateToken, async (req: any, res) => {
+    try {
+      // В реальной реализации здесь будет обработка multipart/form-data
+      // с использованием multer или аналогичного middleware
+      const { fileUrl, type, notes } = req.body;
+      
+      if (!fileUrl) {
+        return res.status(400).json({ message: 'File URL is required' });
+      }
+
+      const reportData = {
+        authorId: req.user.id,
+        status: 'pending',
+        fileUrl,
+        supervisorComment: null
+      };
+
+      const report = await storage.createReport(reportData);
+
+      // Создаем уведомление для супервайзеров
+      const supervisors = (await storage.getAllUsers()).filter(u => u.role === 'supervisor' || u.role === 'admin');
+      for (const supervisor of supervisors) {
+        await storage.createNotification({
+          recipientId: supervisor.id,
+          content: `New report submitted by ${req.user.username}`,
+          link: `/admin/reports/${report.id}`
+        });
+      }
+
+      res.status(201).json(report);
+    } catch (error) {
+      console.error('Error creating report:', error);
+      res.status(400).json({ message: 'Failed to create report' });
+    }
+  });
+
+  // Получение списка шаблонов рапортов
+  app.get('/api/report-templates', authenticateToken, async (req: any, res) => {
+    try {
+      // В реальной реализации шаблоны будут храниться в БД
+      // Пока возвращаем моковые данные
+      const templates = [
+        {
+          id: "incident-report",
+          name: "Incident Report",
+          description: "Standard incident documentation form",
+          fileUrl: "/templates/incident-report.pdf",
+          department: "LSPD"
+        },
+        {
+          id: "arrest-report", 
+          name: "Arrest Report",
+          description: "Detailed arrest documentation",
+          fileUrl: "/templates/arrest-report.pdf",
+          department: "LSPD"
+        },
+        {
+          id: "vehicle-report",
+          name: "Vehicle Inspection Report", 
+          description: "Vehicle condition and inspection details",
+          fileUrl: "/templates/vehicle-report.pdf",
+          department: "LSPD"
+        },
+        {
+          id: "fire-report",
+          name: "Fire Incident Report",
+          description: "Fire department incident documentation", 
+          fileUrl: "/templates/fire-report.pdf",
+          department: "LSFD"
+        },
+        {
+          id: "medical-report",
+          name: "Medical Response Report",
+          description: "EMS response and treatment documentation",
+          fileUrl: "/templates/medical-report.pdf", 
+          department: "EMS"
+        }
+      ];
+
+      res.json(templates);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      res.status(500).json({ message: 'Failed to fetch templates' });
+    }
+  });
+
+  // Скачивание шаблона рапорта
+  app.get('/api/report-templates/:id/download', authenticateToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Список доступных шаблонов
+      const availableTemplates = {
+        'incident-report': 'incident-report.txt',
+        'arrest-report': 'arrest-report.txt',
+        'vehicle-report': 'vehicle-report.txt',
+        'fire-report': 'fire-report.txt',
+        'medical-report': 'medical-report.txt'
+      };
+      
+      const fileName = availableTemplates[id as keyof typeof availableTemplates];
+      
+      if (!fileName) {
+        return res.status(404).json({ message: 'Template not found' });
+      }
+      
+      const filePath = path.join(__dirname, '../public/templates', fileName);
+      
+      // Проверяем существование файла
+      try {
+        await fs.access(filePath);
+      } catch (error) {
+        return res.status(404).json({ message: 'Template file not found' });
+      }
+      
+      // Отправляем файл для скачивания
+      res.download(filePath, fileName);
+      
+    } catch (error) {
+      console.error('Error downloading template:', error);
+      res.status(500).json({ message: 'Failed to download template' });
+    }
+  });
+
   app.get('/api/notifications', authenticateToken, async (req: any, res) => {
     const notifications = await storage.getNotificationsByUser(req.user.id);
     res.json(notifications);
@@ -433,6 +563,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(tickets);
   });
 
+  // Получение всех рапортов для администраторов
+  app.get('/api/admin/reports', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const reports = await storage.getAllReports();
+      
+      // Получаем информацию об авторах для каждого рапорта
+      const reportsWithAuthors = await Promise.all(
+        reports.map(async (report) => {
+          const author = await storage.getUser(report.authorId);
+          return {
+            ...report,
+            author: author ? {
+              id: author.id,
+              username: author.username,
+              email: author.email,
+              department: author.departmentId
+            } : null
+          };
+        })
+      );
+      
+      res.json(reportsWithAuthors);
+    } catch (error) {
+      console.error('Error fetching admin reports:', error);
+      res.status(500).json({ message: 'Failed to fetch reports' });
+    }
+  });
+
+  // Обновление статуса рапорта (одобрение/отклонение)
+  app.put('/api/admin/reports/:id', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      const { status, supervisorComment } = req.body;
+
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status. Must be "approved" or "rejected"' });
+      }
+
+      const report = await storage.updateReport(reportId, {
+        status,
+        supervisorComment
+      });
+
+      if (!report) {
+        return res.status(404).json({ message: 'Report not found' });
+      }
+
+      // Создаем уведомление автору рапорта
+      await storage.createNotification({
+        recipientId: report.authorId,
+        content: `Your report #${report.id} has been ${status}`,
+        link: `/reports`
+      });
+
+      res.json(report);
+    } catch (error) {
+      console.error('Error updating report:', error);
+      res.status(500).json({ message: 'Failed to update report' });
+    }
+  });
+
   app.get('/api/stats', authenticateToken, requireSupervisor, async (req, res) => {
     const users = await storage.getAllUsers();
     const applications = await storage.getAllApplications();
@@ -451,6 +642,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // CAD/MDT routes
   app.use('/api/cad', cadRoutes);
+  app.use('/api/discord', discordRoutes);
+
+  // Report templates and filled reports routes
+  app.use('/api/report-templates', reportTemplatesRoutes);
+  app.use('/api/filled-reports', filledReportsRoutes);
 
   // Test routes
   const businessLogic = new BusinessLogic(storage);

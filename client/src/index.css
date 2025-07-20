@@ -1,91 +1,485 @@
+@import 'react-day-picker/dist/style.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
-  --radius: 0.5rem;
-  --success: hsl(142, 76%, 36%);
-  --warning: hsl(38, 92%, 50%);
-  --error: hsl(0, 84%, 60%);
-}
+@layer base {
+  :root {
+    /* Светлая тема */
+    --background: 0 0% 100%; /* #FFFFFF */
+    --foreground: 220 13% 10%; /* #191F23 */
+    --card: 45 20% 96%; /* #F8F5EE */
+    --card-foreground: 220 13% 10%; /* #191F23 */
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 220 13% 10%; /* #191F23 */
+    --primary: 45 65% 67%; /* #E2C178 - золото */
+    --primary-foreground: 220 13% 10%; /* #191F23 */
+    --secondary: 45 20% 96%; /* #F8F5EE */
+    --secondary-foreground: 220 13% 10%; /* #191F23 */
+    --muted: 45 20% 96%; /* #F8F5EE */
+    --muted-foreground: 220 13% 28%; /* #444A50 */
+    --accent: 45 65% 67%; /* #E2C178 */
+    --accent-foreground: 220 13% 10%; /* #191F23 */
+    --destructive: 0 68% 68%; /* #E57373 */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+    --border: 45 20% 89%; /* #ECE3D3 */
+    --input: 45 20% 89%; /* #ECE3D3 */
+    --ring: 45 65% 67%; /* #E2C178 */
+    --radius: 0.5rem;
+    
+    /* Расширенная цветовая палитра для светлой темы */
+    --success: 142 52% 65%; /* #81C784 */
+    --success-foreground: 142 76% 36%; /* #2E7D32 */
+    --warning: 45 65% 67%; /* #E2C178 */
+    --warning-foreground: 220 13% 10%; /* #191F23 */
+    --info: 199 89% 48%; /* #42A5F5 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
+    
+    /* Градиенты для светлой темы */
+    --gradient-primary: linear-gradient(135deg, #E2C178 0%, #B89D5A 100%);
+    --gradient-secondary: linear-gradient(135deg, #F8F5EE 0%, #ECE3D3 100%);
+    --gradient-success: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+    --gradient-warning: linear-gradient(135deg, #E2C178 0%, #B89D5A 100%);
+    --gradient-error: linear-gradient(135deg, #E57373 0%, #EF5350 100%);
+  }
 
-.dark {
-  --background: hsl(240, 10%, 3.9%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
-  --radius: 0.5rem;
-  --success: hsl(142, 76%, 36%);
-  --warning: hsl(38, 92%, 50%);
-  --error: hsl(0, 84%, 60%);
+  .dark {
+    /* Темная тема */
+    --background: 220 13% 10%; /* #191F23 */
+    --foreground: 45 65% 67%; /* #E2C178 */
+    --card: 220 13% 15%; /* #23292F */
+    --card-foreground: 45 65% 67%; /* #E2C178 */
+    --popover: 220 13% 10%; /* #191F23 */
+    --popover-foreground: 45 65% 67%; /* #E2C178 */
+    --primary: 45 65% 67%; /* #E2C178 - золото */
+    --primary-foreground: 220 13% 10%; /* #191F23 */
+    --secondary: 220 13% 15%; /* #23292F */
+    --secondary-foreground: 45 65% 67%; /* #E2C178 */
+    --muted: 220 13% 15%; /* #23292F */
+    --muted-foreground: 45 55% 58%; /* #C4B68A */
+    --accent: 45 65% 67%; /* #E2C178 */
+    --accent-foreground: 220 13% 10%; /* #191F23 */
+    --destructive: 0 68% 68%; /* #E57373 */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+    --border: 220 13% 20%; /* #2C333A */
+    --input: 220 13% 20%; /* #2C333A */
+    --ring: 45 65% 67%; /* #E2C178 */
+    
+    /* Расширенная цветовая палитра для темной темы */
+    --success: 142 52% 65%; /* #81C784 */
+    --success-foreground: 142 76% 36%; /* #2E7D32 */
+    --warning: 45 65% 67%; /* #E2C178 */
+    --warning-foreground: 220 13% 10%; /* #191F23 */
+    --info: 199 89% 48%; /* #42A5F5 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
+    
+    /* Градиенты для темной темы */
+    --gradient-primary: linear-gradient(135deg, #E2C178 0%, #B89D5A 100%);
+    --gradient-secondary: linear-gradient(135deg, #23292F 0%, #2C333A 100%);
+    --gradient-success: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+    --gradient-warning: linear-gradient(135deg, #E2C178 0%, #B89D5A 100%);
+    --gradient-error: linear-gradient(135deg, #E57373 0%, #EF5350 100%);
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
   }
 }
 
-@layer utilities {
-  .text-success {
-    color: hsl(var(--success));
+/* Микроанимации и переходы */
+@layer components {
+  /* Плавные переходы для всех интерактивных элементов */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-in-out;
   }
   
-  .text-warning {
-    color: hsl(var(--warning));
+  .transition-fast {
+    @apply transition-all duration-150 ease-out;
   }
   
-  .text-error {
-    color: hsl(var(--error));
+  /* Hover эффекты для карточек */
+  .card-hover {
+    @apply transition-smooth hover:shadow-lg hover:-translate-y-1 hover:shadow-primary/10;
   }
   
-  .bg-success {
-    background-color: hsl(var(--success));
+  /* Анимация появления */
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
   }
   
-  .bg-warning {
-    background-color: hsl(var(--warning));
+  .slide-up {
+    animation: slideUp 0.3s ease-out;
   }
   
-  .bg-error {
-    background-color: hsl(var(--error));
+  .scale-in {
+    animation: scaleIn 0.2s ease-out;
   }
+  
+  /* Пульсация для уведомлений */
+  .pulse-gentle {
+    animation: pulseGentle 2s infinite;
+  }
+  
+  /* Анимация загрузки */
+  .loading-dots {
+    animation: loadingDots 1.4s infinite;
+  }
+  
+  /* Градиентные кнопки с новой цветовой схемой */
+  .btn-gradient-primary {
+    background: var(--gradient-primary);
+    @apply text-primary-foreground border-0 hover:opacity-90 transition-opacity shadow-lg shadow-primary/25;
+  }
+  
+  .btn-gradient-success {
+    background: var(--gradient-success);
+    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg shadow-success/25;
+  }
+  
+  .btn-gradient-warning {
+    background: var(--gradient-warning);
+    @apply text-primary-foreground border-0 hover:opacity-90 transition-opacity shadow-lg shadow-warning/25;
+  }
+  
+  .btn-gradient-error {
+    background: var(--gradient-error);
+    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg shadow-destructive/25;
+  }
+  
+  /* Улучшенные состояния фокуса */
+  .focus-ring {
+    @apply focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none focus:ring-offset-background;
+  }
+  
+  /* Анимация для модальных окон */
+  .modal-enter {
+    animation: modalEnter 0.2s ease-out;
+  }
+  
+  /* Анимация для списков */
+  .list-item-enter {
+    animation: listItemEnter 0.2s ease-out;
+  }
+  
+  /* Анимация для прогресс-баров */
+  .progress-animate {
+    animation: progressFill 0.8s ease-out;
+  }
+  
+  /* Специальные стили для золотых акцентов */
+  .gold-accent {
+    @apply text-primary border-primary/20 bg-primary/5;
+  }
+  
+  .gold-accent:hover {
+    @apply bg-primary/10 border-primary/30;
+  }
+  
+  /* Стили для карточек с новой цветовой схемой */
+  .card-gold {
+    @apply bg-card border border-border shadow-lg shadow-primary/5;
+  }
+  
+  .card-gold:hover {
+    @apply shadow-xl shadow-primary/10 border-primary/20;
+  }
+}
+
+/* Keyframes для анимаций */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGentle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes loadingDots {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes listItemEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-value);
+  }
+}
+
+/* Улучшенные стили для департаментов с новой цветовой схемой */
+.department-card {
+  @apply card-hover card-gold;
+}
+
+.department-card.pd {
+  @apply bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/50 dark:to-indigo-950/50 border-blue-200/50 dark:border-blue-800/50;
+}
+
+.department-card.sahp {
+  @apply bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/50 dark:to-amber-950/50 border-yellow-200/50 dark:border-yellow-800/50;
+}
+
+.department-card.sams {
+  @apply bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/50 dark:to-emerald-950/50 border-green-200/50 dark:border-green-800/50;
+}
+
+.department-card.safr {
+  @apply bg-gradient-to-br from-red-50/50 to-orange-50/50 dark:from-red-950/50 dark:to-orange-950/50 border-red-200/50 dark:border-red-800/50;
+}
+
+.department-card.dd {
+  @apply bg-gradient-to-br from-purple-50/50 to-violet-50/50 dark:from-purple-950/50 dark:to-violet-950/50 border-purple-200/50 dark:border-purple-800/50;
+}
+
+.department-card.cd {
+  @apply bg-gradient-to-br from-gray-50/50 to-slate-50/50 dark:from-gray-950/50 dark:to-slate-950/50 border-gray-200/50 dark:border-gray-800/50;
+}
+
+/* Анимация для статусов с новой цветовой схемой */
+.status-badge {
+  @apply transition-fast;
+}
+
+.status-badge.approved {
+  @apply bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-lg shadow-success/25;
+}
+
+.status-badge.rejected {
+  @apply bg-gradient-to-r from-destructive to-destructive/80 text-white shadow-lg shadow-destructive/25;
+}
+
+.status-badge.pending {
+  @apply bg-gradient-to-r from-warning to-warning/80 text-warning-foreground shadow-lg shadow-warning/25;
+}
+
+/* Улучшенные кнопки действий */
+.action-button {
+  @apply transition-fast hover:scale-105 active:scale-95 shadow-md shadow-primary/10;
+}
+
+/* Анимация для уведомлений */
+.notification-item {
+  @apply list-item-enter;
+}
+
+/* Улучшенные формы */
+.form-field {
+  @apply transition-fast focus-within:ring-2 focus-within:ring-primary focus-within:ring-opacity-50 focus-within:ring-offset-2 focus-within:ring-offset-background;
+}
+
+/* Анимация для загрузки */
+.skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+/* Улучшенные таблицы */
+.table-row {
+  @apply transition-fast hover:bg-accent/50;
+}
+
+/* Анимация для модальных окон */
+.modal-overlay {
+  @apply transition-fast;
+}
+
+.modal-content {
+  @apply modal-enter;
+}
+
+/* Специальные стили для навигации */
+.nav-item {
+  @apply transition-fast hover:bg-accent/50 hover:text-primary;
+}
+
+.nav-item.active {
+  @apply bg-primary/10 text-primary border-r-2 border-primary;
+}
+
+/* Стили для кнопок с золотым акцентом */
+.btn-gold {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200 shadow-lg shadow-primary/25;
+}
+
+.btn-gold-outline {
+  @apply border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-200;
+}
+
+/* Стили для инпутов */
+.input-gold {
+  @apply border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors duration-200;
+}
+
+/* Стили для селектов */
+.select-gold {
+  @apply border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors duration-200;
+}
+
+/* Специальные стили для департаментов с уникальными контурами */
+.department-card-pd {
+  @apply border-2 border-blue-500/30 hover:border-blue-500/50;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.1) 100%);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.1);
+}
+
+.department-card-pd:hover {
+  box-shadow: 0 8px 25px 0 rgba(59, 130, 246, 0.2);
+}
+
+.department-card-sahp {
+  @apply border-2 border-yellow-500/30 hover:border-yellow-500/50;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.05) 0%, rgba(234, 179, 8, 0.1) 100%);
+  box-shadow: 0 4px 14px 0 rgba(234, 179, 8, 0.1);
+}
+
+.department-card-sahp:hover {
+  box-shadow: 0 8px 25px 0 rgba(234, 179, 8, 0.2);
+}
+
+.department-card-sams {
+  @apply border-2 border-green-500/30 hover:border-green-500/50;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.1) 100%);
+  box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.1);
+}
+
+.department-card-sams:hover {
+  box-shadow: 0 8px 25px 0 rgba(34, 197, 94, 0.2);
+}
+
+.department-card-safr {
+  @apply border-2 border-red-500/30 hover:border-red-500/50;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%);
+  box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.1);
+}
+
+.department-card-safr:hover {
+  box-shadow: 0 8px 25px 0 rgba(239, 68, 68, 0.2);
+}
+
+.department-card-dd {
+  @apply border-2 border-purple-500/30 hover:border-purple-500/50;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0.1) 100%);
+  box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.1);
+}
+
+.department-card-dd:hover {
+  box-shadow: 0 8px 25px 0 rgba(139, 92, 246, 0.2);
+}
+
+.department-card-cd {
+  @apply border-2 border-gray-500/30 hover:border-gray-500/50;
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.05) 0%, rgba(107, 114, 128, 0.1) 100%);
+  box-shadow: 0 4px 14px 0 rgba(107, 114, 128, 0.1);
+}
+
+.department-card-cd:hover {
+  box-shadow: 0 8px 25px 0 rgba(107, 114, 128, 0.2);
+}
+
+/* Темная тема для департаментов */
+.dark .department-card-pd {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.15) 100%);
+}
+
+.dark .department-card-sahp {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(234, 179, 8, 0.15) 100%);
+}
+
+.dark .department-card-sams {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.15) 100%);
+}
+
+.dark .department-card-safr {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.15) 100%);
+}
+
+.dark .department-card-dd {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.15) 100%);
+}
+
+.dark .department-card-cd {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(107, 114, 128, 0.15) 100%);
+}
+
+/* Анимация для карточек департаментов */
+.department-card-animate {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.department-card-animate:hover {
+  @apply transform scale-105;
+}
+
+/* Стили для чекбоксов и радио */
+.checkbox-gold {
+  @apply text-primary border-border focus:ring-primary/20;
+}
+
+.radio-gold {
+  @apply text-primary border-border focus:ring-primary/20;
 }

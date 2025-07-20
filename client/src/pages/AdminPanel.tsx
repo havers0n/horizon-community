@@ -115,6 +115,28 @@ export default function AdminPanel() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Administration Panel</h1>
           <p className="text-gray-600">Manage users, applications, and system settings.</p>
+          
+          {/* Admin Navigation */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/admin-leave-management">
+                <Clock className="h-4 w-4 mr-2" />
+                Leave Management
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href="/admin-reports">
+                <FileText className="h-4 w-4 mr-2" />
+                Report Management
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href="/admin/support">
+                <Headphones className="h-4 w-4 mr-2" />
+                Support Tickets
+              </a>
+            </Button>
+          </div>
         </div>
 
         {/* Admin Stats */}

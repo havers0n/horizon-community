@@ -97,9 +97,12 @@ async function createTestUsers() {
         const { data: departments, error: deptError } = await supabase
             .from('departments')
             .upsert([
-                { name: 'LSPD', full_name: 'Los Santos Police Department', description: 'Полицейский департамент Лос-Сантоса' },
-                { name: 'LSFD', full_name: 'Los Santos Fire Department', description: 'Пожарный департамент Лос-Сантоса' },
-                { name: 'LSMC', full_name: 'Los Santos Medical Center', description: 'Медицинский центр Лос-Сантоса' }
+                { name: 'PD', full_name: 'Police Department', description: 'Полицейский департамент' },
+                { name: 'SAHP', full_name: 'San Andreas Highway Patrol', description: 'Патрульная служба шоссе Сан-Андреас' },
+                { name: 'SAMS', full_name: 'San Andreas Medical Services', description: 'Медицинская служба Сан-Андреас' },
+                { name: 'SAFR', full_name: 'San Andreas Fire & Rescue', description: 'Пожарная служба и спасение Сан-Андреас' },
+                { name: 'DD', full_name: 'Dispatch Department', description: 'Департамент диспетчеризации' },
+                { name: 'CD', full_name: 'Civilian Department', description: 'Гражданский департамент' }
             ])
             .select()
         

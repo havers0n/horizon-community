@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const applicationSchema = z.object({
   type: z.string().min(1, "Application type is required"),
@@ -32,6 +33,7 @@ export function ApplicationModal({ children, isOpen, onOpenChange }: Application
   const setOpen = onOpenChange || setInternalOpen;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
@@ -51,16 +53,16 @@ export function ApplicationModal({ children, isOpen, onOpenChange }: Application
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       toast({
-        title: "Success",
-        description: "Application submitted successfully"
+        title: t('applications.success', 'Success'),
+        description: t('applications.success_desc', 'Application submitted successfully')
       });
       setOpen(false);
       form.reset();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to submit application",
+        title: t('applications.error', 'Error'),
+        description: t('applications.error_desc', 'Failed to submit application'),
         variant: "destructive"
       });
     }
@@ -74,17 +76,17 @@ export function ApplicationModal({ children, isOpen, onOpenChange }: Application
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+          <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
             <div className="flex items-center space-x-3">
               <Plus className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-gray-900">New Application</span>
+              <span className="text-sm font-medium text-foreground">{t('dashboard.new_application', 'New Application')}</span>
             </div>
-          </Button>
+          </button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Application</DialogTitle>
+          <DialogTitle>{t('dashboard.new_application', 'New Application')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -93,19 +95,19 @@ export function ApplicationModal({ children, isOpen, onOpenChange }: Application
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Application Type</FormLabel>
+                  <FormLabel>{t('applications.type', 'Application Type')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select application type..." />
+                        <SelectValue placeholder={t('applications.select_type', 'Select application type...')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="promotion">Promotion Request</SelectItem>
-                      <SelectItem value="transfer_dept">Department Transfer</SelectItem>
-                      <SelectItem value="transfer_div">Division Transfer</SelectItem>
-                      <SelectItem value="leave">Leave Request</SelectItem>
-                      <SelectItem value="qualification">Qualification Request</SelectItem>
+                      <SelectItem value="promotion">{t('applications.type.promotion', 'Promotion Request')}</SelectItem>
+                      <SelectItem value="transfer_dept">{t('applications.type.transfer_dept', 'Department Transfer')}</SelectItem>
+                      <SelectItem value="transfer_div">{t('applications.type.transfer_div', 'Division Transfer')}</SelectItem>
+                      <SelectItem value="leave">{t('applications.type.leave', 'Leave Request')}</SelectItem>
+                      <SelectItem value="qualification">{t('applications.type.qualification', 'Qualification Request')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -117,10 +119,10 @@ export function ApplicationModal({ children, isOpen, onOpenChange }: Application
               name="data.details"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Details</FormLabel>
+                  <FormLabel>{t('applications.details', 'Details')}</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Please provide details about your application..." 
+                      placeholder={t('applications.details_placeholder', 'Please provide details about your application...')} 
                       className="min-h-[100px]"
                       {...field} 
                     />
@@ -131,10 +133,10 @@ export function ApplicationModal({ children, isOpen, onOpenChange }: Application
             />
             <div className="flex justify-end space-x-3">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Submitting...' : 'Submit Application'}
+                {mutation.isPending ? t('common.submitting', 'Submitting...') : t('applications.submit', 'Submit Application')}
               </Button>
             </div>
           </form>

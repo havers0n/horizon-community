@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const complaintSchema = z.object({
   incidentDate: z.string().min(1, "Incident date is required"),
@@ -31,6 +32,7 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const form = useForm<ComplaintFormData>({
     resolver: zodResolver(complaintSchema),
@@ -53,16 +55,16 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Complaint submitted successfully"
+        title: t('complaints.success', 'Success'),
+        description: t('complaints.success_desc', 'Complaint submitted successfully')
       });
       setOpen(false);
       form.reset();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to submit complaint",
+        title: t('complaints.error', 'Error'),
+        description: t('complaints.error_desc', 'Failed to submit complaint'),
         variant: "destructive"
       });
     }
@@ -76,17 +78,17 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button variant="outline" className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+          <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
             <div className="flex items-center space-x-3">
               <AlertTriangle className="h-4 w-4 text-warning" />
-              <span className="text-sm font-medium text-gray-900">File Complaint</span>
+              <span className="text-sm font-medium text-foreground">{t('dashboard.file_complaint', 'File Complaint')}</span>
             </div>
-          </Button>
+          </button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>File Complaint</DialogTitle>
+          <DialogTitle>{t('dashboard.file_complaint', 'File Complaint')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -95,7 +97,7 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
               name="incidentDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Incident Date</FormLabel>
+                  <FormLabel>{t('complaints.incident_date', 'Incident Date')}</FormLabel>
                   <FormControl>
                     <Input type="datetime-local" {...field} />
                   </FormControl>
@@ -109,7 +111,7 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
               name="incidentType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Incident Type</FormLabel>
+                  <FormLabel>{t('complaints.incident_type', 'Incident Type')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -117,8 +119,8 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="game">Game Related</SelectItem>
-                      <SelectItem value="admin">Administrative</SelectItem>
+                      <SelectItem value="game">{t('complaints.type.game', 'Game Related')}</SelectItem>
+                      <SelectItem value="admin">{t('complaints.type.admin', 'Administrative')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -131,9 +133,9 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
               name="participants"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Participants</FormLabel>
+                  <FormLabel>{t('complaints.participants', 'Participants')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="List all involved parties..." {...field} />
+                    <Input placeholder={t('complaints.participants_placeholder', 'List all involved parties...')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,10 +147,10 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t('complaints.description', 'Description')}</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Provide detailed description of the incident..." 
+                      placeholder={t('complaints.description_placeholder', 'Provide detailed description of the incident...')} 
                       className="min-h-[100px]"
                       {...field} 
                     />
@@ -163,9 +165,9 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
               name="evidenceUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Evidence URL (Optional)</FormLabel>
+                  <FormLabel>{t('complaints.evidence_url', 'Evidence URL (Optional)')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Link to screenshots or videos..." {...field} />
+                    <Input placeholder={t('complaints.evidence_placeholder', 'Link to screenshots or videos...')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -174,10 +176,10 @@ export function ComplaintModal({ children }: ComplaintModalProps) {
             
             <div className="flex justify-end space-x-3">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Submitting...' : 'Submit Complaint'}
+                {mutation.isPending ? t('common.submitting', 'Submitting...') : t('complaints.submit', 'Submit Complaint')}
               </Button>
             </div>
           </form>

@@ -17,6 +17,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Department } from "@shared/schema";
 import { useCheckLimit } from "@/hooks/useCheckLimit";
+import { useTranslation } from "react-i18next";
 
 const jointApplicationSchema = z.object({
   type: z.enum(["joint_primary", "joint_secondary"]),
@@ -37,6 +38,7 @@ interface JointModalProps {
 export function JointModal({ children }: JointModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Проверяем лимиты заявок
   const { isLimitReached, isLoading: isLimitLoading, reason: limitReason } = useCheckLimit('joint');
@@ -92,14 +94,14 @@ export function JointModal({ children }: JointModalProps) {
       setIsOpen(false);
       form.reset();
       toast({
-        title: "Заявка на совмещение подана",
-        description: "Ваша заявка отправлена на рассмотрение администрации."
+        title: t('joint.success', 'Joint application submitted'),
+        description: t('joint.success_desc', 'Your application has been sent for administrative review.')
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Ошибка",
-        description: error.message || "Не удалось подать заявку на совмещение",
+        title: t('joint.error', 'Error'),
+        description: error.message || t('joint.error_desc', 'Failed to submit joint application'),
         variant: "destructive"
       });
     }
@@ -130,20 +132,22 @@ export function JointModal({ children }: JointModalProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="gap-2" disabled={hasActiveJoint}>
-            <Building2 className="h-4 w-4" />
-            Подать заявку на совмещение
-          </Button>
+          <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors" disabled={hasActiveJoint}>
+            <div className="flex items-center space-x-3">
+              <Building2 className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">{t('dashboard.joint_application', 'Submit Joint Application')}</span>
+            </div>
+          </button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            Заявка на совмещение
+            {t('dashboard.joint_application', 'Submit Joint Application')}
           </DialogTitle>
           <DialogDescription>
-            Подайте заявку на работу в дополнительном департаменте.
+            {t('joint.description', 'Submit an application to work in an additional department.')}
           </DialogDescription>
         </DialogHeader>
 

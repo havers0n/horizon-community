@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 // Pages
 import Login from "@/pages/Login";
@@ -21,11 +22,13 @@ import Reports from "@/pages/Reports";
 import JointPositions from "@/pages/JointPositions";
 import LeaveManagement from "@/pages/LeaveManagement";
 import AdminLeaveManagement from "@/pages/AdminLeaveManagement";
+import AdminReports from "@/pages/AdminReports";
 import TestExam from "@/pages/TestExam";
 import Homepage from "@/pages/Homepage";
 import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 import CAD from "@/pages/CAD";
+import DesignSystemDemo from "@/components/DesignSystemDemo";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -49,6 +52,9 @@ function Router() {
       <Route path="/register">
         <Register />
       </Route>
+      <Route path="/design-system">
+        <DesignSystemDemo />
+      </Route>
       
       {/* Protected routes */}
       <Route path="/dashboard">
@@ -71,6 +77,9 @@ function Router() {
       </Route>
       <Route path="/admin-leave-management">
         <AdminLeaveManagement />
+      </Route>
+      <Route path="/admin-reports">
+        <AdminReports />
       </Route>
       <Route path="/reports">
         <Reports />
@@ -112,12 +121,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

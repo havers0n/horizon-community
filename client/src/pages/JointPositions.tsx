@@ -13,6 +13,7 @@ import { Building2, Users, Clock, CheckCircle, XCircle, Eye, Trash2, AlertTriang
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { JointModal } from "@/components/JointModal";
+import { Layout } from "@/components/Layout";
 
 interface JointPosition {
   id: number;
@@ -129,13 +130,14 @@ function JointPositions() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Совмещения</h1>
-        <p className="text-muted-foreground">
-          Управляйте своими совмещениями в различных департаментах.
-        </p>
-      </div>
+    <Layout>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Совмещения</h1>
+          <p className="text-muted-foreground">
+            Управляйте своими совмещениями в различных департаментах.
+          </p>
+        </div>
 
       <Tabs defaultValue="active" className="space-y-6">
         <TabsList>
@@ -401,7 +403,8 @@ function JointPositions() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </Layout>
   );
 }
 

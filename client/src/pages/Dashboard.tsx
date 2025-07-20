@@ -47,10 +47,10 @@ export default function Dashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'approved': return 'status-badge approved';
+      case 'rejected': return 'status-badge rejected';
+      case 'pending': return 'status-badge pending';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -66,11 +66,13 @@ export default function Dashboard() {
 
   const getDepartmentIcon = (name: string) => {
     switch (name.toLowerCase()) {
-      case 'lspd': return <Shield className="text-blue-600" />;
-      case 'lsfd': return <Flame className="text-red-600" />;
-      case 'ems': return <Ambulance className="text-green-600" />;
-      case 'bcso': return <Star className="text-yellow-600" />;
-      default: return <Building className="text-gray-600" />;
+      case 'pd': return <Shield className="text-blue-600" />;
+      case 'sahp': return <Shield className="text-yellow-600" />;
+      case 'sams': return <Ambulance className="text-green-600" />;
+      case 'safr': return <Flame className="text-red-600" />;
+      case 'dd': return <Headphones className="text-purple-600" />;
+      case 'cd': return <Users className="text-gray-600" />;
+      default: return <Building className="text-muted-foreground" />;
     }
   };
 
@@ -80,16 +82,16 @@ export default function Dashboard() {
         
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {t('dashboard.welcome', 'Welcome back')}, {user?.username}
           </h1>
-          <p className="text-gray-600">{t('dashboard.manage', 'Manage your departments, applications, and system operations.')}</p>
+          <p className="text-muted-foreground">{t('dashboard.manage', 'Manage your departments, applications, and system operations.')}</p>
         </div>
 
         {/* Quick Stats Cards */}
         {(user?.role === 'supervisor' || user?.role === 'admin') && stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
+            <Card className="card-gold">
               <CardContent className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -97,15 +99,15 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.total_users', 'Total Users')}</dt>
-                      <dd className="text-2xl font-bold text-gray-900">{stats.totalUsers}</dd>
+                      <dt className="text-sm font-medium text-muted-foreground truncate">{t('dashboard.total_users', 'Total Users')}</dt>
+                      <dd className="text-2xl font-bold text-foreground">{stats.totalUsers}</dd>
                     </dl>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-gold">
               <CardContent className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -113,15 +115,15 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.pending_applications', 'Pending Applications')}</dt>
-                      <dd className="text-2xl font-bold text-gray-900">{stats.pendingApplications}</dd>
+                      <dt className="text-sm font-medium text-muted-foreground truncate">{t('dashboard.pending_applications', 'Pending Applications')}</dt>
+                      <dd className="text-2xl font-bold text-foreground">{stats.pendingApplications}</dd>
                     </dl>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-gold">
               <CardContent className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -129,24 +131,24 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.active_departments', 'Active Departments')}</dt>
-                      <dd className="text-2xl font-bold text-gray-900">{stats.activeDepartments}</dd>
+                      <dt className="text-sm font-medium text-muted-foreground truncate">{t('dashboard.active_departments', 'Active Departments')}</dt>
+                      <dd className="text-2xl font-bold text-foreground">{stats.activeDepartments}</dd>
                     </dl>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-gold">
               <CardContent className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <Headphones className="h-8 w-8 text-error" />
+                    <Headphones className="h-8 w-8 text-destructive" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">{t('dashboard.open_tickets', 'Open Tickets')}</dt>
-                      <dd className="text-2xl font-bold text-gray-900">{stats.openTickets}</dd>
+                      <dt className="text-sm font-medium text-muted-foreground truncate">{t('dashboard.open_tickets', 'Open Tickets')}</dt>
+                      <dd className="text-2xl font-bold text-foreground">{stats.openTickets}</dd>
                     </dl>
                   </div>
                 </div>
@@ -162,31 +164,31 @@ export default function Dashboard() {
           <div className="lg:col-span-2 space-y-8">
             
             {/* Recent Applications */}
-            <Card>
+            <Card className="card-gold">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('dashboard.recent_applications', 'Recent Applications')}</CardTitle>
+                <CardTitle className="text-foreground">{t('dashboard.recent_applications', 'Recent Applications')}</CardTitle>
                 <a href="/applications" className="text-primary hover:text-primary/90 text-sm font-medium">
                   {t('dashboard.view_all', 'View All')}
                 </a>
               </CardHeader>
               <CardContent>
                 {recentApplications.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">{t('dashboard.no_applications', 'No applications yet')}</p>
+                  <p className="text-muted-foreground text-center py-4">{t('dashboard.no_applications', 'No applications yet')}</p>
                 ) : (
                   <div className="space-y-4">
                     {recentApplications.map((application: any) => (
-                      <div key={application.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                      <div key={application.id} className="flex items-center justify-between py-3 border-b border-border last:border-b-0">
                         <div className="flex items-center space-x-4">
                           <div className="flex-shrink-0">
-                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
                               {getApplicationIcon(application.type)}
                             </div>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900 capitalize">
+                            <p className="text-sm font-medium text-foreground capitalize">
                               {t(`applications.type.${application.type}`, application.type)}
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               by {user?.username}
                             </p>
                           </div>
@@ -195,7 +197,7 @@ export default function Dashboard() {
                             <Badge className={getStatusColor(application.status)}>
                               {t(`applications.status.${application.status}`, application.status)}
                             </Badge>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(application.createdAt), { addSuffix: true })}
                           </span>
                         </div>
@@ -207,9 +209,9 @@ export default function Dashboard() {
             </Card>
 
             {/* Departments Overview */}
-            <Card>
+            <Card className="card-gold">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('dashboard.departments', 'Departments')}</CardTitle>
+                <CardTitle className="text-foreground">Департаменты</CardTitle>
                 <a href="/departments" className="text-primary hover:text-primary/90 text-sm font-medium">
                   {t('dashboard.view_all', 'View All')}
                 </a>
@@ -217,12 +219,12 @@ export default function Dashboard() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {departments?.map((department: any) => (
-                    <div key={department.id} className="text-center p-4 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div key={department.id} className="text-center p-4 rounded-lg hover:bg-accent/50 cursor-pointer transition-colors">
+                      <div className="w-16 h-16 mx-auto mb-3 bg-muted rounded-full flex items-center justify-center">
                         {getDepartmentIcon(department.name)}
                       </div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{department.name}</h4>
-                      <p className="text-xs text-gray-500">{department.fullName}</p>
+                      <h4 className="text-sm font-medium text-foreground mb-1">{department.name}</h4>
+                      <p className="text-xs text-muted-foreground">{department.fullName}</p>
                     </div>
                   ))}
                 </div>
@@ -234,33 +236,33 @@ export default function Dashboard() {
           <div className="space-y-6">
             
             {/* User Profile Card */}
-            <Card>
+            <Card className="card-gold">
               <CardHeader>
-                <CardTitle>{t('dashboard.my_profile', 'My Profile')}</CardTitle>
+                <CardTitle className="text-foreground">{t('dashboard.my_profile', 'My Profile')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-6">
                   <Avatar className="w-20 h-20 mx-auto mb-4">
-                    <AvatarFallback className="bg-primary text-white text-2xl font-bold">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
                       {user ? getUserInitials(user.username) : 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <h4 className="text-lg font-semibold text-gray-900">{user?.username}</h4>
-                  <p className="text-sm text-gray-500 capitalize">{user?.rank || 'N/A'}</p>
+                  <h4 className="text-lg font-semibold text-foreground">{user?.username}</h4>
+                  <p className="text-sm text-muted-foreground capitalize">{user?.rank || 'N/A'}</p>
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">{t('dashboard.role', 'Role:')}</span>
-                    <span className="text-sm font-medium text-gray-900 capitalize">{t(`dashboard.user_role.${user?.role}`, user?.role)}</span>
+                    <span className="text-sm text-muted-foreground">{t('dashboard.role', 'Role:')}</span>
+                    <span className="text-sm font-medium text-foreground capitalize">{t(`dashboard.user_role.${user?.role}`, user?.role)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">{t('dashboard.status', 'Status:')}</span>
-                    <Badge className="bg-green-100 text-green-800 capitalize">{t(`dashboard.user_status.${user?.status}`, user?.status)}</Badge>
+                    <span className="text-sm text-muted-foreground">{t('dashboard.status', 'Status:')}</span>
+                    <Badge className="status-badge approved capitalize">{t(`dashboard.user_status.${user?.status}`, user?.status)}</Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">{t('dashboard.member_since', 'Member Since:')}</span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm text-muted-foreground">{t('dashboard.member_since', 'Member Since:')}</span>
+                    <span className="text-sm font-medium text-foreground">
                       {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
@@ -269,9 +271,9 @@ export default function Dashboard() {
             </Card>
 
             {/* Quick Actions */}
-            <Card>
+            <Card className="card-gold">
               <CardHeader>
-                <CardTitle>{t('dashboard.quick_actions', 'Quick Actions')}</CardTitle>
+                <CardTitle className="text-foreground">{t('dashboard.quick_actions', 'Quick Actions')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {/* Показываем заявку на вступление только кандидатам */}
@@ -282,17 +284,48 @@ export default function Dashboard() {
                 {/* Показываем остальные действия только участникам и выше */}
                 {(user?.role === 'member' || user?.role === 'supervisor' || user?.role === 'admin') && (
                   <>
-                    <ApplicationModal />
-                    <JointModal />
-                    <ComplaintModal />
-                    <SupportModal />
+                    <ApplicationModal>
+                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <Plus className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">{t('dashboard.new_application', 'New Application')}</span>
+                        </div>
+                      </button>
+                    </ApplicationModal>
                     
-                    <button className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <JointModal>
+                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <Building className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">{t('dashboard.joint_application', 'Submit Joint Application')}</span>
+                        </div>
+                      </button>
+                    </JointModal>
+                    
+                    <ComplaintModal>
+                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <AlertTriangle className="h-4 w-4 text-warning" />
+                          <span className="text-sm font-medium text-foreground">{t('dashboard.file_complaint', 'File Complaint')}</span>
+                        </div>
+                      </button>
+                    </ComplaintModal>
+                    
+                    <SupportModal>
+                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <Headphones className="h-4 w-4 text-accent" />
+                          <span className="text-sm font-medium text-foreground">{t('dashboard.contact_support', 'Contact Support')}</span>
+                        </div>
+                      </button>
+                    </SupportModal>
+                    
+                    <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
                       <div className="flex items-center space-x-3">
                         <Upload className="h-4 w-4 text-success" />
-                        <span className="text-sm font-medium text-gray-900">{t('dashboard.upload_report', 'Upload Report')}</span>
+                        <span className="text-sm font-medium text-foreground">{t('dashboard.upload_report', 'Upload Report')}</span>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </button>
                   </>
                 )}
@@ -300,25 +333,25 @@ export default function Dashboard() {
             </Card>
 
             {/* Recent Notifications */}
-            <Card>
+            <Card className="card-gold">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{t('dashboard.notifications', 'Notifications')}</CardTitle>
+                <CardTitle className="text-foreground">{t('dashboard.notifications', 'Notifications')}</CardTitle>
                 <a href="/notifications" className="text-primary hover:text-primary/90 text-sm font-medium">
                   {t('dashboard.view_all', 'View All')}
                 </a>
               </CardHeader>
               <CardContent className="space-y-3">
                 {recentNotifications.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">{t('dashboard.no_notifications', 'No notifications')}</p>
+                  <p className="text-muted-foreground text-center py-4">{t('dashboard.no_notifications', 'No notifications')}</p>
                 ) : (
                   recentNotifications.map((notification: any) => (
                     <div key={notification.id} className={`flex items-start space-x-3 p-3 rounded-lg ${
-                      !notification.isRead ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'
+                      !notification.isRead ? 'bg-primary/10 border border-primary/20' : 'hover:bg-accent/50'
                     }`}>
                       <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <div className="flex-1">
-                        <p className="text-sm text-gray-900">{notification.content}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-sm text-foreground">{notification.content}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
                           {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                         </p>
                       </div>

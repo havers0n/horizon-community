@@ -1,0 +1,74 @@
+LSFD FIRE INCIDENT REPORT TEMPLATE
+===================================
+
+Report Number: _______________
+Date: _______________
+Time: _______________
+Location: _______________
+
+FIREFIGHTER INFORMATION:
+Name: _______________
+Badge Number: _______________
+Department: LSFD
+Rank: _______________
+
+INCIDENT TYPE:
+- Structure Fire: _______________
+- Vehicle Fire: _______________
+- Wildfire: _______________
+- Medical Emergency: _______________
+- Other: _______________
+
+RESPONSE DETAILS:
+Dispatch Time: _______________
+Arrival Time: _______________
+Units Responding: _______________
+Command Officer: _______________
+
+BUILDING/STRUCTURE INFORMATION:
+Type: _______________
+Size: _______________
+Occupancy: _______________
+Construction: _______________
+
+FIRE DETAILS:
+Origin: _______________
+Cause: _______________
+Extent of Damage: _______________
+Estimated Loss: _______________
+
+RESCUE OPERATIONS:
+Victims Rescued: _______________
+Injuries: _______________
+Fatalities: _______________
+Evacuations: _______________
+
+EQUIPMENT USED:
+- Ladders: _______________
+- Hoses: _______________
+- Breathing Apparatus: _______________
+- Special Equipment: _______________
+
+WATER USAGE:
+Gallons Used: _______________
+Hydrants Used: _______________
+Water Source: _______________
+
+HAZARDOUS MATERIALS:
+Type: _______________
+Quantity: _______________
+Disposal Method: _______________
+
+COOPERATING AGENCIES:
+- Police: _______________
+- EMS: _______________
+- Utilities: _______________
+- Other: _______________
+
+SUPERVISOR REVIEW:
+Reviewed By: _______________
+Date: _______________
+Comments: _______________
+
+===================================
+END OF REPORT 
