@@ -59,6 +59,10 @@ function LeaveManagement() {
     queryKey: ['/api/leave-stats']
   });
 
+  // 1. Добавим состояния для выбора диапазона дат
+  const [rangeStart, setRangeStart] = useState<Date | null>(null);
+  const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -127,6 +131,29 @@ function LeaveManagement() {
   };
 
   const calendarDays = generateCalendarDays();
+
+  // 2. Функция для обработки клика по дню календаря
+  const handleDayClick = (date: Date) => {
+    if (!rangeStart || (rangeStart && rangeEnd)) {
+      setRangeStart(date);
+      setRangeEnd(null);
+    } else if (rangeStart && !rangeEnd) {
+      if (date < rangeStart) {
+        setRangeStart(date);
+        setRangeEnd(rangeStart);
+      } else {
+        setRangeEnd(date);
+      }
+    }
+  };
+
+  // 3. Проверка, входит ли день в выбранный диапазон
+  const isInRange = (date: Date) => {
+    if (rangeStart && rangeEnd) {
+      return date >= rangeStart && date <= rangeEnd;
+    }
+    return false;
+  };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
@@ -207,10 +234,12 @@ function LeaveManagement() {
                 {calendarDays.map((day, index) => (
                   <div
                     key={index}
+                    onClick={() => handleDayClick(day.date)}
                     className={`
-                      min-h-[80px] p-2 border rounded-lg relative
-                      ${day.isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'}
+                      min-h-[80px] p-2 border rounded-lg relative cursor-pointer
+                      ${day.isToday ? 'bg-blue-900 border-blue-700' : isInRange(day.date) ? 'bg-blue-950 border-blue-900' : 'bg-gray-900 border-gray-800'}
                       ${!day.isCurrentMonth ? 'opacity-50' : ''}
+                      hover:bg-blue-800 transition-colors
                     `}
                   >
                     <div className="text-sm font-medium mb-1">
@@ -235,6 +264,24 @@ function LeaveManagement() {
                   </div>
                 ))}
               </div>
+              {/* Кнопка для создания заявки по выбранному диапазону */}
+              {rangeStart && rangeEnd && (
+                <div className="flex justify-end mt-4">
+                  <LeaveModal
+                    defaultStartDate={rangeStart}
+                    defaultEndDate={rangeEnd}
+                    onSubmit={() => {
+                      setRangeStart(null);
+                      setRangeEnd(null);
+                    }}
+                  >
+                    <Button className="gap-2" variant="default">
+                      <Plane className="h-4 w-4" />
+                      Подать заявку на выбранные даты
+                    </Button>
+                  </LeaveModal>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -23,7 +23,7 @@ async function applyMigration() {
     const migrationPath = path.join(__dirname, '../supabase/migrations/011_enhanced_report_templates.sql');
     const sql = fs.readFileSync(migrationPath, 'utf8');
 
-    // Разбиваем SQL на отдельные команды
+    // Разбиваем SQL на раздельные команды
     const commands = sql.split(';').filter(cmd => cmd.trim());
 
     for (const command of commands) {

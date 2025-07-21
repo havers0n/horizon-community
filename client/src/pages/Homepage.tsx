@@ -23,6 +23,8 @@ import {
   MapPin
 } from "lucide-react";
 import { Department } from "@shared/schema";
+import { DiscordIcon } from "@/components/ui/DiscordIcon";
+import { VKIcon } from "@/components/ui/VKIcon";
 
 interface CommunityStats {
   totalMembers: number;
@@ -46,7 +48,7 @@ const mockStats: CommunityStats = {
   totalMembers: 1247,
   activeDepartments: 4,
   totalApplications: 2891,
-  averageResponseTime: "24 hours"
+  averageResponseTime: "1 час"
 };
 
 const mockGallery: GalleryItem[] = [
@@ -157,13 +159,13 @@ export default function Homepage() {
           </p>
           <div className="flex gap-4 justify-center mb-8">
             <Link href="/register">
-              <Button size="lg" className="gap-2">
+              <Button size="lg" variant="secondary" className="gap-2">
                 <Users className="h-5 w-5" />
                 {t('homepage.join', 'Присоединиться')}
               </Button>
             </Link>
             <Link href="/login">
-              <Button size="lg" variant="outline" className="gap-2">
+              <Button size="lg" variant="secondary" className="gap-2">
                 <Shield className="h-5 w-5" />
                 {t('homepage.login', 'Войти в личный кабинет')}
               </Button>
@@ -178,7 +180,7 @@ export default function Homepage() {
               size="lg" 
               className="gap-2 bg-[#5865F2] text-white hover:bg-[#4752C4] border-[#5865F2]"
             >
-              <MessageCircle className="h-5 w-5" />
+              <DiscordIcon className="h-5 w-5" />
               Наш Discord
             </Button>
             <Button 
@@ -187,7 +189,7 @@ export default function Homepage() {
               size="lg" 
               className="gap-2 bg-[#4C75A3] text-white hover:bg-[#3B5998] border-[#4C75A3]"
             >
-              <ExternalLink className="h-5 w-5" />
+              <VKIcon className="h-5 w-5" />
               Группа ВК
             </Button>
           </div>
@@ -209,8 +211,8 @@ export default function Homepage() {
             <Card>
               <CardContent className="p-6 text-center">
                 <Shield className="h-12 w-12 mx-auto mb-4 text-green-600" />
-                <div className="text-3xl font-bold mb-2">{mockStats.activeDepartments}</div>
-                <p className="text-muted-foreground">{t('homepage.departments', 'Департаментов')}</p>
+                <div className="text-3xl font-bold mb-2">6</div>
+                <p className="text-muted-foreground">Департаментов</p>
               </CardContent>
             </Card>
             
@@ -226,7 +228,7 @@ export default function Homepage() {
               <CardContent className="p-6 text-center">
                 <Clock className="h-12 w-12 mx-auto mb-4 text-purple-600" />
                 <div className="text-3xl font-bold mb-2">{mockStats.averageResponseTime}</div>
-                <p className="text-muted-foreground">{t('homepage.avg_response_time', 'Среднее время ответа')}</p>
+                <p className="text-muted-foreground">Среднее время ответа</p>
               </CardContent>
             </Card>
           </div>
@@ -378,7 +380,7 @@ export default function Homepage() {
               variant="outline" 
               className="gap-2 border-white text-white hover:bg-white hover:text-blue-600"
             >
-              <MessageCircle className="h-5 w-5" />
+              <DiscordIcon className="h-5 w-5" />
               Присоединиться к Discord
             </Button>
           </div>

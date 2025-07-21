@@ -38,9 +38,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Выносим React и React DOM в отдельный чанк
+          // Выносим React и React DOM в самостоятельный чанк
           'react-vendor': ['react', 'react-dom'],
-          // Выносим UI библиотеки в отдельный чанк
+          // Выносим UI библиотеки в самостоятельный чанк
           'ui-vendor': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',

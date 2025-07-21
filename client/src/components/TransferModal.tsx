@@ -20,6 +20,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Department } from "@shared/schema";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 const transferSchema = z.object({
   type: z.enum(["transfer_dept", "transfer_div"]),
@@ -52,6 +53,7 @@ export function TransferModal({ children }: TransferModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const { data: departments = [] } = useQuery<Department[]>({
     queryKey: ['/api/departments']
@@ -129,10 +131,10 @@ export function TransferModal({ children }: TransferModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ArrowRightLeft className="h-5 w-5" />
-            Transfer Request
+            {t('transfer.title', 'Заявка на перевод')}
           </DialogTitle>
           <DialogDescription>
-            Submit a request to transfer between departments or divisions.
+            {t('transfer.description', 'Отправьте заявку на перевод между департаментами или подразделениями.')}
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +146,7 @@ export function TransferModal({ children }: TransferModalProps) {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Transfer Type</FormLabel>
+                  <FormLabel>{t('transfer.type', 'Тип перевода')}</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -154,18 +156,18 @@ export function TransferModal({ children }: TransferModalProps) {
                       <div className="flex items-center space-x-2 border rounded-lg p-4">
                         <RadioGroupItem value="transfer_dept" id="dept" />
                         <Label htmlFor="dept" className="flex-1 cursor-pointer">
-                          <div className="font-medium">Department Transfer</div>
+                          <div className="font-medium">{t('transfer.type.department', 'Перевод между департаментами')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Move to a different department
+                            <span>{t('transfer.type.department_desc', 'Перейти в другой департамент')}</span>
                           </div>
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2 border rounded-lg p-4">
                         <RadioGroupItem value="transfer_div" id="div" />
                         <Label htmlFor="div" className="flex-1 cursor-pointer">
-                          <div className="font-medium">Division Transfer</div>
+                          <div className="font-medium">{t('transfer.type.division', 'Перевод между подразделениями')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Move to a different division
+                            <span>{t('transfer.type.division_desc', 'Перейти в другое подразделение')}</span>
                           </div>
                         </Label>
                       </div>
@@ -183,11 +185,11 @@ export function TransferModal({ children }: TransferModalProps) {
                 name="fromDepartment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Department</FormLabel>
+                    <FormLabel>{t('transfer.current_department', 'Текущий департамент')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select current department" />
+                          <SelectValue placeholder={t('transfer.select_current_department', 'Выберите текущий департамент')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -209,11 +211,11 @@ export function TransferModal({ children }: TransferModalProps) {
                 name="toDepartment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Department</FormLabel>
+                    <FormLabel>{t('transfer.target_department', 'Целевой департамент')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select target department" />
+                          <SelectValue placeholder={t('transfer.select_target_department', 'Выберите целевой департамент')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -251,7 +253,7 @@ export function TransferModal({ children }: TransferModalProps) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select current division" />
+                            <SelectValue placeholder={t('transfer.select_current_division', 'Выберите текущее подразделение')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -283,7 +285,7 @@ export function TransferModal({ children }: TransferModalProps) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select target division" />
+                            <SelectValue placeholder={t('transfer.select_target_division', 'Выберите целевое подразделение')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -307,7 +309,7 @@ export function TransferModal({ children }: TransferModalProps) {
               name="effectiveDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Preferred Effective Date (Optional)</FormLabel>
+                  <FormLabel>{t('transfer.effective_date', 'Желаемая дата перевода (необязательно)')}</FormLabel>
                   <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -342,9 +344,7 @@ export function TransferModal({ children }: TransferModalProps) {
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>
-                    When would you like this transfer to take effect?
-                  </FormDescription>
+                  <FormDescription>{t('transfer.effective_date_desc', 'Когда вы хотите, чтобы перевод вступил в силу?')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -356,18 +356,16 @@ export function TransferModal({ children }: TransferModalProps) {
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reason for Transfer</FormLabel>
+                  <FormLabel>{t('transfer.reason', 'Причина перевода')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Please provide a detailed explanation for your transfer request..."
+                      placeholder={t('transfer.reason_placeholder', 'Пожалуйста, подробно опишите причину вашего перевода...')}
                       className="resize-none"
                       rows={4}
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Explain why you want to transfer and how it will benefit both departments.
-                  </FormDescription>
+                  <FormDescription>{t('transfer.reason_desc', 'Объясните, почему вы хотите перевестись и как это принесёт пользу обоим департаментам.')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -379,18 +377,16 @@ export function TransferModal({ children }: TransferModalProps) {
               name="additionalInfo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Additional Information (Optional)</FormLabel>
+                  <FormLabel>{t('transfer.additional_info', 'Дополнительная информация (необязательно)')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Any additional information that might be relevant to your transfer request..."
+                      placeholder={t('transfer.additional_info_placeholder', 'Любая дополнительная информация, которая может быть важна для вашей заявки...')}
                       className="resize-none"
                       rows={3}
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Include any relevant experience, certifications, or special circumstances.
-                  </FormDescription>
+                  <FormDescription>{t('transfer.additional_info_desc', 'Укажите опыт, сертификаты или особые обстоятельства.')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -401,12 +397,10 @@ export function TransferModal({ children }: TransferModalProps) {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
                 <div className="space-y-1">
-                  <div className="font-medium text-yellow-800">Important Notes:</div>
+                  <div className="font-medium text-yellow-800">{t('transfer.important_notes', 'Важные примечания:')}</div>
                   <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Transfer requests require approval from both departments</li>
-                    <li>• You may need to complete additional training or testing</li>
-                    <li>• Current assignments and certifications will be reviewed</li>
-                    <li>• Processing time may vary depending on department availability</li>
+                    <li>{t('transfer.note_approval', 'Заявки на перевод требуют одобрения обоих департаментов.')}</li>
+                    <li>{t('transfer.note_training', 'Возможно, потребуется дополнительное обучение или тестирование.')}</li>
                   </ul>
                 </div>
               </div>
@@ -418,13 +412,13 @@ export function TransferModal({ children }: TransferModalProps) {
                 variant="outline"
                 onClick={() => setIsOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Отмена')}
               </Button>
               <Button
                 type="submit"
                 disabled={submitMutation.isPending}
               >
-                {submitMutation.isPending ? 'Submitting...' : 'Submit Transfer Request'}
+                {t('transfer.submit', 'Отправить заявку на перевод')}
               </Button>
             </div>
           </form>
