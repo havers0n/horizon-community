@@ -16,6 +16,7 @@ const isSupabaseConnection = process.env.DATABASE_URL?.includes('supabase.com') 
 
 console.log('Supabase connection:', isSupabaseConnection ? 'Yes' : 'No');
 
+console.trace("Creating PG Pool here");
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: isSupabaseConnection ? { rejectUnauthorized: false } : false,
