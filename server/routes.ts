@@ -16,6 +16,8 @@ import filledReportsRoutes from "./routes/filledReports";
 import { initializeCADWebSocket } from "./websocket";
 import fs from 'fs/promises';
 import path from 'path';
+import { authenticateToken, requireSupervisor, requireAdmin } from './middleware/auth.middleware';
+import { uploadMiddleware, handleUpload } from './fileUpload';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -33,46 +35,46 @@ interface AuthenticatedRequest extends Request {
 }
 
 // Middleware to verify JWT token
-const authenticateToken = async (req: any, res: any, next: any) => {
-  console.log('🔍 authenticateToken middleware called');
-  console.log('  URL:', req.url);
-  console.log('  Method:', req.method);
-  console.log('  Headers:', req.headers);
+// const authenticateToken = async (req: any, res: any, next: any) => {
+//   console.log('🔍 authenticateToken middleware called');
+//   console.log('  URL:', req.url);
+//   console.log('  Method:', req.method);
+//   console.log('  Headers:', req.headers);
   
-  try {
-    const user = await getAuthenticatedUser(req);
-    console.log('  User result:', user ? `${user.email} (ID: ${user.id})` : 'null');
+//   try {
+//     const user = await getAuthenticatedUser(req);
+//     console.log('  User result:', user ? `${user.email} (ID: ${user.id})` : 'null');
     
-    if (!user) {
-      console.log('❌ No user found, returning 401');
-      return res.status(401).json({ message: 'Access token required' });
-    }
+//     if (!user) {
+//       console.log('❌ No user found, returning 401');
+//       return res.status(401).json({ message: 'Access token required' });
+//     }
     
-    req.user = user;
-    console.log('✅ User authenticated, proceeding to route');
+//     req.user = user;
+//     console.log('✅ User authenticated, proceeding to route');
     
-    // Также получаем Supabase auth user для backward compatibility
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (token) {
-      const { data: { user: authUser } } = await supabase.auth.getUser(token);
-      req.authUser = authUser;
-    }
+//     // Также получаем Supabase auth user для backward compatibility
+//     const authHeader = req.headers['authorization'];
+//     const token = authHeader && authHeader.split(' ')[1];
+//     if (token) {
+//       const { data: { user: authUser } } = await supabase.auth.getUser(token);
+//       req.authUser = authUser;
+//     }
     
-    next();
-  } catch (error) {
-    console.error('❌ Authentication error:', error);
-    return res.status(401).json({ message: 'Authentication failed' });
-  }
-};
+//     next();
+//   } catch (error) {
+//     console.error('❌ Authentication error:', error);
+//     return res.status(401).json({ message: 'Authentication failed' });
+//   }
+// };
 
 // Middleware to check if user has supervisor/admin role
-const requireSupervisor = (req: any, res: any, next: any) => {
-  if (!req.user || !['supervisor', 'admin'].includes(req.user.role)) {
-    return res.status(403).json({ message: 'Supervisor access required' });
-  }
-  next();
-};
+// const requireSupervisor = (req: any, res: any, next: any) => {
+//   if (!req.user || !['supervisor', 'admin'].includes(req.user.role)) {
+//     return res.status(403).json({ message: 'Supervisor access required' });
+//   }
+//   next();
+// };
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -860,6 +862,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   const schedulerRoutes = createSchedulerRoutes(scheduler);
   app.use('/api/scheduler', schedulerRoutes);
+
+  app.post('/api/files/upload/:category', authenticateToken, uploadMiddleware, handleUpload);
 
   const httpServer = createServer(app);
   

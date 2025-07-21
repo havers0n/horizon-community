@@ -32,6 +32,15 @@ export const requireSupervisor = (req: Request, res: Response, next: NextFunctio
   next();
 };
 
+// Middleware для проверки роли admin
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+  next();
+};
+
 // Backward compatibility - deprecated (will be removed in future versions)
 export const verifyJWT = authenticateToken;
 export const requireAdminOrSupervisor = requireSupervisor;
