@@ -139,7 +139,7 @@
   
   .btn-gradient-success {
     background: var(--gradient-success);
-    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg shadow-success/25;
+    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg shadow-success-25;
   }
   
   .btn-gradient-warning {
@@ -307,7 +307,7 @@
 }
 
 .status-badge.approved {
-  @apply bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-lg shadow-success/25;
+  @apply bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-lg shadow-success-25;
 }
 
 .status-badge.rejected {
