@@ -15,6 +15,11 @@ module.exports = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
       },
+      boxShadow: {
+        'primary': '0 4px 14px 0 hsl(var(--primary) / 0.10)', // 10% opacity
+        'primary-25': '0 4px 14px 0 hsl(var(--primary) / 0.25)', // 25% opacity
+        'primary-5': '0 4px 14px 0 hsl(var(--primary) / 0.05)', // 5% opacity
+      },
     },
   },
   plugins: [],

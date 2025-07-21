@@ -105,7 +105,7 @@
   
   /* Hover эффекты для карточек */
   .card-hover {
-    @apply transition-smooth hover:shadow-lg hover:-translate-y-1 hover:shadow-primary/10;
+    @apply transition-smooth hover:shadow-lg hover:-translate-y-1 hover:shadow-primary;
   }
   
   /* Анимация появления */
