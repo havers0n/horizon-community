@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  workflow_dispatch: # Позволяет запускать вручную
 
 jobs:
   deploy:
@@ -30,6 +30,7 @@ jobs:
 
       - name: Create deployment package
         run: |
+          # Создаем архив только с необходимыми файлами (без env.example)
           tar -czf deployment.tar.gz \
             dist/ \
             package.json \
@@ -59,33 +60,42 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            # Переходим в директорию приложения
             cd /var/www/app
+            
+            # Распаковываем архив
             tar -xzf deployment.tar.gz
-
+            
+            # Проверяем наличие .env файла
             echo "🔍 Проверяем .env файл..."
             if [ -f .env ]; then
               echo "✅ .env файл найден"
+              echo "📋 Содержимое .env (первые 3 строки):"
               head -3 .env
             else
               echo "❌ .env файл не найден"
               exit 1
             fi
-
-            # Безопасный рестарт через PM2
+            
+            # Безопасный рестарт приложения
             if pm2 list | grep -q "roleplayidentity"; then
-              echo "🔄 Релоадим приложение через pm2..."
+              echo "🔄 Перезапускаем приложение..."
               pm2 reload roleplayidentity
             else
-              echo "🚀 Первый старт приложения через pm2..."
+              echo "🚀 Запускаем приложение впервые..."
               NODE_ENV=production pm2 start dist/server.js --name roleplayidentity
             fi
-
+            
+            # Сохраняем конфигурацию PM2
             pm2 save
-
+            
+            # Проверяем статус
             echo "📊 Статус приложения:"
             pm2 status
-
+            
+            # Очищаем архив
             rm -f deployment.tar.gz
+            
             echo "✅ Деплой завершен успешно!"
 
       - name: Health check
@@ -95,14 +105,18 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            # Ждем немного для запуска приложения
             sleep 5
+            
+            # Проверяем статус PM2
             pm2 status
-
+            
+            # Проверяем доступность приложения
             if curl -f http://localhost:5000/api/health > /dev/null 2>&1; then
               echo "✅ Приложение доступно на localhost:5000"
             else
               echo "❌ Приложение недоступно на localhost:5000"
-              echo "📋 Последние 10 строк логов PM2:"
+              echo "📋 Логи приложения:"
               pm2 logs roleplayidentity --lines 10 --nostream
               exit 1
-            fi
+            fi 
