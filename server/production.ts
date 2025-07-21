@@ -25,6 +25,24 @@ export function serveStatic(app: Express) {
     );
   }
 
+  // Проверяем содержимое папки
+  try {
+    const files = fs.readdirSync(distPath);
+    console.log(`📂 Files in dist/public:`, files);
+    
+    if (fs.existsSync(path.join(distPath, 'css'))) {
+      const cssFiles = fs.readdirSync(path.join(distPath, 'css'));
+      console.log(`🎨 CSS files:`, cssFiles);
+    }
+    
+    if (fs.existsSync(path.join(distPath, 'js'))) {
+      const jsFiles = fs.readdirSync(path.join(distPath, 'js'));
+      console.log(`📜 JS files:`, jsFiles.slice(0, 5)); // показываем первые 5
+    }
+  } catch (error) {
+    console.error(`❌ Error reading dist/public:`, error);
+  }
+
   console.log(`✅ Serving static files from: ${distPath}`);
   app.use(express.static(distPath));
 
