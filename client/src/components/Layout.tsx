@@ -76,7 +76,7 @@ export function Layout({ children }: LayoutProps) {
   const userRole = user?.role;
   if (userRole === 'supervisor' || userRole === 'admin') {
     navItems.push({ path: '/admin', label: 'Админ панель', icon: Users });
-    navItems.push({ path: '/admin-leave-management', label: 'Управление отпусками', icon: Calendar });
+    // 'Управление отпусками' убираем из верхнего меню
   }
 
   const getUserInitials = (email: string) => {
