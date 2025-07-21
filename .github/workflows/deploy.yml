@@ -33,6 +33,7 @@ jobs:
           tar -czf deployment.tar.gz \
             dist/ \
             client/ \
+            shared/ \
             vite.config.ts \
             package.json \
             package-lock.json \
