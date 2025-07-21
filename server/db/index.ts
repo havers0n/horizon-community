@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import * as schema from '../../shared/schema';
 
 console.log("ENV DATABASE_URL:", process.env.DATABASE_URL);
+console.log("DRIZZLE DATABASE_URL:", process.env.DATABASE_URL);
 
 // Determine if we're in production or development
 const isProduction = process.env.NODE_ENV === 'production';
