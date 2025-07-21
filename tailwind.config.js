@@ -12,6 +12,7 @@ module.exports = {
       },
       colors: {
         border: 'var(--border, #e5e7eb)',
+        background: 'var(--background, #fff)', // <--- добавлено
       },
     },
   },
