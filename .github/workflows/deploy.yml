@@ -32,6 +32,7 @@ jobs:
         run: |
           tar -czf deployment.tar.gz \
             dist/ \
+            client/ \
             package.json \
             package-lock.json \
             scripts/ \
