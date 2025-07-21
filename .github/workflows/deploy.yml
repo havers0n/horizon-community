@@ -35,6 +35,7 @@ jobs:
             client/ \
             shared/ \
             vite.config.ts \
+            tailwind.config.js \
             package.json \
             package-lock.json \
             scripts/ \
