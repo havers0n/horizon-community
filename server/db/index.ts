@@ -15,6 +15,7 @@ const defaultLocalUrl = 'postgresql://postgres:postgres@localhost:54322/postgres
 const isSupabaseConnection = process.env.DATABASE_URL?.includes('supabase.com') || 
                             process.env.DATABASE_URL?.includes('aws-0-eu-north-1.pooler.supabase.com');
 
+console.trace("Creating PG Pool here");
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || defaultLocalUrl,
   ssl: isSupabaseConnection ? { rejectUnauthorized: false } : false,
