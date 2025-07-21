@@ -231,38 +231,54 @@ function LeaveManagement() {
               </div>
               
               <div className="grid grid-cols-7 gap-1">
-                {calendarDays.map((day, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleDayClick(day.date)}
-                    className={`
-                      min-h-[80px] p-2 border rounded-lg relative cursor-pointer
-                      ${day.isToday ? 'bg-blue-900 border-blue-700' : isInRange(day.date) ? 'bg-blue-950 border-blue-900' : 'bg-gray-900 border-gray-800'}
-                      ${!day.isCurrentMonth ? 'opacity-50' : ''}
-                      hover:bg-blue-800 transition-colors
-                    `}
-                  >
-                    <div className="text-sm font-medium mb-1">
-                      {format(day.date, 'd')}
+                {calendarDays.map((day, index) => {
+                  // Определяем стили для выбранных дат
+                  let cellBg = '';
+                  if (rangeStart && !rangeEnd && isSameDay(day.date, rangeStart)) {
+                    cellBg = 'bg-blue-800 border-blue-600';
+                  } else if (rangeStart && rangeEnd) {
+                    if (isSameDay(day.date, rangeStart) || isSameDay(day.date, rangeEnd)) {
+                      cellBg = 'bg-blue-800 border-blue-600';
+                    } else if (isInRange(day.date)) {
+                      cellBg = 'bg-blue-950 border-blue-900';
+                    }
+                  } else if (day.isToday) {
+                    cellBg = 'bg-blue-900 border-blue-700';
+                  } else {
+                    cellBg = 'bg-gray-900 border-gray-800';
+                  }
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => handleDayClick(day.date)}
+                      className={`
+                        min-h-[80px] p-2 border rounded-lg relative cursor-pointer
+                        ${cellBg}
+                        ${!day.isCurrentMonth ? 'opacity-50' : ''}
+                        hover:bg-blue-900 transition-colors
+                      `}
+                    >
+                      <div className="text-sm font-medium mb-1">
+                        {format(day.date, 'd')}
+                      </div>
+                      {day.leaves.map((leave, leaveIndex) => {
+                        const data = leave.data as any;
+                        return (
+                          <div
+                            key={leaveIndex}
+                            className={`
+                              text-xs p-1 rounded mb-1 truncate
+                              ${getLeaveTypeColor(data.leaveType)}
+                            `}
+                            title={`${getLeaveTypeLabel(data.leaveType)} - ${data.reason}`}
+                          >
+                            {getLeaveTypeLabel(data.leaveType)}
+                          </div>
+                        );
+                      })}
                     </div>
-                    
-                    {day.leaves.map((leave, leaveIndex) => {
-                      const data = leave.data as any;
-                      return (
-                        <div
-                          key={leaveIndex}
-                          className={`
-                            text-xs p-1 rounded mb-1 truncate
-                            ${getLeaveTypeColor(data.leaveType)}
-                          `}
-                          title={`${getLeaveTypeLabel(data.leaveType)} - ${data.reason}`}
-                        >
-                          {getLeaveTypeLabel(data.leaveType)}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {/* Кнопка для создания заявки по выбранному диапазону */}
               {rangeStart && rangeEnd && (

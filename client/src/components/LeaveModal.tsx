@@ -183,35 +183,6 @@ export function LeaveModal({ children, defaultStartDate, defaultEndDate, onSubmi
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6">
-            {/* Leave Type */}
-            <FormField
-              control={form.control}
-              name="leaveType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Тип отпуска</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите тип отпуска" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {leaveTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{type.label}</span>
-                            <span className="text-xs text-muted-foreground">{type.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Partial Day Option */}
             <FormField
               control={form.control}
@@ -411,71 +382,6 @@ export function LeaveModal({ children, defaultStartDate, defaultEndDate, onSubmi
                   </FormControl>
                   <FormDescription>
                     Укажите подробности, почему вам необходим этот отпуск.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Emergency Contact (for extended leave) */}
-            {totalDays > 5 && (
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="emergencyContact"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Экстренный контакт</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Имя контактного лица"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Для длительных отпусков (5+ дней)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="emergencyPhone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Телефон экстренного контакта</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Номер телефона"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Coverage Arrangements */}
-            <FormField
-              control={form.control}
-              name="coverageArrangements"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Организация замещения</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Опишите, как будут выполняться ваши обязанности во время вашего отсутствия..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Укажите, кто будет выполнять ваши обязанности и как будет организована передача дел.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
