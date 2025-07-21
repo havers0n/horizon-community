@@ -28,6 +28,9 @@ module.exports = {
         'primary': '0 4px 14px 0 hsl(var(--primary) / 0.10)', // 10% opacity
         'primary-25': '0 4px 14px 0 hsl(var(--primary) / 0.25)', // 25% opacity
         'primary-5': '0 4px 14px 0 hsl(var(--primary) / 0.05)', // 5% opacity
+        'success-25': '0 4px 14px 0 hsl(var(--success) / 0.25)',
+        'warning-25': '0 4px 14px 0 hsl(var(--warning) / 0.25)',
+        'destructive-25': '0 4px 14px 0 hsl(var(--destructive) / 0.25)',
       },
     },
   },
