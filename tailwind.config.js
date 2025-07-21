@@ -14,6 +14,15 @@ module.exports = {
         border: 'hsl(var(--border))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+        // Можно добавить success, destructive и т.д. по аналогии
       },
       boxShadow: {
         'primary': '0 4px 14px 0 hsl(var(--primary) / 0.10)', // 10% opacity
