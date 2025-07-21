@@ -17,9 +17,10 @@ import { useToast } from "@/hooks/use-toast";
 import { getAuthState } from "@/lib/auth";
 import { 
   Clock, UserCheck, AlertCircle, TrendingUp, Check, X, Eye,
-  Users, FileText, Building, Headphones
+  Users, FileText, Building, Headphones, Calendar
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from 'react-i18next';
 
 interface Stats {
   pendingApplications: number;
@@ -49,6 +50,7 @@ interface User {
 }
 
 export default function AdminPanel() {
+  const { t } = useTranslation();
   const { user } = getAuthState();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -61,8 +63,8 @@ export default function AdminPanel() {
           <Card>
             <CardContent className="text-center py-12">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-              <p className="text-gray-600">You don't have permission to access the admin panel.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('admin.access_denied', 'Access Denied')}</h3>
+              <p className="text-gray-600">{t('admin.no_permission', "You don't have permission to access the admin panel.")}</p>
             </CardContent>
           </Card>
         </div>
@@ -140,27 +142,27 @@ export default function AdminPanel() {
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Administration Panel</h1>
-          <p className="text-gray-600">Manage users, applications, and system settings.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('admin.header', 'Administration Panel')}</h1>
+          <p className="text-gray-600">{t('admin.description', 'Manage users, applications, and system settings.')}</p>
           
           {/* Admin Navigation */}
           <div className="mt-4 flex flex-wrap gap-2">
             <Button variant="outline" size="sm" asChild>
               <a href="/admin-leave-management">
-                <Clock className="h-4 w-4 mr-2" />
-                Leave Management
+                <Calendar className="h-4 w-4 mr-2" />
+                {t('admin.leave_management', 'Управление отпусками')}
               </a>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <a href="/admin-reports">
                 <FileText className="h-4 w-4 mr-2" />
-                Report Management
+                {t('admin.report_management', 'Report Management')}
               </a>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <a href="/admin/support">
                 <Headphones className="h-4 w-4 mr-2" />
-                Support Tickets
+                {t('admin.support_tickets', 'Support Tickets')}
               </a>
             </Button>
           </div>
@@ -176,7 +178,7 @@ export default function AdminPanel() {
                     <Clock className="h-8 w-8 text-warning" />
                   </div>
                   <div className="ml-5">
-                    <p className="text-sm font-medium text-gray-500">Pending Reviews</p>
+                    <p className="text-sm font-medium text-gray-500">{t('admin.stats.pending_reviews', 'Pending Reviews')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.pendingApplications}</p>
                   </div>
                 </div>
@@ -190,7 +192,7 @@ export default function AdminPanel() {
                     <UserCheck className="h-8 w-8 text-success" />
                   </div>
                   <div className="ml-5">
-                    <p className="text-sm font-medium text-gray-500">Total Users</p>
+                    <p className="text-sm font-medium text-gray-500">{t('admin.stats.total_users', 'Total Users')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
                   </div>
                 </div>
@@ -204,7 +206,7 @@ export default function AdminPanel() {
                     <Building className="h-8 w-8 text-success" />
                   </div>
                   <div className="ml-5">
-                    <p className="text-sm font-medium text-gray-500">Departments</p>
+                    <p className="text-sm font-medium text-gray-500">{t('admin.stats.departments', 'Departments')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.activeDepartments}</p>
                   </div>
                 </div>
@@ -218,7 +220,7 @@ export default function AdminPanel() {
                     <Headphones className="h-8 w-8 text-error" />
                   </div>
                   <div className="ml-5">
-                    <p className="text-sm font-medium text-gray-500">Open Tickets</p>
+                    <p className="text-sm font-medium text-gray-500">{t('admin.stats.open_tickets', 'Open Tickets')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.openTickets}</p>
                   </div>
                 </div>

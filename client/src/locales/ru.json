@@ -287,5 +287,16 @@
   "user_roles.candidate": "Кандидат",
   "user_roles.member": "Участник",
   "user_roles.supervisor": "Супервайзер",
-  "user_roles.admin": "Администратор"
+  "user_roles.admin": "Администратор",
+  "admin.access_denied": "Доступ запрещён",
+  "admin.no_permission": "У вас нет прав для доступа к админ-панели.",
+  "admin.header": "Административная панель",
+  "admin.description": "Управляйте пользователями, заявками и системными настройками.",
+  "admin.leave_management": "Управление отпусками",
+  "admin.report_management": "Управление рапортами",
+  "admin.support_tickets": "Тикеты поддержки",
+  "admin.stats.pending_reviews": "Заявки в ожидании",
+  "admin.stats.total_users": "Всего пользователей",
+  "admin.stats.departments": "Департаменты",
+  "admin.stats.open_tickets": "Открытые тикеты"
 }
