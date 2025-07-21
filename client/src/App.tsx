@@ -29,8 +29,10 @@ const FAQ = () => import("@/pages/FAQ");
 const NotFound = () => import("@/pages/not-found");
 const CAD = () => import("@/pages/CAD");
 const DesignSystemDemo = () => import("@/components/DesignSystemDemo");
+const TransferDepartment = () => import("./pages/TransferDepartment");
 
 function Router() {
+  console.log('Router: render');
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -63,12 +65,26 @@ function Router() {
       <Route path="/departments">
         <LazyPage component={Departments} />
       </Route>
-      <Route path="/applications">
-        <LazyPage component={Applications} />
+      
+      {/* Специфические роуты applications должны быть ВЫШЕ общего /applications */}
+      <Route path="/applications/joint">
+        <LazyPage component={JointPositions} />
+      </Route>
+      <Route path="/applications/leave">
+        <LazyPage component={LeaveManagement} />
+      </Route>
+      <Route path="/applications/transfer">
+        {/* Логирование вынесено вне JSX */}
+        {(() => { console.log('Route: /applications/transfer matched'); return null; })()}
+        <LazyPage component={TransferDepartment} />
       </Route>
       <Route path="/applications/:id">
         <div />
       </Route>
+      <Route path="/applications">
+        <LazyPage component={Applications} />
+      </Route>
+      
       <Route path="/joint-positions">
         <LazyPage component={JointPositions} />
       </Route>
@@ -119,6 +135,7 @@ function Router() {
 }
 
 function App() {
+  console.log('App: render');
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -134,3 +151,4 @@ function App() {
 }
 
 export default App;
+

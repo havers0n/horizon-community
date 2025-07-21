@@ -38,7 +38,7 @@ async function applyMigration() {
     const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
     console.log('📄 Читаем файл миграции:', migrationPath);
     
-    // Разбиваем SQL на отдельные команды
+    // Разбиваем SQL на раздельные команды
     const commands = migrationSQL
       .split(';')
       .map(cmd => cmd.trim())

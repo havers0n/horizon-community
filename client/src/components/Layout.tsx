@@ -28,6 +28,8 @@ import {
 import LanguageDropdown from "@/components/ui/LanguageDropdown";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { DiscordIcon } from "@/components/ui/DiscordIcon";
+import { VKIcon } from "@/components/ui/VKIcon";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -128,6 +130,10 @@ export function Layout({ children }: LayoutProps) {
                           <DropdownMenuItem asChild>
                             <Link href="/applications/leave">Заявки на отпуск</Link>
                           </DropdownMenuItem>
+                          {/* Пункт теперь виден для всех ролей */}
+                          <DropdownMenuItem asChild>
+                            <Link href="/applications/transfer">Перевод между департаментами</Link>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     );
@@ -160,7 +166,7 @@ export function Layout({ children }: LayoutProps) {
                   onClick={handleDiscordClick}
                   className="text-[#5865F2] hover:bg-[#5865F2] hover:text-white transition-colors duration-200"
                 >
-                  <MessageCircle className="h-4 w-4" />
+                  <DiscordIcon className="h-4 w-4" />
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -168,7 +174,7 @@ export function Layout({ children }: LayoutProps) {
                   onClick={handleVKClick}
                   className="text-[#4C75A3] hover:bg-[#4C75A3] hover:text-white transition-colors duration-200"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <VKIcon className="h-4 w-4" />
                 </Button>
               </div>
 

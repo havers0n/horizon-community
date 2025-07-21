@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
+import { DiscordIcon } from "@/components/ui/DiscordIcon";
+import { VKIcon } from "@/components/ui/VKIcon";
 
 interface FAQItem {
   id: number;
@@ -283,11 +285,11 @@ const FAQ: React.FC = () => {
             </p>
             <div className="flex gap-4 justify-center">
               <Button onClick={handleVKClick} variant="outline" className="btn-gold-outline">
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <VKIcon className="h-4 w-4 mr-2" />
                 Группа ВК
               </Button>
               <Button onClick={handleDiscordClick} className="btn-gold">
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <DiscordIcon className="h-4 w-4 mr-2" />
                 Discord
               </Button>
             </div>
@@ -310,7 +312,7 @@ const FAQ: React.FC = () => {
                     onClick={handleDiscordClick}
                     className="btn-gold"
                   >
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                    <DiscordIcon className="h-4 w-4 mr-2" />
                     Наш Discord
                   </Button>
                   <Button 
@@ -318,7 +320,7 @@ const FAQ: React.FC = () => {
                     variant="outline"
                     className="btn-gold-outline"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <VKIcon className="h-4 w-4 mr-2" />
                     Группа ВК
                   </Button>
                 </div>

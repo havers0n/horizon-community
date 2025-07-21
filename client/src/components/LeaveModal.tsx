@@ -55,19 +55,22 @@ type LeaveFormData = z.infer<typeof leaveSchema>;
 
 interface LeaveModalProps {
   children?: React.ReactNode;
+  defaultStartDate?: Date;
+  defaultEndDate?: Date;
+  onSubmit?: () => void;
 }
 
 const leaveTypes = [
-  { value: "vacation", label: "Vacation Leave", description: "Planned time off for rest and recreation" },
-  { value: "sick", label: "Sick Leave", description: "Medical illness or recovery time" },
-  { value: "personal", label: "Personal Leave", description: "Personal matters and appointments" },
-  { value: "emergency", label: "Emergency Leave", description: "Unexpected urgent situations" },
-  { value: "medical", label: "Medical Leave", description: "Extended medical treatment or surgery" },
-  { value: "maternity", label: "Maternity/Paternity Leave", description: "Child birth or adoption" },
-  { value: "bereavement", label: "Bereavement Leave", description: "Loss of family member or close friend" }
+  { value: "vacation", label: "Отпуск", description: "Плановый отдых и восстановление" },
+  { value: "sick", label: "Больничный", description: "Болезнь или восстановление после болезни" },
+  { value: "personal", label: "Личный", description: "Личные дела и встречи" },
+  { value: "emergency", label: "Экстренный", description: "Неожиданные срочные ситуации" },
+  { value: "medical", label: "Медицинский", description: "Длительное лечение или операция" },
+  { value: "maternity", label: "Декретный", description: "Рождение ребёнка или усыновление" },
+  { value: "bereavement", label: "Траурный", description: "Потеря члена семьи или близкого человека" }
 ];
 
-export function LeaveModal({ children }: LeaveModalProps) {
+export function LeaveModal({ children, defaultStartDate, defaultEndDate, onSubmit }: LeaveModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [startCalendarOpen, setStartCalendarOpen] = useState(false);
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
@@ -78,7 +81,9 @@ export function LeaveModal({ children }: LeaveModalProps) {
     defaultValues: {
       isPartialDay: false,
       reason: "",
-      additionalNotes: ""
+      additionalNotes: "",
+      startDate: defaultStartDate,
+      endDate: defaultEndDate
     }
   });
 
@@ -115,14 +120,14 @@ export function LeaveModal({ children }: LeaveModalProps) {
       setIsOpen(false);
       form.reset();
       toast({
-        title: "Leave Application Submitted",
-        description: "Your leave request has been submitted for approval."
+        title: "Заявка на отпуск отправлена",
+        description: "Ваша заявка на отпуск отправлена на рассмотрение."
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to submit leave application",
+        title: "Ошибка",
+        description: error.message || "Не удалось отправить заявку на отпуск",
         variant: "destructive"
       });
     }
@@ -134,8 +139,9 @@ export function LeaveModal({ children }: LeaveModalProps) {
     return differenceInDays(endDate, startDate) + 1;
   };
 
-  const onSubmit = (data: LeaveFormData) => {
+  const onSubmitForm = (data: LeaveFormData) => {
     submitMutation.mutate(data);
+    if (onSubmit) onSubmit();
   };
 
   const getLeaveTypeColor = (type: string) => {
@@ -160,7 +166,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
         {children || (
           <Button className="gap-2">
             <Plane className="h-4 w-4" />
-            Request Leave
+            Запросить отпуск
           </Button>
         )}
       </DialogTrigger>
@@ -168,26 +174,26 @@ export function LeaveModal({ children }: LeaveModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plane className="h-5 w-5" />
-            Leave Request
+            Заявка на отпуск
           </DialogTitle>
           <DialogDescription>
-            Submit a request for time off from your duties.
+            Отправьте заявку на освобождение от служебных обязанностей.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6">
             {/* Leave Type */}
             <FormField
               control={form.control}
               name="leaveType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type of Leave</FormLabel>
+                  <FormLabel>Тип отпуска</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select leave type" />
+                        <SelectValue placeholder="Выберите тип отпуска" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -220,10 +226,10 @@ export function LeaveModal({ children }: LeaveModalProps) {
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>
-                      Partial Day Leave
+                      Частичный день отпуска
                     </FormLabel>
                     <FormDescription>
-                      Check this if you only need part of a day off (e.g., morning appointment)
+                      Отметьте, если вам нужен отпуск только на часть дня (например, утренний приём у врача)
                     </FormDescription>
                   </div>
                 </FormItem>
@@ -237,7 +243,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
                 name="startDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>Дата начала</FormLabel>
                     <Popover open={startCalendarOpen} onOpenChange={setStartCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -285,7 +291,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
                 name="endDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>Дата окончания</FormLabel>
                     <Popover open={endCalendarOpen} onOpenChange={setEndCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -336,7 +342,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
                   name="startTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Time</FormLabel>
+                      <FormLabel>Время начала</FormLabel>
                       <FormControl>
                         <Input
                           type="time"
@@ -353,7 +359,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
                   name="endTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>End Time</FormLabel>
+                      <FormLabel>Время окончания</FormLabel>
                       <FormControl>
                         <Input
                           type="time"
@@ -394,17 +400,17 @@ export function LeaveModal({ children }: LeaveModalProps) {
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reason for Leave</FormLabel>
+                  <FormLabel>Причина отпуска</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Please provide the reason for your leave request..."
+                      placeholder="Пожалуйста, укажите причину вашего отпуска..."
                       className="resize-none"
                       rows={3}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide specific details about why you need this time off.
+                    Укажите подробности, почему вам необходим этот отпуск.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -419,15 +425,15 @@ export function LeaveModal({ children }: LeaveModalProps) {
                   name="emergencyContact"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Emergency Contact</FormLabel>
+                      <FormLabel>Экстренный контакт</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Contact person name"
+                          placeholder="Имя контактного лица"
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        For extended leave (5+ days)
+                        Для длительных отпусков (5+ дней)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -439,10 +445,10 @@ export function LeaveModal({ children }: LeaveModalProps) {
                   name="emergencyPhone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Emergency Phone</FormLabel>
+                      <FormLabel>Телефон экстренного контакта</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Phone number"
+                          placeholder="Номер телефона"
                           {...field}
                         />
                       </FormControl>
@@ -459,17 +465,17 @@ export function LeaveModal({ children }: LeaveModalProps) {
               name="coverageArrangements"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Coverage Arrangements</FormLabel>
+                  <FormLabel>Организация замещения</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe how your duties will be covered during your absence..."
+                      placeholder="Опишите, как будут выполняться ваши обязанности во время вашего отсутствия..."
                       className="resize-none"
                       rows={3}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Explain who will handle your responsibilities and any handover arrangements.
+                    Укажите, кто будет выполнять ваши обязанности и как будет организована передача дел.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -482,10 +488,10 @@ export function LeaveModal({ children }: LeaveModalProps) {
               name="additionalNotes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Additional Notes (Optional)</FormLabel>
+                  <FormLabel>Дополнительные сведения (необязательно)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Any additional information..."
+                      placeholder="Любая дополнительная информация..."
                       className="resize-none"
                       rows={2}
                       {...field}
@@ -501,7 +507,7 @@ export function LeaveModal({ children }: LeaveModalProps) {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
                 <div className="space-y-1">
-                  <div className="font-medium text-yellow-800">Leave Policy Reminders:</div>
+                  <div className="font-medium text-yellow-800">Напоминания о правилах отпуска:</div>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• Подавайте заявки на отпуск минимум за 5 дней</li>
                     <li>• Экстренные и больничные отпуска можно подавать задним числом</li>
@@ -519,13 +525,13 @@ export function LeaveModal({ children }: LeaveModalProps) {
                 variant="outline"
                 onClick={() => setIsOpen(false)}
               >
-                Cancel
+                Отмена
               </Button>
               <Button
                 type="submit"
                 disabled={submitMutation.isPending}
               >
-                {submitMutation.isPending ? 'Submitting...' : 'Submit Leave Request'}
+                {submitMutation.isPending ? 'Отправка...' : 'Отправить заявку на отпуск'}
               </Button>
             </div>
           </form>
