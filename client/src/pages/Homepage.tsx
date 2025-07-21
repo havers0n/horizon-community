@@ -161,10 +161,10 @@ export default function Homepage() {
                 {t('homepage.join', 'Присоединиться')}
               </Button>
             </Link>
-            <Link href="/departments">
+            <Link href="/login">
               <Button size="lg" variant="outline" className="gap-2">
                 <Shield className="h-5 w-5" />
-                {t('homepage.view_departments', 'Департаменты')}
+                {t('homepage.login', 'Войти в личный кабинет')}
               </Button>
             </Link>
           </div>
