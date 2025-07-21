@@ -6,7 +6,14 @@ module.exports = {
     "./shared/**/*.{ts,js}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      borderColor: {
+        border: 'var(--border, #e5e7eb)', // fallback на стандартный цвет Tailwind
+      },
+      colors: {
+        border: 'var(--border, #e5e7eb)',
+      },
+    },
   },
   plugins: [],
 };
