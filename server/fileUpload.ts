@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import multer from 'multer';
+import { Request as ExpressRequest } from 'express';
+// import { File as MulterFile } from 'multer';
 
 interface UploadedFile {
   id: string;
@@ -20,6 +23,10 @@ interface FileUploadConfig {
   allowedMimeTypes: string[];
   uploadDirectory: string;
   preserveOriginalName: boolean;
+}
+
+interface MulterRequest extends ExpressRequest {
+  file: Express.Multer.File;
 }
 
 export class FileUploadManager {
@@ -366,6 +373,14 @@ export class FileUploadManager {
 // Singleton instance
 export const fileUploadManager = new FileUploadManager();
 
+// Multer storage config (in-memory, можно заменить на diskStorage при необходимости)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+
+export const uploadMiddleware = upload.single('file');
+
+// Экспорт singleton-экземпляра handleUpload
+export const handleUpload = createUploadMiddleware().handleUpload;
+
 // Express middleware for file uploads
 export function createUploadMiddleware() {
   return {
@@ -380,34 +395,27 @@ export function createUploadMiddleware() {
       next();
     },
 
-    // Upload handler
-    handleUpload: async (req: Request, res: Response) => {
+    // Upload handler (теперь использует multer)
+    handleUpload: async (req: MulterRequest, res: Response) => {
       try {
         const { category } = req.params;
         const userId = (req as any).user?.id;
-
         if (!userId) {
           return res.status(401).json({ error: 'Authentication required' });
         }
-
-        // Mock file data - in real implementation would come from multer
-        const mockFile = {
-          buffer: Buffer.from('mock file content'),
-          originalname: 'test-file.pdf',
-          mimetype: 'application/pdf'
-        };
-
+        if (!req.file) {
+          return res.status(400).json({ error: 'No file uploaded' });
+        }
         const result = await fileUploadManager.uploadFile(
-          mockFile.buffer,
-          mockFile.originalname,
-          mockFile.mimetype,
+          req.file.buffer,
+          req.file.originalname,
+          req.file.mimetype,
           category,
           userId
         );
-
         if (result.success) {
-          res.json({ 
-            success: true, 
+          res.json({
+            success: true,
             file: {
               id: result.file!.id,
               originalName: result.file!.originalName,
@@ -419,7 +427,6 @@ export function createUploadMiddleware() {
         } else {
           res.status(400).json({ success: false, error: result.error });
         }
-
       } catch (error) {
         console.error('Upload handler error:', error);
         res.status(500).json({ success: false, error: 'Upload failed' });

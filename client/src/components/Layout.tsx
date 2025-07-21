@@ -63,19 +63,17 @@ export function Layout({ children }: LayoutProps) {
     window.open('https://vk.com/your-group', '_blank');
   };
 
+  // navItems без Личный кабинет, Совмещения, Отпуска
   const navItems = [
-    { path: '/dashboard', label: 'Личный кабинет', icon: Shield },
     { path: '/departments', label: 'Департаменты', icon: Building },
     { path: '/applications', label: 'Заявки', icon: FileText },
-    { path: '/joint-positions', label: 'Совмещения', icon: Users },
-    { path: '/leave-management', label: 'Отпуска', icon: Calendar },
     { path: '/reports', label: 'Рапорты', icon: FileText },
     { path: '/support', label: 'Поддержка', icon: Headphones },
     { path: '/faq', label: 'FAQ', icon: HelpCircle },
   ];
 
-  // Проверяем роль пользователя из user_metadata или app_metadata
-  const userRole = user?.user_metadata?.role || user?.app_metadata?.role;
+  // Проверяем роль пользователя
+  const userRole = user?.role;
   if (userRole === 'supervisor' || userRole === 'admin') {
     navItems.push({ path: '/admin', label: 'Админ панель', icon: Users });
     navItems.push({ path: '/admin-leave-management', label: 'Управление отпусками', icon: Calendar });
@@ -107,13 +105,34 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
-                <Shield className="text-primary text-2xl mr-3" />
-                <span className="text-xl font-bold text-foreground">Horizon Community</span>
+                <Link href="/dashboard" className="flex items-center">
+                  <Shield className="text-primary text-2xl mr-3" />
+                  <span className="text-xl font-bold text-foreground">Horizon Community</span>
+                </Link>
               </div>
-              
               {/* Desktop Navigation */}
               <div className="hidden md:ml-10 md:flex space-x-8">
+                {/* Департаменты, Заявки (dropdown), Рапорты, Поддержка, FAQ */}
                 {navItems.map((item) => {
+                  if (item.label === 'Заявки') {
+                    // Выпадающий список для Заявки
+                    return (
+                      <DropdownMenu key="applications">
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className={`py-4 px-1 text-sm font-medium transition-colors duration-200 ${location.startsWith('/applications') ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-primary'}`}>Заявки <ChevronDown className="inline ml-1 w-4 h-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem asChild>
+                            <Link href="/applications/joint">Заявки на совмещение</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/applications/leave">Заявки на отпуск</Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    );
+                  }
+                  // Остальные пункты
                   const isActive = location.startsWith(item.path);
                   return (
                     <Link

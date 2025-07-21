@@ -15,16 +15,34 @@ const isSupabaseConnection = process.env.DATABASE_URL?.includes('supabase.com') 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || defaultLocalUrl,
   ssl: isSupabaseConnection ? { rejectUnauthorized: false } : false,
-  // Additional configuration for Supabase
-  max: 20, // Maximum number of connections in the pool
-  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 5000, // Increased connection timeout
+  // Supabase optimized settings
+  max: 10, // Reduced from 20 to avoid connection limits
+  idleTimeoutMillis: 60000, // Increased to 60 seconds
+  connectionTimeoutMillis: 10000, // Increased to 10 seconds
   // Supabase specific settings
   ...(isSupabaseConnection && {
     ssl: { rejectUnauthorized: false },
     keepAlive: true,
-    keepAliveInitialDelayMillis: 10000,
+    keepAliveInitialDelayMillis: 30000, // Increased to 30 seconds
+    // Connection retry settings
+    maxUses: 7500, // Supabase recommended
+    // Error handling
+    allowExitOnIdle: false,
   })
+});
+
+// Handle connection errors
+pool.on('error', (err) => {
+  console.error('❌ Database pool error:', err.message);
+  // Don't exit the process, let it reconnect
+});
+
+pool.on('connect', () => {
+  console.log('✅ New database connection established');
+});
+
+pool.on('remove', () => {
+  console.log('🔌 Database connection removed from pool');
 });
 
 export const db = drizzle(pool, { schema });

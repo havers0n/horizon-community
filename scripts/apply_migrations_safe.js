@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-console.log('🔍 Applying database migrations...');
+console.log('🔍 Applying database migrations safely...');
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Database URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
 
@@ -28,6 +28,28 @@ const pool = new Pool({
   })
 });
 
+async function executeStatement(client, statement) {
+  try {
+    await client.query(statement);
+    return true;
+  } catch (error) {
+    // Ignore errors for already existing objects
+    if (error.code === '42710' || // duplicate_object
+        error.code === '42P07' || // duplicate_table
+        error.code === '42701' || // duplicate_column
+        error.code === '42723' || // duplicate_function
+        error.message.includes('already exists') ||
+        error.message.includes('duplicate key')) {
+      console.log(`  ⚠️  Skipped (already exists): ${statement.substring(0, 50)}...`);
+      return true;
+    } else {
+      console.error(`  ❌ Error: ${error.message}`);
+      console.error(`  Statement: ${statement.substring(0, 100)}...`);
+      throw error;
+    }
+  }
+}
+
 async function applyMigrations() {
   const client = await pool.connect();
   
@@ -35,7 +57,7 @@ async function applyMigrations() {
     console.log('✅ Connected to database');
     
     // Create migrations table if it doesn't exist
-    await client.query(`
+    await executeStatement(client, `
       CREATE TABLE IF NOT EXISTS migrations (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL UNIQUE,
@@ -84,7 +106,7 @@ async function applyMigrations() {
           
           for (const statement of statements) {
             if (statement.trim()) {
-              await client.query(statement);
+              await executeStatement(client, statement);
             }
           }
           
@@ -115,7 +137,7 @@ async function applyMigrations() {
     
     if (columns.length === 0) {
       console.log('⚠️  cad_token column not found, adding it manually...');
-      await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS cad_token TEXT UNIQUE');
+      await executeStatement(client, 'ALTER TABLE users ADD COLUMN IF NOT EXISTS cad_token TEXT UNIQUE');
       console.log('✅ Added cad_token column');
     } else {
       console.log('✅ cad_token column exists');
