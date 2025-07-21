@@ -8,11 +8,12 @@ module.exports = {
   theme: {
     extend: {
       borderColor: {
-        border: 'var(--border, #e5e7eb)', // fallback на стандартный цвет Tailwind
+        border: 'hsl(var(--border))', // fallback на стандартный цвет Tailwind
       },
       colors: {
-        border: 'var(--border, #e5e7eb)',
-        background: 'var(--background, #fff)', // <--- добавлено
+        border: 'hsl(var(--border))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
       },
     },
   },
