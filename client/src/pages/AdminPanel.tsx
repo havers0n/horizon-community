@@ -96,14 +96,14 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/applications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
       toast({
-        title: "Success",
-        description: "Application status updated successfully"
+        title: t('admin.applications.success', 'Success'),
+        description: t('admin.applications.success_desc', 'Application status updated successfully')
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update application",
+        title: t('admin.applications.error', 'Error'),
+        description: t('admin.applications.error_desc', 'Failed to update application'),
         variant: "destructive"
       });
     }
@@ -238,11 +238,11 @@ export default function AdminPanel() {
         {/* Applications Management Table */}
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Pending Applications</CardTitle>
+            <CardTitle>{t('admin.applications.pending', 'Pending Applications')}</CardTitle>
             <div className="flex items-center space-x-4">
               <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-2" />
-                Filter
+                {t('admin.applications.filter', 'Filter')}
               </Button>
             </div>
           </CardHeader>
@@ -258,11 +258,11 @@ export default function AdminPanel() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Applicant</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>{t('admin.applications.applicant', 'Applicant')}</TableHead>
+                      <TableHead>{t('admin.applications.type', 'Type')}</TableHead>
+                      <TableHead>{t('admin.applications.date', 'Date')}</TableHead>
+                      <TableHead>{t('admin.applications.status', 'Status')}</TableHead>
+                      <TableHead>{t('admin.applications.actions', 'Actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -341,8 +341,8 @@ export default function AdminPanel() {
             ) : (
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications</h3>
-                <p className="text-gray-600">No applications to review at this time.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('admin.applications.no_applications', 'No Applications')}</h3>
+                <p className="text-gray-600">{t('admin.applications.no_applications_desc', 'No applications to review at this time.')}</p>
               </div>
             )}
           </CardContent>
@@ -351,7 +351,7 @@ export default function AdminPanel() {
         {/* Recent Users */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Users</CardTitle>
+            <CardTitle>{t('admin.users.recent', 'Recent Users')}</CardTitle>
           </CardHeader>
           <CardContent>
             {users && users.length > 0 ? (
@@ -359,10 +359,10 @@ export default function AdminPanel() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Joined</TableHead>
+                      <TableHead>{t('admin.users.user', 'User')}</TableHead>
+                      <TableHead>{t('admin.users.role', 'Role')}</TableHead>
+                      <TableHead>{t('admin.applications.status', 'Status')}</TableHead>
+                      <TableHead>{t('admin.users.joined', 'Joined')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -404,8 +404,8 @@ export default function AdminPanel() {
             ) : (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Users</h3>
-                <p className="text-gray-600">No users found.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('admin.users.no_users', 'No Users')}</h3>
+                <p className="text-gray-600">{t('admin.users.no_users_desc', 'No users found.')}</p>
               </div>
             )}
           </CardContent>

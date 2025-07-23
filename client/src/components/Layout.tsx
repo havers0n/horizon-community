@@ -23,7 +23,8 @@ import {
   HelpCircle,
   MessageCircle,
   ExternalLink,
-  Calendar
+  Calendar,
+  MessageSquare
 } from "lucide-react";
 import LanguageDropdown from "@/components/ui/LanguageDropdown";
 import { NotificationsModal } from "@/components/NotificationsModal";
@@ -71,6 +72,7 @@ export function Layout({ children }: LayoutProps) {
     { path: '/applications', label: 'Заявки', icon: FileText },
     { path: '/reports', label: 'Рапорты', icon: FileText },
     { path: '/tests', label: 'Тесты', icon: FileText },
+    { path: '/forum', label: 'Форум', icon: MessageSquare },
     { path: '/support', label: 'Поддержка', icon: Headphones },
     { path: '/faq', label: 'FAQ', icon: HelpCircle },
   ];
@@ -114,7 +116,7 @@ export function Layout({ children }: LayoutProps) {
                 </Link>
               </div>
               {/* Desktop Navigation */}
-              <div className="hidden md:ml-10 md:flex space-x-8">
+              <div className="hidden md:ml-10 md:flex items-center space-x-8">
                 {/* Департаменты, Заявки (dropdown), Рапорты, Поддержка, FAQ */}
                 {navItems.map((item) => {
                   if (item.label === 'Заявки') {
@@ -122,7 +124,9 @@ export function Layout({ children }: LayoutProps) {
                     return (
                       <DropdownMenu key="applications">
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className={`py-4 px-1 text-sm font-medium transition-colors duration-200 ${location.startsWith('/applications') ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-primary'}`}>Заявки <ChevronDown className="inline ml-1 w-4 h-4" /></Button>
+                          <div className={`py-4 px-1 text-sm font-medium transition-colors duration-200 cursor-pointer flex items-center ${location.startsWith('/applications') ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-primary'}`}>
+                            Заявки <ChevronDown className="inline ml-1 w-4 h-4" />
+                          </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem asChild>

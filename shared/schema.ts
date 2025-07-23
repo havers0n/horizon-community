@@ -667,6 +667,149 @@ export const entryApplicationSchema = z.object({
   otherCommunitiesDetails: z.string().optional(),
 });
 
+// ===== СИСТЕМА ФОРУМА =====
+
+// Категории форума (департаменты)
+export const forumCategories = pgTable("forum_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  departmentId: integer("department_id").references(() => departments.id),
+  icon: text("icon"),
+  color: text("color"),
+  orderIndex: integer("order_index").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  topicsCount: integer("topics_count").notNull().default(0),
+  postsCount: integer("posts_count").notNull().default(0),
+  lastActivity: timestamp("last_activity"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Темы форума
+export const forumTopics = pgTable("forum_topics", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").notNull().references(() => forumCategories.id),
+  authorId: integer("author_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  status: text("status").notNull().default("open"), // open, closed, pinned, locked
+  isPinned: boolean("is_pinned").notNull().default(false),
+  isLocked: boolean("is_locked").notNull().default(false),
+  viewsCount: integer("views_count").notNull().default(0),
+  repliesCount: integer("replies_count").notNull().default(0),
+  lastPostId: integer("last_post_id"),
+  lastPostAuthorId: integer("last_post_author_id").references(() => users.id),
+  lastPostAt: timestamp("last_post_at"),
+  tags: text("tags").array().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Сообщения в темах
+export const forumPosts = pgTable("forum_posts", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").notNull().references(() => forumTopics.id),
+  authorId: integer("author_id").notNull().references(() => users.id),
+  parentId: integer("parent_id"), // для цитирования (self-reference будет добавлено позже)
+  content: text("content").notNull(),
+  isEdited: boolean("is_edited").notNull().default(false),
+  editedAt: timestamp("edited_at"),
+  editedBy: integer("edited_by").references(() => users.id),
+  reactionsCount: integer("reactions_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Реакции на сообщения
+export const forumReactions = pgTable("forum_reactions", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => forumPosts.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  reactionType: text("reaction_type").notNull(), // like, dislike, heart, etc.
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Подписки на темы
+export const forumSubscriptions = pgTable("forum_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  topicId: integer("topic_id").notNull().references(() => forumTopics.id),
+  isEmailNotification: boolean("is_email_notification").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Просмотры тем
+export const forumViews = pgTable("forum_views", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").notNull().references(() => forumTopics.id),
+  userId: integer("user_id").references(() => users.id), // может быть null для гостей
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+});
+
+// Статистика форума
+export const forumStats = pgTable("forum_stats", {
+  id: serial("id").primaryKey(),
+  totalTopics: integer("total_topics").notNull().default(0),
+  totalPosts: integer("total_posts").notNull().default(0),
+  totalMembers: integer("total_members").notNull().default(0),
+  onlineNow: integer("online_now").notNull().default(0),
+  lastUpdate: timestamp("last_update").defaultNow().notNull(),
+});
+
+// Insert schemas для форума
+export const insertForumCategorySchema = createInsertSchema(forumCategories).omit({
+  id: true,
+  topicsCount: true,
+  postsCount: true,
+  lastActivity: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertForumTopicSchema = createInsertSchema(forumTopics).omit({
+  id: true,
+  viewsCount: true,
+  repliesCount: true,
+  lastPostId: true,
+  lastPostAuthorId: true,
+  lastPostAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  isEdited: true,
+  editedAt: true,
+  editedBy: true,
+  reactionsCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertForumReactionSchema = createInsertSchema(forumReactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertForumSubscriptionSchema = createInsertSchema(forumSubscriptions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertForumViewSchema = createInsertSchema(forumViews).omit({
+  id: true,
+  viewedAt: true,
+});
+
+export const insertForumStatsSchema = createInsertSchema(forumStats).omit({
+  id: true,
+  lastUpdate: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -735,6 +878,22 @@ export type UserBadge = typeof userBadges.$inferSelect;
 export type InsertUserBadge = z.infer<typeof insertUserBadgeSchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+
+// Типы для форума
+export type ForumCategory = typeof forumCategories.$inferSelect;
+export type InsertForumCategory = z.infer<typeof insertForumCategorySchema>;
+export type ForumTopic = typeof forumTopics.$inferSelect;
+export type InsertForumTopic = z.infer<typeof insertForumTopicSchema>;
+export type ForumPost = typeof forumPosts.$inferSelect;
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+export type ForumReaction = typeof forumReactions.$inferSelect;
+export type InsertForumReaction = z.infer<typeof insertForumReactionSchema>;
+export type ForumSubscription = typeof forumSubscriptions.$inferSelect;
+export type InsertForumSubscription = z.infer<typeof insertForumSubscriptionSchema>;
+export type ForumView = typeof forumViews.$inferSelect;
+export type InsertForumView = z.infer<typeof insertForumViewSchema>;
+export type ForumStats = typeof forumStats.$inferSelect;
+export type InsertForumStats = z.infer<typeof insertForumStatsSchema>;
 
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;

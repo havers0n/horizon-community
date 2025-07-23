@@ -40,6 +40,7 @@ import { format, differenceInDays } from "date-fns";
 import { ru } from "date-fns/locale";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 
 interface LeaveApplication {
   id: number;
@@ -79,6 +80,7 @@ interface LeaveStats {
 }
 
 function AdminLeaveManagement() {
+  const { t } = useTranslation();
   const [selectedApplication, setSelectedApplication] = useState<LeaveApplication | null>(null);
   const [reviewComment, setReviewComment] = useState("");
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
@@ -196,40 +198,40 @@ function AdminLeaveManagement() {
   const rejectedApplications = leaveApplications.filter(app => app.status === 'rejected');
 
   if (isApplicationsLoading || isStatsLoading) {
-    return <div className="flex items-center justify-center min-h-96">Загрузка данных...</div>;
+    return <div className="flex items-center justify-center min-h-96">{t('admin.leave.loading', 'Loading data...')}</div>;
   }
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Административное управление отпусками</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('admin.leave.title', 'Administrative Leave Management')}</h1>
         <p className="text-muted-foreground">
-          Управление заявками на отпуск и просмотр статистики по всем департаментам.
+          {t('admin.leave.subtitle', 'Manage leave applications and view statistics across all departments.')}
         </p>
       </div>
 
       <Tabs defaultValue="applications" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="applications">Заявки</TabsTrigger>
-          <TabsTrigger value="stats">Статистика</TabsTrigger>
-          <TabsTrigger value="departments">По департаментам</TabsTrigger>
+          <TabsTrigger value="applications">{t('admin.leave.applications', 'Applications')}</TabsTrigger>
+          <TabsTrigger value="stats">{t('admin.leave.stats', 'Statistics')}</TabsTrigger>
+          <TabsTrigger value="departments">{t('admin.leave.departments', 'By Departments')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="applications" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Заявки на отпуск</h2>
+            <h2 className="text-xl font-semibold">{t('admin.leave.applications_title', 'Leave Applications')}</h2>
             <div className="flex gap-2">
               <Badge variant="outline" className="gap-1">
                 <Clock className="h-3 w-3" />
-                {pendingApplications.length} в ожидании
+                {pendingApplications.length} {t('admin.leave.pending', 'pending')}
               </Badge>
               <Badge variant="default" className="gap-1 bg-green-600">
                 <CheckCircle className="h-3 w-3" />
-                {approvedApplications.length} одобрено
+                {approvedApplications.length} {t('admin.leave.approved', 'approved')}
               </Badge>
               <Badge variant="destructive" className="gap-1">
                 <XCircle className="h-3 w-3" />
-                {rejectedApplications.length} отклонено
+                {rejectedApplications.length} {t('admin.leave.rejected', 'rejected')}
               </Badge>
             </div>
           </div>
@@ -239,14 +241,14 @@ function AdminLeaveManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Сотрудник</TableHead>
-                    <TableHead>Департамент</TableHead>
-                    <TableHead>Тип отпуска</TableHead>
-                    <TableHead>Период</TableHead>
-                    <TableHead>Дней</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>Подана</TableHead>
-                    <TableHead>Действия</TableHead>
+                    <TableHead>{t('admin.leave.employee', 'Employee')}</TableHead>
+                    <TableHead>{t('admin.leave.department', 'Department')}</TableHead>
+                    <TableHead>{t('admin.leave.leave_type', 'Leave Type')}</TableHead>
+                    <TableHead>{t('admin.leave.period', 'Period')}</TableHead>
+                    <TableHead>{t('admin.leave.days', 'Days')}</TableHead>
+                    <TableHead>{t('admin.applications.status', 'Status')}</TableHead>
+                    <TableHead>{t('admin.leave.submitted', 'Submitted')}</TableHead>
+                    <TableHead>{t('admin.leave.actions', 'Actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -270,7 +272,7 @@ function AdminLeaveManagement() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {application.author?.department?.name || 'Не указан'}
+                          {application.author?.department?.name || t('admin.leave.not_specified', 'Not specified')}
                         </TableCell>
                         <TableCell>
                           <Badge className={getLeaveTypeColor(data.leaveType)}>

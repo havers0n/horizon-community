@@ -13,6 +13,7 @@ import {
   AlertCircle,
   FileText
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface Question {
   id: string;
@@ -29,6 +30,7 @@ interface TestQuestionEditorProps {
 }
 
 export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestionEditorProps) {
+  const { t } = useTranslation();
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
 
@@ -37,7 +39,7 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
       id: `q_${Date.now()}`,
       question: '',
       type: 'single',
-      options: ['Вариант 1', 'Вариант 2'],
+      options: [t('test_editor.option', 'Option') + ' 1', t('test_editor.option', 'Option') + ' 2'],
       correctAnswer: '',
       points: 1
     };
@@ -51,7 +53,7 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
   };
 
   const deleteQuestion = (questionId: string) => {
-    if (confirm('Вы уверены, что хотите удалить этот вопрос?')) {
+    if (confirm(t('test_editor.confirm_delete', 'Вы уверены, что хотите удалить этот вопрос?'))) {
       const updatedQuestions = questions.filter(q => q.id !== questionId);
       onQuestionsChange(updatedQuestions);
     }
@@ -62,24 +64,24 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
 
     // Валидация
     if (!editingQuestion.question.trim()) {
-      alert('Введите текст вопроса');
+      alert(t('test_editor.validation.question_required', 'Введите текст вопроса'));
       return;
     }
 
     if (editingQuestion.type !== 'text') {
       const validOptions = editingQuestion.options?.filter(option => option.trim() !== '') || [];
       if (validOptions.length < 2) {
-        alert('Добавьте минимум 2 варианта ответа');
+        alert(t('test_editor.validation.min_options', 'Добавьте минимум 2 варианта ответа'));
         return;
       }
 
       if (editingQuestion.type === 'single' && !editingQuestion.correctAnswer) {
-        alert('Выберите правильный ответ');
+        alert(t('test_editor.validation.single_answer', 'Выберите правильный ответ'));
         return;
       }
 
       if (editingQuestion.type === 'multiple' && (!editingQuestion.correctAnswer || (editingQuestion.correctAnswer as string[]).length === 0)) {
-        alert('Выберите хотя бы один правильный ответ');
+        alert(t('test_editor.validation.multiple_answer', 'Выберите хотя бы один правильный ответ'));
         return;
       }
     }
@@ -141,9 +143,9 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
 
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
-      case 'single': return 'Один ответ';
-      case 'multiple': return 'Несколько ответов';
-      case 'text': return 'Текстовый ответ';
+      case 'single': return t('test_editor.question_type.single', 'Один правильный ответ');
+      case 'multiple': return t('test_editor.question_type.multiple', 'Несколько правильных ответов');
+      case 'text': return t('test_editor.question_type.text', 'Текстовый ответ');
       default: return type;
     }
   };
@@ -153,10 +155,10 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
       {/* Questions List */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Вопросы теста ({questions.length})</h3>
+          <h3 className="text-lg font-medium">{t('test_editor.questions', 'Вопросы теста')} ({questions.length})</h3>
           <Button onClick={addQuestion}>
             <Plus className="h-4 w-4 mr-2" />
-            Добавить вопрос
+            {t('test_editor.add_question', 'Добавить вопрос')}
           </Button>
         </div>
 
@@ -166,10 +168,10 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
-                    <span className="font-medium">Вопрос {index + 1}</span>
+                    <span className="font-medium">{t('test_exam.question', 'Вопрос')} {index + 1}</span>
                     {getQuestionTypeIcon(question.type)}
                     <Badge variant="outline">{getQuestionTypeLabel(question.type)}</Badge>
-                    <Badge variant="secondary">{question.points} баллов</Badge>
+                    <Badge variant="secondary">{question.points} {t('test_editor.points', 'баллов')}</Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{question.question}</p>
                   
@@ -222,13 +224,13 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
           <Card>
             <CardContent className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Нет вопросов</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('test_editor.no_questions', 'Нет вопросов')}</h3>
               <p className="text-gray-600 mb-4">
-                Добавьте вопросы для создания теста
+                {t('test_editor.add_questions_desc', 'Добавьте вопросы для создания теста')}
               </p>
               <Button onClick={addQuestion}>
                 <Plus className="h-4 w-4 mr-2" />
-                Добавить первый вопрос
+                {t('test_editor.add_first_question', 'Добавить первый вопрос')}
               </Button>
             </CardContent>
           </Card>
@@ -240,23 +242,23 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
         <Card className="border-2 border-blue-200">
           <CardHeader>
             <CardTitle>
-              {isAddingQuestion ? 'Добавить вопрос' : 'Редактировать вопрос'}
+              {isAddingQuestion ? t('test_editor.add_question', 'Добавить вопрос') : t('test_editor.edit_question', 'Редактировать вопрос')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Текст вопроса</label>
+              <label className="text-sm font-medium">{t('test_editor.question_text', 'Текст вопроса')}</label>
               <Textarea
                 value={editingQuestion.question}
                 onChange={(e) => updateQuestionField('question', e.target.value)}
-                placeholder="Введите текст вопроса"
+                placeholder={t('test_editor.question_placeholder', 'Введите текст вопроса')}
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Тип вопроса</label>
+                <label className="text-sm font-medium">{t('test_editor.question_type', 'Тип вопроса')}</label>
                 <Select
                   value={editingQuestion.type}
                   onValueChange={(value: 'single' | 'multiple' | 'text') => 
@@ -267,14 +269,14 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="single">Один ответ</SelectItem>
-                    <SelectItem value="multiple">Несколько ответов</SelectItem>
-                    <SelectItem value="text">Текстовый ответ</SelectItem>
+                    <SelectItem value="single">{t('test_editor.question_type.single', 'Один правильный ответ')}</SelectItem>
+                    <SelectItem value="multiple">{t('test_editor.question_type.multiple', 'Несколько правильных ответов')}</SelectItem>
+                    <SelectItem value="text">{t('test_editor.question_type.text', 'Текстовый ответ')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium">Баллы</label>
+                <label className="text-sm font-medium">{t('test_editor.points', 'Баллы')}</label>
                 <Input
                   type="number"
                   value={editingQuestion.points}
@@ -288,14 +290,14 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
             {/* Options for single/multiple choice questions */}
             {editingQuestion.type !== 'text' && (
               <div>
-                <label className="text-sm font-medium">Варианты ответов</label>
+                <label className="text-sm font-medium">{t('test_editor.options', 'Варианты ответов')}</label>
                 <div className="space-y-2">
                   {editingQuestion.options?.map((option, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <Input
                         value={option}
                         onChange={(e) => updateOption(index, e.target.value)}
-                        placeholder={`Вариант ${index + 1}`}
+                        placeholder={`${t('test_editor.option', 'Вариант')} ${index + 1}`}
                       />
                       <Button
                         size="sm"
@@ -313,20 +315,20 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
                     onClick={addOption}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Добавить вариант
+                    {t('test_editor.add_option', 'Добавить вариант')}
                   </Button>
                 </div>
 
                 {/* Correct answer selection */}
                 <div className="mt-4">
-                  <label className="text-sm font-medium">Правильный ответ</label>
+                  <label className="text-sm font-medium">{t('test_editor.correct_answer', 'Правильный ответ')}</label>
                   {editingQuestion.type === 'single' ? (
                     <Select
                       value={editingQuestion.correctAnswer as string}
                       onValueChange={(value) => updateQuestionField('correctAnswer', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите правильный ответ" />
+                        <SelectValue placeholder={t('test_editor.select_correct_answer', 'Выберите правильный ответ')} />
                       </SelectTrigger>
                       <SelectContent>
                         {editingQuestion.options?.filter(option => option.trim() !== '').map((option, index) => (
@@ -362,10 +364,10 @@ export function TestQuestionEditor({ questions, onQuestionsChange }: TestQuestio
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={cancelEdit}>
-                Отмена
+                {t('test_editor.cancel', 'Отмена')}
               </Button>
               <Button onClick={saveQuestion}>
-                {isAddingQuestion ? 'Добавить' : 'Сохранить'}
+                {isAddingQuestion ? t('test_editor.add', 'Добавить') : t('test_editor.save', 'Сохранить')}
               </Button>
             </div>
           </CardContent>
