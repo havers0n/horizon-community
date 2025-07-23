@@ -24,6 +24,8 @@ const LeaveManagement = () => import("@/pages/LeaveManagement");
 const AdminLeaveManagement = () => import("@/pages/AdminLeaveManagement");
 const AdminReports = () => import("@/pages/AdminReports");
 const TestExam = () => import("@/pages/TestExam");
+const Tests = () => import("@/pages/Tests");
+const AdminTests = () => import("@/pages/AdminTests");
 const Homepage = () => import("@/pages/Homepage");
 const FAQ = () => import("@/pages/FAQ");
 const NotFound = () => import("@/pages/not-found");
@@ -97,6 +99,9 @@ function Router() {
       <Route path="/admin-reports">
         <LazyPage component={AdminReports} />
       </Route>
+      <Route path="/admin-tests">
+        <LazyPage component={AdminTests} />
+      </Route>
       <Route path="/reports">
         <LazyPage component={Reports} />
       </Route>
@@ -108,6 +113,9 @@ function Router() {
       </Route>
       <Route path="/test/:id">
         <LazyPage component={TestExam} />
+      </Route>
+      <Route path="/tests">
+        <LazyPage component={Tests} />
       </Route>
 
       <Route path="/admin/support">

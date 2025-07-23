@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { Shield, Flame, Ambulance, Star, Building, Headphones, Users } from "lucide-react";
+import DepartmentDetails from "@/components/DepartmentDetails";
+import { DepartmentDetails as DepartmentDetailsType, getDepartmentByName } from "@/data/departments";
 
 interface Department {
   id: number;
@@ -15,10 +18,33 @@ interface Department {
 
 export default function Departments() {
   const { t } = useTranslation();
+  const [selectedDepartment, setSelectedDepartment] = useState<DepartmentDetailsType | null>(null);
   
   const { data: departments, isLoading } = useQuery<Department[]>({
     queryKey: ['/api/departments']
   });
+
+  const handleDepartmentClick = (department: Department) => {
+    // Пытаемся найти расширенные данные для департамента
+    const detailedDepartment = getDepartmentByName(department.name);
+    if (detailedDepartment) {
+      setSelectedDepartment(detailedDepartment);
+    } else {
+      // Если расширенных данных нет, создаем базовый объект
+      setSelectedDepartment({
+        id: department.id,
+        name: department.name,
+        fullName: department.fullName,
+        description: department.description,
+        logoUrl: department.logoUrl,
+        gallery: department.gallery
+      });
+    }
+  };
+
+  const handleBackToDepartments = () => {
+    setSelectedDepartment(null);
+  };
 
   const getDepartmentIcon = (name: string) => {
     switch (name.toLowerCase()) {
@@ -68,6 +94,18 @@ export default function Departments() {
     );
   }
 
+  // Если выбран департамент, показываем его подробную информацию
+  if (selectedDepartment) {
+    return (
+      <Layout>
+        <DepartmentDetails 
+          department={selectedDepartment} 
+          onBack={handleBackToDepartments}
+        />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -86,6 +124,7 @@ export default function Departments() {
               <Card 
                 key={department.id} 
                 className={`card-hover cursor-pointer transition-all duration-300 border-2 ${style} hover:scale-105`}
+                onClick={() => handleDepartmentClick(department)}
               >
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-4">

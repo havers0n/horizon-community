@@ -24,6 +24,142 @@ export function DesignSystemDemo() {
         {/* Цветовая палитра */}
         <section className="space-y-6">
           <h2 className="text-2xl font-bold text-foreground">Цветовая палитра</h2>
+          
+          {/* Сравнительная таблица */}
+          <Card className="card-gold">
+            <CardHeader>
+              <CardTitle>📊 Сравнительная таблица цветов</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-2">Назначение</th>
+                      <th className="text-left p-2">Тёмная тема</th>
+                      <th className="text-left p-2">Светлая тема</th>
+                      <th className="text-left p-2">Применение</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-border/50">
+                      <td className="p-2 font-medium">Фон</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#191F23] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#191F23</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#FFFFFF] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#FFFFFF</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Основной фон приложения</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="p-2 font-medium">Карточка/блок</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#23292F] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#23292F</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#F8F5EE] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#F8F5EE</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Контентные блоки, модальные окна</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="p-2 font-medium">Текст главный</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#E2C178] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#E2C178</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#191F23] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#191F23</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Заголовки, основной текст</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="p-2 font-medium">Текст вторичный</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#C4B68A] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#C4B68A</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#444A50] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#444A50</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Подписи, вспомогательный текст</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="p-2 font-medium">Акцент</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#E2C178] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#E2C178</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#E2C178] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#E2C178</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Кнопки, ссылки, важные элементы</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="p-2 font-medium">Интерактив</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#B89D5A] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#B89D5A</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#B89D5A] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#B89D5A</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Состояния hover, focus</td>
+                    </tr>
+                    <tr>
+                      <td className="p-2 font-medium">Граница</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#2C333A] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#2C333A</span>
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#ECE3D3] border border-border rounded"></div>
+                          <span className="font-mono text-xs">#ECE3D3</span>
+                        </div>
+                      </td>
+                      <td className="p-2 text-muted-foreground">Разделители, обводки элементов</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="card-gold">
               <CardHeader>

@@ -26,7 +26,7 @@ interface FileUploadConfig {
 }
 
 interface MulterRequest extends ExpressRequest {
-  file: Express.Multer.File;
+  file?: Express.Multer.File;
 }
 
 export class FileUploadManager {

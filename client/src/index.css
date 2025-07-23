@@ -134,22 +134,22 @@
   /* Градиентные кнопки с новой цветовой схемой */
   .btn-gradient-primary {
     background: var(--gradient-primary);
-    @apply text-primary-foreground border-0 hover:opacity-90 transition-opacity shadow-lg shadow-primary-25;
+    @apply text-primary-foreground border-0 hover:opacity-90 transition-opacity shadow-lg;
   }
   
   .btn-gradient-success {
     background: var(--gradient-success);
-    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg shadow-success-25;
+    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg;
   }
   
   .btn-gradient-warning {
     background: var(--gradient-warning);
-    @apply text-primary-foreground border-0 hover:opacity-90 transition-opacity shadow-lg shadow-warning-25;
+    @apply text-primary-foreground border-0 hover:opacity-90 transition-opacity shadow-lg;
   }
   
   .btn-gradient-error {
     background: var(--gradient-error);
-    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg shadow-destructive-25;
+    @apply text-white border-0 hover:opacity-90 transition-opacity shadow-lg;
   }
   
   /* Улучшенные состояния фокуса */
@@ -183,11 +183,11 @@
   
   /* Стили для карточек с новой цветовой схемой */
   .card-gold {
-    @apply bg-card border border-border shadow-lg shadow-primary-5;
+    @apply bg-card border border-border shadow-lg;
   }
   
   .card-gold:hover {
-    @apply shadow-xl shadow-primary border-primary/20;
+    @apply shadow-xl border-primary/20;
   }
 }
 
@@ -307,20 +307,20 @@
 }
 
 .status-badge.approved {
-  @apply bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-lg shadow-success-25;
+  @apply bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-lg;
 }
 
 .status-badge.rejected {
-  @apply bg-gradient-to-r from-destructive to-destructive/80 text-white shadow-lg shadow-destructive-25;
+  @apply bg-gradient-to-r from-destructive to-destructive/80 text-white shadow-lg;
 }
 
 .status-badge.pending {
-  @apply bg-gradient-to-r from-warning to-warning/80 text-warning-foreground shadow-lg shadow-warning-25;
+  @apply bg-gradient-to-r from-warning to-warning/80 text-warning-foreground shadow-lg;
 }
 
 /* Улучшенные кнопки действий */
 .action-button {
-  @apply transition-fast hover:scale-105 active:scale-95 shadow-md shadow-primary;
+  @apply transition-fast hover:scale-105 active:scale-95 shadow-md;
 }
 
 /* Анимация для уведомлений */
@@ -363,7 +363,7 @@
 
 /* Стили для кнопок с золотым акцентом */
 .btn-gold {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200 shadow-lg shadow-primary-25;
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200 shadow-lg;
 }
 
 .btn-gold-outline {

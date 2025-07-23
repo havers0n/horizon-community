@@ -70,6 +70,7 @@ export function Layout({ children }: LayoutProps) {
     { path: '/departments', label: 'Департаменты', icon: Building },
     { path: '/applications', label: 'Заявки', icon: FileText },
     { path: '/reports', label: 'Рапорты', icon: FileText },
+    { path: '/tests', label: 'Тесты', icon: FileText },
     { path: '/support', label: 'Поддержка', icon: Headphones },
     { path: '/faq', label: 'FAQ', icon: HelpCircle },
   ];
