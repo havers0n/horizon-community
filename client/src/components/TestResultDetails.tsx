@@ -14,6 +14,7 @@ import {
   User,
   Calendar
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface TestResult {
   id: number;
@@ -49,6 +50,7 @@ interface TestResultDetailsProps {
 }
 
 export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsProps) {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comment, setComment] = useState(result.results?.adminComment || '');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -80,9 +82,9 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pending': return 'На проверке';
-      case 'approved': return 'Одобрен';
-      case 'rejected': return 'Отклонен';
+      case 'pending': return t('admin.tests.results.pending', 'На проверке');
+      case 'approved': return t('admin.tests.results.approved', 'Одобрен');
+      case 'rejected': return t('admin.tests.results.rejected', 'Отклонен');
       default: return status;
     }
   };
@@ -113,11 +115,11 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
     return (
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium">Ответ пользователя:</span>
+          <span className="text-sm font-medium">{t('test_result.user_answer', 'Ответ пользователя:')}</span>
           <span className="text-sm">{userAnswerStr}</span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium">Правильный ответ:</span>
+          <span className="text-sm font-medium">{t('test_result.correct_answer', 'Правильный ответ:')}</span>
           <span className="text-sm">{correctAnswerStr}</span>
         </div>
       </div>
@@ -137,35 +139,35 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Детали результата теста</DialogTitle>
+            <DialogTitle>{t('test_result.details_title', 'Детали результата теста')}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6">
             {/* Основная информация */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Основная информация</CardTitle>
+                <CardTitle className="text-lg">{t('test_result.basic_info', 'Основная информация')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Пользователь:</span>
+                    <span className="text-sm font-medium">{t('test_result.user', 'Пользователь:')}</span>
                     <span className="text-sm">{result.username}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Тест:</span>
+                    <span className="text-sm font-medium">{t('test_result.test', 'Тест:')}</span>
                     <span className="text-sm">{result.testTitle}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Дата:</span>
+                    <span className="text-sm font-medium">{t('test_result.date', 'Дата:')}</span>
                     <span className="text-sm">{formatDate(result.createdAt)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Время:</span>
+                    <span className="text-sm font-medium">{t('test_result.time', 'Время:')}</span>
                     <span className="text-sm">{formatTime(result.timeSpent)}</span>
                   </div>
                 </div>
@@ -173,11 +175,11 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="text-2xl font-bold">{result.percentage}%</div>
-                    <div className="text-sm text-gray-600">Результат</div>
+                    <div className="text-sm text-gray-600">{t('test_result.result', 'Результат')}</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="text-2xl font-bold">{result.score}/{result.maxScore}</div>
-                    <div className="text-sm text-gray-600">Баллы</div>
+                    <div className="text-sm text-gray-600">{t('test_result.points', 'Баллы')}</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-center">
@@ -188,7 +190,7 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
                       )}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {result.passed ? 'Прошел' : 'Не прошел'}
+                      {result.passed ? t('test_result.passed', 'Прошел') : t('test_result.failed', 'Не прошел')}
                     </div>
                   </div>
                 </div>
@@ -201,11 +203,11 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <div className="flex items-center space-x-1">
                       <AlertTriangle className="h-4 w-4" />
-                      <span>Фокус: {result.focusLostCount}</span>
+                      <span>{t('test_result.focus', 'Фокус:')} {result.focusLostCount}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <AlertTriangle className="h-4 w-4" />
-                      <span>Предупреждения: {result.warningsCount}</span>
+                      <span>{t('test_result.warnings', 'Предупреждения:')} {result.warningsCount}</span>
                     </div>
                   </div>
                 </div>
@@ -216,21 +218,21 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
             {result.results?.answers && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Детали ответов</CardTitle>
+                  <CardTitle className="text-lg">{t('test_result.answer_details', 'Детали ответов')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {result.results.answers.map((answer, index) => (
                       <div key={answer.questionId} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between mb-3">
-                          <h4 className="font-medium">Вопрос {index + 1}</h4>
+                          <h4 className="font-medium">{t('test_exam.question', 'Вопрос')} {index + 1}</h4>
                           <div className="flex items-center space-x-2">
                             {answer.isCorrect ? (
                               <CheckCircle className="h-4 w-4 text-green-500" />
                             ) : (
                               <XCircle className="h-4 w-4 text-red-500" />
                             )}
-                            <Badge variant="secondary">{answer.points} баллов</Badge>
+                            <Badge variant="secondary">{answer.points} {t('test_result.points', 'баллов')}</Badge>
                           </div>
                         </div>
                         
@@ -248,15 +250,15 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
             {result.status === 'pending' && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Административные действия</CardTitle>
+                  <CardTitle className="text-lg">{t('test_result.admin_actions', 'Административные действия')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Комментарий (необязательно)</label>
+                    <label className="text-sm font-medium">{t('test_result.comment', 'Комментарий (необязательно)')}</label>
                     <Textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="Добавьте комментарий к решению..."
+                      placeholder={t('test_result.comment_placeholder', 'Добавьте комментарий к решению...')}
                       rows={3}
                     />
                   </div>
@@ -267,7 +269,7 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
                       onClick={() => setIsModalOpen(false)}
                       disabled={isUpdating}
                     >
-                      Отмена
+                      {t('test_result.cancel', 'Отмена')}
                     </Button>
                     <Button
                       variant="outline"
@@ -275,14 +277,14 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
                       disabled={isUpdating}
                     >
                       <XCircle className="h-4 w-4 mr-2" />
-                      Отклонить
+                      {t('test_result.reject', 'Отклонить')}
                     </Button>
                     <Button
                       onClick={() => handleStatusUpdate('approved')}
                       disabled={isUpdating}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Одобрить
+                      {t('test_result.approve', 'Одобрить')}
                     </Button>
                   </div>
                 </CardContent>
@@ -293,7 +295,7 @@ export function TestResultDetails({ result, onStatusUpdate }: TestResultDetailsP
             {result.results?.adminComment && result.status !== 'pending' && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Комментарий администратора</CardTitle>
+                  <CardTitle className="text-lg">{t('test_result.admin_comment', 'Комментарий администратора')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-700">{result.results.adminComment}</p>

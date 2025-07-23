@@ -32,6 +32,8 @@ const NotFound = () => import("@/pages/not-found");
 const CAD = () => import("@/pages/CAD");
 const DesignSystemDemo = () => import("@/components/DesignSystemDemo");
 const TransferDepartment = () => import("./pages/TransferDepartment");
+const Notifications = () => import("./pages/Notifications");
+const Forum = () => import("./pages/Forum");
 
 function Router() {
   console.log('Router: render');
@@ -116,6 +118,14 @@ function Router() {
       </Route>
       <Route path="/tests">
         <LazyPage component={Tests} />
+      </Route>
+
+      <Route path="/notifications">
+        <LazyPage component={Notifications} />
+      </Route>
+
+      <Route path="/forum">
+        <LazyPage component={Forum} />
       </Route>
 
       <Route path="/admin/support">

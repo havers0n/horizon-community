@@ -3,16 +3,17 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ApplicationModal } from "@/components/ApplicationModal";
 import { ComplaintModal } from "@/components/ComplaintModal";
 import { SupportModal } from "@/components/SupportModal";
 import { EntryApplicationModal } from "@/components/EntryApplicationModal";
 import { JointModal } from "@/components/JointModal";
+import { LeaveModal } from "@/components/LeaveModal";
+import { TransferModal } from "@/components/TransferModal";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthState } from "@/lib/auth";
 import { 
   Users, FileText, Building, Headphones, Shield, Flame, 
-  Ambulance, Star, Plus, AlertTriangle, Upload, ChevronRight,
+  Ambulance, Star, AlertTriangle, Upload, ChevronRight,
   UserPlus, RefreshCw, Calendar, Info
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -314,15 +315,6 @@ export default function Dashboard() {
                 {/* Показываем остальные действия только участникам и выше */}
                 {(user?.role === 'member' || user?.role === 'supervisor' || user?.role === 'admin') && (
                   <>
-                    <ApplicationModal>
-                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                        <div className="flex items-center space-x-3">
-                          <Plus className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium text-foreground">{t('dashboard.new_application', 'New Application')}</span>
-                        </div>
-                      </button>
-                    </ApplicationModal>
-                    
                     <JointModal>
                       <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
                         <div className="flex items-center space-x-3">
@@ -332,9 +324,27 @@ export default function Dashboard() {
                       </button>
                     </JointModal>
                     
+                    <LeaveModal>
+                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <Calendar className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">Заявки на отпуск</span>
+                        </div>
+                      </button>
+                    </LeaveModal>
+                    
+                    <TransferModal>
+                      <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <RefreshCw className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">Перевод между департаментами</span>
+                        </div>
+                      </button>
+                    </TransferModal>
+                    
                     {/* Карточка доступных тестов */}
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <h3 className="font-medium text-blue-900 mb-2">Доступные тесты</h3>
+                      <h3 className="font-medium text-blue-900 mb-2">{t('tests.available_tests', 'Доступные тесты')}</h3>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-blue-700">LSPD Entry Exam</span>
@@ -344,7 +354,7 @@ export default function Dashboard() {
                             onClick={() => window.location.href = '/test/1'}
                             className="text-blue-600 border-blue-300 hover:bg-blue-50"
                           >
-                            Пройти
+                            {t('tests.take_test', 'Пройти')}
                           </Button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -355,7 +365,7 @@ export default function Dashboard() {
                             onClick={() => window.location.href = '/test/2'}
                             className="text-blue-600 border-blue-300 hover:bg-blue-50"
                           >
-                            Пройти
+                            {t('tests.take_test', 'Пройти')}
                           </Button>
                         </div>
                       </div>

@@ -34,7 +34,15 @@
     "test:e2e": "playwright test",
     "test:load": "jest tests/performance/load.test.ts",
     "test:regression": "jest tests/regression/",
-    "test:all": "npm run test:api && npm run test:components && npm run test:security && npm run test:performance"
+    "test:all": "npm run test:api && npm run test:components && npm run test:security && npm run test:performance",
+    "migrate:all": "node scripts/apply_all_migrations.js",
+    "migrate:forum": "node scripts/apply_forum_migration_final.js",
+    "migrate:cad": "node scripts/apply_cad_migration_final.js",
+    "migrate:reports": "node scripts/apply_reports_migration_final.js",
+    "check:db": "node scripts/check_supabase_connection.js",
+    "test:db": "node scripts/test_db_connection.js",
+    "forum:migrate": "node scripts/apply_forum_migration.js",
+    "forum:setup": "echo 'Для применения миграции форума выполните SQL из файла scripts/create_forum_tables.sql в Supabase SQL Editor'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { AlertTriangle, Clock, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
+import { Layout } from "@/components/Layout";
 
 interface Question {
   id: number;
@@ -36,6 +38,11 @@ interface TestResult {
 export default function TestExam() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  
+  // Get test ID from URL params
+  const [, params] = useRoute('/test/:id');
+  const testId = params ? parseInt(params.id) : 1;
   
   // Test state
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -50,9 +57,6 @@ export default function TestExam() {
   const [isVisible, setIsVisible] = useState(true);
   const testContainerRef = useRef<HTMLDivElement>(null);
 
-  // Get test ID from URL params (would be implemented with proper routing)
-  const testId = 1; // Mock test ID
-
   // Fetch test data
   const { data: test, isLoading } = useQuery<TestExam>({
     queryKey: ['/api/tests', testId],
@@ -60,34 +64,111 @@ export default function TestExam() {
   });
 
   // Mock test data for demonstration
-  const mockTest: TestExam = {
-    id: 1,
-    title: "LSPD Entry Exam",
-    durationMinutes: 20,
-    applicationId: 1,
-    questions: [
-      {
+  const getMockTest = (id: number): TestExam => {
+    const tests = {
+      1: {
         id: 1,
-        text: "What is the maximum speed limit in residential areas?",
-        options: ["25 mph", "30 mph", "35 mph", "40 mph"]
+        title: "LSPD Entry Exam",
+        durationMinutes: 20,
+        applicationId: 1,
+        questions: [
+          {
+            id: 1,
+            text: "What is the maximum speed limit in residential areas?",
+            options: ["25 mph", "30 mph", "35 mph", "40 mph"]
+          },
+          {
+            id: 2,
+            text: "Which radio code indicates 'officer needs assistance'?",
+            options: ["10-4", "10-13", "10-20", "10-99"]
+          },
+          {
+            id: 3,
+            text: "What should you do when pursuing a suspect?",
+            options: [
+              "Chase at any speed necessary",
+              "Follow traffic laws strictly",
+              "Call for backup first",
+              "Request helicopter support"
+            ]
+          }
+        ]
       },
-      {
+      2: {
         id: 2,
-        text: "Which radio code indicates 'officer needs assistance'?",
-        options: ["10-4", "10-13", "10-20", "10-99"]
+        title: "SAHP Entry Exam",
+        durationMinutes: 25,
+        applicationId: 1,
+        questions: [
+          {
+            id: 1,
+            text: "What is the primary duty of highway patrol?",
+            options: ["Urban policing", "Highway safety and traffic enforcement", "Detective work", "SWAT operations"]
+          },
+          {
+            id: 2,
+            text: "What should you do when you see a vehicle speeding on the highway?",
+            options: ["Ignore it", "Pursue immediately", "Call for backup and initiate traffic stop", "Let it go"]
+          },
+          {
+            id: 3,
+            text: "Which equipment is essential for highway patrol?",
+            options: ["Riot gear", "Traffic cones and flares", "Undercover clothing", "SWAT equipment"]
+          }
+        ]
       },
-      {
+      3: {
         id: 3,
-        text: "What should you do when pursuing a suspect?",
-        options: [
-          "Chase at any speed necessary",
-          "Follow traffic laws strictly",
-          "Call for backup first",
-          "Request helicopter support"
+        title: "SAMS Medical Test",
+        durationMinutes: 30,
+        applicationId: 1,
+        questions: [
+          {
+            id: 1,
+            text: "What is the first step in assessing a patient?",
+            options: ["Start treatment", "Check vital signs", "Ask for insurance", "Call family"]
+          },
+          {
+            id: 2,
+            text: "What does ABC stand for in emergency medicine?",
+            options: ["Airway, Breathing, Circulation", "Always Be Careful", "Ambulance, Bed, Care", "Assessment, Blood, Care"]
+          },
+          {
+            id: 3,
+            text: "When should you perform CPR?",
+            options: ["When patient is conscious", "When patient has no pulse", "When patient is breathing", "When patient is talking"]
+          }
+        ]
+      },
+      4: {
+        id: 4,
+        title: "SAFR Fire Safety",
+        durationMinutes: 15,
+        applicationId: 1,
+        questions: [
+          {
+            id: 1,
+            text: "What is the primary goal of fire safety?",
+            options: ["Prevent fires", "Put out fires", "Evacuate buildings", "All of the above"]
+          },
+          {
+            id: 2,
+            text: "What should you do in case of a fire?",
+            options: ["Hide", "Run through smoke", "Stay low and evacuate", "Try to put it out yourself"]
+          },
+          {
+            id: 3,
+            text: "What color are fire extinguishers typically?",
+            options: ["Red", "Blue", "Green", "Yellow"]
+          }
         ]
       }
-    ]
+    };
+    
+    return tests[id as keyof typeof tests] || tests[1];
   };
+
+  const mockTest = getMockTest(testId);
 
   const currentTest = test || mockTest;
 
@@ -104,15 +185,15 @@ export default function TestExam() {
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
       
       toast({
-        title: result.passed ? "Test Passed!" : "Test Failed",
-        description: `Score: ${result.score}/${result.totalQuestions} (${result.percentage}%)`,
+        title: result.passed ? t('test_exam.test_passed', 'Test Passed!') : t('test_exam.test_failed', 'Test Failed'),
+        description: `${t('test_exam.score', 'Score:')} ${result.score}/${result.totalQuestions} (${result.percentage}%)`,
         variant: result.passed ? "default" : "destructive"
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to submit test. Please try again.",
+        title: t('test_exam.error', 'Error'),
+        description: t('test_exam.failed_to_submit', 'Failed to submit test. Please try again.'),
         variant: "destructive"
       });
     }
@@ -146,14 +227,14 @@ export default function TestExam() {
           
           if (newCount === 1) {
             toast({
-              title: "Warning!",
-              description: "Do not leave the test window. Next violation will end the test.",
+              title: t('test_exam.warning', 'Warning!'),
+              description: t('test_exam.do_not_leave', 'Do not leave the test window. Next violation will end the test.'),
               variant: "destructive"
             });
           } else if (newCount >= 2) {
             toast({
-              title: "Test Terminated",
-              description: "Test cancelled due to multiple focus violations.",
+              title: t('test_exam.test_terminated', 'Test Terminated'),
+              description: t('test_exam.test_cancelled', 'Test cancelled due to multiple focus violations.'),
               variant: "destructive"
             });
             handleSubmitTest(); // Auto-submit with current answers
@@ -196,8 +277,8 @@ export default function TestExam() {
   const handleSubmitTest = () => {
     if (Object.keys(answers).length === 0) {
       toast({
-        title: "No answers provided",
-        description: "Please answer at least one question before submitting.",
+        title: t('test_exam.no_answers', 'No answers provided'),
+        description: t('test_exam.please_answer', 'Please answer at least one question before submitting.'),
         variant: "destructive"
       });
       return;
@@ -225,16 +306,38 @@ export default function TestExam() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading test...</div>;
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">{t('test_exam.loading', 'Loading test...')}</div>
+      </Layout>
+    );
+  }
+
+  // Check if test exists
+  if (!currentTest) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Тест не найден</h1>
+            <p className="text-muted-foreground mb-4">Тест с ID {testId} не существует или недоступен.</p>
+            <Button onClick={() => setLocation('/tests')}>
+              Вернуться к списку тестов
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   if (testCompleted && testResult) {
     return (
-      <div className="container mx-auto p-6 max-w-2xl">
+      <Layout>
+        <div className="container mx-auto p-6 max-w-2xl">
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              {testResult.passed ? "Test Completed Successfully!" : "Test Not Passed"}
+              {testResult.passed ? t('test_exam.completed_success', 'Test Completed Successfully!') : t('test_exam.not_passed', 'Test Not Passed')}
             </CardTitle>
             <CardDescription>
               {currentTest.title}
@@ -246,7 +349,7 @@ export default function TestExam() {
                 {testResult.percentage}%
               </div>
               <Badge variant={testResult.passed ? "default" : "destructive"} className="text-sm">
-                {testResult.score}/{testResult.totalQuestions} Correct
+                {testResult.score}/{testResult.totalQuestions} {t('test_exam.correct', 'Correct')}
               </Badge>
             </div>
             
@@ -255,13 +358,13 @@ export default function TestExam() {
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <div className="text-2xl font-semibold">{testResult.correctAnswers}</div>
-                <div className="text-sm text-muted-foreground">Correct Answers</div>
+                <div className="text-sm text-muted-foreground">{t('test_exam.correct_answers', 'Correct Answers')}</div>
               </div>
               <div>
                 <div className="text-2xl font-semibold">
                   {testResult.totalQuestions - testResult.correctAnswers}
                 </div>
-                <div className="text-sm text-muted-foreground">Incorrect Answers</div>
+                <div className="text-sm text-muted-foreground">{t('test_exam.incorrect_answers', 'Incorrect Answers')}</div>
               </div>
             </div>
 
@@ -269,57 +372,59 @@ export default function TestExam() {
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 {testResult.passed 
-                  ? "Your test result has been automatically recorded and will be reviewed by supervisors."
-                  : "You can retake this test after 24 hours. Contact your supervisor for additional guidance."
+                  ? t('test_exam.result_recorded', 'Your test result has been automatically recorded and will be reviewed by supervisors.')
+                  : t('test_exam.retake_24h', 'You can retake this test after 24 hours. Contact your supervisor for additional guidance.')
                 }
               </AlertDescription>
             </Alert>
 
             <div className="flex gap-2 justify-center">
               <Button onClick={() => setLocation('/applications')}>
-                View Applications
+                {t('test_exam.view_applications', 'View Applications')}
               </Button>
               <Button variant="outline" onClick={() => setLocation('/dashboard')}>
-                Back to Dashboard
+                {t('test_exam.back_to_dashboard', 'Back to Dashboard')}
               </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   if (!testStarted) {
     return (
-      <div className="container mx-auto p-6 max-w-2xl">
+      <Layout>
+        <div className="container mx-auto p-6 max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">{currentTest.title}</CardTitle>
             <CardDescription>
-              Please read the instructions carefully before starting
+              {t('test_exam.instructions', 'Please read the instructions carefully before starting')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                <span>Duration: {currentTest.durationMinutes} minutes</span>
+                <span>{t('test_exam.duration', 'Duration:')} {currentTest.durationMinutes} {t('tests.duration', 'min')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="h-5 w-5" />
-                <span>Questions: {currentTest.questions.length}</span>
+                <span>{t('test_exam.questions', 'Questions:')} {currentTest.questions.length}</span>
               </div>
             </div>
 
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="space-y-2">
-                <div className="font-semibold">Anti-Cheat Policy:</div>
+                <div className="font-semibold">{t('test_exam.anti_cheat_title', 'Anti-Cheat Policy:')}</div>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Do not leave or minimize this window during the test</li>
-                  <li>First violation: Warning</li>
-                  <li>Second violation: Test automatically cancelled</li>
-                  <li>Focus loss is monitored and recorded</li>
+                  <li>{t('test_exam.anti_cheat.dont_leave', '• Do not leave or minimize this window during the test')}</li>
+                  <li>{t('test_exam.anti_cheat.first_violation', '• First violation: Warning')}</li>
+                  <li>{t('test_exam.anti_cheat.second_violation', '• Second violation: Test automatically cancelled')}</li>
+                  <li>{t('test_exam.anti_cheat.monitored', '• Focus loss is monitored and recorded')}</li>
                 </ul>
               </AlertDescription>
             </Alert>
@@ -327,36 +432,38 @@ export default function TestExam() {
             <div className="space-y-3">
               <div className="text-sm text-muted-foreground">
                 <ul className="list-disc list-inside space-y-1">
-                  <li>You can navigate between questions freely</li>
-                  <li>All answers are automatically saved</li>
-                  <li>Submit when you're confident with your answers</li>
-                  <li>Results are immediately available</li>
+                  <li>{t('test_exam.instructions.navigate', '• You can navigate between questions freely')}</li>
+                  <li>{t('test_exam.instructions.auto_save', '• All answers are automatically saved')}</li>
+                  <li>{t('test_exam.instructions.submit', '• Submit when you\'re confident with your answers')}</li>
+                  <li>{t('test_exam.instructions.results', '• Results are immediately available')}</li>
                 </ul>
               </div>
             </div>
 
             <Button onClick={handleStartTest} className="w-full" size="lg">
-              Start Test
+              {t('test_exam.start_test', 'Start Test')}
             </Button>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   const currentQ = currentTest.questions[currentQuestion];
 
   return (
-    <div ref={testContainerRef} className="container mx-auto p-6 max-w-4xl">
+    <Layout>
+      <div ref={testContainerRef} className="container mx-auto p-6 max-w-4xl">
       {/* Header with timer and progress */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Badge variant="outline">
-            Question {currentQuestion + 1} of {currentTest.questions.length}
+            {t('test_exam.question', 'Question')} {currentQuestion + 1} {t('test_exam.of', 'of')} {currentTest.questions.length}
           </Badge>
           {focusLost > 0 && (
             <Badge variant="destructive">
-              Focus Lost: {focusLost}/2
+              {t('test_exam.focus_lost', 'Focus Lost:')} {focusLost}/2
             </Badge>
           )}
         </div>
@@ -365,7 +472,7 @@ export default function TestExam() {
           {!isVisible && (
             <div className="flex items-center gap-1 text-red-500">
               <EyeOff className="h-4 w-4" />
-              <span className="text-sm">Window not focused</span>
+              <span className="text-sm">{t('test_exam.window_not_focused', 'Window not focused')}</span>
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -422,7 +529,7 @@ export default function TestExam() {
           onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
           disabled={currentQuestion === 0}
         >
-          Previous Question
+          {t('test_exam.previous_question', 'Previous Question')}
         </Button>
 
         <div className="flex gap-2">
@@ -432,13 +539,13 @@ export default function TestExam() {
               disabled={submitTestMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
             >
-              {submitTestMutation.isPending ? 'Submitting...' : 'Submit Test'}
+              {submitTestMutation.isPending ? t('test_exam.submitting', 'Submitting...') : t('test_exam.submit_test', 'Submit Test')}
             </Button>
           ) : (
             <Button
               onClick={() => setCurrentQuestion(prev => Math.min(currentTest.questions.length - 1, prev + 1))}
             >
-              Next Question
+              {t('test_exam.next_question', 'Next Question')}
             </Button>
           )}
         </div>
@@ -464,6 +571,7 @@ export default function TestExam() {
           ))}
         </div>
       </div>
-    </div>
-  );
-}
+        </div>
+      </Layout>
+    );
+  }

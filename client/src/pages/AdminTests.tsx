@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 import { TestQuestionEditor } from "@/components/TestQuestionEditor";
 import { TestResultDetails } from "@/components/TestResultDetails";
 import { 
@@ -158,6 +159,7 @@ const updateResultStatus = async (resultId: number, status: string, comment?: st
 };
 
 export default function AdminTests() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -205,14 +207,14 @@ export default function AdminTests() {
         questions: []
       });
       toast({
-        title: "Тест создан",
-        description: "Тест успешно создан",
+        title: t('admin.tests.save_success', 'Test saved successfully'),
+        description: t('admin.tests.save_success', 'Test saved successfully'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Ошибка",
-        description: "Не удалось создать тест",
+        title: t('admin.tests.save_error', 'Error'),
+        description: t('admin.tests.save_error', 'Failed to save test'),
         variant: "destructive"
       });
     }
@@ -225,14 +227,14 @@ export default function AdminTests() {
       setIsEditModalOpen(false);
       setSelectedTest(null);
       toast({
-        title: "Тест обновлен",
-        description: "Тест успешно обновлен",
+        title: t('admin.tests.save_success', 'Test updated successfully'),
+        description: t('admin.tests.save_success', 'Test updated successfully'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Ошибка",
-        description: "Не удалось обновить тест",
+        title: t('admin.tests.save_error', 'Error'),
+        description: t('admin.tests.save_error', 'Failed to update test'),
         variant: "destructive"
       });
     }
@@ -243,14 +245,14 @@ export default function AdminTests() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminTests'] });
       toast({
-        title: "Тест удален",
-        description: "Тест успешно удален",
+        title: t('admin.tests.delete_success', 'Test deleted successfully'),
+        description: t('admin.tests.delete_success', 'Test deleted successfully'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Ошибка",
-        description: "Не удалось удалить тест",
+        title: t('admin.tests.delete_error', 'Error'),
+        description: t('admin.tests.delete_error', 'Failed to delete test'),
         variant: "destructive"
       });
     }
@@ -358,7 +360,7 @@ export default function AdminTests() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Загрузка...</div>
+          <div className="text-lg">{t('common.loading', 'Loading...')}</div>
         </div>
       </Layout>
     );
@@ -369,26 +371,26 @@ export default function AdminTests() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Управление тестами</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('admin.tests.management', 'Test Management')}</h1>
           <p className="text-gray-600">
-            Создавайте, редактируйте и проверяйте результаты тестов
+            {t('admin.tests.management_desc', 'Create, edit and review test results')}
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="tests">Тесты</TabsTrigger>
-            <TabsTrigger value="results">Результаты</TabsTrigger>
-            <TabsTrigger value="analytics">Аналитика</TabsTrigger>
+            <TabsTrigger value="tests">{t('admin.tests.tests', 'Tests')}</TabsTrigger>
+            <TabsTrigger value="results">{t('admin.tests.test_results', 'Test Results')}</TabsTrigger>
+            <TabsTrigger value="analytics">{t('admin.tests.analytics', 'Test Analytics')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tests" className="space-y-6">
             {/* Tests Management */}
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Список тестов</h2>
+              <h2 className="text-xl font-semibold">{t('admin.tests.test_list', 'Test List')}</h2>
               <Button onClick={handleCreateTest}>
                 <Plus className="h-4 w-4 mr-2" />
-                Создать тест
+                {t('admin.tests.create_test', 'Create Test')}
               </Button>
             </div>
 
@@ -412,28 +414,28 @@ export default function AdminTests() {
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <Clock className="h-4 w-4" />
-                        <span>{test.durationMinutes} мин</span>
+                        <span>{test.durationMinutes} {t('admin.tests.minutes', 'min')}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <FileText className="h-4 w-4" />
-                        <span>{test.questionsCount} вопросов</span>
+                        <span>{test.questionsCount} {t('admin.tests.questions_count', 'questions')}</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Попыток:</span>
+                        <span className="text-gray-600">{t('admin.tests.attempts', 'Attempts:')}</span>
                         <span className="font-medium ml-1">{test.totalAttempts}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Проходимость:</span>
+                        <span className="text-gray-600">{t('admin.tests.pass_rate', 'Pass Rate:')}</span>
                         <span className="font-medium ml-1">{test.passRate}%</span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <Badge variant={test.isActive ? "default" : "secondary"}>
-                        {test.isActive ? "Активен" : "Неактивен"}
+                        {test.isActive ? t('admin.tests.active', 'Active') : t('admin.tests.inactive', 'Inactive')}
                       </Badge>
                       <div className="flex space-x-2">
                         <Button
@@ -461,17 +463,17 @@ export default function AdminTests() {
           <TabsContent value="results" className="space-y-6">
             {/* Test Results Management */}
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Результаты тестов</h2>
+              <h2 className="text-xl font-semibold">{t('admin.tests.results.title', 'Test Results')}</h2>
               <div className="flex space-x-2">
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Все</SelectItem>
-                    <SelectItem value="pending">На проверке</SelectItem>
-                    <SelectItem value="approved">Одобрены</SelectItem>
-                    <SelectItem value="rejected">Отклонены</SelectItem>
+                    <SelectItem value="all">{t('admin.tests.results.all', 'All')}</SelectItem>
+                    <SelectItem value="pending">{t('admin.tests.results.pending_review', 'Pending Review')}</SelectItem>
+                    <SelectItem value="approved">{t('admin.tests.results.approved', 'Approved')}</SelectItem>
+                    <SelectItem value="rejected">{t('admin.tests.results.rejected', 'Rejected')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -482,13 +484,13 @@ export default function AdminTests() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Пользователь</TableHead>
-                      <TableHead>Тест</TableHead>
-                      <TableHead>Результат</TableHead>
-                      <TableHead>Время</TableHead>
-                      <TableHead>Нарушения</TableHead>
-                      <TableHead>Статус</TableHead>
-                      <TableHead>Действия</TableHead>
+                      <TableHead>{t('admin.tests.results.user', 'User')}</TableHead>
+                      <TableHead>{t('admin.tests.results.test', 'Test')}</TableHead>
+                      <TableHead>{t('admin.tests.results.result', 'Result')}</TableHead>
+                      <TableHead>{t('admin.tests.results.time', 'Time')}</TableHead>
+                      <TableHead>{t('admin.tests.results.violations', 'Violations')}</TableHead>
+                      <TableHead>{t('admin.applications.status', 'Status')}</TableHead>
+                      <TableHead>{t('admin.tests.results.actions', 'Actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
