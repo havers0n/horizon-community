@@ -16,9 +16,9 @@ const Support = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'open': return 'bg-success text-success-foreground';
+      case 'closed': return 'bg-muted text-muted-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -27,10 +27,10 @@ const Support = () => {
       <Layout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                <div key={i} className="h-32 bg-muted rounded-lg"></div>
               ))}
             </div>
           </div>
@@ -65,19 +65,19 @@ const Support = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                          <MessageCircle className="h-5 w-5 text-gray-600" />
+                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                          <MessageCircle className="h-5 w-5 text-muted-foreground" />
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-lg font-semibold text-foreground">
                           {t('support.ticket', {id: ticket.id, defaultValue: 'Support Ticket #{{id}}'})}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {t('support.created', 'Created')} {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true })}
                         </p>
                         {ticket.messages && ticket.messages.length > 0 && (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {t('support.messages_count', {count: ticket.messages.length, defaultValue: '{{count}} message', plural: '{{count}} messages'})}
                           </p>
                         )}

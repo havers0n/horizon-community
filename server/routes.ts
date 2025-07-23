@@ -18,6 +18,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { authenticateToken, requireSupervisor, requireAdmin } from './middleware/auth.middleware';
 import { uploadMiddleware, handleUpload } from './fileUpload';
+import adminSupportRoutes from './routes/admin/support.routes.js';
+import adminTestsRoutes from './routes/adminTests.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -864,6 +866,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/scheduler', schedulerRoutes);
 
   app.post('/api/files/upload/:category', authenticateToken, uploadMiddleware, handleUpload);
+
+  // Admin routes
+  app.use('/api/admin/support', adminSupportRoutes);
+  app.use('/api/admin/tests', adminTestsRoutes);
 
   const httpServer = createServer(app);
   

@@ -130,6 +130,18 @@ export default function Applications() {
                       >
                         {t('applications.view_details', 'View Details')}
                       </Button>
+                      
+                      {/* Кнопка "Пройти тест" для заявок на вступление */}
+                      {application.type === 'entry' && application.status === 'test_required' && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => navigate(`/test/1`)} // Пока используем тест ID 1
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Пройти тест
+                        </Button>
+                      )}
                     </div>
                   </div>
                   

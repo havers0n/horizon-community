@@ -141,9 +141,9 @@ export function NotificationsModal({ children, isOpen, onOpenChange }: Notificat
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-8">
-              <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Нет уведомлений</h3>
-              <p className="text-gray-500">У вас пока нет уведомлений</p>
+              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">Нет уведомлений</h3>
+              <p className="text-muted-foreground">У вас пока нет уведомлений</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -152,8 +152,8 @@ export function NotificationsModal({ children, isOpen, onOpenChange }: Notificat
                   key={notification.id}
                   className={`p-4 rounded-lg border transition-colors ${
                     !notification.isRead 
-                      ? 'bg-blue-50 border-blue-200' 
-                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                      ? 'bg-info/10 border-info/20' 
+                      : 'bg-card border-border hover:bg-accent/50'
                   }`}
                 >
                   <div className="flex items-start justify-between">

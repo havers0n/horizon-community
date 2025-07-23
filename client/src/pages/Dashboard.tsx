@@ -16,6 +16,7 @@ import {
   UserPlus, RefreshCw, Calendar, Info
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 interface Stats {
   totalUsers: number;
@@ -330,6 +331,35 @@ export default function Dashboard() {
                         </div>
                       </button>
                     </JointModal>
+                    
+                    {/* Карточка доступных тестов */}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h3 className="font-medium text-blue-900 mb-2">Доступные тесты</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-blue-700">LSPD Entry Exam</span>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => window.location.href = '/test/1'}
+                            className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                          >
+                            Пройти
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-blue-700">SAHP Entry Exam</span>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => window.location.href = '/test/2'}
+                            className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                          >
+                            Пройти
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                     
                     <ComplaintModal>
                       <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">

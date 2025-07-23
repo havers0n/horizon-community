@@ -14,13 +14,13 @@ interface StatusHistoryTimelineProps {
 }
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-400 text-yellow-900",
-  approved: "bg-green-500 text-white",
-  rejected: "bg-red-500 text-white",
-  closed: "bg-gray-400 text-white",
-  'test_required': "bg-blue-400 text-white",
-  'test_completed': "bg-blue-600 text-white",
-  resolved: "bg-green-700 text-white"
+  pending: "bg-warning text-warning-foreground",
+  approved: "bg-success text-success-foreground",
+  rejected: "bg-destructive text-destructive-foreground",
+  closed: "bg-muted text-muted-foreground",
+  'test_required': "bg-info text-info-foreground",
+  'test_completed': "bg-info text-info-foreground",
+  resolved: "bg-success text-success-foreground"
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -39,15 +39,15 @@ export function StatusHistoryTimeline({ history }: StatusHistoryTimelineProps) {
 
   return (
     <div>
-      <ol className="relative border-l border-gray-200 ml-4">
+      <ol className="relative border-l border-border ml-4">
         {history.map((item, idx) => (
           <li key={idx} className="mb-8 ml-6">
-            <span className={`absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-8 ring-white ${statusColors[item.status] || 'bg-gray-300 text-gray-800'}`}>{statusIcons[item.status] || '•'}</span>
+            <span className={`absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-8 ring-background ${statusColors[item.status] || 'bg-muted text-muted-foreground'}`}>{statusIcons[item.status] || '•'}</span>
             <div className="flex flex-col gap-1">
-              <span className="font-semibold capitalize">{item.status}</span>
-              <span className="text-xs text-gray-500">{new Date(item.date).toLocaleString()}</span>
-              {item.comment && <span className="text-sm text-gray-700">{item.comment}</span>}
-              {item.reviewerName && <span className="text-xs text-gray-400">{t('applications.reviewer')}: {item.reviewerName}</span>}
+              <span className="font-semibold capitalize text-foreground">{item.status}</span>
+              <span className="text-xs text-muted-foreground">{new Date(item.date).toLocaleString()}</span>
+              {item.comment && <span className="text-sm text-muted-foreground">{item.comment}</span>}
+              {item.reviewerName && <span className="text-xs text-muted-foreground">{t('applications.reviewer')}: {item.reviewerName}</span>}
             </div>
           </li>
         ))}

@@ -94,6 +94,7 @@ export default defineConfig({
     },
   },
   server: {
+    port: parseInt(process.env.VITE_PORT || '3000'),
     fs: {
       strict: true,
       deny: ["**/.*"],

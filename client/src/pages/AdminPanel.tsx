@@ -160,6 +160,12 @@ export default function AdminPanel() {
               </a>
             </Button>
             <Button variant="outline" size="sm" asChild>
+              <a href="/admin-tests">
+                <FileText className="h-4 w-4 mr-2" />
+                Управление тестами
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
               <a href="/admin/support">
                 <Headphones className="h-4 w-4 mr-2" />
                 {t('admin.support_tickets', 'Support Tickets')}
