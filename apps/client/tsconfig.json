@@ -1,0 +1,29 @@
+{
+  "include": ["src/**/*", "../../libs/shared-types/src/**/*", "../../libs/shared-utils/src/**/*", "../../libs/shared-schema/src/**/*"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.tsx"],
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+    "noEmit": false,
+    "module": "ESNext",
+    "strict": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "types": ["node", "vite/client", "jest"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/schema": ["../../libs/shared-schema/src/index.ts"],
+      "@shared/schema/*": ["../../libs/shared-schema/src/*"],
+      "@roleplay-identity/shared-types": ["../../libs/shared-types/src/index.ts"],
+      "@roleplay-identity/shared-types/*": ["../../libs/shared-types/src/*"],
+      "@roleplay-identity/shared-utils": ["../../libs/shared-utils/src/index.ts"],
+      "@roleplay-identity/shared-utils/*": ["../../libs/shared-utils/src/*"],
+      "@assets/*": ["../attached_assets/*"]
+    }
+  }
+} 

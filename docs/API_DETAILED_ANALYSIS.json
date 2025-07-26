@@ -1,0 +1,489 @@
+{
+  "analysis_report": {
+    "task": "Задача №2: Анализ API и схем данных",
+    "timestamp": "2024-01-15T12:00:00Z",
+    "systems_compared": {
+      "our_system": "RolePlayIdentity",
+      "target_system": "SnailyCAD v4"
+    },
+    "api_comparison": {
+      "our_api_routes": {
+        "characters": "/api/cad/characters",
+        "vehicles": "/api/cad/vehicles", 
+        "weapons": "/api/cad/weapons",
+        "onduty": "/api/cad/onduty",
+        "status": "/api/cad/status",
+        "offduty": "/api/cad/offduty",
+        "active": "/api/cad/active",
+        "panic": "/api/cad/panic",
+        "calls": "/api/cad/calls",
+        "records": "/api/cad/records"
+      },
+      "snailycad_api_routes": {
+        "citizen": "/citizen",
+        "leo": "/leo", 
+        "ems_fd": "/ems-fd",
+        "dispatch": "/dispatch",
+        "911_calls": "/911-calls",
+        "records": "/records",
+        "admin": "/admin"
+      },
+      "migration_recommendations": {
+        "direct_mapping": [
+          "characters -> citizen",
+          "vehicles -> registered-vehicles", 
+          "weapons -> weapons",
+          "calls -> 911-calls",
+          "records -> records"
+        ],
+        "needs_rewrite": [
+          "onduty/offduty -> leo/ems-fd status management",
+          "active -> dispatch active units",
+          "panic -> leo/ems-fd panic button"
+        ],
+        "missing_functionality": [
+          "business management",
+          "medical records",
+          "warrants system",
+          "incidents management",
+          "dispatch chat",
+          "bolo system"
+        ]
+      }
+    },
+    "data_models_analysis": {
+      "total_models": {
+        "our_system": 35,
+        "snailycad_system": 75
+      },
+      "core_models_comparison": {
+        "character_vs_citizen": {
+          "our_fields": {
+            "id": {"type": "serial", "required": true, "description": "Primary key"},
+            "ownerId": {"type": "integer", "required": true, "description": "FK to users"},
+            "type": {"type": "text", "required": true, "description": "civilian, leo, fire, ems"},
+            "firstName": {"type": "text", "required": true, "description": "First name"},
+            "lastName": {"type": "text", "required": true, "description": "Last name"},
+            "dob": {"type": "date", "required": true, "description": "Date of birth"},
+            "address": {"type": "text", "required": true, "description": "Address"},
+            "insuranceNumber": {"type": "text", "required": true, "description": "Insurance number"},
+            "licenses": {"type": "jsonb", "required": false, "description": "Licenses as JSON"},
+            "medicalInfo": {"type": "jsonb", "required": false, "description": "Medical info as JSON"},
+            "mugshotUrl": {"type": "text", "required": false, "description": "Mugshot URL"},
+            "isUnit": {"type": "boolean", "required": false, "description": "Is unit flag"},
+            "unitInfo": {"type": "jsonb", "required": false, "description": "Unit information"},
+            "departmentId": {"type": "integer", "required": false, "description": "FK to departments"},
+            "rankId": {"type": "integer", "required": false, "description": "FK to ranks"},
+            "divisionId": {"type": "integer", "required": false, "description": "FK to divisions"},
+            "unitId": {"type": "integer", "required": false, "description": "FK to units"},
+            "badgeNumber": {"type": "text", "required": false, "description": "Badge number"},
+            "employeeId": {"type": "text", "required": false, "description": "Employee ID"},
+            "hireDate": {"type": "date", "required": false, "description": "Hire date"},
+            "terminationDate": {"type": "date", "required": false, "description": "Termination date"},
+            "isActive": {"type": "boolean", "required": false, "description": "Active status"},
+            "createdAt": {"type": "timestamp", "required": true, "description": "Creation timestamp"},
+            "updatedAt": {"type": "timestamp", "required": true, "description": "Update timestamp"}
+          },
+          "snailycad_fields": {
+            "id": {"type": "string(cuid)", "required": true, "description": "Primary key"},
+            "socialSecurityNumber": {"type": "string", "required": false, "description": "SSN"},
+            "userId": {"type": "string", "required": false, "description": "FK to User"},
+            "name": {"type": "string", "required": true, "description": "First name"},
+            "surname": {"type": "string", "required": true, "description": "Last name"},
+            "dateOfBirth": {"type": "DateTime", "required": true, "description": "Date of birth"},
+            "gender": {"type": "Value(FK)", "required": false, "description": "Gender reference"},
+            "ethnicity": {"type": "Value(FK)", "required": false, "description": "Ethnicity reference"},
+            "hairColor": {"type": "string", "required": true, "description": "Hair color"},
+            "eyeColor": {"type": "string", "required": true, "description": "Eye color"},
+            "address": {"type": "string", "required": true, "description": "Address"},
+            "postal": {"type": "string", "required": false, "description": "Postal code"},
+            "height": {"type": "string", "required": true, "description": "Height"},
+            "weight": {"type": "string", "required": true, "description": "Weight"},
+            "driversLicense": {"type": "Value(FK)", "required": false, "description": "Driver license"},
+            "driversLicenseNumber": {"type": "string", "required": false, "description": "DL number"},
+            "weaponLicense": {"type": "Value(FK)", "required": false, "description": "Weapon license"},
+            "weaponLicenseNumber": {"type": "string", "required": false, "description": "WL number"},
+            "pilotLicense": {"type": "Value(FK)", "required": false, "description": "Pilot license"},
+            "pilotLicenseNumber": {"type": "string", "required": false, "description": "PL number"},
+            "waterLicense": {"type": "Value(FK)", "required": false, "description": "Water license"},
+            "waterLicenseNumber": {"type": "string", "required": false, "description": "WL number"},
+            "huntingLicense": {"type": "Value(FK)", "required": false, "description": "Hunting license"},
+            "huntingLicenseNumber": {"type": "string", "required": false, "description": "HL number"},
+            "fishingLicense": {"type": "Value(FK)", "required": false, "description": "Fishing license"},
+            "fishingLicenseNumber": {"type": "string", "required": false, "description": "FL number"},
+            "ccw": {"type": "Value(FK)", "required": false, "description": "CCW permit"},
+            "imageId": {"type": "string", "required": false, "description": "Image ID"},
+            "imageBlurData": {"type": "string", "required": false, "description": "Blur data"},
+            "note": {"type": "string", "required": false, "description": "Notes"},
+            "dead": {"type": "boolean", "required": false, "description": "Dead status"},
+            "dateOfDead": {"type": "DateTime", "required": false, "description": "Date of death"},
+            "missing": {"type": "boolean", "required": false, "description": "Missing status"},
+            "dateOfMissing": {"type": "DateTime", "required": false, "description": "Date missing"},
+            "arrested": {"type": "boolean", "required": false, "description": "Arrested status"},
+            "phoneNumber": {"type": "string", "required": false, "description": "Phone number"},
+            "occupation": {"type": "string", "required": false, "description": "Occupation"},
+            "additionalInfo": {"type": "string", "required": false, "description": "Additional info"},
+            "appearance": {"type": "string", "required": false, "description": "Appearance"},
+            "createdAt": {"type": "DateTime", "required": true, "description": "Creation timestamp"},
+            "updatedAt": {"type": "DateTime", "required": true, "description": "Update timestamp"}
+          },
+          "field_mapping": {
+            "exact_matches": [
+              {"our": "firstName", "snailycad": "name", "type": "string"},
+              {"our": "lastName", "snailycad": "surname", "type": "string"},
+              {"our": "dob", "snailycad": "dateOfBirth", "type": "date"},
+              {"our": "address", "snailycad": "address", "type": "string"},
+              {"our": "mugshotUrl", "snailycad": "imageId", "type": "string"},
+              {"our": "badgeNumber", "snailycad": "badgeNumber", "type": "string"}
+            ],
+            "similar_purpose": [
+              {"our": "insuranceNumber", "snailycad": "socialSecurityNumber", "description": "Unique identifier"},
+              {"our": "licenses", "snailycad": "driversLicense,weaponLicense,pilotLicense,waterLicense,huntingLicense,fishingLicense", "description": "License information"}
+            ],
+            "missing_in_our_system": [
+              {"field": "gender", "type": "Value(FK)", "description": "Gender reference"},
+              {"field": "ethnicity", "type": "Value(FK)", "description": "Ethnicity reference"},
+              {"field": "hairColor", "type": "string", "description": "Hair color"},
+              {"field": "eyeColor", "type": "string", "description": "Eye color"},
+              {"field": "postal", "type": "string", "description": "Postal code"},
+              {"field": "height", "type": "string", "description": "Height"},
+              {"field": "weight", "type": "string", "description": "Weight"},
+              {"field": "dead", "type": "boolean", "description": "Dead status"},
+              {"field": "missing", "type": "boolean", "description": "Missing status"},
+              {"field": "arrested", "type": "boolean", "description": "Arrested status"},
+              {"field": "phoneNumber", "type": "string", "description": "Phone number"},
+              {"field": "occupation", "type": "string", "description": "Occupation"}
+            ],
+            "missing_in_snailycad": [
+              {"field": "type", "type": "text", "description": "Character type"},
+              {"field": "isUnit", "type": "boolean", "description": "Is unit flag"},
+              {"field": "unitInfo", "type": "jsonb", "description": "Unit information"},
+              {"field": "departmentId", "type": "integer", "description": "Department reference"},
+              {"field": "rankId", "type": "integer", "description": "Rank reference"},
+              {"field": "divisionId", "type": "integer", "description": "Division reference"},
+              {"field": "unitId", "type": "integer", "description": "Unit reference"},
+              {"field": "employeeId", "type": "text", "description": "Employee ID"},
+              {"field": "hireDate", "type": "date", "description": "Hire date"},
+              {"field": "terminationDate", "type": "date", "description": "Termination date"},
+              {"field": "isActive", "type": "boolean", "description": "Active status"}
+            ]
+          }
+        },
+        "vehicle_comparison": {
+          "our_fields": {
+            "id": {"type": "serial", "required": true},
+            "ownerId": {"type": "integer", "required": true},
+            "plate": {"type": "text", "required": true},
+            "vin": {"type": "text", "required": true},
+            "model": {"type": "text", "required": true},
+            "color": {"type": "text", "required": true},
+            "registration": {"type": "text", "required": false},
+            "insurance": {"type": "text", "required": false},
+            "createdAt": {"type": "timestamp", "required": true}
+          },
+          "snailycad_fields": {
+            "id": {"type": "string(cuid)", "required": true},
+            "userId": {"type": "string", "required": false},
+            "citizenId": {"type": "string", "required": false},
+            "vinNumber": {"type": "string", "required": true},
+            "plate": {"type": "string", "required": true},
+            "model": {"type": "VehicleValue(FK)", "required": true},
+            "color": {"type": "string", "required": true},
+            "registrationStatus": {"type": "Value(FK)", "required": true},
+            "insuranceStatus": {"type": "Value(FK)", "required": false},
+            "inspectionStatus": {"type": "VehicleInspectionStatus", "required": false},
+            "taxStatus": {"type": "VehicleTaxStatus", "required": false},
+            "reportedStolen": {"type": "boolean", "required": false},
+            "impounded": {"type": "boolean", "required": false},
+            "dmvStatus": {"type": "WhitelistStatus", "required": false},
+            "appearance": {"type": "string", "required": false},
+            "imageId": {"type": "string", "required": false},
+            "createdAt": {"type": "DateTime", "required": true},
+            "updatedAt": {"type": "DateTime", "required": true}
+          }
+        },
+        "weapon_comparison": {
+          "our_fields": {
+            "id": {"type": "serial", "required": true},
+            "ownerId": {"type": "integer", "required": true},
+            "serialNumber": {"type": "text", "required": true},
+            "model": {"type": "text", "required": true},
+            "registration": {"type": "text", "required": false},
+            "createdAt": {"type": "timestamp", "required": true}
+          },
+          "snailycad_fields": {
+            "id": {"type": "string(cuid)", "required": true},
+            "userId": {"type": "string", "required": false},
+            "citizenId": {"type": "string", "required": true},
+            "serialNumber": {"type": "string", "required": true},
+            "registrationStatus": {"type": "Value(FK)", "required": true},
+            "bofStatus": {"type": "WhitelistStatus", "required": false},
+            "model": {"type": "WeaponValue(FK)", "required": true},
+            "createdAt": {"type": "DateTime", "required": true},
+            "updatedAt": {"type": "DateTime", "required": true}
+          }
+        },
+        "call911_comparison": {
+          "our_fields": {
+            "id": {"type": "serial", "required": true},
+            "location": {"type": "text", "required": true},
+            "description": {"type": "text", "required": true},
+            "status": {"type": "text", "required": false},
+            "type": {"type": "text", "required": true},
+            "priority": {"type": "integer", "required": false},
+            "callerInfo": {"type": "jsonb", "required": false},
+            "createdAt": {"type": "timestamp", "required": true},
+            "updatedAt": {"type": "timestamp", "required": true}
+          },
+          "snailycad_fields": {
+            "id": {"type": "string(cuid)", "required": true},
+            "caseNumber": {"type": "int", "required": false},
+            "position": {"type": "Position(FK)", "required": false},
+            "userId": {"type": "string", "required": false},
+            "assignedUnits": {"type": "AssignedUnit[]", "required": false},
+            "location": {"type": "string", "required": true},
+            "postal": {"type": "string", "required": false},
+            "description": {"type": "string", "required": false},
+            "descriptionData": {"type": "Json", "required": false},
+            "name": {"type": "string", "required": true},
+            "ended": {"type": "boolean", "required": false},
+            "situationCode": {"type": "StatusValue(FK)", "required": false},
+            "dispositionCode": {"type": "CallTypeValue(FK)", "required": false},
+            "viaDispatch": {"type": "boolean", "required": false},
+            "divisions": {"type": "DivisionValue[]", "required": false},
+            "departments": {"type": "DepartmentValue[]", "required": false},
+            "events": {"type": "Call911Event[]", "required": false},
+            "incidents": {"type": "LeoIncident[]", "required": false},
+            "type": {"type": "CallTypeValue(FK)", "required": false},
+            "gtaMapPosition": {"type": "GTAMapPosition(FK)", "required": false},
+            "isSignal100": {"type": "boolean", "required": false},
+            "extraFields": {"type": "Json", "required": false},
+            "status": {"type": "WhitelistStatus", "required": false},
+            "createdAt": {"type": "DateTime", "required": true},
+            "updatedAt": {"type": "DateTime", "required": true}
+          }
+        }
+      }
+    },
+    "missing_entities_analysis": {
+      "critical_missing": [
+        {
+          "entity": "Business",
+          "description": "Business management system",
+          "fields": ["id", "userId", "name", "whitelisted", "address", "postal", "status"],
+          "priority": "Critical",
+          "impact": "Economic system foundation"
+        },
+        {
+          "entity": "MedicalRecord", 
+          "description": "Medical records for citizens",
+          "fields": ["id", "citizenId", "type", "description", "bloodGroup"],
+          "priority": "Critical",
+          "impact": "EMS/FD functionality"
+        },
+        {
+          "entity": "Warrant",
+          "description": "Warrant system for LEO",
+          "fields": ["id", "citizenId", "officerId", "description", "status"],
+          "priority": "Critical", 
+          "impact": "LEO functionality"
+        },
+        {
+          "entity": "LeoIncident",
+          "description": "LEO incident management",
+          "fields": ["id", "caseNumber", "description", "creatorId", "isActive"],
+          "priority": "Critical",
+          "impact": "Incident management"
+        },
+        {
+          "entity": "EmsFdIncident",
+          "description": "EMS/FD incident management", 
+          "fields": ["id", "caseNumber", "description", "creatorId", "isActive"],
+          "priority": "Critical",
+          "impact": "EMS/FD incident management"
+        }
+      ],
+      "important_missing": [
+        {
+          "entity": "Bolo",
+          "description": "Be On Look Out system",
+          "priority": "High",
+          "impact": "Search and alert system"
+        },
+        {
+          "entity": "CombinedLeoUnit",
+          "description": "Combined LEO units",
+          "priority": "High", 
+          "impact": "Multi-officer operations"
+        },
+        {
+          "entity": "CombinedEmsFdUnit",
+          "description": "Combined EMS/FD units",
+          "priority": "High",
+          "impact": "Multi-deputy operations"
+        },
+        {
+          "entity": "ActiveDispatchers",
+          "description": "Active dispatchers",
+          "priority": "High",
+          "impact": "Dispatch management"
+        },
+        {
+          "entity": "DispatchChat",
+          "description": "Dispatch chat system",
+          "priority": "High",
+          "impact": "Communication system"
+        }
+      ],
+      "additional_missing": [
+        {
+          "entity": "TowCall",
+          "description": "Tow service calls",
+          "priority": "Medium",
+          "impact": "Service calls"
+        },
+        {
+          "entity": "TaxiCall", 
+          "description": "Taxi service calls",
+          "priority": "Medium",
+          "impact": "Service calls"
+        },
+        {
+          "entity": "BleeterProfile",
+          "description": "Social media profiles",
+          "priority": "Low",
+          "impact": "Social features"
+        },
+        {
+          "entity": "BleeterPost",
+          "description": "Social media posts",
+          "priority": "Low", 
+          "impact": "Social features"
+        },
+        {
+          "entity": "CustomField",
+          "description": "Custom fields system",
+          "priority": "Medium",
+          "impact": "Flexibility"
+        }
+      ]
+    },
+    "reference_systems_analysis": {
+      "value_system": {
+        "description": "Universal reference system",
+        "purpose": "Centralized management of all reference data",
+        "types": [
+          "LICENSE", "GENDER", "ETHNICITY", "VEHICLE", "WEAPON", 
+          "CALL_TYPE", "STATUS", "DEPARTMENT", "DIVISION", "RANK"
+        ],
+        "impact": "Foundation for all other reference systems"
+      },
+      "penal_code_system": {
+        "description": "Criminal code management",
+        "entities": ["PenalCode", "PenalCodeGroup", "Violation"],
+        "purpose": "Manage criminal charges and violations",
+        "impact": "LEO record keeping"
+      },
+      "custom_field_system": {
+        "description": "Custom fields for flexibility",
+        "entities": ["CustomField", "CustomFieldValue"],
+        "purpose": "Allow custom data fields",
+        "impact": "System flexibility"
+      }
+    },
+    "migration_plan": {
+      "phase_1_preparation": {
+        "duration": "2-3 weeks",
+        "tasks": [
+          "Create Value reference system",
+          "Add missing fields to existing tables",
+          "Create ID type migration scripts",
+          "Update API routes structure"
+        ],
+        "dependencies": [],
+        "risks": ["Data migration complexity", "API breaking changes"]
+      },
+      "phase_2_core_entities": {
+        "duration": "4-6 weeks", 
+        "tasks": [
+          "Create MedicalRecord table",
+          "Create Business and Employee tables",
+          "Create Warrant table",
+          "Create Incident tables (LeoIncident, EmsFdIncident)"
+        ],
+        "dependencies": ["Phase 1 completion"],
+        "risks": ["Data integrity", "Performance impact"]
+      },
+      "phase_3_extended_functionality": {
+        "duration": "3-4 weeks",
+        "tasks": [
+          "Create CombinedUnit tables",
+          "Create Dispatch system",
+          "Create Court system", 
+          "Add Bolo system"
+        ],
+        "dependencies": ["Phase 2 completion"],
+        "risks": ["Complex relationships", "Testing complexity"]
+      },
+      "phase_4_additional_features": {
+        "duration": "2-3 weeks",
+        "tasks": [
+          "Create TowCall/TaxiCall tables",
+          "Create Bleeter system",
+          "Add CustomField system",
+          "Create Expungement system"
+        ],
+        "dependencies": ["Phase 3 completion"],
+        "risks": ["Feature creep", "Maintenance overhead"]
+      }
+    },
+    "technical_recommendations": {
+      "database_changes": [
+        "Change ID types from serial to string(cuid)",
+        "Add updatedAt fields to all tables",
+        "Create Value reference system",
+        "Add missing foreign key relationships"
+      ],
+      "api_changes": [
+        "Restructure routes to match SnailyCAD pattern",
+        "Add proper error handling",
+        "Implement proper validation",
+        "Add pagination support"
+      ],
+      "code_changes": [
+        "Update Drizzle schema definitions",
+        "Create new controllers for missing entities",
+        "Update existing controllers for new fields",
+        "Add proper TypeScript types"
+      ]
+    },
+    "compatibility_assessment": {
+      "current_compatibility": "30%",
+      "target_compatibility": "95%",
+      "effort_required": "High",
+      "timeline": "3-4 months",
+      "recommendation": "Phased migration approach"
+    },
+    "conclusion": {
+      "summary": "Significant integration effort required but will provide full SnailyCAD compatibility",
+      "key_challenges": [
+        "ID type migration",
+        "Reference system creation", 
+        "New entity implementation",
+        "API restructuring"
+      ],
+      "benefits": [
+        "Full SnailyCAD ecosystem compatibility",
+        "Enhanced functionality",
+        "Better maintainability",
+        "Industry standard compliance"
+      ],
+      "next_steps": [
+        "Begin Phase 1 preparation",
+        "Create detailed migration scripts",
+        "Set up testing environment",
+        "Plan rollback strategy"
+      ]
+    }
+  }
+} 

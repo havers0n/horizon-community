@@ -1,0 +1,29 @@
+{
+  "include": ["./**/*", "../../libs/shared-types/src/**/*", "../../libs/shared-utils/src/**/*", "../../libs/shared-schema/src/**/*"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.js"],
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "baseUrl": ".",
+    "types": ["node", "jest"],
+    "paths": {
+      "@/*": ["./*"],
+      "@roleplay-identity/shared-types": ["../../libs/shared-types/src/index.ts"],
+      "@roleplay-identity/shared-utils": ["../../libs/shared-utils/src/index.ts"],
+      "@roleplay-identity/shared-schema": ["../../libs/shared-schema/src/index.ts"]
+    }
+  }
+} 

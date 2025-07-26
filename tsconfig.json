@@ -1,6 +1,6 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
+  "include": ["client/src/**/*", "mdtclient/src/**/*", "server/**/*", "shared/**/*"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.tsx"],
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
@@ -16,8 +16,17 @@
     "baseUrl": ".",
     "types": ["node", "vite/client", "jest"],
     "paths": {
-      "@/*": ["./client/src/*"],
-      "@shared/*": ["./shared/*"]
+      "@client/*": ["./client/src/*"],
+      "@mdtclient/*": ["./mdtclient/src/*"],
+      "@server/*": ["./server/*"],
+      "@shared/*": ["./shared/*"],
+      "@assets/*": ["./attached_assets/*"]
     }
-  }
+  },
+  "references": [
+    { "path": "./client" },
+    { "path": "./mdtclient" },
+    { "path": "./server" },
+    { "path": "./shared" }
+  ]
 }

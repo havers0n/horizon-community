@@ -8,6 +8,27 @@
       "when": 1751385713873,
       "tag": "0000_wooden_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753372985687,
+      "tag": "0001_faithful_kylun",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753374740773,
+      "tag": "0002_nitialchema",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1753389015342,
+      "tag": "0003_ExtendUsersAndCharacters",
+      "breakpoints": true
     }
   ]
 }

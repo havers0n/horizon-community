@@ -1,0 +1,89 @@
+
+import React, { useState, createContext, useContext } from 'react';
+import { UserRole } from './types';
+import { MainLayout } from './components/Layout';
+import { CitizenPortal } from './components/CitizenPortal';
+import { MdtPortal } from './components/MdtPortal';
+import { DispatchPortal } from './components/DispatchPortal';
+import { AdminPortal } from './components/AdminPortal';
+import { EmsFdPortal } from './components/EmsFdPortal';
+import { NAVIGATION_MAP } from './constants';
+
+
+interface AppContextType {
+  currentRole: UserRole;
+  setCurrentRole: (role: UserRole) => void;
+  activeView: string;
+  setActiveView: (view: string) => void;
+}
+
+const AppContext = createContext<AppContextType | null>(null);
+
+export const useAppContext = () => {
+    const context = useContext(AppContext);
+    if (!context) {
+        throw new Error('useAppContext must be used within an AppProvider');
+    }
+    return context;
+};
+
+const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [currentRole, _setCurrentRole] = useState<UserRole>(UserRole.EMS_FD);
+    const [activeView, setActiveView] = useState('Dashboard');
+
+    const setCurrentRole = (role: UserRole) => {
+        _setCurrentRole(role);
+        const defaultView = NAVIGATION_MAP[role]?.[0]?.name || 'Dashboard';
+        setActiveView(defaultView);
+    };
+    
+    return (
+        <AppContext.Provider value={{ currentRole, setCurrentRole, activeView, setActiveView }}>
+            {children}
+        </AppContext.Provider>
+    );
+};
+
+const RoleBasedPortal: React.FC<{ role: UserRole; activeView: string; onViewChange: (view: string) => void }> = ({ role, activeView, onViewChange }) => {
+    switch (role) {
+        case UserRole.CITIZEN:
+            return <CitizenPortal />;
+        case UserRole.LEO:
+            return <MdtPortal activeView={activeView} onViewChange={onViewChange} />;
+        case UserRole.EMS_FD:
+            return <EmsFdPortal activeView={activeView} onViewChange={onViewChange} />;
+        case UserRole.DISPATCH:
+            return <DispatchPortal />;
+        case UserRole.ADMIN:
+            return <AdminPortal />;
+        default:
+            return <div>Invalid Role</div>;
+    }
+};
+
+const App: React.FC = () => {
+    return (
+        <AppProvider>
+            <AppContent />
+        </AppProvider>
+    );
+};
+
+const AppContent: React.FC = () => {
+    const { currentRole, setCurrentRole, activeView, setActiveView } = useAppContext();
+    const availableRoles = Object.values(UserRole);
+
+    return (
+        <MainLayout 
+            currentRole={currentRole} 
+            onRoleChange={setCurrentRole}
+            availableRoles={availableRoles}
+            activeView={activeView}
+            onViewChange={setActiveView}
+        >
+            <RoleBasedPortal role={currentRole} activeView={activeView} onViewChange={setActiveView} />
+        </MainLayout>
+    );
+};
+
+export default App;

@@ -1,0 +1,36 @@
+{
+  "name": "schema",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/schema/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/schema",
+        "main": "libs/shared/schema/src/index.ts",
+        "tsConfig": "libs/shared/schema/tsconfig.json",
+        "assets": ["libs/shared/schema/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/shared/schema/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "type-check": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "tsConfig": "libs/shared/schema/tsconfig.json"
+      }
+    }
+  },
+  "tags": []
+} 
