@@ -1,0 +1,69 @@
+[m[36mvite v5.4.19[32m[1Cbuilding for production...
+]0;C:\Windows\system32\cmd.exe[?25h[m[Ktransforming (1) index.html[K[27Ctransforming (3) src\main.tsx[K[29Ctransforming (10) src\locales\ru.json[K[37Ctransforming (21) node_modules\@tanstack\query-core\build\modern\index.js[K[73C[K[K[K[Ktransforming (67) node_modules\react-i18next\dist\es\Trans.js[K[K[61C[K[Ktransforming (101) node_modules\@tanstack\query-core\build\modern\queryCache.js[K[79C[K[K[K[Ktransforming (118) node_modules\react\cjs\react.production.min.js[K[65C[K[K[Ktransforming (153) node_modules\date-fns\addDays.mjs[K[52Ctransforming (1109) node_modules\lucide-react\dist\esm\icons\laugh.js[K[69Ctransforming (1155) node_modules\lucide-react\dist\esm\icons\locate-off.js[K[74Ctransforming (1888) node_modules\lucide-react\dist\esm\icons\square-chevron-left.js[K[83C[K[K[K[K[K[K[K[Ktransforming (2096) node_modules\react-dom\cjs\react-dom.production.min.js[K[74C[K[K[K[K[K[K[K[K[Ktransforming (2611) node_modules\react-router\dist\development\chunk-KIUJAIYX.mjs[K[81C[K[K[K[K[K[K[Ktransforming (2658) node_modules\set-cookie-parser\lib\set-cookie.js[K[68Ctransforming (2705) node_modules\react-remove-scroll\dist\es2015\sidecar.js[K[75C[K[Ktransforming (2744) node_modules\core-js\internals\perform.js[K[61Ctransforming (2777) node_modules\react-day-picker\dist\esm\formatters\formatDay.js[K[82Ctransforming (2947) node_modules\core-js\internals\function-uncurry-this-clause.js[K[K[82Ctransforming (3025) node_modules\use-sidecar\dist\es2015\config.js[K[66C[K[Ktransforming (3343) node_modules\react-remove-scroll-bar\dist\es2015\component.js[K[81Ctransforming (3483) node_modules\core-js\modules\es.string.match.js[K[67Ctransforming (3624) node_modules\react-day-picker\node_modules\date-fns\parse\_lib\Parser.js[K[92C[32m✓[m 3626 modules transformed.
+transforming (3629) node_modules\nanoid\index.browser.js[K[56C[Ktransforming (3727) node_modules\framer-motion\dist\es\value\types\complex\index.mjs[K[84C[K[K[K[K[Ktransforming (3788) node_modules\zod\v3\index.js[K[Ktransforming (3852) node_modules\framer-motion\dist\es\value\types\color\hex.mjs[K[80C[K[Ktransforming (3915) node_modules\tailwindcss\lib\util\createPlugin.js[K[K[69C[Ktransforming (3951) node_modules\d3-shape\src\index.js[K[54C[K[Ktransforming (4023) node_modules\lodash\_baseSortBy.js[K[54Ctransforming (4053) node_modules\d3-shape\src\arc.js[K[K[52Ctransforming (4185) node_modules\recharts\node_modules\react-is\cjs\react-is.production.min.js[K[94Ctransforming (4225) node_modules\d3-shape\src\array.js[K[54Ctransforming (4278) node_modules\lodash\_getSymbols.js[K[54Ctransforming (4413) node_modules\@babel\runtime\helpers\esm\objectWithoutPropertiesLoose.js[K[91Ctransforming (4559) node_modules\lodash\_baseAssignValue.js[K[59Crendering chunks (1)...[K[23Crendering chunks (3)...[K[23Crendering chunks (4)...[K[23Crendering chunks (5)...[K[K[23Crendering chunks (8)...[K[23C[K[23C[K[24Crendering chunks (12)...[K[24Crendering chunks (13)...[K[24Crendering chunks (14)...rendering chunks (16)...[K[K[24Crendering chunks (17)...[K[24Crendering chunks (18)...[K[24Crendering chunks (19)...[K[24Crendering chunks (20)...rendering chunks (22)...[K[K[24Crendering chunks (23)...[K[24Crendering chunks (24)...[K[24Crendering chunks (25)...[K[24Crendering chunks (26)...[K[24Crendering chunks (27)...[K[24Crendering chunks (28)...[K[24C[K[24Crendering chunks (30)...[K[24Crendering chunks (31)...[K[24Crendering chunks (32)...[K[24Crendering chunks (33)...[K[24Crendering chunks (34)...[K[24C[K[24Crendering chunks (36)...[K[24Crendering chunks (37)...[K[24Crendering chunks (38)...[K[24Crendering chunks (39)...[K[24Crendering chunks (40)...[K[24Crendering chunks (41)...[K[24Crendering chunks (45)...[K[Krendering chunks (46)...[K[24C[Krendering chunks (48)...[K[24Crendering chunks (49)...[K[24Crendering chunks (50)...[K[24Crendering chunks (51)...[K[24Crendering chunks (52)...[K[24Crendering chunks (53)...[K[24Crendering chunks (54)...[K[24Crendering chunks (55)...[K[24Crendering chunks (56)...[K[24Crendering chunks (57)...[K[24C[K[24Crendering chunks (59)...[Krendering chunks (60)...[K[24Crendering chunks (61)...[Krendering chunks (62)...[K[24Crendering chunks (63)...[K[24Crendering chunks (64)...[K[24C[Kcomputing gzip size (0)...[K[26Ccomputing gzip size (1)...[K[26C[K[26C[K[27C../../dist/apps/client/[32mindex.html[28X[1m[97m[28C  0.93 kB[m │ gzip:   0.46 kB[K
+../../dist/apps/client/[35mcss/index-jNkkTAIy.css[16X[1m[97m[16C123.58 kB[m │ gzip:  18.89 kB[K
+../../dist/apps/client/[36mjs/animations-vendor-C83jcnXe.js      [1m[97m  0.07 kB[m │ gzip:   0.07 kB[K
+../../dist/apps/client/[36mjs/textarea-BKKdZu4W.js[15X[1m[97m[15C  0.57 kB[m │ gzip:   0.36 kB[K
+../../dist/apps/client/[36mjs/label-wMsOnMH8.js[18X[1m[97m[18C  0.63 kB[m │ gzip:   0.41 kB[K
+../../dist/apps/client/[36mjs/input-Cj2HgVSV.js[18X[1m[97m[18C  0.65 kB[m │ gzip:   0.39 kB[K
+../../dist/apps/client/[36mjs/badge-CVOMAMh1.js[18X[1m[97m[18C  0.75 kB[m │ gzip:   0.39 kB[K
+../../dist/apps/client/[36mjs/not-found-C3QkFSI3.js[14X[1m[97m[14C  0.84 kB[m │ gzip:   0.47 kB
+../../dist/apps/client/[36mjs/useCheckLimit-Cr9ZHLkm.js[10X[1m[97m[10C  1.06 kB[m │ gzip:   0.61 kB[K
+../../dist/apps/client/[36mjs/card-BE4yNRQn.js[19X[1m[97m[19C  1.06 kB[m │ gzip:   0.40 kB[K
+../../dist/apps/client/[36mjs/tabs-ChL47llv.js[19X[1m[97m[19C  1.15 kB[m │ gzip:   0.49 kB[K
+../../dist/apps/client/[36mjs/button-DcNUJw00.js[17X[1m[97m[17C  1.31 kB[m │ gzip:   0.64 kB[K
+../../dist/apps/client/[36mjs/progress-DJUwATtQ.js[15X[1m[97m[15C  1.44 kB[m │ gzip:   0.76 kB[K
+../../dist/apps/client/[36mjs/table-CxoSTA8n.js[18X[1m[97m[18C  1.54 kB[m │ gzip:   0.55 kB[K
+../../dist/apps/client/[36mjs/VKIcon-CBweKPmI.js[17X[1m[97m[17C  1.83 kB[m │ gzip:   0.99 kB
+../../dist/apps/client/[36mjs/dialog-BAMuzhI-.js[17X[1m[97m[17C  2.05 kB[m │ gzip:   0.83 kB[K
+../../dist/apps/client/[36mjs/SupportPage-DGYNTTqn.js[12X[1m[97m[12C  2.11 kB[m │ gzip:   1.00 kB[K
+../../dist/apps/client/[36mjs/avatar-CcNqiN-4.js[17X[1m[97m[17C  2.22 kB[m │ gzip:   1.02 kB[K
+../../dist/apps/client/[36mjs/AdminTicketDetails-BuoTUD1L.js     [1m[97m  2.29 kB[m │ gzip:   1.23 kB[K
+../../dist/apps/client/[36mjs/UserTicketDetails-BeyMyHjU.js      [1m[97m  2.47 kB[m │ gzip:   1.26 kB[K
+../../dist/apps/client/[36mjs/Login-DkUrKQ7K.js[18X[1m[97m[18C  2.54 kB[m │ gzip:   1.13 kB[K
+../../dist/apps/client/[36mjs/zod-BYqeDRau.js[20X[1m[97m[20C  2.82 kB[m │ gzip:   1.24 kB[K
+../../dist/apps/client/[36mjs/useMutation-B-bGCg-g.js[12X[1m[97m[12C  2.91 kB[m │ gzip:   1.21 kB[K
+../../dist/apps/client/[36mjs/Register-BbTK09_A.js[15X[1m[97m[15C  2.94 kB[m │ gzip:   1.20 kB[K
+../../dist/apps/client/[36mjs/select-CqT_OiFI.js[17X[1m[97m[17C  3.11 kB[m │ gzip:   1.13 kB[K
+../../dist/apps/client/[36mjs/TransferDepartment-Ae7hIcpw.js     [1m[97m  3.41 kB[m │ gzip:   1.58 kB[K
+../../dist/apps/client/[36mjs/checkbox-CWToCtr0.js[15X[1m[97m[15C  3.91 kB[m │ gzip:   1.70 kB[K
+../../dist/apps/client/[36mjs/radio-group-CsDZCtG8.js[12X[1m[97m[12C  4.01 kB[m │ gzip:   1.81 kB[K
+../../dist/apps/client/[36mjs/EntryApplication-sKTDWXaH.js       [1m[97m  4.19 kB[m │ gzip:   1.87 kB[K
+../../dist/apps/client/[36mjs/Notifications-CTlG_gty.js[10X[1m[97m[10C  4.61 kB[m │ gzip:   1.75 kB[K
+../../dist/apps/client/[36mjs/Tests-Cs_-qHfW.js[18X[1m[97m[18C  6.35 kB[m │ gzip:   2.38 kB[K
+../../dist/apps/client/[36mjs/AdminReports-CPOajbnQ.js[11X[1m[97m[11C  6.81 kB[m │ gzip:   2.41 kB[K
+../../dist/apps/client/[36mjs/LeaveModal-UnYgfq4K.js[13X[1m[97m[13C  8.39 kB[m │ gzip:   3.26 kB[K
+../../dist/apps/client/[36mjs/Applications-DrR3wiX4.js[11X[1m[97m[11C  8.39 kB[m │ gzip:   2.88 kB[K
+../../dist/apps/client/[36mjs/TransferModal-Cl2DUcHt.js[10X[1m[97m[10C  9.41 kB[m │ gzip:   3.32 kB[K
+../../dist/apps/client/[36mjs/FAQ-Cnc_u5ay.js[20X[1m[97m[20C  9.42 kB[m │ gzip:   4.12 kB[K
+../../dist/apps/client/[36mjs/JointModal-d3nv3y8e.js[13X[1m[97m[13C  9.60 kB[m │ gzip:   3.46 kB[K
+../../dist/apps/client/[36mjs/JointPositions-Ct62nOFh.js[9X[1m[97m[9C  9.77 kB[m │ gzip:   3.20 kB[K
+../../dist/apps/client/[36mjs/AdminPanel-T2497WIW.js[13X[1m[97m[13C  9.96 kB[m │ gzip:   2.60 kB[K
+../../dist/apps/client/[36mjs/ru-FZHQ_T-7.js[21X[1m[97m[21C 10.16 kB[m │ gzip:   3.01 kB[K
+../../dist/apps/client/[36mjs/useQuery-BbOwTsqG.js[15X[1m[97m[15C 10.19 kB[m │ gzip:   3.59 kB[K
+../../dist/apps/client/[36mjs/Homepage-CU7el9FB.js[15X[1m[97m[15C 10.52 kB[m │ gzip:   3.57 kB[K
+../../dist/apps/client/[36mjs/AdminLeaveManagement-aASRP0dY.js   [1m[97m 12.47 kB[m │ gzip:   3.58 kB[K
+../../dist/apps/client/[36mjs/LeaveManagement-Dkg3BHad.js        [1m[97m 12.52 kB[m │ gzip:   3.93 kB
+../../dist/apps/client/[36mjs/EntryApplicationModal-BhNjSVJb.js  [1m[97m 13.07 kB[m │ gzip:   4.05 kB[K
+../../dist/apps/client/[36mjs/Departments-Az-vyudn.js[12X[1m[97m[12C 13.24 kB[m │ gzip:   4.08 kB[K
+../../dist/apps/client/[36mjs/TestExam-B3g6Dh80.js[15X[1m[97m[15C 13.35 kB[m │ gzip:   4.64 kB[K
+../../dist/apps/client/[36mjs/Layout-CN1qA4cj.js[17X[1m[97m[17C 14.03 kB[m │ gzip:   4.35 kB[K
+../../dist/apps/client/[36mjs/Forum-AlKZH8LX.js[18X[1m[97m[18C 16.41 kB[m │ gzip:   4.39 kB[K
+../../dist/apps/client/[36mjs/CAD-DzCZjxFK.js[20X[1m[97m[20C 17.57 kB[m │ gzip:   4.80 kB[K
+../../dist/apps/client/[36mjs/DesignSystemDemo-B7IOZxBY.js       [1m[97m 18.29 kB[m │ gzip:   3.28 kB[K
+../../dist/apps/client/[36mjs/Dashboard-D_NeN8-R.js[14X[1m[97m[14C 19.69 kB[m │ gzip:   4.44 kB[K
+../../dist/apps/client/[36mjs/purify.es-DrMIVfJO.js[14X[1m[97m[14C 22.00 kB[m │ gzip:   8.60 kB[K
+../../dist/apps/client/[36mjs/utils-vendor-B5IYWXJQ.js[11X[1m[97m[11C 23.05 kB[m │ gzip:   6.59 kB[K
+../../dist/apps/client/[36mjs/chunk-C37GKA54-DA2-HfTd.js[9X[1m[97m[9C 26.06 kB[m │ gzip:   9.66 kB[K
+../../dist/apps/client/[36mjs/AdminTests-CTf6Gfee.js[13X[1m[97m[13C 33.18 kB[m │ gzip:   7.29 kB[K
+../../dist/apps/client/[36mjs/i18n-vendor-CqP-6NsO.js[12X[1m[97m[12C 46.61 kB[m │ gzip:  14.73 kB[K
+../../dist/apps/client/[36mjs/popover-BuptyzUl.js[16X[1m[97m[16C 69.64 kB[m │ gzip:  19.94 kB[K
+../../dist/apps/client/[36mjs/Reports-lGfe_611.js[16X[1m[97m[16C 70.21 kB[m │ gzip:  19.32 kB[K
+../../dist/apps/client/[36mjs/forms-vendor-CqPGC30r.js[11X[1m[97m[11C 79.78 kB[m │ gzip:  21.21 kB[K
+../../dist/apps/client/[36mjs/index-Dt_42J1P.js[18X[1m[97m[18C118.31 kB[m │ gzip:  28.69 kB[K
+../../dist/apps/client/[36mjs/react-vendor-PvkCJ9AW.js[11X[1m[97m[11C140.50 kB[m │ gzip:  45.07 kB[K
+../../dist/apps/client/[36mjs/index.es-D6fx0Ms5.js[15X[1m[97m[15C148.61 kB[m │ gzip:  49.64 kB[K
+../../dist/apps/client/[36mjs/ui-vendor-C6KYVtRI.js[14X[1m[97m[14C158.65 kB[m │ gzip:  50.49 kB[K
+../../dist/apps/client/[36mjs/index-BEt-cyaE.js[18X[1m[97m[18C212.72 kB[m │ gzip:  59.42 kB[K
+../../dist/apps/client/[36mjs/charts-vendor-mNqK4ij7.js[10X[1m[97m[10C555.89 kB[m │ gzip: 162.37 kB[K
+[32m✓ built in 34.38s[m[K

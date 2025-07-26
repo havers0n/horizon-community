@@ -1,0 +1,691 @@
+{
+  "project": "SnailyCAD v4",
+  "analysis_date": "2024-12-19",
+  "database_models": {
+    "users_and_auth": {
+      "User": {
+        "description": "Пользователи системы",
+        "main_fields": ["id", "username", "password", "rank", "banned", "whitelistStatus", "permissions"],
+        "relations": ["citizens", "cads", "vehicles", "weapons", "officers", "emsFdDeputies"]
+      },
+      "UserSession": {
+        "description": "Сессии пользователей",
+        "main_fields": ["id", "refreshToken", "userId", "expires"]
+      },
+      "User2FA": {
+        "description": "Двухфакторная аутентификация",
+        "main_fields": ["id", "secret", "userId"]
+      },
+      "UserSoundSettings": {
+        "description": "Настройки звука пользователя",
+        "main_fields": ["id", "speech", "panicButton", "signal100", "statusUpdate"]
+      }
+    },
+    "cad_and_settings": {
+      "cad": {
+        "description": "Основная модель CAD системы",
+        "main_fields": ["id", "name", "ownerId", "areaOfPlay", "whitelisted", "timeZone"],
+        "relations": ["owner", "features", "miscCadSettings", "apiToken"]
+      },
+      "MiscCadSettings": {
+        "description": "Дополнительные настройки CAD",
+        "main_fields": ["id", "heightPrefix", "weightPrefix", "maxCitizensPerUser", "callsignTemplate"]
+      },
+      "CadFeature": {
+        "description": "Функции системы",
+        "main_fields": ["id", "feature", "isEnabled", "extraFields"]
+      },
+      "ApiToken": {
+        "description": "API токены",
+        "main_fields": ["id", "enabled", "token", "routes", "uses"]
+      },
+      "DiscordRoles": {
+        "description": "Роли Discord",
+        "main_fields": ["id", "guildId", "leoRoles", "emsFdRoles", "dispatchRoles"]
+      }
+    },
+    "citizens": {
+      "Citizen": {
+        "description": "Граждане",
+        "main_fields": ["id", "name", "surname", "dateOfBirth", "gender", "ethnicity", "address", "height", "weight"],
+        "licenses": ["driversLicense", "weaponLicense", "pilotLicense", "waterLicense", "huntingLicense", "fishingLicense"],
+        "relations": ["user", "vehicles", "weapons", "officers"]
+      },
+      "Pet": {
+        "description": "Домашние животные",
+        "main_fields": ["id", "name", "breed", "color", "weight", "dateOfBirth", "citizenId"]
+      },
+      "MedicalRecord": {
+        "description": "Медицинские записи",
+        "main_fields": ["id", "type", "description", "bloodGroup", "citizenId"]
+      },
+      "DoctorVisit": {
+        "description": "Посещения врача",
+        "main_fields": ["id", "diagnosis", "description", "conditions", "medications", "citizenId"]
+      }
+    },
+    "vehicles": {
+      "RegisteredVehicle": {
+        "description": "Зарегистрированные транспортные средства",
+        "main_fields": ["id", "vinNumber", "plate", "model", "color", "registrationStatus", "insuranceStatus"],
+        "relations": ["user", "citizen", "model"]
+      },
+      "VehicleValue": {
+        "description": "Модели транспортных средств",
+        "main_fields": ["id", "valueId", "hash", "imageId"]
+      },
+      "ImpoundedVehicle": {
+        "description": "Конфискованные транспортные средства",
+        "main_fields": ["id", "vehicleId", "location", "officerId", "descriptionData"]
+      }
+    },
+    "weapons": {
+      "Weapon": {
+        "description": "Оружие",
+        "main_fields": ["id", "serialNumber", "registrationStatus", "model", "citizenId"],
+        "relations": ["user", "citizen", "model"]
+      },
+      "WeaponValue": {
+        "description": "Модели оружия",
+        "main_fields": ["id", "valueId", "hash"]
+      }
+    },
+    "law_enforcement": {
+      "Officer": {
+        "description": "Офицеры полиции",
+        "main_fields": ["id", "callsign", "callsign2", "rank", "status", "department", "divisions"],
+        "relations": ["citizen", "user", "department"]
+      },
+      "DepartmentValue": {
+        "description": "Департаменты",
+        "main_fields": ["id", "valueId", "callsign", "type", "whitelisted"]
+      },
+      "DivisionValue": {
+        "description": "Подразделения",
+        "main_fields": ["id", "valueId", "departmentId", "callsign"]
+      },
+      "StatusValue": {
+        "description": "Статусы",
+        "main_fields": ["id", "valueId", "shouldDo", "whatPages", "color", "type"]
+      },
+      "CombinedLeoUnit": {
+        "description": "Объединенные подразделения полиции",
+        "main_fields": ["id", "callsign", "callsign2", "departmentId", "statusId"]
+      }
+    },
+    "ems_fd": {
+      "EmsFdDeputy": {
+        "description": "Сотрудники EMS/FD",
+        "main_fields": ["id", "callsign", "callsign2", "rank", "status", "department", "division"],
+        "relations": ["citizen", "user", "department"]
+      },
+      "CombinedEmsFdUnit": {
+        "description": "Объединенные подразделения EMS/FD",
+        "main_fields": ["id", "callsign", "callsign2", "departmentId", "statusId"]
+      }
+    },
+    "incidents_and_calls": {
+      "LeoIncident": {
+        "description": "Инциденты полиции",
+        "main_fields": ["id", "caseNumber", "description", "isActive", "firearmsInvolved", "injuriesOrFatalities"],
+        "relations": ["creator", "officersInvolved", "unitsInvolved"]
+      },
+      "EmsFdIncident": {
+        "description": "Инциденты EMS/FD",
+        "main_fields": ["id", "caseNumber", "description", "isActive", "firearmsInvolved", "vehicleInvolved"]
+      },
+      "Call911": {
+        "description": "Вызовы 911",
+        "main_fields": ["id", "caseNumber", "location", "description", "name", "ended", "isSignal100"],
+        "relations": ["assignedUnits", "incidents"]
+      },
+      "IncidentEvent": {
+        "description": "События инцидентов",
+        "main_fields": ["id", "incidentId", "description"]
+      },
+      "Call911Event": {
+        "description": "События вызовов",
+        "main_fields": ["id", "call911Id", "description"]
+      }
+    },
+    "records_and_warrants": {
+      "Record": {
+        "description": "Записи (билеты, аресты, предупреждения)",
+        "main_fields": ["id", "caseNumber", "type", "publishStatus", "citizenId", "officerId"],
+        "relations": ["citizen", "officer", "violations"]
+      },
+      "Warrant": {
+        "description": "Ордера на арест",
+        "main_fields": ["id", "caseNumber", "description", "status", "citizenId", "officerId"],
+        "relations": ["citizen", "officer", "assignedOfficers"]
+      },
+      "Violation": {
+        "description": "Нарушения",
+        "main_fields": ["id", "fine", "jailTime", "bail", "penalCodeId", "counts"]
+      },
+      "PenalCode": {
+        "description": "Уголовные кодексы",
+        "main_fields": ["id", "title", "description", "isPrimary", "type", "position"]
+      },
+      "PenalCodeGroup": {
+        "description": "Группы уголовных кодексов",
+        "main_fields": ["id", "name", "position"]
+      }
+    },
+    "business": {
+      "Business": {
+        "description": "Бизнесы",
+        "main_fields": ["id", "name", "address", "whitelisted", "status"],
+        "relations": ["user", "employees", "vehicles"]
+      },
+      "Employee": {
+        "description": "Сотрудники бизнеса",
+        "main_fields": ["id", "userId", "citizenId", "businessId", "roleId", "employeeOfTheMonth"]
+      },
+      "BusinessPost": {
+        "description": "Посты бизнеса",
+        "main_fields": ["id", "title", "body", "employeeId", "businessId"]
+      },
+      "EmployeeValue": {
+        "description": "Роли сотрудников",
+        "main_fields": ["id", "valueId", "as"]
+      }
+    },
+    "additional_services": {
+      "TowCall": {
+        "description": "Вызовы эвакуатора",
+        "main_fields": ["id", "location", "plate", "model", "description", "ended"]
+      },
+      "TaxiCall": {
+        "description": "Вызовы такси",
+        "main_fields": ["id", "location", "description", "name"]
+      },
+      "Bolo": {
+        "description": "BOLO (Be On Look Out)",
+        "main_fields": ["id", "type", "description", "plate", "model", "color", "name"]
+      },
+      "BleeterPost": {
+        "description": "Посты в социальной сети",
+        "main_fields": ["id", "title", "body", "imageId", "userId"]
+      },
+      "BleeterProfile": {
+        "description": "Профили в социальной сети",
+        "main_fields": ["id", "name", "handle", "isVerified", "bio", "userId"]
+      }
+    },
+    "values_and_references": {
+      "Value": {
+        "description": "Справочные значения",
+        "main_fields": ["id", "type", "value", "isDefault", "position", "isDisabled"]
+      },
+      "AddressValue": {
+        "description": "Адреса",
+        "main_fields": ["id", "valueId", "county", "postal"]
+      },
+      "DriversLicenseCategoryValue": {
+        "description": "Категории водительских прав",
+        "main_fields": ["id", "valueId", "type", "description"]
+      },
+      "QualificationValue": {
+        "description": "Квалификации",
+        "main_fields": ["id", "valueId", "imageId", "description", "qualificationType"]
+      }
+    }
+  },
+  "enums": {
+    "Rank": ["OWNER", "ADMIN", "USER"],
+    "WhitelistStatus": ["ACCEPTED", "PENDING", "DECLINED"],
+    "ValueType": ["LICENSE", "GENDER", "ETHNICITY", "VEHICLE", "WEAPON", "DEPARTMENT", "OFFICER_RANK", "DIVISION", "DRIVERSLICENSE_CATEGORY", "IMPOUND_LOT", "VEHICLE_FLAG", "CITIZEN_FLAG", "QUALIFICATION", "CALL_TYPE", "ADDRESS", "EMERGENCY_VEHICLE", "ADDRESS_FLAG", "VEHICLE_TRIM_LEVEL", "WEAPON_FLAG"],
+    "RecordType": ["ARREST_REPORT", "TICKET", "WRITTEN_WARNING"],
+    "WarrantStatus": ["ACTIVE", "INACTIVE"],
+    "Feature": ["BLEETER", "TOW", "TAXI", "COURTHOUSE", "TRUCK_LOGS", "AOP", "BUSINESS", "ALLOW_DUPLICATE_CITIZEN_NAMES", "DISCORD_AUTH", "CALLS_911", "WEAPON_REGISTRATION", "SOCIAL_SECURITY_NUMBERS", "CUSTOM_TEXTFIELD_VALUES", "ACTIVE_DISPATCHERS", "ACTIVE_INCIDENTS", "ALLOW_CITIZEN_UPDATE_LICENSE", "ALLOW_REGULAR_LOGIN", "RADIO_CHANNEL_MANAGEMENT", "ALLOW_CITIZEN_DELETION_BY_NON_ADMIN", "DMV", "BADGE_NUMBERS", "USER_API_TOKENS", "CITIZEN_RECORD_APPROVAL", "COMMON_CITIZEN_CARDS", "STEAM_OAUTH", "CREATE_USER_CITIZEN_LEO", "LEO_TICKETS", "LEO_BAIL", "COURTHOUSE_POSTS", "ACTIVE_WARRANTS", "CITIZEN_DELETE_ON_DEAD", "PANIC_BUTTON", "WARRANT_STATUS_APPROVAL", "DIVISIONS", "TONES", "LICENSE_EXAMS", "CITIZEN_CREATION_RECORDS", "BUREAU_OF_FIREARMS", "CALL_911_APPROVAL", "FORCE_DISCORD_AUTH", "FORCE_STEAM_AUTH", "EDITABLE_SSN", "EDITABLE_VIN", "SIGNAL_100_CITIZEN", "FORCE_ACCOUNT_PASSWORD", "USER_DEFINED_CALLSIGN_COMBINED_UNIT", "HOSPITAL_SERVICES", "MEDICAL_RECORDS_CITIZEN_MANAGEABLE", "PETS", "REQUIRED_CITIZEN_IMAGE", "LEO_EDITABLE_CITIZEN_PROFILE", "ALLOW_MULTIPLE_UNITS_DEPARTMENTS_PER_USER", "OPEN_LAW_BOOK", "CITIZEN_RECORD_PAYMENTS"]
+  },
+  "api_endpoints": {
+    "authentication": {
+      "/auth": {
+        "POST /auth/login": "Вход в систему",
+        "POST /auth/register": "Регистрация пользователя"
+      },
+      "/auth/discord": {
+        "GET /auth/discord": "Аутентификация через Discord"
+      },
+      "/auth/steam": {
+        "GET /auth/steam": "Аутентификация через Steam"
+      },
+      "/2fa": {
+        "POST /2fa/enable": "Включить 2FA",
+        "POST /2fa/disable": "Отключить 2FA",
+        "POST /2fa/verify": "Проверить 2FA код"
+      }
+    },
+    "user_management": {
+      "/user": {
+        "GET /user": "Получить данные пользователя",
+        "PUT /user": "Обновить данные пользователя",
+        "DELETE /user": "Удалить пользователя"
+      },
+      "/user/api-token": {
+        "GET /user/api-token": "Получить API токен",
+        "POST /user/api-token": "Создать API токен",
+        "DELETE /user/api-token": "Удалить API токен"
+      }
+    },
+    "notifications": {
+      "/notifications": {
+        "GET /notifications/officer": "Уведомления для офицеров",
+        "GET /notifications/admin": "Уведомления для администраторов"
+      }
+    },
+    "citizens": {
+      "/citizen": {
+        "GET /citizen": "Получить список граждан",
+        "POST /citizen": "Создать гражданина",
+        "GET /citizen/:id": "Получить гражданина по ID",
+        "PUT /citizen/:id": "Обновить гражданина",
+        "DELETE /citizen/:id": "Удалить гражданина"
+      }
+    },
+    "vehicles": {
+      "/vehicles": {
+        "GET /vehicles": "Получить список транспортных средств",
+        "POST /vehicles": "Создать транспортное средство",
+        "GET /vehicles/:id": "Получить транспортное средство по ID",
+        "PUT /vehicles/:id": "Обновить транспортное средство",
+        "DELETE /vehicles/:id": "Удалить транспортное средство"
+      }
+    },
+    "weapons": {
+      "/weapons": {
+        "GET /weapons": "Получить список оружия",
+        "POST /weapons": "Создать оружие",
+        "GET /weapons/:id": "Получить оружие по ID",
+        "PUT /weapons/:id": "Обновить оружие",
+        "DELETE /weapons/:id": "Удалить оружие"
+      }
+    },
+    "licenses": {
+      "/licenses": {
+        "GET /licenses": "Получить лицензии",
+        "POST /licenses": "Создать лицензию",
+        "PUT /licenses/:id": "Обновить лицензию"
+      }
+    },
+    "medical_records": {
+      "/medical-records": {
+        "GET /medical-records": "Получить медицинские записи",
+        "POST /medical-records": "Создать медицинскую запись",
+        "PUT /medical-records/:id": "Обновить медицинскую запись",
+        "DELETE /medical-records/:id": "Удалить медицинскую запись"
+      }
+    },
+    "pets": {
+      "/pets": {
+        "GET /pets": "Получить список домашних животных",
+        "POST /pets": "Создать домашнее животное",
+        "GET /pets/:id": "Получить домашнее животное по ID",
+        "PUT /pets/:id": "Обновить домашнее животное",
+        "DELETE /pets/:id": "Удалить домашнее животное"
+      }
+    },
+    "truck_logs": {
+      "/truck-logs": {
+        "GET /truck-logs": "Получить логи грузовиков",
+        "POST /truck-logs": "Создать лог грузовика",
+        "PUT /truck-logs/:id": "Обновить лог грузовика",
+        "DELETE /truck-logs/:id": "Удалить лог грузовика"
+      }
+    },
+    "law_enforcement": {
+      "/leo": {
+        "GET /leo": "Получить офицеров",
+        "POST /leo": "Создать офицера",
+        "GET /leo/:id": "Получить офицера по ID",
+        "PUT /leo/:id": "Обновить офицера",
+        "DELETE /leo/:id": "Удалить офицера"
+      },
+      "/leo/bureau-of-firearms": {
+        "GET /leo/bureau-of-firearms": "Получить ожидающие оружия",
+        "POST /leo/bureau-of-firearms/:weaponId": "Принять/отклонить оружие"
+      },
+      "/leo/dmv": {
+        "GET /leo/dmv": "Получить ожидающие транспортные средства",
+        "POST /leo/dmv/:vehicleId": "Принять/отклонить транспортное средство"
+      },
+      "/leo/jail": {
+        "POST /leo/jail": "Отправить в тюрьму",
+        "PUT /leo/jail/:id": "Обновить тюремное заключение"
+      },
+      "/leo/license-exams": {
+        "GET /leo/license-exams": "Получить экзамены",
+        "POST /leo/license-exams": "Создать экзамен",
+        "PUT /leo/license-exams/:id": "Обновить экзамен"
+      }
+    },
+    "incidents": {
+      "/incidents": {
+        "GET /incidents": "Получить инциденты",
+        "POST /incidents": "Создать инцидент",
+        "GET /incidents/:id": "Получить инцидент по ID",
+        "PUT /incidents/:id": "Обновить инцидент",
+        "DELETE /incidents/:id": "Удалить инцидент"
+      },
+      "/incidents/events": {
+        "POST /incidents/events/:incidentId": "Создать событие инцидента"
+      }
+    },
+    "ems_fd": {
+      "/ems-fd": {
+        "GET /ems-fd": "Получить сотрудников EMS/FD",
+        "POST /ems-fd": "Создать сотрудника EMS/FD",
+        "GET /ems-fd/:id": "Получить сотрудника EMS/FD по ID",
+        "PUT /ems-fd/:id": "Обновить сотрудника EMS/FD",
+        "DELETE /ems-fd/:id": "Удалить сотрудника EMS/FD",
+        "POST /ems-fd/declare/:citizenId": "Объявить гражданина мертвым/живым"
+      },
+      "/ems-fd/incidents": {
+        "GET /ems-fd/incidents": "Получить инциденты EMS/FD",
+        "POST /ems-fd/incidents": "Создать инцидент EMS/FD",
+        "GET /ems-fd/incidents/:id": "Получить инцидент EMS/FD по ID",
+        "PUT /ems-fd/incidents/:id": "Обновить инцидент EMS/FD",
+        "DELETE /ems-fd/incidents/:id": "Удалить инцидент EMS/FD"
+      }
+    },
+    "dispatch": {
+      "/dispatch": {
+        "GET /dispatch": "Получить данные диспетчеризации",
+        "POST /dispatch": "Создать вызов",
+        "PUT /dispatch/:id": "Обновить вызов",
+        "DELETE /dispatch/:id": "Удалить вызов"
+      },
+      "/dispatch/status": {
+        "PUT /dispatch/status/:unitId": "Обновить статус подразделения",
+        "GET /dispatch/status": "Получить объединенные подразделения",
+        "POST /dispatch/status": "Создать объединенное подразделение",
+        "PUT /dispatch/status/:id": "Обновить объединенное подразделение",
+        "DELETE /dispatch/status/:id": "Удалить объединенное подразделение"
+      },
+      "/dispatch/private-message": {
+        "GET /dispatch/private-message": "Получить приватные сообщения",
+        "POST /dispatch/private-message": "Отправить приватное сообщение"
+      }
+    },
+    "temporary_units": {
+      "/temporary-units": {
+        "GET /temporary-units": "Получить временные подразделения",
+        "POST /temporary-units": "Создать временное подразделение",
+        "PUT /temporary-units/:id": "Обновить временное подразделение",
+        "DELETE /temporary-units/:id": "Удалить временное подразделение"
+      }
+    },
+    "911_calls": {
+      "/911-calls": {
+        "GET /911-calls": "Получить вызовы 911",
+        "POST /911-calls": "Создать вызов 911",
+        "GET /911-calls/:id": "Получить вызов 911 по ID",
+        "PUT /911-calls/:id": "Обновить вызов 911",
+        "DELETE /911-calls/:id": "Удалить вызов 911"
+      },
+      "/911-calls/events": {
+        "POST /911-calls/events/:callId": "Создать событие вызова"
+      }
+    },
+    "bolos": {
+      "/bolos": {
+        "GET /bolos": "Получить BOLO",
+        "POST /bolos": "Создать BOLO",
+        "GET /bolos/:id": "Получить BOLO по ID",
+        "PUT /bolos/:id": "Обновить BOLO",
+        "DELETE /bolos/:id": "Удалить BOLO"
+      }
+    },
+    "search": {
+      "/search": {
+        "GET /search": "Поиск граждан, транспортных средств, оружия"
+      },
+      "/search/actions": {
+        "POST /search/actions": "Выполнить действия поиска"
+      }
+    },
+    "notes": {
+      "/notes": {
+        "GET /notes": "Получить заметки",
+        "POST /notes": "Создать заметку",
+        "PUT /notes/:id": "Обновить заметку",
+        "DELETE /notes/:id": "Удалить заметку"
+      }
+    },
+    "records": {
+      "/records": {
+        "GET /records": "Получить записи",
+        "POST /records": "Создать запись",
+        "GET /records/:id": "Получить запись по ID",
+        "PUT /records/record/:id": "Обновить запись",
+        "DELETE /records/:id": "Удалить запись",
+        "POST /records/warrant": "Создать ордер на арест",
+        "PUT /records/warrant/:id": "Обновить ордер на арест",
+        "DELETE /records/warrant/:id": "Удалить ордер на арест"
+      }
+    },
+    "businesses": {
+      "/businesses": {
+        "GET /businesses": "Получить бизнесы",
+        "POST /businesses": "Создать бизнес",
+        "GET /businesses/:id": "Получить бизнес по ID",
+        "PUT /businesses/:id": "Обновить бизнес",
+        "DELETE /businesses/:id": "Удалить бизнес"
+      },
+      "/businesses/employees": {
+        "GET /businesses/employees": "Получить сотрудников",
+        "POST /businesses/employees": "Создать сотрудника",
+        "PUT /businesses/employees/:id": "Обновить сотрудника",
+        "DELETE /businesses/employees/:id": "Удалить сотрудника"
+      },
+      "/businesses/roles": {
+        "GET /businesses/roles": "Получить роли бизнеса",
+        "POST /businesses/roles": "Создать роль бизнеса",
+        "PUT /businesses/roles/:id": "Обновить роль бизнеса",
+        "DELETE /businesses/roles/:id": "Удалить роль бизнеса"
+      },
+      "/businesses/posts": {
+        "GET /businesses/posts": "Получить посты бизнеса",
+        "POST /businesses/posts": "Создать пост бизнеса",
+        "PUT /businesses/posts/:id": "Обновить пост бизнеса",
+        "DELETE /businesses/posts/:id": "Удалить пост бизнеса"
+      }
+    },
+    "tow": {
+      "/tow": {
+        "GET /tow": "Получить вызовы эвакуатора",
+        "POST /tow": "Создать вызов эвакуатора",
+        "GET /tow/:id": "Получить вызов эвакуатора по ID",
+        "PUT /tow/:id": "Обновить вызов эвакуатора",
+        "DELETE /tow/:id": "Удалить вызов эвакуатора"
+      }
+    },
+    "taxi": {
+      "/taxi": {
+        "GET /taxi": "Получить вызовы такси",
+        "POST /taxi": "Создать вызов такси",
+        "GET /taxi/:id": "Получить вызов такси по ID",
+        "PUT /taxi/:id": "Обновить вызов такси",
+        "DELETE /taxi/:id": "Удалить вызов такси"
+      }
+    },
+    "bleeter": {
+      "/bleeter": {
+        "GET /bleeter": "Получить посты Bleeter",
+        "POST /bleeter": "Создать пост Bleeter",
+        "GET /bleeter/:id": "Получить пост Bleeter по ID",
+        "PUT /bleeter/:id": "Обновить пост Bleeter",
+        "DELETE /bleeter/:id": "Удалить пост Bleeter"
+      },
+      "/bleeter/profiles": {
+        "GET /bleeter/profiles/:handle": "Получить профиль Bleeter"
+      }
+    },
+    "court": {
+      "/court-entries": {
+        "GET /court-entries": "Получить судебные записи",
+        "POST /court-entries": "Создать судебную запись",
+        "GET /court-entries/:id": "Получить судебную запись по ID",
+        "PUT /court-entries/:id": "Обновить судебную запись",
+        "DELETE /court-entries/:id": "Удалить судебную запись"
+      },
+      "/courthouse-posts": {
+        "GET /courthouse-posts": "Получить посты суда",
+        "POST /courthouse-posts": "Создать пост суда",
+        "PUT /courthouse-posts/:id": "Обновить пост суда",
+        "DELETE /courthouse-posts/:id": "Удалить пост суда"
+      },
+      "/expungement-requests": {
+        "GET /expungement-requests": "Получить запросы на удаление записей",
+        "POST /expungement-requests": "Создать запрос на удаление записей",
+        "PUT /expungement-requests/:id": "Обновить запрос на удаление записей"
+      },
+      "/name-change": {
+        "GET /name-change": "Получить запросы на смену имени",
+        "POST /name-change": "Создать запрос на смену имени",
+        "PUT /name-change/:id": "Обновить запрос на смену имени"
+      }
+    },
+    "admin": {
+      "/admin": {
+        "GET /admin": "Получить данные административной панели"
+      },
+      "/admin/manage/users": {
+        "GET /admin/manage/users": "Получить пользователей",
+        "POST /admin/manage/users": "Создать пользователя",
+        "PUT /admin/manage/users/:id": "Обновить пользователя",
+        "DELETE /admin/manage/users/:id": "Удалить пользователя"
+      },
+      "/admin/manage/citizens": {
+        "GET /admin/manage/citizens": "Получить граждан",
+        "POST /admin/manage/citizens": "Создать гражданина",
+        "PUT /admin/manage/citizens/:id": "Обновить гражданина",
+        "DELETE /admin/manage/citizens/:id": "Удалить гражданина"
+      },
+      "/admin/manage/businesses": {
+        "GET /admin/manage/businesses": "Получить бизнесы",
+        "POST /admin/manage/businesses": "Создать бизнес",
+        "PUT /admin/manage/businesses/:id": "Обновить бизнес",
+        "DELETE /admin/manage/businesses/:id": "Удалить бизнес"
+      },
+      "/admin/manage/units": {
+        "GET /admin/manage/units": "Получить подразделения",
+        "POST /admin/manage/units": "Создать подразделение",
+        "PUT /admin/manage/units/:id": "Обновить подразделение",
+        "DELETE /admin/manage/units/:id": "Удалить подразделение"
+      },
+      "/admin/manage/cad-settings": {
+        "GET /admin/manage/cad-settings": "Получить настройки CAD",
+        "PUT /admin/manage/cad-settings": "Обновить настройки CAD"
+      },
+      "/admin/values/:path": {
+        "GET /admin/values/:path": "Получить значения по типу",
+        "POST /admin/values/:path": "Создать значение",
+        "PUT /admin/values/:path/:id": "Обновить значение",
+        "DELETE /admin/values/:path/:id": "Удалить значение",
+        "PATCH /admin/values/:path/:id": "Частично обновить значение"
+      },
+      "/admin/import": {
+        "POST /admin/import/citizens": "Импорт граждан",
+        "POST /admin/import/vehicles": "Импорт транспортных средств",
+        "POST /admin/import/weapons": "Импорт оружия"
+      }
+    }
+  },
+  "socket_io_events": {
+    "tow_calls": {
+      "CreateTowCall": "Создание вызова эвакуатора",
+      "UpdateTowCall": "Обновление вызова эвакуатора",
+      "EndTowCall": "Завершение вызова эвакуатора"
+    },
+    "taxi_calls": {
+      "CreateTaxiCall": "Создание вызова такси",
+      "UpdateTaxiCall": "Обновление вызова такси",
+      "EndTaxiCall": "Завершение вызова такси"
+    },
+    "911_calls": {
+      "Create911Call": "Создание вызова 911",
+      "Update911Call": "Обновление вызова 911",
+      "End911Call": "Завершение вызова 911"
+    },
+    "bolos": {
+      "CreateBolo": "Создание BOLO",
+      "UpdateBolo": "Обновление BOLO",
+      "DeleteBolo": "Удаление BOLO"
+    },
+    "status_and_states": {
+      "UpdateAreaOfPlay": "Обновление области игры",
+      "UpdateOfficerStatus": "Обновление статуса офицеров",
+      "UpdateEmsFdStatus": "Обновление статуса EMS/FD",
+      "UpdateDispatchersState": "Обновление состояния диспетчеров",
+      "SetUnitOffDuty": "Установка подразделения вне дежурства",
+      "UpdateUnitStatus": "Обновление статуса подразделения"
+    },
+    "users": {
+      "UserBanned": "Пользователь заблокирован",
+      "UserDeleted": "Пользователь удален"
+    },
+    "signals_and_alerts": {
+      "Signal100": "Сигнал 100",
+      "PANIC_BUTTON_ON": "Кнопка паники включена",
+      "PANIC_BUTTON_OFF": "Кнопка паники выключена"
+    },
+    "incidents_and_warrants": {
+      "CreateActiveIncident": "Создание активного инцидента",
+      "UpdateActiveIncident": "Обновление активного инцидента",
+      "CreateActiveWarrant": "Создание активного ордера",
+      "UpdateActiveWarrant": "Обновление активного ордера"
+    },
+    "additional_events": {
+      "RoleplayStopped": "Ролевая игра остановлена",
+      "Tones": "Тона",
+      "PrivateMessage": "Приватное сообщение"
+    }
+  },
+  "architectural_features": {
+    "multi_layer_architecture": {
+      "controllers": "Обработка HTTP запросов",
+      "services": "Бизнес-логика",
+      "models": "Работа с базой данных",
+      "middleware": "Промежуточная обработка"
+    },
+    "permission_system": {
+      "granular_permissions": "Гранулярные разрешения для разных ролей",
+      "custom_roles": "Поддержка кастомных ролей",
+      "discord_integration": "Интеграция с Discord ролями"
+    },
+    "webhook_system": {
+      "discord_webhooks": "Discord webhooks для уведомлений",
+      "raw_webhooks": "Raw webhooks для внешних интеграций",
+      "event_types": "Поддержка различных типов событий"
+    },
+    "real_time": {
+      "socket_io": "Socket.IO для обновлений в реальном времени",
+      "automatic_updates": "Автоматические обновления статусов",
+      "event_notifications": "Уведомления о событиях"
+    },
+    "multi_tenancy": {
+      "multiple_cad": "Поддержка множественных CAD систем",
+      "data_isolation": "Изоляция данных между системами",
+      "cad_level_settings": "Настройки на уровне CAD"
+    },
+    "extensibility": {
+      "features_system": "Система функций (Features)",
+      "custom_fields": "Кастомные поля",
+      "api_tokens": "API токены для интеграций"
+    }
+  },
+  "conclusion": {
+    "description": "SnailyCAD v4 представляет собой комплексную систему управления CAD с богатым функционалом для правоохранительных органов, EMS/FD и диспетчерских служб. Система построена на современном стеке технологий с использованием TypeScript, Prisma ORM и Socket.IO для работы в реальном времени.",
+    "advantages": [
+      "Модульная структура с четким разделением ответственности",
+      "Гибкая система разрешений и ролей",
+      "Поддержка множественных CAD систем",
+      "Интеграция с внешними сервисами (Discord, Steam)",
+      "Реальное время обновления данных",
+      "Расширяемая система функций и настроек"
+    ]
+  }
+} 

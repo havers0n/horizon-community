@@ -1,0 +1,61 @@
+{
+  "name": "server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/server",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "apps/server/index.ts",
+        "tsConfig": "apps/server/tsconfig.json",
+        "outputPath": "dist/apps/server",
+        "outputFileName": "index.js",
+        "platform": "node",
+        "bundle": true,
+        "format": ["esm"],
+        "external": ["@roleplay-identity/shared-types", "@roleplay-identity/shared-utils", "@roleplay-identity/shared-schema"]
+      },
+      "configurations": {
+        "development": {
+          "mode": "development",
+          "sourcemap": true
+        },
+        "production": {
+          "mode": "production",
+          "minify": true
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "server:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "server:build:development",
+          "port": 5000
+        },
+        "production": {
+          "buildTarget": "server:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/server/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": []
+} 

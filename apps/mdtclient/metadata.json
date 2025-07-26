@@ -1,0 +1,6 @@
+{
+  "name": "SnailyCAD v4 Interface Concept",
+  "description": "A modern, role-based user interface concept for SnailyCAD v4, designed for Citizens, LEO/EMS-FD, Dispatch, and Administrators. Features real-time updates and an AI-powered incident report generator.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

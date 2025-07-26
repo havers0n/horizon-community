@@ -1,0 +1,36 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@roleplay-identity/client": ["apps/client/src/index.ts"],
+      "@roleplay-identity/client/*": ["apps/client/src/*"],
+      "@roleplay-identity/mdtclient": ["apps/mdtclient/index.tsx"],
+      "@roleplay-identity/mdtclient/*": ["apps/mdtclient/*"],
+      "@roleplay-identity/schema": ["libs/shared/schema/src/index.ts"],
+      "@roleplay-identity/schema/*": ["libs/shared/schema/src/*"],
+      "@roleplay-identity/server": ["apps/server/index.ts"],
+      "@roleplay-identity/server/*": ["apps/server/*"],
+      "@roleplay-identity/shared": ["libs/shared/src/index.ts"],
+      "@roleplay-identity/shared-schema": ["libs/shared-schema/src/index.ts"],
+      "@roleplay-identity/shared-types": ["libs/shared-types/src/index.ts"],
+      "@roleplay-identity/shared-types/*": ["libs/shared-types/src/*"],
+      "@roleplay-identity/shared-utils": ["libs/shared-utils/src/index.ts"],
+      "@roleplay-identity/shared-utils/*": ["libs/shared-utils/src/*"],
+      "@roleplay-identity/shared/*": ["libs/shared/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

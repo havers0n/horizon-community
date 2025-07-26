@@ -1,0 +1,14 @@
+[m[36mvite v5.4.19[32m[1Cbuilding for production...
+]0;C:\Windows\system32\cmd.exe[?25h[33m
+[1m[93m(!)[22m[33m outDir [mC:\Projects\HorizonProject\RolePlayIdentity\dist\libs\shared-schema[33m is not inside project root an
+d will not be emptied.
+Use --emptyOutDir to override.[m
+[33m[m
+[Ktransforming (1) src\index.ts[K[29Ctransforming (5) node_modules\drizzle-orm\pg-core\alias.js[K[58Ctransforming (29) node_modules\drizzle-orm\alias.js[K[51Ctransforming (103) node_modules\drizzle-orm\tracing-utils.js[K[60C[32m✓[m 115 modules transformed.
+[K[32m[m[K
+[36m[vite:dts][32m Start generate declaration files...[K[m
+computing gzip size (0)...[32m[36m[vite:dts][32m Declaration files built in 2385ms.[m
+[32m[m
+../../dist/libs/shared-schema/[36mindex.js  [1m[97m174.54 kB[m │ gzip: 38.85 kB[K
+[K../../dist/libs/shared-schema/[36mindex.cjs  [1m[97m125.09 kB[m │ gzip: 31.37 kB[K
+[32m✓ built in 4.37s[m[K
