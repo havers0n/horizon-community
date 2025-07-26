@@ -130,660 +130,776 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "supabase/seed.sql",
-        "hash": "13376950263575640000"
-      },
-      {
-        "file": "migrations/002_rls_candidate_guest.sql",
-        "hash": "12381501398555177256"
-      },
-      {
-        "file": "scripts/apply_all_migrations.js",
-        "hash": "4686984014046392983"
-      },
-      {
-        "file": "scripts/add_admin_user.js",
-        "hash": "3767713231369670445"
-      },
-      {
-        "file": "scripts/apply_dev_schema_migration.js",
-        "hash": "2459558302045457166"
-      },
-      {
-        "file": "scripts/apply_test_migration.js",
-        "hash": "13339676250401428561"
-      },
-      {
-        "file": "docs/ADMIN_TESTS_SYSTEM.md",
-        "hash": "15055421803720398870"
-      },
-      {
-        "file": "scripts/apply_cad_migration.js",
-        "hash": "8522940580778507683"
-      },
-      {
-        "file": "App.tsx",
-        "hash": "10625566745493941368"
-      },
-      {
-        "file": "supabase/migrations/009_setup_rls_policies.sql",
-        "hash": "15535352586940939591"
-      },
-      {
-        "file": "docs/LEAVE_ADVANCE_NOTICE_UPDATE.md",
-        "hash": "2372506088475247571"
-      },
-      {
-        "file": "scripts/deploy-to-cloud.js",
-        "hash": "6492726992347377561"
-      },
-      {
-        "file": "docs/CAD_MDT_README.md",
-        "hash": "8443472604582982941"
-      },
-      {
-        "file": "docs/QUICK_ACTIONS_SYNC_REPORT.md",
-        "hash": "12509133776028564478"
-      },
-      {
-        "file": "docs/API_ANALYSIS_REPORT.md",
-        "hash": "12662010486798506064"
-      },
-      {
-        "file": "scripts/test_snailycad_api.js",
-        "hash": "8503112778939388283"
-      },
-      {
-        "file": "README.md",
-        "hash": "3805444317805758455"
-      },
-      {
-        "file": "docs/LEAVE_MODAL_FIX_REPORT.md",
-        "hash": "12227530486626902814"
-      },
-      {
-        "file": "docs/INCOMPATIBLE_FIELDS_ANALYSIS.md",
-        "hash": "13617840594656731642"
-      },
-      {
-        "file": "types.ts",
-        "hash": "12251168296645048776"
-      },
-      {
-        "file": "supabase/migrations/007_update_departments.sql",
-        "hash": "11303292592642553509"
-      },
-      {
-        "file": "scripts/check_departments.sql",
-        "hash": "11091435766970941083"
-      },
-      {
-        "file": "docs/rls-guest-policies.md",
-        "hash": "17124952439587079480"
-      },
-      {
-        "file": "docs/COMPLETE_SYSTEM_UPDATE_REPORT.md",
-        "hash": "9827012407227145452"
-      },
-      {
-        "file": "scripts/restore_database.cjs",
-        "hash": "11969742431016460329"
-      },
-      {
-        "file": "metadata.json",
-        "hash": "847393420253324798"
-      },
-      {
-        "file": "scripts/apply_templates_only.cjs",
-        "hash": "4381672356002752013"
-      },
-      {
-        "file": "components/icons/ClockIcon.tsx",
-        "hash": "10478898914729485851"
-      },
-      {
-        "file": "supabase/migrations/012_add_template_status.sql",
-        "hash": "8734188197730373541"
-      },
-      {
-        "file": "index.tsx",
-        "hash": "5708829987370292496"
-      },
-      {
-        "file": "scripts/create_test_users.js",
-        "hash": "5694578994624709374"
-      },
-      {
-        "file": ".prettierrc",
-        "hash": "16267754514737964994"
-      },
-      {
-        "file": "attached_assets/Pasted--UI--1751363180844_1751363180846.txt",
-        "hash": "6319521357404929688"
-      },
-      {
-        "file": "scripts/create_test_users.sql",
-        "hash": "12312643752594090201"
-      },
-      {
-        "file": "docs/DEPLOYMENT_OPTIMIZATIONS.md",
-        "hash": "3756476300733029323"
-      },
-      {
-        "file": "scripts/apply_reports_migration_final.js",
-        "hash": "8058154457247697548"
-      },
-      {
-        "file": "scripts/apply_forum_migration_simple.js",
-        "hash": "14374197698372773405"
-      },
-      {
-        "file": "docs/DESIGN_SYSTEM.md",
-        "hash": "8672665519800438630"
-      },
-      {
-        "file": "docs/MAPPING_TABLE.md",
-        "hash": "17714497447799393028"
-      },
-      {
-        "file": "scripts/fix-production-deployment.sh",
-        "hash": "14939252647997614042"
-      },
-      {
-        "file": "supabase/migrations/011_enhanced_report_templates.sql",
-        "hash": "4196000462399524730"
-      },
-      {
-        "file": "docs/LEAVE_SYSTEM_DOCUMENTATION.md",
-        "hash": "5379412121502900164"
-      },
-      {
-        "file": "supabase/migrations/005_cad_mdt_system.sql",
-        "hash": "1292452403301833810"
-      },
-      {
-        "file": "docs/MIGRATION_INSTRUCTIONS.md",
-        "hash": "7496825803201224232"
-      },
-      {
-        "file": "components/icons/UserIcon.tsx",
-        "hash": "15365574551590138506"
-      },
-      {
-        "file": "docs/QUICK_DEPLOY_SETUP.md",
-        "hash": "10322605218178698190"
-      },
-      {
-        "file": "scripts/migrate-to-cloud.js",
-        "hash": "15412530269280727075"
-      },
-      {
-        "file": "scripts/apply_forum_migration.js",
-        "hash": "7684883382413663999"
-      },
-      {
-        "file": "components/ProfilePage.tsx",
-        "hash": "16511347681147288524"
-      },
-      {
-        "file": ".github/workflows/backup.md",
-        "hash": "2536150726825847360"
-      },
-      {
-        "file": "jest.preset.cjs",
-        "hash": "9430166341120122740"
-      },
-      {
-        "file": "scripts/apply_migrations_safe.js",
-        "hash": "1123160504604294504"
-      },
-      {
-        "file": "components/icons/CheckCircleIcon.tsx",
-        "hash": "2649471090203086675"
-      },
-      {
-        "file": "scripts/quick-fix.sh",
-        "hash": "2225907583030368414"
-      },
-      {
-        "file": "newtz.md",
-        "hash": "3072206457910379861"
-      },
-      {
-        "file": "tailwind.config.ts",
-        "hash": "14886741921035005360"
-      },
-      {
-        "file": "docs/DATABASE_AUDIT_REPORT.md",
-        "hash": "2438376191807793033"
-      },
-      {
-        "file": "scripts/get_supabase_keys.js",
-        "hash": "15612277435335726742"
-      },
-      {
-        "file": "docs/INTERACTIVE_A4_FORM_IMPLEMENTATION.md",
-        "hash": "1738723531724216101"
-      },
-      {
-        "file": "VPS_DEPLOYMENT_GUIDE.md",
-        "hash": "8266441240692073091"
-      },
-      {
-        "file": "components/TransferRequestForm.tsx",
-        "hash": "9027597373949654383"
-      },
-      {
-        "file": "docs/FAQ_DARK_THEME_FIX.md",
-        "hash": "3351479384324478776"
-      },
-      {
-        "file": "REORGANIZATION_SUMMARY.md",
-        "hash": "15959801446741096896"
-      },
-      {
-        "file": "supabase/migrations/014_extend_users_and_characters.sql",
-        "hash": "7150925884150117502"
-      },
-      {
-        "file": "docs/API_DETAILED_ANALYSIS.json",
-        "hash": "5069523616480805096"
-      },
-      {
-        "file": "scripts/check_supabase_connection.js",
-        "hash": "9085991694826142394"
-      },
-      {
-        "file": "docs/LOCAL_TESTING_GUIDE.md",
-        "hash": "2539318178809350468"
-      },
-      {
-        "file": "components/SupervisorDashboard.tsx",
-        "hash": "12004873673391099626"
-      },
-      {
-        "file": "supabase/migrations/010_report_templates_system.sql",
-        "hash": "13099961395515154698"
-      },
-      {
-        "file": "MONOREPO_FINAL_DOCUMENTATION.md",
-        "hash": "14732436389208483984"
-      },
-      {
-        "file": "docs/SECURITY_IMPROVEMENTS.md",
-        "hash": "11599254968892976763"
-      },
-      {
-        "file": "test-db-password.js",
-        "hash": "5089232419506061650"
-      },
-      {
-        "file": "scripts/apply_sql_direct.js",
-        "hash": "17012840326686358923"
-      },
-      {
-        "file": "supabase/migrations/008_complete_character_system.sql",
-        "hash": "11827627643639358045"
-      },
-      {
-        "file": "FORUM_MIGRATION_INSTRUCTIONS.md",
-        "hash": "4838149360488321433"
-      },
-      {
-        "file": "DEPARTMENT_SYSTEM_IMPROVEMENTS.md",
-        "hash": "17372081947583277578"
-      },
-      {
-        "file": "scripts/check_user_limits.js",
-        "hash": "9573090104471900521"
-      },
-      {
-        "file": "docs/STAGE_3_COMPLETION_REPORT.md",
-        "hash": "2196478532617093537"
-      },
-      {
-        "file": "docs/DEPLOYMENT.md",
-        "hash": "1230295416080978918"
-      },
-      {
-        "file": "scripts/create_basic_templates.cjs",
-        "hash": "18311116849184970057"
-      },
-      {
-        "file": ".env.example",
-        "hash": "3535500971392317723"
-      },
-      {
-        "file": "scripts/test_supabase_connection.js",
-        "hash": "1958907455779461462"
-      },
-      {
-        "file": "scripts/create_forum_tables.sql",
-        "hash": "1911021168228953244"
-      },
-      {
-        "file": "docs/WEBSOCKET_USAGE_EXAMPLES.md",
-        "hash": "5882623343813702269"
-      },
-      {
-        "file": "docs/REPORTS_SYSTEM_DOCUMENTATION.md",
-        "hash": "12879477264236816902"
-      },
-      {
-        "file": "docs/BACKEND_SNAILYCAD_INTEGRATION_REPORT.md",
-        "hash": "6615121233766349370"
-      },
-      {
-        "file": "docs/DEPLOYMENT_INSTRUCTIONS.md",
-        "hash": "2723209972353074814"
-      },
-      {
-        "file": "scripts/create_correct_jwt.js",
-        "hash": "16666118461411896789"
-      },
-      {
-        "file": "scripts/apply-dev-schema-migration.js",
-        "hash": "15923690289375188370"
-      },
-      {
-        "file": "scripts/apply_joint_migration.js",
-        "hash": "16618016149731688648"
-      },
-      {
-        "file": "local_seed_data.sql",
-        "hash": "13887698347107124070"
-      },
-      {
-        "file": "components/TransferHistory.tsx",
-        "hash": "9667000904686676041"
-      },
-      {
-        "file": "docs/REPORTS_SYSTEM_COMPLETION_REPORT.md",
-        "hash": "8677565985246873464"
-      },
-      {
-        "file": ".env.production",
-        "hash": "5261357101576304645"
-      },
-      {
-        "file": "scripts/apply_forum_migration_direct.js",
-        "hash": "1740324465656466113"
-      },
-      {
-        "file": "docs/REPORTS_SYSTEM_GUIDE.md",
-        "hash": "11844726062499620685"
-      },
-      {
-        "file": "supabase/.gitignore",
-        "hash": "10990855904653518110"
-      },
-      {
-        "file": "scripts/apply_enhanced_templates.js",
-        "hash": "9388724677514501808"
-      },
-      {
-        "file": ".eslintignore",
-        "hash": "7663861978715868291"
-      },
-      {
-        "file": "scripts/fix_jwt_tokens.js",
-        "hash": "17234302209235957103"
-      },
-      {
-        "file": "docs/API_SNAILYCAD_INTEGRATION.md",
-        "hash": "7671897443956525570"
-      },
-      {
-        "file": "migrations/meta/0002_snapshot.json",
-        "hash": "13396004583551762211"
-      },
-      {
-        "file": "supabase/migrations/004_test_system.sql",
-        "hash": "591454785969369916"
-      },
-      {
-        "file": "tsconfig.json",
-        "hash": "1409626872828258269"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "11859558129296447736"
-      },
-      {
-        "file": "drizzle.config.ts",
-        "hash": "4325878711683596239"
-      },
-      {
-        "file": "test-env-simple.cjs",
-        "hash": "6833995582080867419"
-      },
-      {
-        "file": "docs/MANUAL_MIGRATION_INSTRUCTIONS.md",
-        "hash": "2838996626608947829"
-      },
-      {
-        "file": "scripts/debug_applications.js",
-        "hash": "14542362139591077056"
-      },
-      {
-        "file": "FORUM_QUICK_START.md",
-        "hash": "13740392872492086115"
-      },
-      {
-        "file": "docs/CRITICAL_DEPLOYMENT_FIX.md",
-        "hash": "13250238670169577524"
-      },
-      {
-        "file": "scripts/apply_enhanced_templates_simple.cjs",
-        "hash": "16072946818214620649"
-      },
-      {
-        "file": "docs/WEBSOCKET_ANALYSIS_REPORT.md",
-        "hash": "15827081428980391459"
-      },
-      {
-        "file": "migrations/0003_ExtendUsersAndCharacters.sql",
-        "hash": "6651814083053838193"
-      },
-      {
-        "file": "scripts/reset_test_limits.js",
-        "hash": "5255467621192384216"
-      },
-      {
-        "file": "docs/DEPARTMENTS_DESIGN_UPDATE.md",
-        "hash": "13607754095961510152"
+        "file": "supabase/migrations/001_initial_schema.sql",
+        "hash": "13824463293405508163"
       },
       {
         "file": "docs/COLOR_PALETTE_UPDATE.md",
         "hash": "17948018011800356228"
       },
       {
-        "file": "README_REPORTS_SYSTEM.md",
-        "hash": "4870712721949753019"
-      },
-      {
-        "file": "docker-compose.yml",
-        "hash": "13006215882576324033"
-      },
-      {
-        "file": "scripts/debug_auth.js",
-        "hash": "3322904960108330723"
-      },
-      {
-        "file": "supabase/config.toml",
-        "hash": "14899851295786961498"
-      },
-      {
-        "file": "scripts/apply_migrations.js",
-        "hash": "13338554822932093783"
-      },
-      {
-        "file": "components/Notification.tsx",
-        "hash": "5892252722562430909"
-      },
-      {
-        "file": "scripts/simple_templates_setup.cjs",
-        "hash": "8321771888933886003"
-      },
-      {
-        "file": "migrations/0002_nitialchema.sql",
-        "hash": "6419363198433994852"
-      },
-      {
-        "file": "scripts/test_curl_limits.js",
-        "hash": "17615058857988150608"
-      },
-      {
-        "file": "docs/VITE_ISSUE_ANALYSIS.md",
-        "hash": "15529411384940229870"
+        "file": ".env.production",
+        "hash": "5261357101576304645"
       },
       {
         "file": "scripts/force-fix-vite.sh",
         "hash": "11790046544400454430"
       },
       {
-        "file": "docs/roadmap.md",
-        "hash": "17691165133422218423"
-      },
-      {
-        "file": ".github/workflows/deploy.backup.md",
-        "hash": "15504765014758989594"
-      },
-      {
-        "file": "package.json",
-        "hash": "15067887224609498779"
-      },
-      {
-        "file": "package-lock.json",
-        "hash": "6930694502408354913"
-      },
-      {
-        "file": "migration_commands.sql",
-        "hash": "7713994488998429876"
-      },
-      {
-        "file": "scripts/apply_schema_direct.cjs",
-        "hash": "17294524549295112446"
-      },
-      {
-        "file": "scripts/emergency-vps-fix.sh",
-        "hash": "822687134393279953"
-      },
-      {
-        "file": "docs/тз.md",
-        "hash": "10122793774620201296"
-      },
-      {
-        "file": "docs/DARK_THEME_TEXT_FIX.md",
-        "hash": "18005585294088084925"
-      },
-      {
-        "file": "scripts/check_user.js",
-        "hash": "6056135424961958539"
-      },
-      {
-        "file": "scripts/fix-vite-build.sh",
-        "hash": "16876703382964632969"
-      },
-      {
-        "file": "supabase/migrations/006_joint_positions_history.sql",
-        "hash": "10778399762334326066"
+        "file": "postcss.config.js",
+        "hash": "1886002347757770194"
       },
       {
         "file": "scripts/generate_jwt_tokens.js",
         "hash": "15922476627984489073"
       },
       {
-        "file": ".prettierignore",
-        "hash": "16448050467312557263"
+        "file": "scripts/test_api_limits.js",
+        "hash": "13268288897197112101"
       },
       {
-        "file": "docs/test-users.md",
-        "hash": "9418963146796927233"
+        "file": "supabase/migrations/004_test_system.sql",
+        "hash": "591454785969369916"
       },
       {
-        "file": "supabase/migrations/002_rls_policies.sql",
-        "hash": "11351603747400306426"
+        "file": "scripts/fix-dev-schema-migration.js",
+        "hash": "12840014350429475660"
       },
       {
-        "file": "scripts/fix_dev_schema_constraint.js",
-        "hash": "5863553077959324480"
+        "file": "test-db-password.js",
+        "hash": "5089232419506061650"
       },
       {
-        "file": "docs/COMPREHENSIVE_TESTING_PLAN.md",
-        "hash": "4929880172224315749"
+        "file": "docs/DEPLOYMENT_OPTIMIZATIONS.md",
+        "hash": "3756476300733029323"
       },
       {
-        "file": "docs/TESTING_GUIDE.md",
-        "hash": "18103022868125101293"
+        "file": "docs/rls-guest-policies.md",
+        "hash": "17124952439587079480"
       },
       {
-        "file": "docs/CLOUD_MIGRATION_GUIDE.md",
-        "hash": "10729646885134352805"
-      },
-      {
-        "file": "supabase/migrations/003_rls_candidate_guest_restrictions.sql",
-        "hash": "3737784980493724343"
-      },
-      {
-        "file": "migrations/meta/0003_snapshot.json",
-        "hash": "7366711472910756227"
-      },
-      {
-        "file": "docs/REPORTS_SYSTEM_AUDIT.md",
-        "hash": "7714969134545468214"
-      },
-      {
-        "file": "jest.config.js",
-        "hash": "10017495835341144793"
-      },
-      {
-        "file": "migrations/meta/_journal.json",
-        "hash": "1472223792121451690"
-      },
-      {
-        "file": "scripts/quick-api-fix.sh",
-        "hash": "13262491214620191486"
+        "file": "scripts/apply_migrations_safe.js",
+        "hash": "1123160504604294504"
       },
       {
         "file": "docs/AS-IS_DOCUMENTATION.md",
         "hash": "7392698689963496773"
       },
       {
-        "file": "scripts/clear_browser_cache.js",
-        "hash": "9445862633761983739"
+        "file": "README_MONOREPO.md",
+        "hash": "16499686203882476285"
       },
       {
-        "file": ".github/workflows/deploy.yml",
-        "hash": "4397924740290924665"
+        "file": "docs/WEBSOCKET_ANALYSIS_REPORT.md",
+        "hash": "15827081428980391459"
       },
       {
-        "file": "components/icons/ArrowRightIcon.tsx",
-        "hash": "13766032813499805150"
+        "file": "scripts/apply_enhanced_templates_simple.cjs",
+        "hash": "16072946818214620649"
+      },
+      {
+        "file": "migrations/meta/0003_snapshot.json",
+        "hash": "7366711472910756227"
+      },
+      {
+        "file": "scripts/apply_schema_direct.cjs",
+        "hash": "17294524549295112446"
+      },
+      {
+        "file": "scripts/apply_forum_migration.js",
+        "hash": "7684883382413663999"
+      },
+      {
+        "file": "scripts/apply_joint_migration.js",
+        "hash": "16618016149731688648"
+      },
+      {
+        "file": "components/Notification.tsx",
+        "hash": "5892252722562430909"
+      },
+      {
+        "file": "docs/CLOUD_MIGRATION_GUIDE.md",
+        "hash": "10729646885134352805"
+      },
+      {
+        "file": "scripts/reset_test_limits.js",
+        "hash": "5255467621192384216"
+      },
+      {
+        "file": "scripts/test_snailycad_api.js",
+        "hash": "8503112778939388283"
       },
       {
         "file": "scripts/setup-vps.js",
         "hash": "6421503279023085781"
       },
       {
-        "file": "docs/CHARACTER_SYSTEM_DOCUMENTATION.md",
-        "hash": "1623273020678543642"
+        "file": ".github/workflows/backup.md",
+        "hash": "2536150726825847360"
       },
       {
-        "file": "docs/FORUM_SYSTEM.md",
-        "hash": "12827408935957151450"
+        "file": ".github/workflows/deploy.yml",
+        "hash": "4397924740290924665"
       },
       {
-        "file": "supabase/migrations/013_forum_system.sql",
-        "hash": "8385164403131443327"
+        "file": "docs/VITE_ISSUE_ANALYSIS.md",
+        "hash": "15529411384940229870"
+      },
+      {
+        "file": "scripts/apply-dev-schema-migration.js",
+        "hash": "15923690289375188370"
+      },
+      {
+        "file": "components/icons/CheckCircleIcon.tsx",
+        "hash": "2649471090203086675"
+      },
+      {
+        "file": "scripts/apply_all_migrations.js",
+        "hash": "4686984014046392983"
+      },
+      {
+        "file": "scripts/apply_migration_simple.js",
+        "hash": "7754718864778586069"
+      },
+      {
+        "file": "docs/MAPPING_TABLE.md",
+        "hash": "17714497447799393028"
+      },
+      {
+        "file": "docs/LEAVE_MODAL_FIX_REPORT.md",
+        "hash": "12227530486626902814"
+      },
+      {
+        "file": "scripts/test_curl_limits.js",
+        "hash": "17615058857988150608"
+      },
+      {
+        "file": "scripts/create_forum_tables.sql",
+        "hash": "1911021168228953244"
+      },
+      {
+        "file": "components/icons/ArrowRightIcon.tsx",
+        "hash": "13766032813499805150"
+      },
+      {
+        "file": "components/icons/ClockIcon.tsx",
+        "hash": "10478898914729485851"
+      },
+      {
+        "file": "types.ts",
+        "hash": "12251168296645048776"
+      },
+      {
+        "file": "docs/AUTHENTICATION.md",
+        "hash": "15376061969720325599"
+      },
+      {
+        "file": "scripts/test_dynamic_limits.js",
+        "hash": "5007502910261507510"
+      },
+      {
+        "file": "docs/CAD_MDT_README.md",
+        "hash": "8443472604582982941"
+      },
+      {
+        "file": "DEPARTMENT_SYSTEM_IMPROVEMENTS.md",
+        "hash": "17372081947583277578"
+      },
+      {
+        "file": "supabase/migrations/002_rls_policies.sql",
+        "hash": "11351603747400306426"
+      },
+      {
+        "file": "docs/DATABASE_AUDIT_REPORT.md",
+        "hash": "2438376191807793033"
+      },
+      {
+        "file": "docs/DARK_THEME_TEXT_FIX.md",
+        "hash": "18005585294088084925"
+      },
+      {
+        "file": ".github/workflows/deploy.backup.md",
+        "hash": "15504765014758989594"
+      },
+      {
+        "file": "docs/DEPLOYMENT_INSTRUCTIONS.md",
+        "hash": "2723209972353074814"
+      },
+      {
+        "file": "scripts/apply_forum_migration_simple.js",
+        "hash": "14374197698372773405"
+      },
+      {
+        "file": "scripts/debug_applications.js",
+        "hash": "14542362139591077056"
+      },
+      {
+        "file": "scripts/apply_enhanced_templates.js",
+        "hash": "9388724677514501808"
+      },
+      {
+        "file": "test-env.js",
+        "hash": "2476553710699344100"
+      },
+      {
+        "file": "docs/QUICK_DEPLOY_SETUP.md",
+        "hash": "10322605218178698190"
+      },
+      {
+        "file": "supabase/migrations/003_rls_candidate_guest_restrictions.sql",
+        "hash": "3737784980493724343"
+      },
+      {
+        "file": ".nxignore",
+        "hash": "9492348307038149687"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
+      {
+        "file": "components/TransferHistory.tsx",
+        "hash": "9667000904686676041"
+      },
+      {
+        "file": "docs/COMPREHENSIVE_TESTING_PLAN.md",
+        "hash": "4929880172224315749"
+      },
+      {
+        "file": "scripts/quick-api-fix.sh",
+        "hash": "13262491214620191486"
+      },
+      {
+        "file": "MONOREPO_REORGANIZATION.md",
+        "hash": "15915082696074798953"
+      },
+      {
+        "file": "docs/API_ANALYSIS_REPORT.md",
+        "hash": "12662010486798506064"
+      },
+      {
+        "file": "supabase/migrations/010_report_templates_system.sql",
+        "hash": "13099961395515154698"
+      },
+      {
+        "file": "scripts/upload-seed-data.ps1",
+        "hash": "1131361460915154976"
+      },
+      {
+        "file": "supabase/migrations/008_complete_character_system.sql",
+        "hash": "11827627643639358045"
+      },
+      {
+        "file": "scripts/create_test_application.js",
+        "hash": "2797124367758317945"
+      },
+      {
+        "file": "attached_assets/Pasted--UI--1751363180844_1751363180846.txt",
+        "hash": "6319521357404929688"
+      },
+      {
+        "file": "docs/DEPARTMENTS_DESIGN_UPDATE.md",
+        "hash": "13607754095961510152"
+      },
+      {
+        "file": "docs/SECURITY_IMPROVEMENTS.md",
+        "hash": "11599254968892976763"
+      },
+      {
+        "file": "scripts/diagnose-vite-issue.sh",
+        "hash": "8670671618458854242"
+      },
+      {
+        "file": "scripts/check_user.js",
+        "hash": "6056135424961958539"
+      },
+      {
+        "file": "docs/LEAVE_ADVANCE_NOTICE_UPDATE.md",
+        "hash": "2372506088475247571"
+      },
+      {
+        "file": "docs/DEPARTMENTS_UPDATE_REPORT.md",
+        "hash": "17572963532199731243"
+      },
+      {
+        "file": "docs/newpagecreaterules.md",
+        "hash": "8931170849203345179"
+      },
+      {
+        "file": "scripts/apply_templates_only.cjs",
+        "hash": "4381672356002752013"
+      },
+      {
+        "file": "PROJECT_STATUS_CHECKLIST.md",
+        "hash": "3097756867573536952"
+      },
+      {
+        "file": "scripts/check_localstorage.js",
+        "hash": "5147446733073609942"
+      },
+      {
+        "file": "supabase/migrations/006_joint_positions_history.sql",
+        "hash": "10778399762334326066"
+      },
+      {
+        "file": "test-db-password.cjs",
+        "hash": "5089232419506061650"
+      },
+      {
+        "file": "docs/test-users.md",
+        "hash": "9418963146796927233"
+      },
+      {
+        "file": "scripts/create_basic_templates.cjs",
+        "hash": "18311116849184970057"
+      },
+      {
+        "file": "scripts/deploy-to-cloud.js",
+        "hash": "6492726992347377561"
+      },
+      {
+        "file": "README_REPORTS_SYSTEM.md",
+        "hash": "4870712721949753019"
+      },
+      {
+        "file": "local_seed_data.sql",
+        "hash": "13887698347107124070"
+      },
+      {
+        "file": "VPS_DEPLOYMENT_GUIDE.md",
+        "hash": "8266441240692073091"
+      },
+      {
+        "file": "docs/ADMIN_TESTS_SYSTEM.md",
+        "hash": "15055421803720398870"
+      },
+      {
+        "file": "README_NX_MONOREPO.md",
+        "hash": "53930415350610442"
+      },
+      {
+        "file": "scripts/simple_templates_setup.cjs",
+        "hash": "8321771888933886003"
+      },
+      {
+        "file": "README.md",
+        "hash": "3805444317805758455"
+      },
+      {
+        "file": "docs/ENTRY_APPLICATION_FIX.md",
+        "hash": "7760654503466975182"
+      },
+      {
+        "file": "docs/WEBSOCKET_USAGE_EXAMPLES.md",
+        "hash": "5882623343813702269"
+      },
+      {
+        "file": "env.example",
+        "hash": "13542280406341721749"
+      },
+      {
+        "file": "scripts/check_supabase_connection.js",
+        "hash": "9085991694826142394"
+      },
+      {
+        "file": "docs/COMPREHENSIVE_AUDIT_PLAN.md",
+        "hash": "15733409243760732860"
+      },
+      {
+        "file": "vite.config.ts",
+        "hash": "8728422867014991419"
+      },
+      {
+        "file": "components/icons/XCircleIcon.tsx",
+        "hash": "8659510971523039645"
+      },
+      {
+        "file": "supabase/.gitignore",
+        "hash": "10990855904653518110"
+      },
+      {
+        "file": "newtz.md",
+        "hash": "3072206457910379861"
+      },
+      {
+        "file": "docs/TESTING_GUIDE.md",
+        "hash": "18103022868125101293"
+      },
+      {
+        "file": "docs/TEST_TRANSLATION_REPORT.md",
+        "hash": "1341212189231485154"
+      },
+      {
+        "file": "docs/FAQ_DARK_THEME_FIX.md",
+        "hash": "3351479384324478776"
+      },
+      {
+        "file": "components/SupervisorDashboard.tsx",
+        "hash": "12004873673391099626"
+      },
+      {
+        "file": ".env.example",
+        "hash": "3535500971392317723"
+      },
+      {
+        "file": "scripts/create_correct_jwt.js",
+        "hash": "16666118461411896789"
+      },
+      {
+        "file": "supabase/seed.sql",
+        "hash": "13376950263575640000"
+      },
+      {
+        "file": "scripts/add_admin_user.js",
+        "hash": "3767713231369670445"
+      },
+      {
+        "file": "scripts/fix-vite-build.sh",
+        "hash": "16876703382964632969"
+      },
+      {
+        "file": "package.json",
+        "hash": "15067887224609498779"
+      },
+      {
+        "file": "scripts/fix_dev_schema_constraint.js",
+        "hash": "5863553077959324480"
+      },
+      {
+        "file": "scripts/quick-fix.sh",
+        "hash": "2225907583030368414"
+      },
+      {
+        "file": "docs/DESIGN_SYSTEM_IMPLEMENTATION.md",
+        "hash": "17995283445150683987"
+      },
+      {
+        "file": "scripts/create_test_auth_users.js",
+        "hash": "15190606669752285093"
+      },
+      {
+        "file": "components/icons/UserIcon.tsx",
+        "hash": "15365574551590138506"
+      },
+      {
+        "file": "scripts/create_standard_jwt.js",
+        "hash": "8577690499200563864"
       },
       {
         "file": "create-env.js",
         "hash": "788520630118395703"
       },
       {
-        "file": "docs/COLOR_PALETTE_IMPLEMENTATION_REPORT.md",
-        "hash": "279681680362426477"
+        "file": "REORGANIZATION_SUMMARY.md",
+        "hash": "15959801446741096896"
+      },
+      {
+        "file": "migration_commands.sql",
+        "hash": "7713994488998429876"
+      },
+      {
+        "file": "scripts/clear_browser_cache.js",
+        "hash": "9445862633761983739"
+      },
+      {
+        "file": "components/ProfilePage.tsx",
+        "hash": "16511347681147288524"
+      },
+      {
+        "file": "scripts/fix_jwt_tokens.js",
+        "hash": "17234302209235957103"
+      },
+      {
+        "file": "docs/INCOMPATIBLE_FIELDS_ANALYSIS.md",
+        "hash": "13617840594656731642"
+      },
+      {
+        "file": "scripts/check_existing_users.js",
+        "hash": "3500446764719466778"
+      },
+      {
+        "file": "index.tsx",
+        "hash": "5708829987370292496"
+      },
+      {
+        "file": "scripts/apply_migrations.js",
+        "hash": "13338554822932093783"
+      },
+      {
+        "file": "docs/CHARACTER_SYSTEM_DOCUMENTATION.md",
+        "hash": "1623273020678543642"
+      },
+      {
+        "file": "nx.json",
+        "hash": "3496215214210838429"
+      },
+      {
+        "file": "supabase/migrations/005_cad_mdt_system.sql",
+        "hash": "1292452403301833810"
+      },
+      {
+        "file": "docs/REPORTS_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "8677565985246873464"
+      },
+      {
+        "file": "supabase/migrations/014_extend_users_and_characters.sql",
+        "hash": "7150925884150117502"
+      },
+      {
+        "file": "docs/LOCAL_TESTING_GUIDE.md",
+        "hash": "2539318178809350468"
+      },
+      {
+        "file": "App.tsx",
+        "hash": "10625566745493941368"
+      },
+      {
+        "file": "docs/API_DETAILED_ANALYSIS.json",
+        "hash": "5069523616480805096"
+      },
+      {
+        "file": "docs/тз.md",
+        "hash": "10122793774620201296"
+      },
+      {
+        "file": "scripts/emergency-vps-fix.sh",
+        "hash": "822687134393279953"
+      },
+      {
+        "file": "jest.preset.cjs",
+        "hash": "9430166341120122740"
+      },
+      {
+        "file": "FORUM_QUICK_FIX.md",
+        "hash": "11094045247311527602"
+      },
+      {
+        "file": "docs/ENHANCED_TEMPLATES_COMPLETION_REPORT.md",
+        "hash": "17096488500797955386"
+      },
+      {
+        "file": "docs/ENHANCED_TEMPLATES_SETUP.md",
+        "hash": "14585925969792901373"
+      },
+      {
+        "file": "scripts/create_test_users.sql",
+        "hash": "12312643752594090201"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "11859558129296447736"
+      },
+      {
+        "file": "scripts/get_supabase_keys.js",
+        "hash": "15612277435335726742"
+      },
+      {
+        "file": "scripts/apply_reports_migration_final.js",
+        "hash": "8058154457247697548"
+      },
+      {
+        "file": "docs/IMMEDIATE_VPS_FIX.md",
+        "hash": "11661952496791987573"
+      },
+      {
+        "file": "metadata.json",
+        "hash": "847393420253324798"
+      },
+      {
+        "file": "docs/DESIGN_SYSTEM.md",
+        "hash": "8672665519800438630"
+      },
+      {
+        "file": "scripts/run_restore.cjs",
+        "hash": "1376934169997692581"
+      },
+      {
+        "file": "docs/DEPLOYMENT.md",
+        "hash": "1230295416080978918"
+      },
+      {
+        "file": "scripts/check_user_limits.js",
+        "hash": "9573090104471900521"
+      },
+      {
+        "file": "scripts/apply_forum_migration_direct.js",
+        "hash": "1740324465656466113"
+      },
+      {
+        "file": "test-env-simple.cjs",
+        "hash": "6833995582080867419"
+      },
+      {
+        "file": "scripts/test_db_connection.js",
+        "hash": "9793170929262866559"
+      },
+      {
+        "file": "docs/QUICK_ACTIONS_SYNC_REPORT.md",
+        "hash": "12509133776028564478"
+      },
+      {
+        "file": "scripts/fix-production-deployment.sh",
+        "hash": "14939252647997614042"
+      },
+      {
+        "file": "tailwind.config.ts",
+        "hash": "14886741921035005360"
+      },
+      {
+        "file": "docs/FEATURE_SCAFFOLDING.md",
+        "hash": "1382711523289886663"
+      },
+      {
+        "file": "supabase/config.toml",
+        "hash": "14899851295786961498"
+      },
+      {
+        "file": "scripts/migrate-to-cloud.js",
+        "hash": "15412530269280727075"
+      },
+      {
+        "file": "docs/BACKEND_SNAILYCAD_INTEGRATION_REPORT.md",
+        "hash": "6615121233766349370"
+      },
+      {
+        "file": "docs/roadmap.md",
+        "hash": "17691165133422218423"
+      },
+      {
+        "file": "supabase/migrations/013_forum_system.sql",
+        "hash": "8385164403131443327"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "1409626872828258269"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": "scripts/check_departments.sql",
+        "hash": "11091435766970941083"
+      },
+      {
+        "file": "docs/INTERACTIVE_A4_FORM_IMPLEMENTATION.md",
+        "hash": "1738723531724216101"
+      },
+      {
+        "file": "docs/STAGE_3_COMPLETION_REPORT.md",
+        "hash": "2196478532617093537"
+      },
+      {
+        "file": "scripts/restore_database.cjs",
+        "hash": "11969742431016460329"
+      },
+      {
+        "file": "docs/GITHUB_ACTIONS_SETUP.md",
+        "hash": "9942657353810451550"
+      },
+      {
+        "file": "components/TransferRequestForm.tsx",
+        "hash": "9027597373949654383"
+      },
+      {
+        "file": "supabase/migrations/007_update_departments.sql",
+        "hash": "11303292592642553509"
+      },
+      {
+        "file": "docs/MIGRATION_INSTRUCTIONS.md",
+        "hash": "7496825803201224232"
+      },
+      {
+        "file": "scripts/apply_cad_migration.js",
+        "hash": "8522940580778507683"
+      },
+      {
+        "file": "scripts/apply_cad_migration_final.js",
+        "hash": "11851596549515059051"
+      },
+      {
+        "file": "supabase/migrations/009_setup_rls_policies.sql",
+        "hash": "15535352586940939591"
+      },
+      {
+        "file": "docs/REPORTS_SYSTEM_AUDIT.md",
+        "hash": "7714969134545468214"
+      },
+      {
+        "file": "docs/AUDIT_REPORT.md",
+        "hash": "16934432368695375968"
+      },
+      {
+        "file": "migrations/meta/0002_snapshot.json",
+        "hash": "13396004583551762211"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "6930694502408354913"
+      },
+      {
+        "file": "components/icons/PaperAirplaneIcon.tsx",
+        "hash": "5763566202221761257"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "13006215882576324033"
+      },
+      {
+        "file": "scripts/create_test_users.js",
+        "hash": "5694578994624709374"
+      },
+      {
+        "file": "docs/COMPLETE_SYSTEM_UPDATE_REPORT.md",
+        "hash": "9827012407227145452"
+      },
+      {
+        "file": "docs/CRITICAL_DEPLOYMENT_FIX.md",
+        "hash": "13250238670169577524"
+      },
+      {
+        "file": "supabase/migrations/011_enhanced_report_templates.sql",
+        "hash": "4196000462399524730"
+      },
+      {
+        "file": "docs/REPORTS_SYSTEM_DOCUMENTATION.md",
+        "hash": "12879477264236816902"
+      },
+      {
+        "file": "scripts/apply_forum_migration_final.js",
+        "hash": "4848959959807346726"
+      },
+      {
+        "file": "MONOREPO_FINAL_DOCUMENTATION.md",
+        "hash": "14732436389208483984"
+      },
+      {
+        "file": "docs/LEAVE_SYSTEM_DOCUMENTATION.md",
+        "hash": "5379412121502900164"
+      },
+      {
+        "file": "scripts/fix_cad_token.js",
+        "hash": "4009806721132679893"
+      },
+      {
+        "file": "docs/FORUM_SYSTEM.md",
+        "hash": "12827408935957151450"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "18315524891129148814"
+      },
+      {
+        "file": "index.html",
+        "hash": "9648313504119978031"
+      },
+      {
+        "file": "docs/MANUAL_MIGRATION_INSTRUCTIONS.md",
+        "hash": "2838996626608947829"
+      },
+      {
+        "file": "drizzle.config.ts",
+        "hash": "4325878711683596239"
       },
       {
         "file": "docs/STAGE_2_COMPLETION_REPORT.md",
@@ -794,823 +910,119 @@
         "hash": "10854490058065806236"
       },
       {
-        "file": "docs/IMMEDIATE_VPS_FIX.md",
-        "hash": "11661952496791987573"
-      },
-      {
-        "file": "README_MONOREPO.md",
-        "hash": "16499686203882476285"
-      },
-      {
-        "file": "docs/tzv2.md",
-        "hash": "9601320196706719856"
-      },
-      {
-        "file": "scripts/upload-seed-data.ps1",
-        "hash": "1131361460915154976"
-      },
-      {
-        "file": "docs/AUTHENTICATION.md",
-        "hash": "15376061969720325599"
-      },
-      {
-        "file": "scripts/apply_drizzle_migration.js",
-        "hash": "15227135141724902145"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "8465593252564287444"
-      },
-      {
-        "file": "docs/ENHANCED_TEMPLATES_SETUP.md",
-        "hash": "14585925969792901373"
-      },
-      {
-        "file": "scripts/fix-dev-schema-migration.js",
-        "hash": "12840014350429475660"
-      },
-      {
-        "file": "scripts/test_dynamic_limits.js",
-        "hash": "5007502910261507510"
-      },
-      {
-        "file": "README_NX_MONOREPO.md",
-        "hash": "53930415350610442"
-      },
-      {
-        "file": "scripts/test_api_limits.js",
-        "hash": "13268288897197112101"
-      },
-      {
-        "file": "docs/CRITICAL_FIXES_REPORT.md",
-        "hash": "5654805428456543091"
-      },
-      {
-        "file": "scripts/test_api_endpoints.js",
-        "hash": "11201701680565517404"
-      },
-      {
-        "file": "docs/DEPARTMENTS_UPDATE_REPORT.md",
-        "hash": "17572963532199731243"
-      },
-      {
-        "file": "scripts/check_existing_users.js",
-        "hash": "3500446764719466778"
-      },
-      {
-        "file": "migrations/0000_wooden_naoko.sql",
-        "hash": "3171765125198565187"
-      },
-      {
-        "file": "FORUM_QUICK_FIX.md",
-        "hash": "11094045247311527602"
-      },
-      {
-        "file": "scripts/create_test_auth_users.js",
-        "hash": "15190606669752285093"
-      },
-      {
-        "file": "docs/GITHUB_ACTIONS_SETUP.md",
-        "hash": "9942657353810451550"
-      },
-      {
-        "file": "migrations/meta/0000_snapshot.json",
-        "hash": "6243112149849924599"
-      },
-      {
-        "file": "vite.config.ts",
-        "hash": "8728422867014991419"
-      },
-      {
-        "file": "scripts/check-dev-schema.js",
-        "hash": "4153696518610889290"
-      },
-      {
-        "file": "scripts/diagnose-vite-issue.sh",
-        "hash": "8670671618458854242"
-      },
-      {
-        "file": "index.html",
-        "hash": "9648313504119978031"
-      },
-      {
-        "file": "scripts/apply_forum_migration_final.js",
-        "hash": "4848959959807346726"
-      },
-      {
-        "file": "docs/FEATURE_SCAFFOLDING.md",
-        "hash": "1382711523289886663"
-      },
-      {
-        "file": "docs/DESIGN_SYSTEM_IMPLEMENTATION.md",
-        "hash": "17995283445150683987"
-      },
-      {
-        "file": "scripts/apply_cad_migration_final.js",
-        "hash": "11851596549515059051"
-      },
-      {
-        "file": "components/icons/PaperAirplaneIcon.tsx",
-        "hash": "5763566202221761257"
-      },
-      {
-        "file": "scripts/create_standard_jwt.js",
-        "hash": "8577690499200563864"
-      },
-      {
-        "file": "MONOREPO_REORGANIZATION.md",
-        "hash": "15915082696074798953"
-      },
-      {
-        "file": "scripts/test_db_connection.js",
-        "hash": "9793170929262866559"
-      },
-      {
-        "file": "docs/COMPREHENSIVE_AUDIT_PLAN.md",
-        "hash": "15733409243760732860"
-      },
-      {
-        "file": "test-db-password.cjs",
-        "hash": "5089232419506061650"
-      },
-      {
-        "file": "docs/DATA_MODEL_MAPPING.md",
-        "hash": "17410203756758934700"
-      },
-      {
-        "file": "components.json",
-        "hash": "604427135059490639"
-      },
-      {
-        "file": "scripts/create_test_application.js",
-        "hash": "2797124367758317945"
-      },
-      {
-        "file": "env.example",
-        "hash": "13542280406341721749"
-      },
-      {
-        "file": "PROJECT_STATUS_CHECKLIST.md",
-        "hash": "3097756867573536952"
+        "file": "scripts/apply_test_migration.js",
+        "hash": "13339676250401428561"
       },
       {
         "file": "docs/JOINT_POSITIONS_SYSTEM.md",
         "hash": "13954784376239459728"
       },
       {
-        "file": "components/icons/XCircleIcon.tsx",
-        "hash": "8659510971523039645"
+        "file": "jest.config.js",
+        "hash": "10017495835341144793"
       },
       {
-        "file": "docs/newpagecreaterules.md",
-        "hash": "8931170849203345179"
+        "file": ".prettierignore",
+        "hash": "16448050467312557263"
       },
       {
-        "file": "docs/ENTRY_APPLICATION_FIX.md",
-        "hash": "7760654503466975182"
+        "file": "docs/DATA_MODEL_MAPPING.md",
+        "hash": "17410203756758934700"
       },
       {
-        "file": "scripts/check_localstorage.js",
-        "hash": "5147446733073609942"
+        "file": "scripts/apply_drizzle_migration.js",
+        "hash": "15227135141724902145"
       },
       {
-        "file": "supabase/migrations/001_initial_schema.sql",
-        "hash": "13824463293405508163"
+        "file": "scripts/check-dev-schema.js",
+        "hash": "4153696518610889290"
       },
       {
-        "file": "scripts/fix_cad_token.js",
-        "hash": "4009806721132679893"
+        "file": "FORUM_QUICK_START.md",
+        "hash": "13740392872492086115"
       },
       {
-        "file": "docs/ENHANCED_TEMPLATES_COMPLETION_REPORT.md",
-        "hash": "17096488500797955386"
+        "file": "migrations/meta/_journal.json",
+        "hash": "1472223792121451690"
       },
       {
-        "file": "scripts/run_restore.cjs",
-        "hash": "1376934169997692581"
+        "file": "scripts/apply_sql_direct.js",
+        "hash": "17012840326686358923"
       },
       {
-        "file": "docs/AUDIT_REPORT.md",
-        "hash": "16934432368695375968"
+        "file": "scripts/test_api_endpoints.js",
+        "hash": "11201701680565517404"
       },
       {
-        "file": ".nxignore",
-        "hash": "9492348307038149687"
+        "file": "docs/tzv2.md",
+        "hash": "9601320196706719856"
       },
       {
-        "file": "postcss.config.js",
-        "hash": "1886002347757770194"
+        "file": "migrations/0000_wooden_naoko.sql",
+        "hash": "3171765125198565187"
       },
       {
-        "file": "test-env.js",
-        "hash": "2476553710699344100"
+        "file": "scripts/apply_dev_schema_migration.js",
+        "hash": "2459558302045457166"
       },
       {
-        "file": "nx.json",
-        "hash": "3496215214210838429"
+        "file": "supabase/migrations/012_add_template_status.sql",
+        "hash": "8734188197730373541"
       },
       {
-        "file": "docs/TEST_TRANSLATION_REPORT.md",
-        "hash": "1341212189231485154"
+        "file": "docs/REPORTS_SYSTEM_GUIDE.md",
+        "hash": "11844726062499620685"
       },
       {
-        "file": ".eslintrc.json",
-        "hash": "18315524891129148814"
+        "file": "migrations/0002_nitialchema.sql",
+        "hash": "6419363198433994852"
       },
       {
-        "file": "scripts/apply_migration_simple.js",
-        "hash": "7754718864778586069"
+        "file": "docs/API_SNAILYCAD_INTEGRATION.md",
+        "hash": "7671897443956525570"
+      },
+      {
+        "file": "FORUM_MIGRATION_INSTRUCTIONS.md",
+        "hash": "4838149360488321433"
+      },
+      {
+        "file": "docs/COLOR_PALETTE_IMPLEMENTATION_REPORT.md",
+        "hash": "279681680362426477"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "8465593252564287444"
+      },
+      {
+        "file": "migrations/002_rls_candidate_guest.sql",
+        "hash": "12381501398555177256"
+      },
+      {
+        "file": "components.json",
+        "hash": "604427135059490639"
+      },
+      {
+        "file": "docs/CRITICAL_FIXES_REPORT.md",
+        "hash": "5654805428456543091"
+      },
+      {
+        "file": "migrations/meta/0000_snapshot.json",
+        "hash": "6243112149849924599"
+      },
+      {
+        "file": "scripts/debug_auth.js",
+        "hash": "3322904960108330723"
+      },
+      {
+        "file": "migrations/0003_ExtendUsersAndCharacters.sql",
+        "hash": "6651814083053838193"
+      },
+      {
+        "file": "scripts/test_supabase_connection.js",
+        "hash": "1958907455779461462"
       }
     ],
     "projectFileMap": {
-      "server": [
-        {
-          "file": "apps/server/basic-server.js",
-          "hash": "10803031175819672564"
-        },
-        {
-          "file": "apps/server/businessLogic.ts",
-          "hash": "12078816037742482314"
-        },
-        {
-          "file": "apps/server/check-schema.js",
-          "hash": "14199409993978082610"
-        },
-        {
-          "file": "apps/server/check-user.cjs",
-          "hash": "3605683808255429783"
-        },
-        {
-          "file": "apps/server/db/PgStorage.ts",
-          "hash": "16535061069789430964"
-        },
-        {
-          "file": "apps/server/db/SupabaseStorage.ts",
-          "hash": "2389492221093300739"
-        },
-        {
-          "file": "apps/server/db/dev-schema.ts",
-          "hash": "18032683228972239101"
-        },
-        {
-          "file": "apps/server/db/index.ts",
-          "hash": "7270254876910411830"
-        },
-        {
-          "file": "apps/server/db/schema/applications.ts",
-          "hash": "9392092457094567600"
-        },
-        {
-          "file": "apps/server/db/schema/characters.ts",
-          "hash": "2919319977642227857"
-        },
-        {
-          "file": "apps/server/db/schema/departments.ts",
-          "hash": "7984712999829424778"
-        },
-        {
-          "file": "apps/server/db/schema/supportTickets.ts",
-          "hash": "14043432527977732036"
-        },
-        {
-          "file": "apps/server/db/schema/users.ts",
-          "hash": "5885299465835938730"
-        },
-        {
-          "file": "apps/server/db/seedUsers.ts",
-          "hash": "16908495248313490969"
-        },
-        {
-          "file": "apps/server/development.ts",
-          "hash": "11360482141622311242"
-        },
-        {
-          "file": "apps/server/fileUpload.ts",
-          "hash": "7463821900383666540"
-        },
-        {
-          "file": "apps/server/index.ts",
-          "hash": "5524602090331429611"
-        },
-        {
-          "file": "apps/server/middleware/auth.middleware.ts",
-          "hash": "15412397719954678319"
-        },
-        {
-          "file": "apps/server/migrate-schema.js",
-          "hash": "13402682255920908823"
-        },
-        {
-          "file": "apps/server/package-lock.json",
-          "hash": "4128033124445413562"
-        },
-        {
-          "file": "apps/server/package.json",
-          "hash": "9174923296463613459",
-          "deps": [
-            "npm:@jridgewell/trace-mapping",
-            "npm:@supabase/supabase-js",
-            "npm:@types/pg",
-            "npm:bcrypt",
-            "npm:bcryptjs",
-            "npm:cors",
-            "npm:dotenv",
-            "npm:drizzle-orm",
-            "npm:drizzle-zod",
-            "npm:express",
-            "npm:express-rate-limit",
-            "npm:jsonwebtoken",
-            "npm:multer",
-            "npm:nanoid",
-            "npm:pg",
-            "npm:ws",
-            "npm:zod",
-            "npm:@types/bcrypt",
-            "npm:@types/cors",
-            "npm:@types/express",
-            "npm:@types/jest",
-            "npm:@types/jsonwebtoken",
-            "npm:@types/multer",
-            "npm:@types/node",
-            "npm:@types/ws",
-            "npm:esbuild",
-            "npm:eslint",
-            "npm:jest",
-            "npm:ts-jest",
-            "npm:typescript",
-            "npm:bufferutil"
-          ]
-        },
-        {
-          "file": "apps/server/production-entry.ts",
-          "hash": "14942914208494252350"
-        },
-        {
-          "file": "apps/server/production.ts",
-          "hash": "6996106479920727805"
-        },
-        {
-          "file": "apps/server/project.json",
-          "hash": "11758714833567539270"
-        },
-        {
-          "file": "apps/server/quick-test.js",
-          "hash": "8661310337819850254"
-        },
-        {
-          "file": "apps/server/routes.ts",
-          "hash": "4366169235765594029"
-        },
-        {
-          "file": "apps/server/routes/admin/support.routes.ts",
-          "hash": "12947033375211660514"
-        },
-        {
-          "file": "apps/server/routes/admin/support.tickets.list.ts",
-          "hash": "13122696688696044463"
-        },
-        {
-          "file": "apps/server/routes/adminTests.ts",
-          "hash": "1607422537373289233"
-        },
-        {
-          "file": "apps/server/routes/applicationLimits.ts",
-          "hash": "12192381114152422312"
-        },
-        {
-          "file": "apps/server/routes/auth.ts",
-          "hash": "1943600438514174708"
-        },
-        {
-          "file": "apps/server/routes/cad.ts",
-          "hash": "7647436813984515169"
-        },
-        {
-          "file": "apps/server/routes/discord.ts",
-          "hash": "8520101812284634721"
-        },
-        {
-          "file": "apps/server/routes/filledReports.ts",
-          "hash": "12568858418579854122"
-        },
-        {
-          "file": "apps/server/routes/forum.ts",
-          "hash": "16460507924483465706"
-        },
-        {
-          "file": "apps/server/routes/reportTemplates.ts",
-          "hash": "10264772541946169645"
-        },
-        {
-          "file": "apps/server/routes/scheduler.ts",
-          "hash": "17437295409555935368"
-        },
-        {
-          "file": "apps/server/routes/tests.ts",
-          "hash": "585668747699998133"
-        },
-        {
-          "file": "apps/server/scheduler.ts",
-          "hash": "16780583761872849164"
-        },
-        {
-          "file": "apps/server/security.ts",
-          "hash": "4850919447580530432"
-        },
-        {
-          "file": "apps/server/services/CharacterService.ts",
-          "hash": "17162724225648092473"
-        },
-        {
-          "file": "apps/server/services/UserService.ts",
-          "hash": "12630495826113628917"
-        },
-        {
-          "file": "apps/server/simple-env-test.js",
-          "hash": "12020528081533620303"
-        },
-        {
-          "file": "apps/server/simple-test-server.js",
-          "hash": "715885988124004092"
-        },
-        {
-          "file": "apps/server/storage.ts",
-          "hash": "6351345828011591670"
-        },
-        {
-          "file": "apps/server/test-auth.js",
-          "hash": "2914429617938241632"
-        },
-        {
-          "file": "apps/server/test-db-connection-fixed.cjs",
-          "hash": "13422477118509363995"
-        },
-        {
-          "file": "apps/server/test-db-connection-fixed.js",
-          "hash": "1094711985089185509"
-        },
-        {
-          "file": "apps/server/test-db-connection.js",
-          "hash": "3434646909165554130"
-        },
-        {
-          "file": "apps/server/test-db.js",
-          "hash": "1458967127380203143"
-        },
-        {
-          "file": "apps/server/test-new-connection.js",
-          "hash": "17326134714988922409"
-        },
-        {
-          "file": "apps/server/test-pgstorage.cjs",
-          "hash": "9339658918127414169"
-        },
-        {
-          "file": "apps/server/test-pgstorage.js",
-          "hash": "13720549805342718753"
-        },
-        {
-          "file": "apps/server/test-server.ts",
-          "hash": "5530018370493027959"
-        },
-        {
-          "file": "apps/server/test-storage-simple.cjs",
-          "hash": "995873466238332648"
-        },
-        {
-          "file": "apps/server/tsconfig.json",
-          "hash": "9718255250949913121"
-        },
-        {
-          "file": "apps/server/types.ts",
-          "hash": "14841973325430910987"
-        },
-        {
-          "file": "apps/server/types/express.d.ts",
-          "hash": "713557345826331833"
-        },
-        {
-          "file": "apps/server/utils/auth.ts",
-          "hash": "16467474169378843204"
-        },
-        {
-          "file": "apps/server/utils/error-handler.ts",
-          "hash": "14581266568802676856"
-        },
-        {
-          "file": "apps/server/vite.ts",
-          "hash": "5545792696318244850"
-        },
-        {
-          "file": "apps/server/websocket.ts",
-          "hash": "1057979234211545507"
-        }
-      ],
-      "mdtclient": [
-        {
-          "file": "apps/mdtclient/.gitignore",
-          "hash": "13046175384202504187"
-        },
-        {
-          "file": "apps/mdtclient/App.tsx",
-          "hash": "15692947295432632179"
-        },
-        {
-          "file": "apps/mdtclient/LOCALIZATION_REPORT.md",
-          "hash": "1133409787432517838"
-        },
-        {
-          "file": "apps/mdtclient/README.md",
-          "hash": "18312346845542312600"
-        },
-        {
-          "file": "apps/mdtclient/README_LOCALIZATION.md",
-          "hash": "14003223322045799780"
-        },
-        {
-          "file": "apps/mdtclient/backup/App.tsx_backup",
-          "hash": "17294650376381188606"
-        },
-        {
-          "file": "apps/mdtclient/components/ActiveIncidents.tsx",
-          "hash": "10928039007035847542"
-        },
-        {
-          "file": "apps/mdtclient/components/AdminPortal.tsx",
-          "hash": "17113277680409886954"
-        },
-        {
-          "file": "apps/mdtclient/components/CitizenPortal.tsx",
-          "hash": "11295216670775720590"
-        },
-        {
-          "file": "apps/mdtclient/components/DispatchPortal.tsx",
-          "hash": "8465219422770707114"
-        },
-        {
-          "file": "apps/mdtclient/components/EmsFdPortal.tsx",
-          "hash": "6149184596864174574"
-        },
-        {
-          "file": "apps/mdtclient/components/LanguageSwitcher.tsx",
-          "hash": "2473514751277246889"
-        },
-        {
-          "file": "apps/mdtclient/components/Layout.tsx",
-          "hash": "5580160641792771616"
-        },
-        {
-          "file": "apps/mdtclient/components/LoginForm.tsx",
-          "hash": "4237675142861748536"
-        },
-        {
-          "file": "apps/mdtclient/components/MdtPortal.tsx",
-          "hash": "1794954866249203303"
-        },
-        {
-          "file": "apps/mdtclient/components/PatientSearch.tsx",
-          "hash": "14165938549021383579"
-        },
-        {
-          "file": "apps/mdtclient/components/PenalCodeSearch.tsx",
-          "hash": "15914922679440214499"
-        },
-        {
-          "file": "apps/mdtclient/components/ReportsPortal.tsx",
-          "hash": "1049513457069156609"
-        },
-        {
-          "file": "apps/mdtclient/components/ui/Theme.tsx",
-          "hash": "12554102447183848107"
-        },
-        {
-          "file": "apps/mdtclient/constants.ts",
-          "hash": "12077779082035235506"
-        },
-        {
-          "file": "apps/mdtclient/contexts/AuthContext.tsx",
-          "hash": "11821506794536242500"
-        },
-        {
-          "file": "apps/mdtclient/contexts/LocaleContext.tsx",
-          "hash": "13067074809850572023"
-        },
-        {
-          "file": "apps/mdtclient/index.html",
-          "hash": "15002571136070598666"
-        },
-        {
-          "file": "apps/mdtclient/index.tsx",
-          "hash": "5708829987370292496"
-        },
-        {
-          "file": "apps/mdtclient/lib/i18n.ts",
-          "hash": "2393679874444055496"
-        },
-        {
-          "file": "apps/mdtclient/locales/en.json",
-          "hash": "13441717986213466362"
-        },
-        {
-          "file": "apps/mdtclient/locales/ru.json",
-          "hash": "6550676920489502670"
-        },
-        {
-          "file": "apps/mdtclient/metadata.json",
-          "hash": "4891983939639945273"
-        },
-        {
-          "file": "apps/mdtclient/package-lock.json",
-          "hash": "16036389678212778013"
-        },
-        {
-          "file": "apps/mdtclient/package.json",
-          "hash": "181400221422251087",
-          "deps": [
-            "npm:react",
-            "npm:@google/genai",
-            "npm:react-dom",
-            "npm:lucide-react",
-            "npm:@types/node",
-            "npm:@types/react",
-            "npm:@types/react-dom",
-            "npm:@vitejs/plugin-react",
-            "npm:eslint",
-            "npm:jest",
-            "npm:ts-jest",
-            "npm:typescript",
-            "npm:vite"
-          ]
-        },
-        {
-          "file": "apps/mdtclient/project.json",
-          "hash": "13580098062515724504"
-        },
-        {
-          "file": "apps/mdtclient/scripts/check-translations.cjs",
-          "hash": "1275257324150386918"
-        },
-        {
-          "file": "apps/mdtclient/services/api.ts",
-          "hash": "14810946794437832121"
-        },
-        {
-          "file": "apps/mdtclient/services/geminiService.ts",
-          "hash": "4452639364964583234"
-        },
-        {
-          "file": "apps/mdtclient/src/App.tsx",
-          "hash": "13665394916567786291"
-        },
-        {
-          "file": "apps/mdtclient/src/index.css",
-          "hash": "11172213350730530724"
-        },
-        {
-          "file": "apps/mdtclient/src/main.tsx",
-          "hash": "2483932803704138330"
-        },
-        {
-          "file": "apps/mdtclient/tailwind.config.ts",
-          "hash": "6904900642774625895"
-        },
-        {
-          "file": "apps/mdtclient/tsconfig.json",
-          "hash": "5070002293977461106"
-        },
-        {
-          "file": "apps/mdtclient/types.ts",
-          "hash": "13461738604094480249"
-        },
-        {
-          "file": "apps/mdtclient/vite.config.ts",
-          "hash": "9026846900618416351"
-        },
-        {
-          "file": "apps/mdtclient/CITIZEN_PORTAL_UPDATE.md",
-          "hash": "14124929350762312827"
-        }
-      ],
-      "shared-schema": [
-        {
-          "file": "libs/shared-schema/.eslintrc.json",
-          "hash": "10905178498824427073"
-        },
-        {
-          "file": "libs/shared-schema/README.md",
-          "hash": "10089104178545327111"
-        },
-        {
-          "file": "libs/shared-schema/jest.config.ts",
-          "hash": "9125256940951724915"
-        },
-        {
-          "file": "libs/shared-schema/package-lock.json",
-          "hash": "1242917731434437884"
-        },
-        {
-          "file": "libs/shared-schema/package.json",
-          "hash": "17840331845400140290",
-          "deps": [
-            "npm:drizzle-orm",
-            "npm:drizzle-zod",
-            "npm:zod",
-            "npm:typescript"
-          ]
-        },
-        {
-          "file": "libs/shared-schema/project.json",
-          "hash": "13774426364134086009"
-        },
-        {
-          "file": "libs/shared-schema/src/index.ts",
-          "hash": "2362664011860572252"
-        },
-        {
-          "file": "libs/shared-schema/src/lib/shared-schema.spec.ts",
-          "hash": "11633013759709821297"
-        },
-        {
-          "file": "libs/shared-schema/src/lib/shared-schema.ts",
-          "hash": "3390503601335539616"
-        },
-        {
-          "file": "libs/shared-schema/src/websocket-events.ts",
-          "hash": "9120676401046935990"
-        },
-        {
-          "file": "libs/shared-schema/tsconfig.json",
-          "hash": "5840880287502376438"
-        },
-        {
-          "file": "libs/shared-schema/tsconfig.lib.json",
-          "hash": "874530265290128605"
-        },
-        {
-          "file": "libs/shared-schema/tsconfig.spec.json",
-          "hash": "11550347367511341917"
-        },
-        {
-          "file": "libs/shared-schema/vite.config.ts",
-          "hash": "7713191369486854584"
-        }
-      ],
-      "schema": [
-        {
-          "file": "libs/shared/schema/project.json",
-          "hash": "8774781299697112300"
-        }
-      ],
-      "shared": [
-        {
-          "file": "libs/shared/project.json",
-          "hash": "9573853802076345087"
-        }
-      ],
-      "shared-utils": [
-        {
-          "file": "libs/shared-utils/package.json",
-          "hash": "3361493756295011767",
-          "deps": [
-            "shared-types",
-            "npm:typescript"
-          ]
-        },
-        {
-          "file": "libs/shared-utils/project.json",
-          "hash": "4345799646826105250"
-        },
-        {
-          "file": "libs/shared-utils/src/index.ts",
-          "hash": "2785212028867442622"
-        },
-        {
-          "file": "libs/shared-utils/tsconfig.json",
-          "hash": "13227097114682296264"
-        }
-      ],
-      "shared-types": [
-        {
-          "file": "libs/shared-types/package.json",
-          "hash": "11793928261716304617",
-          "deps": [
-            "shared-schema",
-            "npm:typescript"
-          ]
-        },
-        {
-          "file": "libs/shared-types/project.json",
-          "hash": "14548515526776661667"
-        },
-        {
-          "file": "libs/shared-types/src/index.ts",
-          "hash": "11903035670571254978"
-        },
-        {
-          "file": "libs/shared-types/tsconfig.json",
-          "hash": "8639147696162716859"
-        }
-      ],
       "client": [
         {
           "file": "apps/client/.eslintrc.json",
@@ -2212,6 +1624,594 @@
         {
           "file": "apps/client/vite.config.ts",
           "hash": "6944405763244768754"
+        }
+      ],
+      "schema": [
+        {
+          "file": "libs/shared/schema/project.json",
+          "hash": "8774781299697112300"
+        }
+      ],
+      "shared-utils": [
+        {
+          "file": "libs/shared-utils/package.json",
+          "hash": "3361493756295011767",
+          "deps": [
+            "shared-types",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-utils/project.json",
+          "hash": "4345799646826105250"
+        },
+        {
+          "file": "libs/shared-utils/src/index.ts",
+          "hash": "2785212028867442622"
+        },
+        {
+          "file": "libs/shared-utils/tsconfig.json",
+          "hash": "13227097114682296264"
+        }
+      ],
+      "mdtclient": [
+        {
+          "file": "apps/mdtclient/.gitignore",
+          "hash": "13046175384202504187"
+        },
+        {
+          "file": "apps/mdtclient/App.tsx",
+          "hash": "15692947295432632179"
+        },
+        {
+          "file": "apps/mdtclient/CITIZEN_PORTAL_UPDATE.md",
+          "hash": "9792994363775188583"
+        },
+        {
+          "file": "apps/mdtclient/LOCALIZATION_REPORT.md",
+          "hash": "1133409787432517838"
+        },
+        {
+          "file": "apps/mdtclient/README.md",
+          "hash": "18312346845542312600"
+        },
+        {
+          "file": "apps/mdtclient/README_LOCALIZATION.md",
+          "hash": "14003223322045799780"
+        },
+        {
+          "file": "apps/mdtclient/backup/App.tsx_backup",
+          "hash": "17294650376381188606"
+        },
+        {
+          "file": "apps/mdtclient/components/ActiveIncidents.tsx",
+          "hash": "10928039007035847542"
+        },
+        {
+          "file": "apps/mdtclient/components/AdminPortal.tsx",
+          "hash": "17113277680409886954"
+        },
+        {
+          "file": "apps/mdtclient/components/CitizenPortal.tsx",
+          "hash": "14636106721776076607"
+        },
+        {
+          "file": "apps/mdtclient/components/DispatchPortal.tsx",
+          "hash": "8465219422770707114"
+        },
+        {
+          "file": "apps/mdtclient/components/EmsFdPortal.tsx",
+          "hash": "6149184596864174574"
+        },
+        {
+          "file": "apps/mdtclient/components/LanguageSwitcher.tsx",
+          "hash": "2473514751277246889"
+        },
+        {
+          "file": "apps/mdtclient/components/Layout.tsx",
+          "hash": "5580160641792771616"
+        },
+        {
+          "file": "apps/mdtclient/components/LoginForm.tsx",
+          "hash": "4237675142861748536"
+        },
+        {
+          "file": "apps/mdtclient/components/MdtPortal.tsx",
+          "hash": "1794954866249203303"
+        },
+        {
+          "file": "apps/mdtclient/components/PatientSearch.tsx",
+          "hash": "14165938549021383579"
+        },
+        {
+          "file": "apps/mdtclient/components/PenalCodeSearch.tsx",
+          "hash": "15914922679440214499"
+        },
+        {
+          "file": "apps/mdtclient/components/ReportsPortal.tsx",
+          "hash": "1049513457069156609"
+        },
+        {
+          "file": "apps/mdtclient/components/ui/Theme.tsx",
+          "hash": "12554102447183848107"
+        },
+        {
+          "file": "apps/mdtclient/constants.ts",
+          "hash": "12077779082035235506"
+        },
+        {
+          "file": "apps/mdtclient/contexts/AuthContext.tsx",
+          "hash": "11821506794536242500"
+        },
+        {
+          "file": "apps/mdtclient/contexts/LocaleContext.tsx",
+          "hash": "13067074809850572023"
+        },
+        {
+          "file": "apps/mdtclient/index.html",
+          "hash": "15002571136070598666"
+        },
+        {
+          "file": "apps/mdtclient/index.tsx",
+          "hash": "5708829987370292496"
+        },
+        {
+          "file": "apps/mdtclient/lib/i18n.ts",
+          "hash": "2393679874444055496"
+        },
+        {
+          "file": "apps/mdtclient/locales/en.json",
+          "hash": "13441717986213466362"
+        },
+        {
+          "file": "apps/mdtclient/locales/ru.json",
+          "hash": "6550676920489502670"
+        },
+        {
+          "file": "apps/mdtclient/metadata.json",
+          "hash": "4891983939639945273"
+        },
+        {
+          "file": "apps/mdtclient/package-lock.json",
+          "hash": "16036389678212778013"
+        },
+        {
+          "file": "apps/mdtclient/package.json",
+          "hash": "181400221422251087",
+          "deps": [
+            "npm:react",
+            "npm:@google/genai",
+            "npm:react-dom",
+            "npm:lucide-react",
+            "npm:@types/node",
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:@vitejs/plugin-react",
+            "npm:eslint",
+            "npm:jest",
+            "npm:ts-jest",
+            "npm:typescript",
+            "npm:vite"
+          ]
+        },
+        {
+          "file": "apps/mdtclient/project.json",
+          "hash": "13580098062515724504"
+        },
+        {
+          "file": "apps/mdtclient/scripts/check-translations.cjs",
+          "hash": "1275257324150386918"
+        },
+        {
+          "file": "apps/mdtclient/services/api.ts",
+          "hash": "14810946794437832121"
+        },
+        {
+          "file": "apps/mdtclient/services/geminiService.ts",
+          "hash": "4452639364964583234"
+        },
+        {
+          "file": "apps/mdtclient/src/App.tsx",
+          "hash": "13665394916567786291"
+        },
+        {
+          "file": "apps/mdtclient/src/index.css",
+          "hash": "11172213350730530724"
+        },
+        {
+          "file": "apps/mdtclient/src/main.tsx",
+          "hash": "2483932803704138330"
+        },
+        {
+          "file": "apps/mdtclient/tailwind.config.ts",
+          "hash": "6904900642774625895"
+        },
+        {
+          "file": "apps/mdtclient/tsconfig.json",
+          "hash": "5070002293977461106"
+        },
+        {
+          "file": "apps/mdtclient/types.ts",
+          "hash": "13461738604094480249"
+        },
+        {
+          "file": "apps/mdtclient/vite.config.ts",
+          "hash": "9026846900618416351"
+        }
+      ],
+      "server": [
+        {
+          "file": "apps/server/basic-server.js",
+          "hash": "10803031175819672564"
+        },
+        {
+          "file": "apps/server/businessLogic.ts",
+          "hash": "12078816037742482314"
+        },
+        {
+          "file": "apps/server/check-schema.js",
+          "hash": "14199409993978082610"
+        },
+        {
+          "file": "apps/server/check-user.cjs",
+          "hash": "3605683808255429783"
+        },
+        {
+          "file": "apps/server/db/PgStorage.ts",
+          "hash": "16535061069789430964"
+        },
+        {
+          "file": "apps/server/db/SupabaseStorage.ts",
+          "hash": "2389492221093300739"
+        },
+        {
+          "file": "apps/server/db/dev-schema.ts",
+          "hash": "18032683228972239101"
+        },
+        {
+          "file": "apps/server/db/index.ts",
+          "hash": "7270254876910411830"
+        },
+        {
+          "file": "apps/server/db/schema/applications.ts",
+          "hash": "9392092457094567600"
+        },
+        {
+          "file": "apps/server/db/schema/characters.ts",
+          "hash": "2919319977642227857"
+        },
+        {
+          "file": "apps/server/db/schema/departments.ts",
+          "hash": "7984712999829424778"
+        },
+        {
+          "file": "apps/server/db/schema/supportTickets.ts",
+          "hash": "14043432527977732036"
+        },
+        {
+          "file": "apps/server/db/schema/users.ts",
+          "hash": "5885299465835938730"
+        },
+        {
+          "file": "apps/server/db/seedUsers.ts",
+          "hash": "16908495248313490969"
+        },
+        {
+          "file": "apps/server/development.ts",
+          "hash": "11360482141622311242"
+        },
+        {
+          "file": "apps/server/fileUpload.ts",
+          "hash": "7463821900383666540"
+        },
+        {
+          "file": "apps/server/index.ts",
+          "hash": "5524602090331429611"
+        },
+        {
+          "file": "apps/server/middleware/auth.middleware.ts",
+          "hash": "15412397719954678319"
+        },
+        {
+          "file": "apps/server/migrate-schema.js",
+          "hash": "13402682255920908823"
+        },
+        {
+          "file": "apps/server/package-lock.json",
+          "hash": "4128033124445413562"
+        },
+        {
+          "file": "apps/server/package.json",
+          "hash": "9174923296463613459",
+          "deps": [
+            "npm:@jridgewell/trace-mapping",
+            "npm:@supabase/supabase-js",
+            "npm:@types/pg",
+            "npm:bcrypt",
+            "npm:bcryptjs",
+            "npm:cors",
+            "npm:dotenv",
+            "npm:drizzle-orm",
+            "npm:drizzle-zod",
+            "npm:express",
+            "npm:express-rate-limit",
+            "npm:jsonwebtoken",
+            "npm:multer",
+            "npm:nanoid",
+            "npm:pg",
+            "npm:ws",
+            "npm:zod",
+            "npm:@types/bcrypt",
+            "npm:@types/cors",
+            "npm:@types/express",
+            "npm:@types/jest",
+            "npm:@types/jsonwebtoken",
+            "npm:@types/multer",
+            "npm:@types/node",
+            "npm:@types/ws",
+            "npm:esbuild",
+            "npm:eslint",
+            "npm:jest",
+            "npm:ts-jest",
+            "npm:typescript",
+            "npm:bufferutil"
+          ]
+        },
+        {
+          "file": "apps/server/production-entry.ts",
+          "hash": "14942914208494252350"
+        },
+        {
+          "file": "apps/server/production.ts",
+          "hash": "6996106479920727805"
+        },
+        {
+          "file": "apps/server/project.json",
+          "hash": "11758714833567539270"
+        },
+        {
+          "file": "apps/server/quick-test.js",
+          "hash": "8661310337819850254"
+        },
+        {
+          "file": "apps/server/routes.ts",
+          "hash": "4366169235765594029"
+        },
+        {
+          "file": "apps/server/routes/admin/support.routes.ts",
+          "hash": "12947033375211660514"
+        },
+        {
+          "file": "apps/server/routes/admin/support.tickets.list.ts",
+          "hash": "13122696688696044463"
+        },
+        {
+          "file": "apps/server/routes/adminTests.ts",
+          "hash": "1607422537373289233"
+        },
+        {
+          "file": "apps/server/routes/applicationLimits.ts",
+          "hash": "12192381114152422312"
+        },
+        {
+          "file": "apps/server/routes/auth.ts",
+          "hash": "1943600438514174708"
+        },
+        {
+          "file": "apps/server/routes/cad.ts",
+          "hash": "7647436813984515169"
+        },
+        {
+          "file": "apps/server/routes/discord.ts",
+          "hash": "8520101812284634721"
+        },
+        {
+          "file": "apps/server/routes/filledReports.ts",
+          "hash": "12568858418579854122"
+        },
+        {
+          "file": "apps/server/routes/forum.ts",
+          "hash": "16460507924483465706"
+        },
+        {
+          "file": "apps/server/routes/reportTemplates.ts",
+          "hash": "10264772541946169645"
+        },
+        {
+          "file": "apps/server/routes/scheduler.ts",
+          "hash": "17437295409555935368"
+        },
+        {
+          "file": "apps/server/routes/tests.ts",
+          "hash": "585668747699998133"
+        },
+        {
+          "file": "apps/server/scheduler.ts",
+          "hash": "16780583761872849164"
+        },
+        {
+          "file": "apps/server/security.ts",
+          "hash": "4850919447580530432"
+        },
+        {
+          "file": "apps/server/services/CharacterService.ts",
+          "hash": "17162724225648092473"
+        },
+        {
+          "file": "apps/server/services/UserService.ts",
+          "hash": "12630495826113628917"
+        },
+        {
+          "file": "apps/server/simple-env-test.js",
+          "hash": "12020528081533620303"
+        },
+        {
+          "file": "apps/server/simple-test-server.js",
+          "hash": "715885988124004092"
+        },
+        {
+          "file": "apps/server/storage.ts",
+          "hash": "6351345828011591670"
+        },
+        {
+          "file": "apps/server/test-auth.js",
+          "hash": "2914429617938241632"
+        },
+        {
+          "file": "apps/server/test-db-connection-fixed.cjs",
+          "hash": "13422477118509363995"
+        },
+        {
+          "file": "apps/server/test-db-connection-fixed.js",
+          "hash": "1094711985089185509"
+        },
+        {
+          "file": "apps/server/test-db-connection.js",
+          "hash": "3434646909165554130"
+        },
+        {
+          "file": "apps/server/test-db.js",
+          "hash": "1458967127380203143"
+        },
+        {
+          "file": "apps/server/test-new-connection.js",
+          "hash": "17326134714988922409"
+        },
+        {
+          "file": "apps/server/test-pgstorage.cjs",
+          "hash": "9339658918127414169"
+        },
+        {
+          "file": "apps/server/test-pgstorage.js",
+          "hash": "13720549805342718753"
+        },
+        {
+          "file": "apps/server/test-server.ts",
+          "hash": "5530018370493027959"
+        },
+        {
+          "file": "apps/server/test-storage-simple.cjs",
+          "hash": "995873466238332648"
+        },
+        {
+          "file": "apps/server/tsconfig.json",
+          "hash": "9718255250949913121"
+        },
+        {
+          "file": "apps/server/types.ts",
+          "hash": "14841973325430910987"
+        },
+        {
+          "file": "apps/server/types/express.d.ts",
+          "hash": "713557345826331833"
+        },
+        {
+          "file": "apps/server/utils/auth.ts",
+          "hash": "16467474169378843204"
+        },
+        {
+          "file": "apps/server/utils/error-handler.ts",
+          "hash": "14581266568802676856"
+        },
+        {
+          "file": "apps/server/vite.ts",
+          "hash": "5545792696318244850"
+        },
+        {
+          "file": "apps/server/websocket.ts",
+          "hash": "1057979234211545507"
+        }
+      ],
+      "shared-types": [
+        {
+          "file": "libs/shared-types/package.json",
+          "hash": "11793928261716304617",
+          "deps": [
+            "shared-schema",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-types/project.json",
+          "hash": "14548515526776661667"
+        },
+        {
+          "file": "libs/shared-types/src/index.ts",
+          "hash": "11903035670571254978"
+        },
+        {
+          "file": "libs/shared-types/tsconfig.json",
+          "hash": "8639147696162716859"
+        }
+      ],
+      "shared-schema": [
+        {
+          "file": "libs/shared-schema/.eslintrc.json",
+          "hash": "10905178498824427073"
+        },
+        {
+          "file": "libs/shared-schema/README.md",
+          "hash": "10089104178545327111"
+        },
+        {
+          "file": "libs/shared-schema/jest.config.ts",
+          "hash": "9125256940951724915"
+        },
+        {
+          "file": "libs/shared-schema/package-lock.json",
+          "hash": "1242917731434437884"
+        },
+        {
+          "file": "libs/shared-schema/package.json",
+          "hash": "17840331845400140290",
+          "deps": [
+            "npm:drizzle-orm",
+            "npm:drizzle-zod",
+            "npm:zod",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-schema/project.json",
+          "hash": "13774426364134086009"
+        },
+        {
+          "file": "libs/shared-schema/src/index.ts",
+          "hash": "2362664011860572252"
+        },
+        {
+          "file": "libs/shared-schema/src/lib/shared-schema.spec.ts",
+          "hash": "11633013759709821297"
+        },
+        {
+          "file": "libs/shared-schema/src/lib/shared-schema.ts",
+          "hash": "3390503601335539616"
+        },
+        {
+          "file": "libs/shared-schema/src/websocket-events.ts",
+          "hash": "9120676401046935990"
+        },
+        {
+          "file": "libs/shared-schema/tsconfig.json",
+          "hash": "5840880287502376438"
+        },
+        {
+          "file": "libs/shared-schema/tsconfig.lib.json",
+          "hash": "874530265290128605"
+        },
+        {
+          "file": "libs/shared-schema/tsconfig.spec.json",
+          "hash": "11550347367511341917"
+        },
+        {
+          "file": "libs/shared-schema/vite.config.ts",
+          "hash": "7713191369486854584"
+        }
+      ],
+      "shared": [
+        {
+          "file": "libs/shared/project.json",
+          "hash": "9573853802076345087"
         }
       ]
     }
