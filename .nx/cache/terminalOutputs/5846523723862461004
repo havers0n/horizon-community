@@ -1,0 +1,316 @@
+[4m[34mapps\client\src\components\ProfilePage.tsx:3:10[39m[24m - [31m[1merror[22m[39m [90mTS2614[39m: Module '"../App"' has no exported member 'AppContext'. Did you mean to use 'import AppContext from "../App"' instead?
+
+[0m [90m 1 | [39m[0m
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useContext } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m [90m   | [39m         [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m [33mTransferRequestForm[39m from [32m'./TransferRequestForm'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m [33mTransferHistory[39m from [32m'./TransferHistory'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m [33mUserIcon[39m from [32m'./icons/UserIcon'[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\components\ProfilePage.tsx:7:31[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '../types' or its corresponding type declarations.
+
+[0m [90m  5 | [39m[36mimport[39m [33mTransferHistory[39m from [32m'./TransferHistory'[39m[33m;[39m[0m
+[0m [90m  6 | [39m[36mimport[39m [33mUserIcon[39m from [32m'./icons/UserIcon'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 | [39m[36mimport[39m { [33mRequestStatus[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m [90m    | [39m                              [31m[1m^[22m[39m[0m
+[0m [90m  8 | [39m[0m
+[0m [90m  9 | [39m[36mconst[39m [33mProfilePage[39m [33m=[39m () [33m=>[39m {[0m
+[0m [90m 10 | [39m    [36mconst[39m { currentUser[33m,[39m requests } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\ProfilePage.tsx:10:13[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'currentUser' does not exist on type 'unknown'.
+
+[0m [90m  8 | [39m[0m
+[0m [90m  9 | [39m[36mconst[39m [33mProfilePage[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 10 | [39m    [36mconst[39m { currentUser[33m,[39m requests } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m            [31m[1m^[22m[39m[0m
+[0m [90m 11 | [39m[0m
+[0m [90m 12 | [39m    [36mif[39m ([33m![39mcurrentUser) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 13 | [39m    [0m
+
+[4m[34mapps\client\src\components\ProfilePage.tsx:10:26[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'requests' does not exist on type 'unknown'.
+
+[0m [90m  8 | [39m[0m
+[0m [90m  9 | [39m[36mconst[39m [33mProfilePage[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 10 | [39m    [36mconst[39m { currentUser[33m,[39m requests } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                         [31m[1m^[22m[39m[0m
+[0m [90m 11 | [39m[0m
+[0m [90m 12 | [39m    [36mif[39m ([33m![39mcurrentUser) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 13 | [39m    [0m
+
+[4m[34mapps\client\src\components\ProfilePage.tsx:15:9[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'req' implicitly has an 'any' type.
+
+[0m [90m 13 | [39m    [0m
+[0m [90m 14 | [39m    [36mconst[39m hasPendingRequest [33m=[39m requests[33m.[39msome([0m
+[0m[31m[1m>[22m[39m[90m 15 | [39m        req [33m=>[39m req[33m.[39muserId [33m===[39m currentUser[33m.[39mid [33m&&[39m (req[33m.[39mstatus [33m===[39m [33mRequestStatus[39m[33m.[39m[33mSENT[39m [33m||[39m req[33m.[39mstatus [33m===[39m [33mRequestStatus[39m[33m.[39m[33mREVIEWING[39m)[0m
+[0m [90m    | [39m        [31m[1m^[22m[39m[0m
+[0m [90m 16 | [39m    )[33m;[39m[0m
+[0m [90m 17 | [39m[0m
+[0m [90m 18 | [39m    [36mreturn[39m ([0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:3:10[39m[24m - [31m[1merror[22m[39m [90mTS2614[39m: Module '"../App"' has no exported member 'AppContext'. Did you mean to use 'import AppContext from "../App"' instead?
+
+[0m [90m 1 | [39m[0m
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useContext[33m,[39m useState } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m [90m   | [39m         [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mTransferRequest[39m[33m,[39m [33mUser[39m[33m,[39m [33mRequestStatus[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m [33mArrowRightIcon[39m from [32m'./icons/ArrowRightIcon'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:4:54[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '../types' or its corresponding type declarations.
+
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useContext[33m,[39m useState } from [32m'react'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { [33mTransferRequest[39m[33m,[39m [33mUser[39m[33m,[39m [33mRequestStatus[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m [90m   | [39m                                                     [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mimport[39m [33mArrowRightIcon[39m from [32m'./icons/ArrowRightIcon'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[0m
+[0m [90m 7 | [39m[36mconst[39m [33mSupervisorDashboard[39m [33m=[39m () [33m=>[39m {[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:8:13[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'currentUser' does not exist on type 'unknown'.
+
+[0m [90m  6 | [39m[0m
+[0m [90m  7 | [39m[36mconst[39m [33mSupervisorDashboard[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  8 | [39m    [36mconst[39m { currentUser[33m,[39m users[33m,[39m requests[33m,[39m decideOnRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m            [31m[1m^[22m[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [rejectionReason[33m,[39m setRejectionReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [requestToReject[33m,[39m setRequestToReject] [33m=[39m useState[33m<[39m[33mnumber[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+[0m [90m 11 | [39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:8:26[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'users' does not exist on type 'unknown'.
+
+[0m [90m  6 | [39m[0m
+[0m [90m  7 | [39m[36mconst[39m [33mSupervisorDashboard[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  8 | [39m    [36mconst[39m { currentUser[33m,[39m users[33m,[39m requests[33m,[39m decideOnRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                         [31m[1m^[22m[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [rejectionReason[33m,[39m setRejectionReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [requestToReject[33m,[39m setRequestToReject] [33m=[39m useState[33m<[39m[33mnumber[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+[0m [90m 11 | [39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:8:33[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'requests' does not exist on type 'unknown'.
+
+[0m [90m  6 | [39m[0m
+[0m [90m  7 | [39m[36mconst[39m [33mSupervisorDashboard[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  8 | [39m    [36mconst[39m { currentUser[33m,[39m users[33m,[39m requests[33m,[39m decideOnRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                                [31m[1m^[22m[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [rejectionReason[33m,[39m setRejectionReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [requestToReject[33m,[39m setRequestToReject] [33m=[39m useState[33m<[39m[33mnumber[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+[0m [90m 11 | [39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:8:43[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'decideOnRequest' does not exist on type 'unknown'.
+
+[0m [90m  6 | [39m[0m
+[0m [90m  7 | [39m[36mconst[39m [33mSupervisorDashboard[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  8 | [39m    [36mconst[39m { currentUser[33m,[39m users[33m,[39m requests[33m,[39m decideOnRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                                          [31m[1m^[22m[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [rejectionReason[33m,[39m setRejectionReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [requestToReject[33m,[39m setRequestToReject] [33m=[39m useState[33m<[39m[33mnumber[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+[0m [90m 11 | [39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:8:60[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'addNotification' does not exist on type 'unknown'.
+
+[0m [90m  6 | [39m[0m
+[0m [90m  7 | [39m[36mconst[39m [33mSupervisorDashboard[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  8 | [39m    [36mconst[39m { currentUser[33m,[39m users[33m,[39m requests[33m,[39m decideOnRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                                                           [31m[1m^[22m[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [rejectionReason[33m,[39m setRejectionReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [requestToReject[33m,[39m setRequestToReject] [33m=[39m useState[33m<[39m[33mnumber[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[33m;[39m[0m
+[0m [90m 11 | [39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:17:10[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'req' implicitly has an 'any' type.
+
+[0m [90m 15 | [39m[0m
+[0m [90m 16 | [39m    [36mconst[39m pendingRequests [33m=[39m requests[33m.[39mfilter([0m
+[0m[31m[1m>[22m[39m[90m 17 | [39m        (req) [33m=>[39m req[33m.[39mfromDepartment [33m===[39m currentUser[33m.[39mdepartment [33m&&[39m (req[33m.[39mstatus [33m===[39m [33mRequestStatus[39m[33m.[39m[33mSENT[39m [33m||[39m req[33m.[39mstatus [33m===[39m [33mRequestStatus[39m[33m.[39m[33mREVIEWING[39m)[0m
+[0m [90m    | [39m         [31m[1m^[22m[39m[0m
+[0m [90m 18 | [39m    )[33m;[39m[0m
+[0m [90m 19 | [39m[0m
+[0m [90m 20 | [39m    [36mconst[39m getUserById [33m=[39m (id[33m:[39m number)[33m:[39m [33mUser[39m [33m|[39m undefined [33m=>[39m users[33m.[39mfind(u [33m=>[39m u[33m.[39mid [33m===[39m id)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:20:70[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'u' implicitly has an 'any' type.
+
+[0m [90m 18 | [39m    )[33m;[39m[0m
+[0m [90m 19 | [39m[0m
+[0m[31m[1m>[22m[39m[90m 20 | [39m    [36mconst[39m getUserById [33m=[39m (id[33m:[39m number)[33m:[39m [33mUser[39m [33m|[39m undefined [33m=>[39m users[33m.[39mfind(u [33m=>[39m u[33m.[39mid [33m===[39m id)[33m;[39m[0m
+[0m [90m    | [39m                                                                     [31m[1m^[22m[39m[0m
+[0m [90m 21 | [39m[0m
+[0m [90m 22 | [39m    [36mconst[39m handleApprove [33m=[39m (requestId[33m:[39m number) [33m=>[39m {[0m
+[0m [90m 23 | [39m        decideOnRequest(requestId[33m,[39m [33mRequestStatus[39m[33m.[39m[33mAPPROVED[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\SupervisorDashboard.tsx:46:43[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'req' implicitly has an 'any' type.
+
+[0m [90m 44 | [39m            {pendingRequests[33m.[39mlength [33m>[39m [35m0[39m [33m?[39m ([0m
+[0m [90m 45 | [39m                [33m<[39m[33mul[39m className[33m=[39m[32m"space-y-6"[39m[33m>[39m[0m
+[0m[31m[1m>[22m[39m[90m 46 | [39m                    {pendingRequests[33m.[39mmap((req) [33m=>[39m {[0m
+[0m [90m    | [39m                                          [31m[1m^[22m[39m[0m
+[0m [90m 47 | [39m                        [36mconst[39m user [33m=[39m getUserById(req[33m.[39muserId)[33m;[39m[0m
+[0m [90m 48 | [39m                        [36mreturn[39m ([0m
+[0m [90m 49 | [39m                            [33m<[39m[33mli[39m key[33m=[39m{req[33m.[39mid} className[33m=[39m[32m"bg-gray-900/70 rounded-lg p-6 shadow-lg"[39m[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:3:48[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '../types' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[0m
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useContext } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mTransferRequest[39m[33m,[39m [33mRequestStatus[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m [90m   | [39m                                               [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m [33mArrowRightIcon[39m from [32m'./icons/ArrowRightIcon'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m [33mCheckCircleIcon[39m from [32m'./icons/CheckCircleIcon'[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:4:10[39m[24m - [31m[1merror[22m[39m [90mTS2614[39m: Module '"../App"' has no exported member 'AppContext'. Did you mean to use 'import AppContext from "../App"' instead?
+
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useContext } from [32m'react'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mTransferRequest[39m[33m,[39m [33mRequestStatus[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m [90m   | [39m         [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mimport[39m [33mArrowRightIcon[39m from [32m'./icons/ArrowRightIcon'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m [33mCheckCircleIcon[39m from [32m'./icons/CheckCircleIcon'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mimport[39m [33mXCircleIcon[39m from [32m'./icons/XCircleIcon'[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:67:13[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'currentUser' does not exist on type 'unknown'.
+
+[0m [90m 65 | [39m[0m
+[0m [90m 66 | [39m[36mconst[39m [33mTransferHistory[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 67 | [39m    [36mconst[39m { currentUser[33m,[39m requests } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m            [31m[1m^[22m[39m[0m
+[0m [90m 68 | [39m    [0m
+[0m [90m 69 | [39m    [36mif[39m ([33m![39mcurrentUser) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 70 | [39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:67:26[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'requests' does not exist on type 'unknown'.
+
+[0m [90m 65 | [39m[0m
+[0m [90m 66 | [39m[36mconst[39m [33mTransferHistory[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m 67 | [39m    [36mconst[39m { currentUser[33m,[39m requests } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                         [31m[1m^[22m[39m[0m
+[0m [90m 68 | [39m    [0m
+[0m [90m 69 | [39m    [36mif[39m ([33m![39mcurrentUser) [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 70 | [39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:72:18[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'req' implicitly has an 'any' type.
+
+[0m [90m 70 | [39m[0m
+[0m [90m 71 | [39m    [36mconst[39m userRequests [33m=[39m requests[0m
+[0m[31m[1m>[22m[39m[90m 72 | [39m        [33m.[39mfilter((req) [33m=>[39m req[33m.[39muserId [33m===[39m currentUser[33m.[39mid)[0m
+[0m [90m    | [39m                 [31m[1m^[22m[39m[0m
+[0m [90m 73 | [39m        [33m.[39msort((a[33m,[39m b) [33m=>[39m b[33m.[39msubmissionDate[33m.[39mgetTime() [33m-[39m a[33m.[39msubmissionDate[33m.[39mgetTime())[33m;[39m[0m
+[0m [90m 74 | [39m[0m
+[0m [90m 75 | [39m    [36mreturn[39m ([0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:73:16[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'a' implicitly has an 'any' type.
+
+[0m [90m 71 | [39m    [36mconst[39m userRequests [33m=[39m requests[0m
+[0m [90m 72 | [39m        [33m.[39mfilter((req) [33m=>[39m req[33m.[39muserId [33m===[39m currentUser[33m.[39mid)[0m
+[0m[31m[1m>[22m[39m[90m 73 | [39m        [33m.[39msort((a[33m,[39m b) [33m=>[39m b[33m.[39msubmissionDate[33m.[39mgetTime() [33m-[39m a[33m.[39msubmissionDate[33m.[39mgetTime())[33m;[39m[0m
+[0m [90m    | [39m               [31m[1m^[22m[39m[0m
+[0m [90m 74 | [39m[0m
+[0m [90m 75 | [39m    [36mreturn[39m ([0m
+[0m [90m 76 | [39m        [33m<[39m[33mdiv[39m className[33m=[39m[32m"bg-gray-800 rounded-lg shadow-xl p-6"[39m[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:73:19[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'b' implicitly has an 'any' type.
+
+[0m [90m 71 | [39m    [36mconst[39m userRequests [33m=[39m requests[0m
+[0m [90m 72 | [39m        [33m.[39mfilter((req) [33m=>[39m req[33m.[39muserId [33m===[39m currentUser[33m.[39mid)[0m
+[0m[31m[1m>[22m[39m[90m 73 | [39m        [33m.[39msort((a[33m,[39m b) [33m=>[39m b[33m.[39msubmissionDate[33m.[39mgetTime() [33m-[39m a[33m.[39msubmissionDate[33m.[39mgetTime())[33m;[39m[0m
+[0m [90m    | [39m                  [31m[1m^[22m[39m[0m
+[0m [90m 74 | [39m[0m
+[0m [90m 75 | [39m    [36mreturn[39m ([0m
+[0m [90m 76 | [39m        [33m<[39m[33mdiv[39m className[33m=[39m[32m"bg-gray-800 rounded-lg shadow-xl p-6"[39m[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TransferHistory.tsx:80:40[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'req' implicitly has an 'any' type.
+
+[0m [90m 78 | [39m            {userRequests[33m.[39mlength [33m>[39m [35m0[39m [33m?[39m ([0m
+[0m [90m 79 | [39m                [33m<[39m[33mul[39m className[33m=[39m[32m"space-y-4"[39m[33m>[39m[0m
+[0m[31m[1m>[22m[39m[90m 80 | [39m                    {userRequests[33m.[39mmap((req) [33m=>[39m ([0m
+[0m [90m    | [39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 81 | [39m                        [33m<[39m[33mTransferHistoryItem[39m key[33m=[39m{req[33m.[39mid} request[33m=[39m{req} [33m/[39m[33m>[39m[0m
+[0m [90m 82 | [39m                    ))}[0m
+[0m [90m 83 | [39m                [33m<[39m[33m/[39mul[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:3:28[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '../types' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[0m
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m useContext } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mDepartment[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m [90m   | [39m                           [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[0m
+[0m [90m 6 | [39m[36mconst[39m [33mTransferRequestForm[39m [33m=[39m () [33m=>[39m {[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:4:10[39m[24m - [31m[1merror[22m[39m [90mTS2614[39m: Module '"../App"' has no exported member 'AppContext'. Did you mean to use 'import AppContext from "../App"' instead?
+
+[0m [90m 2 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m useContext } from [32m'react'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mDepartment[39m } from [32m'../types'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { [33mAppContext[39m } from [32m'../App'[39m[33m;[39m[0m
+[0m [90m   | [39m         [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[0m
+[0m [90m 6 | [39m[36mconst[39m [33mTransferRequestForm[39m [33m=[39m () [33m=>[39m {[0m
+[0m [90m 7 | [39m    [36mconst[39m { currentUser[33m,[39m createRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:7:13[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'currentUser' does not exist on type 'unknown'.
+
+[0m [90m  5 | [39m[0m
+[0m [90m  6 | [39m[36mconst[39m [33mTransferRequestForm[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  7 | [39m    [36mconst[39m { currentUser[33m,[39m createRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m            [31m[1m^[22m[39m[0m
+[0m [90m  8 | [39m    [36mconst[39m [toDepartment[33m,[39m setToDepartment] [33m=[39m useState[33m<[39m[33mDepartment[39m [33m|[39m [32m''[39m[33m>[39m([32m''[39m)[33m;[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [reason[33m,[39m setReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [documentationRead[33m,[39m setDocumentationRead] [33m=[39m useState([36mfalse[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:7:26[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'createRequest' does not exist on type 'unknown'.
+
+[0m [90m  5 | [39m[0m
+[0m [90m  6 | [39m[36mconst[39m [33mTransferRequestForm[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  7 | [39m    [36mconst[39m { currentUser[33m,[39m createRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                         [31m[1m^[22m[39m[0m
+[0m [90m  8 | [39m    [36mconst[39m [toDepartment[33m,[39m setToDepartment] [33m=[39m useState[33m<[39m[33mDepartment[39m [33m|[39m [32m''[39m[33m>[39m([32m''[39m)[33m;[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [reason[33m,[39m setReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [documentationRead[33m,[39m setDocumentationRead] [33m=[39m useState([36mfalse[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:7:41[39m[24m - [31m[1merror[22m[39m [90mTS2339[39m: Property 'addNotification' does not exist on type 'unknown'.
+
+[0m [90m  5 | [39m[0m
+[0m [90m  6 | [39m[36mconst[39m [33mTransferRequestForm[39m [33m=[39m () [33m=>[39m {[0m
+[0m[31m[1m>[22m[39m[90m  7 | [39m    [36mconst[39m { currentUser[33m,[39m createRequest[33m,[39m addNotification } [33m=[39m useContext([33mAppContext[39m)[33m;[39m[0m
+[0m [90m    | [39m                                        [31m[1m^[22m[39m[0m
+[0m [90m  8 | [39m    [36mconst[39m [toDepartment[33m,[39m setToDepartment] [33m=[39m useState[33m<[39m[33mDepartment[39m [33m|[39m [32m''[39m[33m>[39m([32m''[39m)[33m;[39m[0m
+[0m [90m  9 | [39m    [36mconst[39m [reason[33m,[39m setReason] [33m=[39m useState([32m''[39m)[33m;[39m[0m
+[0m [90m 10 | [39m    [36mconst[39m [documentationRead[33m,[39m setDocumentationRead] [33m=[39m useState([36mfalse[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:51:37[39m[24m - [31m[1merror[22m[39m [90mTS2322[39m: Type 'unknown' is not assignable to type 'Key | null | undefined'.
+
+[0m [90m 49 | [39m                        [33m<[39m[33moption[39m value[33m=[39m[32m""[39m disabled[33m>[39m[33mВыберите[39m департамент[33m...[39m[33m<[39m[33m/[39moption[33m>[39m[0m
+[0m [90m 50 | [39m                        {availableDepartments[33m.[39mmap((dept) [33m=>[39m ([0m
+[0m[31m[1m>[22m[39m[90m 51 | [39m                            [33m<[39m[33moption[39m key[33m=[39m{dept} value[33m=[39m{dept}[33m>[39m{dept}[33m<[39m[33m/[39moption[33m>[39m[0m
+[0m [90m    | [39m                                    [31m[1m^[22m[39m[0m
+[0m [90m 52 | [39m                        ))}[0m
+[0m [90m 53 | [39m                    [33m<[39m[33m/[39mselect[33m>[39m[0m
+[0m [90m 54 | [39m                [33m<[39m[33m/[39mdiv[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:51:48[39m[24m - [31m[1merror[22m[39m [90mTS2322[39m: Type 'unknown' is not assignable to type 'string | number | readonly string[] | undefined'.
+
+[0m [90m 49 | [39m                        [33m<[39m[33moption[39m value[33m=[39m[32m""[39m disabled[33m>[39m[33mВыберите[39m департамент[33m...[39m[33m<[39m[33m/[39moption[33m>[39m[0m
+[0m [90m 50 | [39m                        {availableDepartments[33m.[39mmap((dept) [33m=>[39m ([0m
+[0m[31m[1m>[22m[39m[90m 51 | [39m                            [33m<[39m[33moption[39m key[33m=[39m{dept} value[33m=[39m{dept}[33m>[39m{dept}[33m<[39m[33m/[39moption[33m>[39m[0m
+[0m [90m    | [39m                                               [31m[1m^[22m[39m[0m
+[0m [90m 52 | [39m                        ))}[0m
+[0m [90m 53 | [39m                    [33m<[39m[33m/[39mselect[33m>[39m[0m
+[0m [90m 54 | [39m                [33m<[39m[33m/[39mdiv[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TransferRequestForm.tsx:51:61[39m[24m - [31m[1merror[22m[39m [90mTS2322[39m: Type 'unknown' is not assignable to type 'ReactI18NextChildren | Iterable<ReactI18NextChildren>'.
+
+[0m [90m 49 | [39m                        [33m<[39m[33moption[39m value[33m=[39m[32m""[39m disabled[33m>[39m[33mВыберите[39m департамент[33m...[39m[33m<[39m[33m/[39moption[33m>[39m[0m
+[0m [90m 50 | [39m                        {availableDepartments[33m.[39mmap((dept) [33m=>[39m ([0m
+[0m[31m[1m>[22m[39m[90m 51 | [39m                            [33m<[39m[33moption[39m key[33m=[39m{dept} value[33m=[39m{dept}[33m>[39m{dept}[33m<[39m[33m/[39moption[33m>[39m[0m
+[0m [90m    | [39m                                                            [31m[1m^[22m[39m[0m
+[0m [90m 52 | [39m                        ))}[0m
+[0m [90m 53 | [39m                    [33m<[39m[33m/[39mselect[33m>[39m[0m
+[0m [90m 54 | [39m                [33m<[39m[33m/[39mdiv[33m>[39m[0m
+
+Found 31 errors.
+
+ [31m>[39m [0m[7m[1m[31m NX [39m[22m[27m[0m  [31mFound type errors. See above.[39m
+
+   Pass --verbose to see the stacktrace.
+

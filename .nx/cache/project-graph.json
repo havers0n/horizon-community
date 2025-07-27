@@ -247,6 +247,20 @@
               }
             }
           },
+          "build:fivem": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build:fivem"
+            },
+            "configurations": {}
+          },
+          "build:watch": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build:watch"
+            },
+            "configurations": {}
+          },
           "preview": {
             "executor": "@nx/vite:preview-server",
             "defaultConfiguration": "development",
@@ -11653,22 +11667,22 @@
     "mdtclient": [
       {
         "source": "mdtclient",
-        "target": "npm:react",
-        "type": "static"
-      },
-      {
-        "source": "mdtclient",
         "target": "npm:@google/genai",
         "type": "static"
       },
       {
         "source": "mdtclient",
-        "target": "npm:react-dom",
+        "target": "npm:lucide-react",
         "type": "static"
       },
       {
         "source": "mdtclient",
-        "target": "npm:lucide-react",
+        "target": "npm:react",
+        "type": "static"
+      },
+      {
+        "source": "mdtclient",
+        "target": "npm:react-dom",
         "type": "static"
       },
       {

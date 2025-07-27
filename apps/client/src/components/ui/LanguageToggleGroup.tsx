@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ToggleGroup, ToggleGroupItem } from './toggle-group';
 
-const LanguageToggleGroup: React.FC = () => {
+const LanguageToggleGroup = () => {
     const { i18n } = useTranslation();
     const [language, setLanguage] = useState<'en' | 'ru'>(i18n.language as 'en' | 'ru' || 'ru');
 

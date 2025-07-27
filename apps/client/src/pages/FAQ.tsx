@@ -157,7 +157,7 @@ const faqData: FAQItem[] = [
   }
 ];
 
-const FAQ: React.FC = () => {
+const FAQ = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'general' | 'technical' | 'application' | 'gameplay'>('all');

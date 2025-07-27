@@ -20,7 +20,7 @@ const languages: Language[] = [
     { code: 'ru', name: 'Russian', nativeName: 'Русский' },
 ];
 
-const LanguageDropdown: React.FC = () => {
+const LanguageDropdown = () => {
     const { i18n } = useTranslation();
     const [language, setLanguage] = useState<'en' | 'ru'>(i18n.language as 'en' | 'ru' || 'ru');
 

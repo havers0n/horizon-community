@@ -27,11 +27,11 @@ interface ReportFillerProps {
   }) => void;
 }
 
-const ReportFiller: React.FC<ReportFillerProps> = ({ 
+const ReportFiller = ({ 
   template, 
   onBack,
   onSubmit 
-}) => {
+}: ReportFillerProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});

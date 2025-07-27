@@ -160,19 +160,28 @@ export const MOCK_REPORTS: MDTReport[] = [
 
 export const REPORT_TEMPLATES: ReportTemplate[] = [
     {
+        id: 'arrest_template',
+        name: 'Arrest Report Template',
         type: 'Arrest',
         title: 'Рапорт об аресте: [Имя Фамилия]',
-        content: `**1. ДЕТАЛИ АРЕСТА**\nДата: \nВремя: \nМесто: \n\n**2. ИНФОРМАЦИЯ О ЗАДЕРЖАННОМ**\nИмя: \nФамилия: \nДата рождения: \n\n**3. ОБВИНЕНИЯ**\n- \n- \n\n**4. ОПИСАНИЕ ИНЦИДЕНТА**\n[Подробное описание событий, приведших к аресту.]\n\n**5. ИЗЪЯТЫЕ ПРЕДМЕТЫ**\n- \n\n**6. ЗАЯВЛЕНИЕ ОФИЦЕРА**\n[Имя офицера]`
+        content: `**1. ДЕТАЛИ АРЕСТА**\nДата: \nВремя: \nМесто: \n\n**2. ИНФОРМАЦИЯ О ЗАДЕРЖАННОМ**\nИмя: \nФамилия: \nДата рождения: \n\n**3. ОБВИНЕНИЯ**\n- \n- \n\n**4. ОПИСАНИЕ ИНЦИДЕНТА**\n[Подробное описание событий, приведших к аресту.]\n\n**5. ИЗЪЯТЫЕ ПРЕДМЕТЫ**\n- \n\n**6. ЗАЯВЛЕНИЕ ОФИЦЕРА**\n[Имя офицера]`,
+        fields: ['date', 'time', 'location', 'suspectName', 'charges', 'description', 'evidence', 'officerName']
     },
     {
+        id: 'incident_template',
+        name: 'Incident Report Template',
         type: 'Incident',
         title: 'Рапорт об инциденте: [Тип инцидента]',
-        content: `**1. ТИП ИНЦИДЕНТА:** \n**2. ДАТА/ВРЕМЯ:** \n**3. МЕСТО:** \n\n**4. УЧАСТВУЮЩИЕ ЮНИТЫ:**\n- \n\n**5. ВОВЛЕЧЕННЫЕ ЛИЦА:**\n- \n\n**6. ХРОНОЛОГИЯ СОБЫТИЙ:**\n[Подробное описание инцидента от начала до конца.]\n\n**7. РЕЗУЛЬТАТ:**\n[Чем завершился инцидент.]`
+        content: `**1. ТИП ИНЦИДЕНТА:** \n**2. ДАТА/ВРЕМЯ:** \n**3. МЕСТО:** \n\n**4. УЧАСТВУЮЩИЕ ЮНИТЫ:**\n- \n\n**5. ВОВЛЕЧЕННЫЕ ЛИЦА:**\n- \n\n**6. ХРОНОЛОГИЯ СОБЫТИЙ:**\n[Подробное описание инцидента от начала до конца.]\n\n**7. РЕЗУЛЬТАТ:**\n[Чем завершился инцидент.]`,
+        fields: ['incidentType', 'dateTime', 'location', 'units', 'involvedPersons', 'chronology', 'outcome']
     },
     {
+        id: 'medical_template',
+        name: 'Medical Report Template',
         type: 'Medical',
         title: 'Медицинский рапорт (PCR): [Имя пациента]',
-        content: `**PATIENT CARE REPORT**\n\n**1. PATIENT INFORMATION**\nName: \nDOB: \nAge: \nGender: \n\n**2. DISPATCH INFORMATION**\nCall Location: \nChief Complaint: \n\n**3. ASSESSMENT (S.O.A.P.)**\n**S (Subjective):**\n[What the patient tells you.]\n\n**O (Objective):**\n- Vitals (HR, BP, RR, SpO2): \n- GCS: \n- Physical Findings: \n\n**A (Assessment):**\n[Your professional assessment of the patient's condition.]\n\n**P (Plan):**\n- Treatment Provided: \n- Transport Decision: \n\n**4. NARRATIVE**\n[A detailed, chronological account of the call from dispatch to transfer of care.]\n\n**5. CREW**\n[Responding unit and personnel.]`
+        content: `**PATIENT CARE REPORT**\n\n**1. PATIENT INFORMATION**\nName: \nDOB: \nAge: \nGender: \n\n**2. DISPATCH INFORMATION**\nCall Location: \nChief Complaint: \n\n**3. ASSESSMENT (S.O.A.P.)**\n**S (Subjective):**\n[What the patient tells you.]\n\n**O (Objective):**\n- Vitals (HR, BP, RR, SpO2): \n- GCS: \n- Physical Findings: \n\n**A (Assessment):**\n[Your professional assessment of the patient's condition.]\n\n**P (Plan):**\n- Treatment Provided: \n- Transport Decision: \n\n**4. NARRATIVE**\n[A detailed, chronological account of the call from dispatch to transfer of care.]\n\n**5. CREW**\n[Responding unit and personnel.]`,
+        fields: ['patientName', 'dob', 'age', 'gender', 'location', 'complaint', 'vitals', 'assessment', 'treatment', 'narrative', 'crew']
     }
 ];
 

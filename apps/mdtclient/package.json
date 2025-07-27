@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:fivem": "cross-env BUILD_TARGET=fivem vite build",
+    "build:watch": "vite build --watch",
     "preview": "vite preview",
     "check": "tsc --noEmit",
     "test": "jest",
@@ -13,20 +15,21 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --fix",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist dist-nui",
     "check-translations": "node scripts/check-translations.cjs"
   },
   "dependencies": {
-    "react": "^19.1.0",
     "@google/genai": "^1.11.0",
-    "react-dom": "^19.1.0",
-    "lucide-react": "^0.525.0"
+    "lucide-react": "^0.525.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "jest": "^30.0.4",
     "ts-jest": "^29.4.0",

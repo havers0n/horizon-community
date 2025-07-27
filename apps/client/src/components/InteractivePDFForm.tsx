@@ -40,11 +40,11 @@ interface InteractivePDFFormProps {
   }) => void;
 }
 
-const InteractivePDFForm: React.FC<InteractivePDFFormProps> = ({ 
+const InteractivePDFForm = ({ 
   template, 
   onBack,
   onSubmit 
-}) => {
+}: InteractivePDFFormProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});

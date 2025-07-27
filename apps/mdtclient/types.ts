@@ -129,3 +129,25 @@ export interface Stats {
   totalReports: number;
   totalApplications: number;
 }
+
+// Unit type for MDT portals
+export interface Unit {
+  id: string;
+  name: string;
+  department: 'LSPD' | 'BCSO' | 'LSFD';
+  status: UnitStatus;
+  callId?: string;
+  location?: string;
+  notes?: string;
+}
+
+// Report template type
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  title: string;
+  type: ReportType;
+  content: string;
+  fields: string[];
+  isDefault?: boolean;
+}

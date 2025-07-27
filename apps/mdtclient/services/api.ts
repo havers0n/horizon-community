@@ -1,5 +1,9 @@
 // API Service for MDT Client
-const API_BASE_URL = 'http://localhost:5000/api';
+const isNUI = typeof (window as any).GetParentResourceName === 'function';
+
+export const API_BASE_URL = isNUI
+  ? 'http://127.0.0.1:5000/api'  // Для FiveM NUI
+  : '/api';                      // Для браузера (через proxy)
 
 export interface ApiResponse<T = any> {
   success: boolean;
