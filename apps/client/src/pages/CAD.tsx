@@ -81,7 +81,7 @@ interface User {
   rank?: string;
 }
 
-const CAD: React.FC = () => {
+const CAD = () => {
   const { user } = useAuth() as { user: User | null };
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('dashboard');

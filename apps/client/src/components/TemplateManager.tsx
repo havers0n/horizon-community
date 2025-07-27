@@ -41,13 +41,13 @@ interface TemplateManagerProps {
   onCreate: () => void;
 }
 
-const TemplateManager: React.FC<TemplateManagerProps> = ({
+const TemplateManager = ({
   templates,
   departments,
   onEdit,
   onDelete,
   onCreate
-}) => {
+}: TemplateManagerProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');

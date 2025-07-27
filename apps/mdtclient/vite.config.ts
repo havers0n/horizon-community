@@ -1,19 +1,32 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { fivemPlugin } from "./vite-plugin-fivem.js";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, '.', '');
   
+  // Автоматическое определение режима сборки
+  const isNUI = process.env.NUI === 'true' || process.env.BUILD_TARGET === 'fivem';
+  const isProduction = mode === 'production';
+  
+  console.log(`🔧 Vite Config: ${isNUI ? 'FiveM NUI' : 'Browser'} mode`);
+  
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+      fivemPlugin() // Автоматическое копирование в FiveM
+    ],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.IS_NUI': JSON.stringify(isNUI),
+      'process.env.BUILD_TARGET': JSON.stringify(isNUI ? 'fivem' : 'browser')
     },
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "."),
+        "@": path.resolve(__dirname, "src"),
+        "@shared": path.resolve(__dirname, "../../libs/shared-schema/src"),
       },
     },
     server: {
@@ -31,8 +44,31 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: "dist",
-      sourcemap: true,
+      outDir: isNUI ? "dist-nui" : "dist",
+      sourcemap: !isNUI, // Отключаем sourcemap для FiveM
+      emptyOutDir: true,
+      
+      // Автоматические настройки для FiveM
+      base: isNUI ? './' : '/',
+      
+      rollupOptions: {
+        output: {
+          // Для FiveM: простые имена файлов без хешей
+          entryFileNames: isNUI ? '[name].js' : '[name]-[hash].js',
+          chunkFileNames: isNUI ? '[name].js' : '[name]-[hash].js',
+          assetFileNames: isNUI ? '[name].[ext]' : '[name]-[hash].[ext]',
+          
+          // Оптимизация для FiveM
+          manualChunks: isNUI ? undefined : {
+            'react-vendor': ['react', 'react-dom'],
+            'ui-vendor': ['lucide-react'],
+          }
+        }
+      },
+      
+      // Оптимизация размера для FiveM
+      minify: isNUI ? 'esbuild' : 'terser',
+      target: isNUI ? 'es2015' : 'esnext',
     },
   };
 });

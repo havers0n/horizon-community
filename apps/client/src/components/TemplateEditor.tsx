@@ -19,12 +19,12 @@ interface TemplateEditorProps {
   departments?: Array<{ id: number; name: string }>;
 }
 
-const TemplateEditor: React.FC<TemplateEditorProps> = ({ 
+const TemplateEditor = ({ 
   template, 
   onSave, 
   onCancel,
   departments = []
-}) => {
+}: TemplateEditorProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [title, setTitle] = useState('');

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from './button';
 import { Languages } from 'lucide-react';
 
-const LanguageToggle: React.FC = () => {
+const LanguageToggle = () => {
     const { i18n } = useTranslation();
     const [language, setLanguage] = useState<'en' | 'ru'>(i18n.language as 'en' | 'ru' || 'ru');
 

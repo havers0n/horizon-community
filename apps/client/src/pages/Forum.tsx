@@ -70,7 +70,7 @@ interface ForumStats {
   onlineNow: number;
 }
 
-const Forum: React.FC = () => {
+const Forum = () => {
   const [activeSection, setActiveSection] = useState<'main' | 'category' | 'topic'>('main');
   const [selectedCategory, setSelectedCategory] = useState<ForumCategory | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<ForumTopic | null>(null);

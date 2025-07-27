@@ -44,12 +44,12 @@ interface TemplateBrowserProps {
   userDepartmentId?: number | null;
 }
 
-const TemplateBrowser: React.FC<TemplateBrowserProps> = ({
+const TemplateBrowser = ({
   templates,
   departments,
   onSelectTemplate,
   userDepartmentId
-}) => {
+}: TemplateBrowserProps) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');

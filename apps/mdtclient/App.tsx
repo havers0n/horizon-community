@@ -82,9 +82,10 @@ const AppContent: React.FC = () => {
         );
     }
 
-    if (!isAuthenticated) {
-        return <LoginForm />;
-    }
+    // ВРЕМЕННО ОТКЛЮЧЕНО: проверка аутентификации
+    // if (!isAuthenticated) {
+    //     return <LoginForm />;
+    // }
 
     return (
         <MainLayout 

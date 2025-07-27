@@ -29,7 +29,7 @@ interface CreateCharacterModalProps {
   onCharacterCreated: () => void;
 }
 
-const CreateCharacterModal: React.FC<CreateCharacterModalProps> = ({ onCharacterCreated }) => {
+const CreateCharacterModal = ({ onCharacterCreated }: CreateCharacterModalProps) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

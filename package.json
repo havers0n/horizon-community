@@ -10,9 +10,13 @@
     "dev:mdtclient": "nx serve mdtclient",
     "build": "nx run-many --target=build --projects=client,server",
     "build:all": "nx run-many --target=build --projects=client,mdtclient,server",
+    "build:fivem": "node scripts/build-fivem-simple.js",
+    "build:fivem:watch": "cd apps/mdtclient && npm run build:watch",
+    "build:deploy": "npm run build:all && npm run build:fivem",
     "test": "nx run-many --target=test --projects=client,server",
     "lint": "nx run-many --target=lint --projects=client,server",
-    "clean": "nx reset && rm -rf dist"
+    "clean": "nx reset && rm -rf dist && cd apps/mdtclient && npm run clean",
+    "migrate:react19": "node scripts/migrate-react-19.cjs"
   },
   "devDependencies": {
     "@nx/esbuild": "^21.3.6",

@@ -64,7 +64,7 @@ interface CharacterRecord {
   officer: Character;
 }
 
-const DatabaseSearch: React.FC = () => {
+const DatabaseSearch = () => {
   const { toast } = useToast();
   const [searchType, setSearchType] = useState<'character' | 'vehicle' | 'weapon'>('character');
   const [searchQuery, setSearchQuery] = useState('');
