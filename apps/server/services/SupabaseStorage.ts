@@ -273,7 +273,7 @@ export class SupabaseStorage implements IStorage {
   
   async getCharactersByOwner(ownerId: number): Promise<Character[]> {
     const { data, error } = await supabase
-      .from('characters')
+      .from('common.characters')
       .select('*')
       .eq('owner_id', ownerId);
     
@@ -302,7 +302,7 @@ export class SupabaseStorage implements IStorage {
     };
     
     const { data, error } = await supabase
-      .from('characters')
+      .from('common.characters')
       .insert(supabaseChar)
       .select()
       .single();

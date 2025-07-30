@@ -1,4 +1,4 @@
-import { pool } from '../db/index.js';
+import { pool } from '../db/index';
 import type { 
   MDTUnit, 
   MDTCall911, 
@@ -355,7 +355,7 @@ export class MDTService {
           ms.created_at,
           u.username as author_name
         FROM mdt_signals ms
-        LEFT JOIN users u ON ms.author_id = u.id
+        LEFT JOIN public.users u ON ms.author_id = u.id
         WHERE ms.is_active = TRUE
         ORDER BY ms.created_at DESC
       `);
@@ -466,7 +466,7 @@ export class MDTService {
     try {
       // Получаем всех пользователей с соответствующими ролями
       const usersResult = await this.pool.query(`
-        SELECT id FROM users 
+        SELECT id FROM public.users 
         WHERE role IN ('admin', 'supervisor', 'member')
       `);
 
@@ -538,11 +538,11 @@ export class MDTService {
           mb.additional_info,
           mb.status,
           mb.created_at,
-          mb.expires_at,
+          mb.timestamp,
           mb.issued_by,
-          u.first_name || ' ' || u.last_name as issued_by_name
+          u.username as issued_by_name
         FROM mdt.bolos mb
-        LEFT JOIN public.users u ON mb.issued_by = u.id
+        LEFT JOIN public.users u ON mb.issued_by::integer = u.id
         WHERE mb.status != 'deleted'
         ORDER BY mb.created_at DESC
       `);
@@ -562,7 +562,7 @@ export class MDTService {
       const result = await this.pool.query(`
         INSERT INTO mdt.bolos (
           type, description, vehicle, plate, reason, priority, 
-          location, additional_info, issued_by, expires_at
+          location, additional_info, issued_by, timestamp
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
       `, [
@@ -574,8 +574,8 @@ export class MDTService {
         data.priority,
         data.location || null,
         data.additionalInfo || null,
-        data.issuedBy,
-        data.expiresAt || null
+        String(data.issuedBy), // Convert to string to match text field
+        data.timestamp || new Date()
       ]);
 
       return result.rows[0];

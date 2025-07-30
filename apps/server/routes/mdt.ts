@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { mdtService } from '../services/MDTService.js';
+import { mdtService } from '../services/MDTService';
 
 const router: import('express').Router = Router();
 
@@ -644,13 +644,20 @@ router.put('/notifications/:id/read', authenticateToken, async (req: Request, re
  */
 router.get('/bolos', authenticateToken, async (req: Request, res: Response) => {
   try {
+    console.log('BOLO endpoint вызван');
+    console.log('mdtService:', mdtService);
+    
     const bolos = await mdtService.getBolos();
+    console.log('BOLO получены:', bolos);
+    
     res.json({ success: true, data: bolos });
   } catch (error) {
     console.error('Error fetching BOLOs:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({ 
       success: false, 
-      error: 'Failed to fetch BOLOs' 
+      error: 'Failed to fetch BOLOs',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });
