@@ -1,0 +1,1 @@
+export { MdtWorkspaceWidget } from './ui/MdtWorkspaceWidget';

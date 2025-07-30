@@ -20,6 +20,8 @@ import { uploadMiddleware, handleUpload } from './fileUpload';
 import adminSupportRoutes from './routes/admin/support.routes.js';
 import adminTestsRoutes from './routes/adminTests.js';
 import forumRoutes from './routes/forum.js';
+import mdtRoutes from './routes/mdt.js';
+import realtimeRoutes from './routes/realtime-simple.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -873,6 +875,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Forum routes
   app.use('/api/forum', forumRoutes);
+
+  // MDT routes
+  app.use('/api/mdt', mdtRoutes);
+
+  // Realtime routes (HTTP polling for FiveM)
+  app.use('/api/realtime', realtimeRoutes);
 
   const httpServer = createServer(app);
   

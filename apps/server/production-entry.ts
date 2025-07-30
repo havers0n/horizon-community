@@ -6,8 +6,20 @@ import { storage } from "./storage";
 import { BusinessLogic } from "./businessLogic";
 import { Scheduler } from "./scheduler";
 import { log, serveStatic } from "./production";
+import { 
+  loggingMiddleware, 
+  errorLoggingMiddleware, 
+  performanceMiddleware, 
+  securityLoggingMiddleware 
+} from "./middleware/logging.middleware.js";
+import { logger } from "./services/LoggerService.js";
 
 const app = express();
+
+// Оптимизированные middleware для логирования и производительности
+app.use(loggingMiddleware);
+app.use(performanceMiddleware);
+app.use(securityLoggingMiddleware);
 
 // Middleware
 app.use(express.json());
@@ -52,6 +64,8 @@ app.use((req, res, next) => {
     process.exit(0);
   });
 
+  app.use(errorLoggingMiddleware);
+  
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -77,5 +91,11 @@ app.use((req, res, next) => {
     host,
   }, () => {
     log(`serving on ${host}:${port}`);
+    logger.info('Server started successfully', {
+      host,
+      port,
+      environment: process.env.NODE_ENV,
+      nodeVersion: process.version
+    });
   });
 })(); 

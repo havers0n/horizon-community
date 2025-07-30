@@ -1,0 +1,1 @@
+export { VehicleSearchWidget } from './VehicleSearchWidget';

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { pool } from '../db/index.js';
+import { storage } from '../storage.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { characterService } from '../services/CharacterService.js';
 import { userService } from '../services/UserService.js';
@@ -231,8 +231,8 @@ router.get('/characters/stats', authenticateToken, async (req, res) => {
 // Получить все департаменты
 router.get('/departments', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM departments ORDER BY name');
-    res.json(result.rows);
+    const departments = await storage.getDepartments();
+    res.json(departments);
   } catch (error) {
     console.error('Error fetching departments:', error);
     res.status(500).json({ error: 'Failed to fetch departments' });
@@ -247,13 +247,13 @@ router.get('/departments/:id', async (req, res) => {
       return res.status(400).json({ error: 'Invalid department ID' });
     }
     
-    const result = await pool.query('SELECT * FROM departments WHERE id = $1', [departmentId]);
+    const department = await storage.getDepartment(departmentId);
     
-    if (result.rows.length === 0) {
+    if (!department) {
       return res.status(404).json({ error: 'Department not found' });
     }
     
-    res.json(result.rows[0]);
+    res.json(department);
   } catch (error) {
     console.error('Error fetching department:', error);
     res.status(500).json({ error: 'Failed to fetch department' });

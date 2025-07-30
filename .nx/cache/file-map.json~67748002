@@ -1,0 +1,5273 @@
+{
+  "version": "6.0",
+  "nxVersion": "18.0.0",
+  "deps": {
+    "@google/genai": "^1.11.0",
+    "@hookform/resolvers": "^5.2.0",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-checkbox": "^1.3.2",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-progress": "^1.1.7",
+    "@radix-ui/react-radio-group": "^1.3.7",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@radix-ui/react-toast": "^1.2.14",
+    "@radix-ui/react-tooltip": "^1.2.7",
+    "@supabase/supabase-js": "^2.52.1",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tanstack/react-query": "^5.83.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.3",
+    "drizzle-zod": "^0.8.2",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "html2canvas": "^1.4.1",
+    "i18next": "^25.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
+    "lucide-react": "^0.525.0",
+    "multer": "^2.0.2",
+    "nanoid": "^5.1.5",
+    "react-day-picker": "^9.8.0",
+    "react-hook-form": "^7.61.1",
+    "react-i18next": "^15.6.1",
+    "react-router-dom": "^7.7.1",
+    "react-to-print": "^3.1.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
+    "wouter": "^3.7.1",
+    "zod": "^3.25.76",
+    "@nx/esbuild": "^21.3.6",
+    "@nx/eslint": "18.0.0",
+    "@nx/jest": "18.0.0",
+    "@nx/js": "18.0.0",
+    "@nx/storybook": "^21.3.8",
+    "@nx/vite": "18.0.0",
+    "@nx/workspace": "18.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "20.16.11",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.57.0",
+    "jest": "^30.0.4",
+    "nx": "18.0.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.2.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^3.4.17",
+    "ts-jest": "^29.4.0",
+    "typescript": "5.6.3",
+    "vite": "^5.4.19",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "pathMappings": {
+    "@roleplay-identity/client": [
+      "apps/client/src/index.ts"
+    ],
+    "@roleplay-identity/client/*": [
+      "apps/client/src/*"
+    ],
+    "@roleplay-identity/mdtclient": [
+      "apps/mdtclient/index.tsx"
+    ],
+    "@roleplay-identity/mdtclient/*": [
+      "apps/mdtclient/*"
+    ],
+    "@roleplay-identity/schema": [
+      "libs/shared/schema/src/index.ts"
+    ],
+    "@roleplay-identity/schema/*": [
+      "libs/shared/schema/src/*"
+    ],
+    "@roleplay-identity/server": [
+      "apps/server/index.ts"
+    ],
+    "@roleplay-identity/server/*": [
+      "apps/server/*"
+    ],
+    "@roleplay-identity/shared": [
+      "libs/shared/src/index.ts"
+    ],
+    "@roleplay-identity/shared-schema": [
+      "libs/shared-schema/src/index.ts"
+    ],
+    "@roleplay-identity/shared-types": [
+      "libs/shared-types/src/index.ts"
+    ],
+    "@roleplay-identity/shared-types/*": [
+      "libs/shared-types/src/*"
+    ],
+    "@roleplay-identity/shared-utils": [
+      "libs/shared-utils/src/index.ts"
+    ],
+    "@roleplay-identity/shared-utils/*": [
+      "libs/shared-utils/src/*"
+    ],
+    "@roleplay-identity/shared/*": [
+      "libs/shared/src/*"
+    ]
+  },
+  "nxJsonPlugins": [],
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": false
+    }
+  },
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": "scripts/fix-production-deployment.sh",
+        "hash": "14939252647997614042"
+      },
+      {
+        "file": "docs/testing/LOCAL_TESTING_GUIDE.md",
+        "hash": "2539318178809350468"
+      },
+      {
+        "file": "docs/api-and-integrations/API_SNAILYCAD_INTEGRATION.md",
+        "hash": "7671897443956525570"
+      },
+      {
+        "file": "docs/api-and-integrations/AUTHENTICATION.md",
+        "hash": "15376061969720325599"
+      },
+      {
+        "file": "scripts/get_supabase_keys.js",
+        "hash": "15612277435335726742"
+      },
+      {
+        "file": "docs/mdt-system/MDT_MIGRATION_GUIDE.md",
+        "hash": "5698310696900387226"
+      },
+      {
+        "file": ".nxignore",
+        "hash": "9492348307038149687"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/CLEANUP_REPORT.md",
+        "hash": "6403843863104262490"
+      },
+      {
+        "file": "scripts/test_supabase_connection.js",
+        "hash": "1958907455779461462"
+      },
+      {
+        "file": "docs/technical-specs/AS-IS_DOCUMENTATION.md",
+        "hash": "7392698689963496773"
+      },
+      {
+        "file": "scripts/test_db_connection.js",
+        "hash": "9793170929262866559"
+      },
+      {
+        "file": "scripts/apply_dev_schema_migration.js",
+        "hash": "2459558302045457166"
+      },
+      {
+        "file": "docs/implementation-reports/QUICK_ACTIONS_SYNC_REPORT.md",
+        "hash": "12509133776028564478"
+      },
+      {
+        "file": "scripts/quick-fix.sh",
+        "hash": "2225907583030368414"
+      },
+      {
+        "file": "docs/api-and-integrations/DATA_MODEL_MAPPING.md",
+        "hash": "17410203756758934700"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/test-simple.html",
+        "hash": "10713261800636190533"
+      },
+      {
+        "file": "docs/implementation-reports/STAGE_3_COMPLETION_REPORT.md",
+        "hash": "2196478532617093537"
+      },
+      {
+        "file": "docs/user-guides/REPORTS_SYSTEM_GUIDE.md",
+        "hash": "11844726062499620685"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
+      {
+        "file": "scripts/create_test_auth_users.js",
+        "hash": "15190606669752285093"
+      },
+      {
+        "file": "supabase/migrations/011_enhanced_report_templates.sql",
+        "hash": "4196000462399524730"
+      },
+      {
+        "file": "docs/implementation-reports/EMS_FD_PORTAL_IMPLEMENTATION_REPORT.md",
+        "hash": "3394457766389157351"
+      },
+      {
+        "file": "supabase/migrations/003_rls_candidate_guest_restrictions.sql",
+        "hash": "3737784980493724343"
+      },
+      {
+        "file": "scripts/apply_mdt_simple.cjs",
+        "hash": "14505537967578921653"
+      },
+      {
+        "file": "supabase/.gitignore",
+        "hash": "10990855904653518110"
+      },
+      {
+        "file": ".env.production",
+        "hash": "5261357101576304645"
+      },
+      {
+        "file": "docs/implementation-reports/OFFICERS_SECTION_IMPLEMENTATION_REPORT.md",
+        "hash": "2941136397236426270"
+      },
+      {
+        "file": "docs/user-guides/newpagecreaterules.md",
+        "hash": "8931170849203345179"
+      },
+      {
+        "file": "scripts/apply_mdt_migration_drizzle.js",
+        "hash": "9157872698159912865"
+      },
+      {
+        "file": "docs/technical-specs/тз.md",
+        "hash": "10122793774620201296"
+      },
+      {
+        "file": "scripts/apply_schema_direct.cjs",
+        "hash": "17294524549295112446"
+      },
+      {
+        "file": "docs/user-guides/JOINT_POSITIONS_SYSTEM.md",
+        "hash": "13954784376239459728"
+      },
+      {
+        "file": "scripts/apply_enhanced_templates.js",
+        "hash": "9388724677514501808"
+      },
+      {
+        "file": "docs/mdt-system/MDT_BACKEND_AUDIT_REPORT.md",
+        "hash": "5668945791323316072"
+      },
+      {
+        "file": "docs/api-and-integrations/WEBSOCKET_USAGE_EXAMPLES.md",
+        "hash": "5882623343813702269"
+      },
+      {
+        "file": "docs/api-and-integrations/API_DETAILED_ANALYSIS.json",
+        "hash": "5069523616480805096"
+      },
+      {
+        "file": "scripts/check-dev-schema.js",
+        "hash": "4153696518610889290"
+      },
+      {
+        "file": "scripts/reset_test_limits.js",
+        "hash": "5255467621192384216"
+      },
+      {
+        "file": "docs/implementation-reports/REPORTS_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "8677565985246873464"
+      },
+      {
+        "file": "docs/testing/COMPREHENSIVE_TESTING_PLAN.md",
+        "hash": "4929880172224315749"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/FINAL_DIAGNOSTIC_INSTRUCTIONS.md",
+        "hash": "5224374961734499102"
+      },
+      {
+        "file": "docs/technical-specs/rls-guest-policies.md",
+        "hash": "17124952439587079480"
+      },
+      {
+        "file": "supabase/migrations/004_mdt_system.sql",
+        "hash": "18263571696876582494"
+      },
+      {
+        "file": "docs/implementation-reports/DASHBOARD_WIDGET_BUGFIX_REPORT.md",
+        "hash": "7606327312437661733"
+      },
+      {
+        "file": "scripts/create_correct_jwt.js",
+        "hash": "16666118461411896789"
+      },
+      {
+        "file": "scripts/apply_drizzle_migration.js",
+        "hash": "15227135141724902145"
+      },
+      {
+        "file": "docs/deployment/VITE_ISSUE_ANALYSIS.md",
+        "hash": "15529411384940229870"
+      },
+      {
+        "file": "docs/deployment/DEPLOYMENT_INSTRUCTIONS.md",
+        "hash": "2723209972353074814"
+      },
+      {
+        "file": "docs/implementation-reports/EMS_MIGRATION_COMPLETION_REPORT.md",
+        "hash": "57666629897277539"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/config.lua",
+        "hash": "5372277954146625262"
+      },
+      {
+        "file": "scripts/fix_jwt_tokens.js",
+        "hash": "17234302209235957103"
+      },
+      {
+        "file": "docs/implementation-reports/INTERACTIVE_A4_FORM_IMPLEMENTATION.md",
+        "hash": "1738723531724216101"
+      },
+      {
+        "file": "scripts/restore_database.cjs",
+        "hash": "11969742431016460329"
+      },
+      {
+        "file": "scripts/apply_enhanced_templates_simple.cjs",
+        "hash": "16072946818214620649"
+      },
+      {
+        "file": "docs/deployment/FIVEM_DEPLOYMENT_GUIDE.md",
+        "hash": "7308662711130364100"
+      },
+      {
+        "file": "docs/implementation-reports/ENHANCED_TEMPLATES_COMPLETION_REPORT.md",
+        "hash": "17096488500797955386"
+      },
+      {
+        "file": "docs/implementation-reports/DEPARTMENTS_UPDATE_REPORT.md",
+        "hash": "17572963532199731243"
+      },
+      {
+        "file": "scripts/migrate-react-19.js",
+        "hash": "13109700678437191668"
+      },
+      {
+        "file": "docs/implementation-reports/DARK_THEME_TEXT_FIX.md",
+        "hash": "18005585294088084925"
+      },
+      {
+        "file": "docs/technical-specs/REPORTS_SYSTEM_AUDIT.md",
+        "hash": "7714969134545468214"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_MIGRATION_FINAL_SUMMARY.md",
+        "hash": "15668541896314301177"
+      },
+      {
+        "file": "supabase/migrations/001_initial_schema.sql",
+        "hash": "13824463293405508163"
+      },
+      {
+        "file": "docs/implementation-reports/COMPANIES_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "10231390676252975946"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "8465593252564287444"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "18315524891129148814"
+      },
+      {
+        "file": "scripts/build-fivem.js",
+        "hash": "5135381230475597728"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/FINAL_FIX_REPORT.md",
+        "hash": "4253535085292606080"
+      },
+      {
+        "file": "scripts/run_restore.cjs",
+        "hash": "1376934169997692581"
+      },
+      {
+        "file": "supabase/migrations/010_report_templates_system.sql",
+        "hash": "13099961395515154698"
+      },
+      {
+        "file": "docs/implementation-reports/CRITICAL_FIXES_REPORT.md",
+        "hash": "5654805428456543091"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/TEST_F6_FIX.md",
+        "hash": "4300879197652907058"
+      },
+      {
+        "file": "scripts/apply_mdt_migration.js",
+        "hash": "17722128273132114571"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/shared/utils.lua",
+        "hash": "14544638809109192433"
+      },
+      {
+        "file": "docs/deployment/GITHUB_ACTIONS_SETUP.md",
+        "hash": "9942657353810451550"
+      },
+      {
+        "file": "supabase/migrations/008_complete_character_system.sql",
+        "hash": "11827627643639358045"
+      },
+      {
+        "file": "docs/implementation-reports/LEAVE_MODAL_FIX_REPORT.md",
+        "hash": "12227530486626902814"
+      },
+      {
+        "file": "docs/deployment/CRITICAL_DEPLOYMENT_FIX.md",
+        "hash": "13250238670169577524"
+      },
+      {
+        "file": "docs/user-guides/CHARACTER_SYSTEM_DOCUMENTATION.md",
+        "hash": "1623273020678543642"
+      },
+      {
+        "file": "scripts/apply-dev-schema-migration.js",
+        "hash": "15923690289375188370"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "13006215882576324033"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/fxmanifest.lua",
+        "hash": "2744061369719602099"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/nui-bridge.js",
+        "hash": "16349643100944573836"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/index.css",
+        "hash": "3875422341144391110"
+      },
+      {
+        "file": "docs/testing/TESTING_GUIDE.md",
+        "hash": "18103022868125101293"
+      },
+      {
+        "file": "scripts/debug_auth.js",
+        "hash": "3322904960108330723"
+      },
+      {
+        "file": "scripts/simple_templates_setup.cjs",
+        "hash": "8321771888933886003"
+      },
+      {
+        "file": "scripts/apply_migrations.js",
+        "hash": "13338554822932093783"
+      },
+      {
+        "file": "scripts/check_user.js",
+        "hash": "6056135424961958539"
+      },
+      {
+        "file": ".github/workflows/deploy.backup.md",
+        "hash": "15504765014758989594"
+      },
+      {
+        "file": "env.example",
+        "hash": "13542280406341721749"
+      },
+      {
+        "file": "docs/implementation-reports/LAW_CONTROL_PANEL_IMPLEMENTATION_REPORT.md",
+        "hash": "13292091978323327663"
+      },
+      {
+        "file": "migrations/meta/0000_snapshot.json",
+        "hash": "6243112149849924599"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/FINAL_F6_FIX_REPORT.md",
+        "hash": "17583296129577475921"
+      },
+      {
+        "file": "migrations/meta/_journal.json",
+        "hash": "1472223792121451690"
+      },
+      {
+        "file": "DEPARTMENT_SYSTEM_IMPROVEMENTS.md",
+        "hash": "17372081947583277578"
+      },
+      {
+        "file": "scripts/deploy-to-cloud.js",
+        "hash": "6492726992347377561"
+      },
+      {
+        "file": "docs/api-and-integrations/SOCKET_IO_INTEGRATION_PLAN.md",
+        "hash": "17411229850014064549"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/input-fix.css",
+        "hash": "6621983715107520433"
+      },
+      {
+        "file": "docs/api-and-integrations/MAPPING_TABLE.md",
+        "hash": "17714497447799393028"
+      },
+      {
+        "file": "docs/user-guides/MIGRATION_INSTRUCTIONS.md",
+        "hash": "7496825803201224232"
+      },
+      {
+        "file": ".env.example",
+        "hash": "11463985077921953980"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/DIAGNOSTIC_REPORT.md",
+        "hash": "7780742072349194846"
+      },
+      {
+        "file": "scripts/apply_migration_simple.js",
+        "hash": "7754718864778586069"
+      },
+      {
+        "file": "scripts/create_test_users.sql",
+        "hash": "12312643752594090201"
+      },
+      {
+        "file": "scripts/build-fivem-simple.js",
+        "hash": "17833267731171558558"
+      },
+      {
+        "file": ".github/workflows/backup.md",
+        "hash": "2536150726825847360"
+      },
+      {
+        "file": "docs/mdt-system/MDT_FRONTEND_BACKEND_INTEGRATION_REPORT.md",
+        "hash": "11870781760293303516"
+      },
+      {
+        "file": "DISPATCH_MODULE_COMPLETION_REPORT.md",
+        "hash": "10122019934313768644"
+      },
+      {
+        "file": "scripts/quick-api-fix.sh",
+        "hash": "13262491214620191486"
+      },
+      {
+        "file": "docs/architecture/COLOR_PALETTE_UPDATE.md",
+        "hash": "17948018011800356228"
+      },
+      {
+        "file": "docs/technical-specs/PROJECT_STATUS_ANALYSIS.md",
+        "hash": "17937147488019237155"
+      },
+      {
+        "file": "docs/architecture/BACKEND_ARCHITECTURE_ANALYSIS.md",
+        "hash": "8570473825255472999"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_MIGRATION_COMPLETION_REPORT.md",
+        "hash": "1460460104899146670"
+      },
+      {
+        "file": "docs/user-guides/DEPARTMENTS_DESIGN_UPDATE.md",
+        "hash": "13607754095961510152"
+      },
+      {
+        "file": "supabase/migrations/005_cad_mdt_system.sql",
+        "hash": "1292452403301833810"
+      },
+      {
+        "file": "docs/deployment/UPROSHCHENNAYA_SBORKA_FIVEM.md",
+        "hash": "8677200351996860010"
+      },
+      {
+        "file": "nx.json",
+        "hash": "3496215214210838429"
+      },
+      {
+        "file": "docs/user-guides/FORUM_SYSTEM.md",
+        "hash": "12827408935957151450"
+      },
+      {
+        "file": "docs/api-and-integrations/INCOMPATIBLE_FIELDS_ANALYSIS.md",
+        "hash": "13617840594656731642"
+      },
+      {
+        "file": "scripts/check_supabase_connection.js",
+        "hash": "9085991694826142394"
+      },
+      {
+        "file": "migrations/0002_nitialchema.sql",
+        "hash": "6419363198433994852"
+      },
+      {
+        "file": "docs/testing/ADMIN_TESTS_SYSTEM.md",
+        "hash": "15055421803720398870"
+      },
+      {
+        "file": "scripts/clear_browser_cache.js",
+        "hash": "9445862633761983739"
+      },
+      {
+        "file": "scripts/fix_cad_token.js",
+        "hash": "4009806721132679893"
+      },
+      {
+        "file": "supabase/migrations/004_test_system.sql",
+        "hash": "591454785969369916"
+      },
+      {
+        "file": "scripts/apply_joint_migration.js",
+        "hash": "16618016149731688648"
+      },
+      {
+        "file": "docs/implementation-reports/LAW_ENFORCEMENT_FEATURE_MIGRATION_REPORT.md",
+        "hash": "10727730471832686663"
+      },
+      {
+        "file": "scripts/test_snailycad_api.js",
+        "hash": "8503112778939388283"
+      },
+      {
+        "file": "docs/technical-specs/tzv2.md",
+        "hash": "9601320196706719856"
+      },
+      {
+        "file": "scripts/check_departments.sql",
+        "hash": "11091435766970941083"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_19_MIGRATION_GUIDE.md",
+        "hash": "3785524353096279276"
+      },
+      {
+        "file": "scripts/apply_forum_migration.js",
+        "hash": "7684883382413663999"
+      },
+      {
+        "file": "docs/implementation-reports/ETAP1_MIGRATION_COMPLETE_REPORT.md",
+        "hash": "3808830119160776438"
+      },
+      {
+        "file": "docs/architecture/DESIGN_SYSTEM_IMPLEMENTATION.md",
+        "hash": "17995283445150683987"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/index.js",
+        "hash": "11349421669549872882"
+      },
+      {
+        "file": "docs/implementation-reports/FAQ_DARK_THEME_FIX.md",
+        "hash": "3351479384324478776"
+      },
+      {
+        "file": "scripts/upload-seed-data.ps1",
+        "hash": "1131361460915154976"
+      },
+      {
+        "file": "VPS_DEPLOYMENT_GUIDE.md",
+        "hash": "8266441240692073091"
+      },
+      {
+        "file": "docs/technical-specs/SECURITY_IMPROVEMENTS.md",
+        "hash": "11599254968892976763"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/README.md",
+        "hash": "438399247483089461"
+      },
+      {
+        "file": "supabase/migrations/014_extend_users_and_characters.sql",
+        "hash": "7150925884150117502"
+      },
+      {
+        "file": "scripts/generate_jwt_tokens.js",
+        "hash": "15922476627984489073"
+      },
+      {
+        "file": "scripts/apply_forum_migration_final.js",
+        "hash": "4848959959807346726"
+      },
+      {
+        "file": "scripts/test_curl_limits.js",
+        "hash": "17615058857988150608"
+      },
+      {
+        "file": "scripts/test_api_limits.js",
+        "hash": "13268288897197112101"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/fivem-nui.js",
+        "hash": "8486604940571303751"
+      },
+      {
+        "file": "scripts/apply_templates_only.cjs",
+        "hash": "4381672356002752013"
+      },
+      {
+        "file": "docs/technical-specs/COMPREHENSIVE_AUDIT_PLAN.md",
+        "hash": "15733409243760732860"
+      },
+      {
+        "file": "scripts/migrate-to-cloud.js",
+        "hash": "15412530269280727075"
+      },
+      {
+        "file": "scripts/check_user_limits.js",
+        "hash": "9573090104471900521"
+      },
+      {
+        "file": "create-env.js",
+        "hash": "788520630118395703"
+      },
+      {
+        "file": "docs/mdt-system/MDT_IMPLEMENTATION_SUMMARY.md",
+        "hash": "15982873614936381044"
+      },
+      {
+        "file": "docs/user-guides/LEAVE_SYSTEM_DOCUMENTATION.md",
+        "hash": "5379412121502900164"
+      },
+      {
+        "file": "scripts/emergency-vps-fix.sh",
+        "hash": "822687134393279953"
+      },
+      {
+        "file": "supabase/migrations/006_joint_positions_history.sql",
+        "hash": "10778399762334326066"
+      },
+      {
+        "file": "scripts/create_basic_templates.cjs",
+        "hash": "18311116849184970057"
+      },
+      {
+        "file": "docs/testing/test-users.md",
+        "hash": "9418963146796927233"
+      },
+      {
+        "file": "docs/README.md",
+        "hash": "19043695673828292"
+      },
+      {
+        "file": "scripts/apply_cad_migration.js",
+        "hash": "8522940580778507683"
+      },
+      {
+        "file": "scripts/apply_cad_migration_final.js",
+        "hash": "11851596549515059051"
+      },
+      {
+        "file": "README.md",
+        "hash": "3805444317805758455"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "11859558129296447736"
+      },
+      {
+        "file": "supabase/migrations/013_forum_system.sql",
+        "hash": "8385164403131443327"
+      },
+      {
+        "file": "scripts/check_migration_readiness.js",
+        "hash": "12452928658565142891"
+      },
+      {
+        "file": "apps/aichangelog.md",
+        "hash": "10774785171615596812"
+      },
+      {
+        "file": "scripts/fix_dev_schema_constraint.js",
+        "hash": "5863553077959324480"
+      },
+      {
+        "file": "docs/implementation-reports/OFFICER_CREATION_SECTION_REPORT.md",
+        "hash": "13292953025439563593"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/INPUT_FIX_REPORT.md",
+        "hash": "4858770751265276819"
+      },
+      {
+        "file": "scripts/build-nui-quick.js",
+        "hash": "13480207975284025036"
+      },
+      {
+        "file": "docs/architecture/ARCHITECTURE_SUMMARY.md",
+        "hash": "10358808525776508851"
+      },
+      {
+        "file": "scripts/force-fix-vite.sh",
+        "hash": "11790046544400454430"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/index.html",
+        "hash": "6452626132023598499"
+      },
+      {
+        "file": "docs/user-guides/roadmap.md",
+        "hash": "17691165133422218423"
+      },
+      {
+        "file": "supabase/seed.sql",
+        "hash": "13376950263575640000"
+      },
+      {
+        "file": "scripts/create_standard_jwt.js",
+        "hash": "8577690499200563864"
+      },
+      {
+        "file": "docs/implementation-reports/ENHANCED_TEMPLATES_SETUP.md",
+        "hash": "14585925969792901373"
+      },
+      {
+        "file": "supabase/migrations/009_setup_rls_policies.sql",
+        "hash": "15535352586940939591"
+      },
+      {
+        "file": "scripts/test_api_endpoints.js",
+        "hash": "11201701680565517404"
+      },
+      {
+        "file": "docs/implementation-reports/LAW_REPORT_SYSTEM_IMPLEMENTATION.md",
+        "hash": "16993573521201387100"
+      },
+      {
+        "file": "docs/deployment/CLOUD_MIGRATION_GUIDE.md",
+        "hash": "10729646885134352805"
+      },
+      {
+        "file": ".github/workflows/deploy.yml",
+        "hash": "4397924740290924665"
+      },
+      {
+        "file": "supabase/migrations/012_add_template_status.sql",
+        "hash": "8734188197730373541"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "1409626872828258269"
+      },
+      {
+        "file": "docs/deployment/IMMEDIATE_VPS_FIX.md",
+        "hash": "11661952496791987573"
+      },
+      {
+        "file": "migrations/002_rls_candidate_guest.sql",
+        "hash": "12381501398555177256"
+      },
+      {
+        "file": "tailwind.config.ts",
+        "hash": "14886741921035005360"
+      },
+      {
+        "file": "scripts/apply_all_migrations.js",
+        "hash": "4686984014046392983"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/REACT_INTEGRATION_REPORT.md",
+        "hash": "15549434015514687416"
+      },
+      {
+        "file": "docs/architecture/PROEKTNYI_ANALIZ_ARKHITEKTURY.md",
+        "hash": "1194702703084444561"
+      },
+      {
+        "file": "supabase/config.toml",
+        "hash": "14899851295786961498"
+      },
+      {
+        "file": "docs/mdt-system/CAD_MDT_README.md",
+        "hash": "8443472604582982941"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/server/main.lua",
+        "hash": "13848019409895324078"
+      },
+      {
+        "file": "scripts/create_test_users.js",
+        "hash": "5694578994624709374"
+      },
+      {
+        "file": "scripts/create_forum_tables.sql",
+        "hash": "1911021168228953244"
+      },
+      {
+        "file": "supabase/migrations/007_update_departments.sql",
+        "hash": "11303292592642553509"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "16448050467312557263"
+      },
+      {
+        "file": "docs/technical-specs/AUDIT_REPORT.md",
+        "hash": "16934432368695375968"
+      },
+      {
+        "file": "docs/implementation-reports/CITIZEN_PORTAL_MIGRATION_COMPLETE_REPORT.md",
+        "hash": "6170167340352082705"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "4132127514409114962"
+      },
+      {
+        "file": "scripts/apply_forum_migration_direct.js",
+        "hash": "1740324465656466113"
+      },
+      {
+        "file": "scripts/fix-dev-schema-migration.js",
+        "hash": "12840014350429475660"
+      },
+      {
+        "file": "drizzle.config.ts",
+        "hash": "4325878711683596239"
+      },
+      {
+        "file": "scripts/debug_applications.js",
+        "hash": "14542362139591077056"
+      },
+      {
+        "file": "docs/api-and-integrations/BACKEND_SNAILYCAD_INTEGRATION_REPORT.md",
+        "hash": "6615121233766349370"
+      },
+      {
+        "file": "docs/testing/TEST_TRANSLATION_REPORT.md",
+        "hash": "1341212189231485154"
+      },
+      {
+        "file": "scripts/apply_sql_direct.js",
+        "hash": "17012840326686358923"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_UNIFICATION_REPORT.md",
+        "hash": "10264141758590428595"
+      },
+      {
+        "file": "docs/technical-specs/DATABASE_AUDIT_REPORT.md",
+        "hash": "2438376191807793033"
+      },
+      {
+        "file": "scripts/create_test_application.js",
+        "hash": "2797124367758317945"
+      },
+      {
+        "file": "scripts/apply_forum_migration_simple.js",
+        "hash": "14374197698372773405"
+      },
+      {
+        "file": "scripts/diagnose-vite-issue.sh",
+        "hash": "8670671618458854242"
+      },
+      {
+        "file": "docs/user-guides/MANUAL_MIGRATION_INSTRUCTIONS.md",
+        "hash": "2838996626608947829"
+      },
+      {
+        "file": "scripts/apply_migrations_safe.js",
+        "hash": "1123160504604294504"
+      },
+      {
+        "file": "scripts/test_dynamic_limits.js",
+        "hash": "5007502910261507510"
+      },
+      {
+        "file": "docs/implementation-reports/STAGE_2_COMPLETION_REPORT.md",
+        "hash": "13238347365739132574"
+      },
+      {
+        "file": "scripts/apply_test_migration.js",
+        "hash": "13339676250401428561"
+      },
+      {
+        "file": "docs/user-guides/REPORTS_SYSTEM_DOCUMENTATION.md",
+        "hash": "12879477264236816902"
+      },
+      {
+        "file": "scripts/check_localstorage.js",
+        "hash": "5147446733073609942"
+      },
+      {
+        "file": "docs/implementation-reports/COMPLETE_SYSTEM_UPDATE_REPORT.md",
+        "hash": "9827012407227145452"
+      },
+      {
+        "file": "package.json",
+        "hash": "718882839154905154"
+      },
+      {
+        "file": "migrations/meta/0002_snapshot.json",
+        "hash": "13396004583551762211"
+      },
+      {
+        "file": "docs/api-and-integrations/WEBSOCKET_ANALYSIS_REPORT.md",
+        "hash": "15827081428980391459"
+      },
+      {
+        "file": "QUICK_MDT_MIGRATION.md",
+        "hash": "13736169925682108341"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": "docs/deployment/DEPLOYMENT_OPTIMIZATIONS.md",
+        "hash": "3756476300733029323"
+      },
+      {
+        "file": "docs/architecture/COLOR_PALETTE_IMPLEMENTATION_REPORT.md",
+        "hash": "279681680362426477"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/client/main.lua",
+        "hash": "8125279085516656768"
+      },
+      {
+        "file": "docs/implementation-reports/DASHBOARD_WIDGET_INTEGRATION_REPORT.md",
+        "hash": "997323260920094297"
+      },
+      {
+        "file": "scripts/apply_reports_migration_final.js",
+        "hash": "8058154457247697548"
+      },
+      {
+        "file": "docs/deployment/DEPLOYMENT.md",
+        "hash": "1230295416080978918"
+      },
+      {
+        "file": "docs/ORGANIZATION_REPORT.md",
+        "hash": "15269226365809179836"
+      },
+      {
+        "file": "docs/deployment/QUICK_DEPLOY_SETUP.md",
+        "hash": "10322605218178698190"
+      },
+      {
+        "file": "docs/implementation-reports/SIGNALS_SYSTEM_IMPLEMENTATION_REPORT.md",
+        "hash": "16183889526404718257"
+      },
+      {
+        "file": "scripts/fix-vite-build.sh",
+        "hash": "16876703382964632969"
+      },
+      {
+        "file": "docs/implementation-reports/ENTRY_APPLICATION_FIX.md",
+        "hash": "7760654503466975182"
+      },
+      {
+        "file": "scripts/migrate-react-19.cjs",
+        "hash": "13109700678437191668"
+      },
+      {
+        "file": "scripts/add_admin_user.js",
+        "hash": "3767713231369670445"
+      },
+      {
+        "file": "migrations/0003_ExtendUsersAndCharacters.sql",
+        "hash": "6651814083053838193"
+      },
+      {
+        "file": "docs/architecture/DESIGN_SYSTEM.md",
+        "hash": "8672665519800438630"
+      },
+      {
+        "file": "docs/user-guides/LEAVE_ADVANCE_NOTICE_UPDATE.md",
+        "hash": "2372506088475247571"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/VISUAL_FIX_REPORT.md",
+        "hash": "1951470659321301974"
+      },
+      {
+        "file": "supabase/migrations/002_rls_policies.sql",
+        "hash": "11351603747400306426"
+      },
+      {
+        "file": "docs/implementation-reports/CITIZEN_PORTAL_MIGRATION_REPORT.md",
+        "hash": "4106715702531413039"
+      },
+      {
+        "file": "docs/mdt-system/MDT_FRAMEWORK_INDEPENDENCE_REPORT.md",
+        "hash": "12747493148244574514"
+      },
+      {
+        "file": "docs/implementation-reports/NOTEBOOK_IMPLEMENTATION_REPORT.md",
+        "hash": "2489395833805574974"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/CRITICAL_FIX_REPORT.md",
+        "hash": "9529570993219191760"
+      },
+      {
+        "file": "scripts/setup-vps.js",
+        "hash": "6421503279023085781"
+      },
+      {
+        "file": "docs/implementation-reports/EMS_FD_REPORTS_IMPLEMENTATION_REPORT.md",
+        "hash": "17951042887923718490"
+      },
+      {
+        "file": "migrations/meta/0003_snapshot.json",
+        "hash": "7366711472910756227"
+      },
+      {
+        "file": "docs/architecture/FEATURE_SCAFFOLDING.md",
+        "hash": "1382711523289886663"
+      },
+      {
+        "file": "migrations/0000_wooden_naoko.sql",
+        "hash": "3171765125198565187"
+      },
+      {
+        "file": "scripts/check_existing_users.js",
+        "hash": "3500446764719466778"
+      },
+      {
+        "file": "docs/api-and-integrations/API_ANALYSIS_REPORT.md",
+        "hash": "12662010486798506064"
+      }
+    ],
+    "projectFileMap": {
+      "schema": [
+        {
+          "file": "libs/shared/schema/project.json",
+          "hash": "8774781299697112300"
+        }
+      ],
+      "client": [
+        {
+          "file": "apps/client/.eslintrc.json",
+          "hash": "351631804844499173"
+        },
+        {
+          "file": "apps/client/index.html",
+          "hash": "18356585134329928712"
+        },
+        {
+          "file": "apps/client/jest.config.ts",
+          "hash": "1716764977130943197"
+        },
+        {
+          "file": "apps/client/package-lock.json",
+          "hash": "14014228917335384750"
+        },
+        {
+          "file": "apps/client/package.json",
+          "hash": "472130407505709985",
+          "deps": [
+            "npm:@hookform/resolvers",
+            "npm:@radix-ui/react-avatar",
+            "npm:@radix-ui/react-checkbox",
+            "npm:@radix-ui/react-dialog",
+            "npm:@radix-ui/react-dropdown-menu",
+            "npm:@radix-ui/react-label",
+            "npm:@radix-ui/react-popover",
+            "npm:@radix-ui/react-progress",
+            "npm:@radix-ui/react-radio-group",
+            "npm:@radix-ui/react-select",
+            "npm:@radix-ui/react-slot",
+            "npm:@radix-ui/react-tabs",
+            "npm:@radix-ui/react-toast",
+            "npm:@radix-ui/react-tooltip",
+            "npm:@supabase/supabase-js",
+            "npm:@tanstack/react-query",
+            "npm:class-variance-authority",
+            "npm:clsx",
+            "npm:date-fns",
+            "npm:html2canvas",
+            "npm:i18next",
+            "npm:jspdf",
+            "npm:lucide-react",
+            "npm:react",
+            "npm:react-day-picker",
+            "npm:react-dom",
+            "npm:react-hook-form",
+            "npm:react-i18next",
+            "npm:react-router-dom",
+            "npm:react-to-print",
+            "npm:tailwind-merge",
+            "npm:tailwindcss-animate",
+            "npm:wouter",
+            "npm:zod",
+            "npm:@tailwindcss/typography",
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:@vitejs/plugin-react",
+            "npm:autoprefixer",
+            "npm:eslint",
+            "npm:jest",
+            "npm:postcss",
+            "npm:tailwindcss",
+            "npm:terser",
+            "npm:ts-jest",
+            "npm:typescript",
+            "npm:vite"
+          ]
+        },
+        {
+          "file": "apps/client/project.json",
+          "hash": "16725809066753687039"
+        },
+        {
+          "file": "apps/client/src/App.tsx",
+          "hash": "1990559229260257078"
+        },
+        {
+          "file": "apps/client/src/assets/icons/discordicon.svg",
+          "hash": "15967666351953838703"
+        },
+        {
+          "file": "apps/client/src/assets/icons/vkicon.svg",
+          "hash": "14899322180067465834"
+        },
+        {
+          "file": "apps/client/src/components/AchievementsModal.tsx",
+          "hash": "7204125543697675063"
+        },
+        {
+          "file": "apps/client/src/components/AnalyticsDashboard.tsx",
+          "hash": "7723031050863507575"
+        },
+        {
+          "file": "apps/client/src/components/ApplicationModal.tsx",
+          "hash": "4774894675534673938"
+        },
+        {
+          "file": "apps/client/src/components/ComplaintModal.tsx",
+          "hash": "18058919521199998268"
+        },
+        {
+          "file": "apps/client/src/components/CreateCharacterModal.tsx",
+          "hash": "1670170900640915782"
+        },
+        {
+          "file": "apps/client/src/components/DatabaseSearch.tsx",
+          "hash": "15468517116626276486"
+        },
+        {
+          "file": "apps/client/src/components/DepartmentDetails.tsx",
+          "hash": "2721607993477882660"
+        },
+        {
+          "file": "apps/client/src/components/DesignSystemDemo.tsx",
+          "hash": "16712166135084316017"
+        },
+        {
+          "file": "apps/client/src/components/EntryApplicationModal.tsx",
+          "hash": "3609449825902718444"
+        },
+        {
+          "file": "apps/client/src/components/HeavyComponents.tsx",
+          "hash": "12145457004640456553"
+        },
+        {
+          "file": "apps/client/src/components/InteractivePDFForm.tsx",
+          "hash": "18302611054183981740"
+        },
+        {
+          "file": "apps/client/src/components/JointModal.tsx",
+          "hash": "18384506967210012643"
+        },
+        {
+          "file": "apps/client/src/components/Layout.tsx",
+          "hash": "13311845262495789225"
+        },
+        {
+          "file": "apps/client/src/components/LazyPage.tsx",
+          "hash": "10563122870113668944"
+        },
+        {
+          "file": "apps/client/src/components/LeaveModal.tsx",
+          "hash": "11201528200402922214"
+        },
+        {
+          "file": "apps/client/src/components/Notification.tsx",
+          "hash": "10395709616280026714"
+        },
+        {
+          "file": "apps/client/src/components/NotificationsModal.tsx",
+          "hash": "3260883897182901874"
+        },
+        {
+          "file": "apps/client/src/components/ProfilePage.tsx",
+          "hash": "12210541739009158943"
+        },
+        {
+          "file": "apps/client/src/components/ProtectedRoute.tsx",
+          "hash": "3551613176002399975"
+        },
+        {
+          "file": "apps/client/src/components/ReportFiller.tsx",
+          "hash": "16548029808257236559"
+        },
+        {
+          "file": "apps/client/src/components/StatusHistoryTimeline.tsx",
+          "hash": "16945317599554782871"
+        },
+        {
+          "file": "apps/client/src/components/SupervisorDashboard.tsx",
+          "hash": "9381443177341657418"
+        },
+        {
+          "file": "apps/client/src/components/SupportModal.tsx",
+          "hash": "8526715683849674349"
+        },
+        {
+          "file": "apps/client/src/components/TemplateBrowser.tsx",
+          "hash": "4423348708829809224"
+        },
+        {
+          "file": "apps/client/src/components/TemplateEditor.tsx",
+          "hash": "416026207112477787"
+        },
+        {
+          "file": "apps/client/src/components/TemplateManager.tsx",
+          "hash": "6185432904427332345"
+        },
+        {
+          "file": "apps/client/src/components/TestQuestionEditor.tsx",
+          "hash": "1110834965671577831"
+        },
+        {
+          "file": "apps/client/src/components/TestResultDetails.tsx",
+          "hash": "11272616886214925682"
+        },
+        {
+          "file": "apps/client/src/components/ThemeToggle.tsx",
+          "hash": "8974819279846309979"
+        },
+        {
+          "file": "apps/client/src/components/TransferHistory.tsx",
+          "hash": "11829225948723651212"
+        },
+        {
+          "file": "apps/client/src/components/TransferModal.tsx",
+          "hash": "8983193989983444244"
+        },
+        {
+          "file": "apps/client/src/components/TransferRequestForm.tsx",
+          "hash": "390862506382391380"
+        },
+        {
+          "file": "apps/client/src/components/icons/ArrowRightIcon.tsx",
+          "hash": "13766032813499805150"
+        },
+        {
+          "file": "apps/client/src/components/icons/CheckCircleIcon.tsx",
+          "hash": "2649471090203086675"
+        },
+        {
+          "file": "apps/client/src/components/icons/ClockIcon.tsx",
+          "hash": "10478898914729485851"
+        },
+        {
+          "file": "apps/client/src/components/icons/PaperAirplaneIcon.tsx",
+          "hash": "5763566202221761257"
+        },
+        {
+          "file": "apps/client/src/components/icons/UserIcon.tsx",
+          "hash": "15365574551590138506"
+        },
+        {
+          "file": "apps/client/src/components/icons/XCircleIcon.tsx",
+          "hash": "8659510971523039645"
+        },
+        {
+          "file": "apps/client/src/components/ui/DiscordIcon.tsx",
+          "hash": "8443217830423071942"
+        },
+        {
+          "file": "apps/client/src/components/ui/LanguageDropdown.tsx",
+          "hash": "8709483639328438099"
+        },
+        {
+          "file": "apps/client/src/components/ui/LanguageToggle.tsx",
+          "hash": "18438147784556405708"
+        },
+        {
+          "file": "apps/client/src/components/ui/LanguageToggleGroup.tsx",
+          "hash": "14573872083386786840"
+        },
+        {
+          "file": "apps/client/src/components/ui/VKIcon.tsx",
+          "hash": "5482505615009896329"
+        },
+        {
+          "file": "apps/client/src/components/ui/accordion.tsx",
+          "hash": "3167988994528357415"
+        },
+        {
+          "file": "apps/client/src/components/ui/alert-dialog.tsx",
+          "hash": "12931732376882220959"
+        },
+        {
+          "file": "apps/client/src/components/ui/alert.tsx",
+          "hash": "1861621377426642757"
+        },
+        {
+          "file": "apps/client/src/components/ui/aspect-ratio.tsx",
+          "hash": "12340592216594228921"
+        },
+        {
+          "file": "apps/client/src/components/ui/avatar.tsx",
+          "hash": "8660661188500548189"
+        },
+        {
+          "file": "apps/client/src/components/ui/badge.tsx",
+          "hash": "8406134610660828449"
+        },
+        {
+          "file": "apps/client/src/components/ui/breadcrumb.tsx",
+          "hash": "16363177524338459737"
+        },
+        {
+          "file": "apps/client/src/components/ui/button.tsx",
+          "hash": "11257389123344437734"
+        },
+        {
+          "file": "apps/client/src/components/ui/calendar.tsx",
+          "hash": "5717828197741706846"
+        },
+        {
+          "file": "apps/client/src/components/ui/card.tsx",
+          "hash": "8258172798928960664"
+        },
+        {
+          "file": "apps/client/src/components/ui/carousel.tsx",
+          "hash": "16025284428382211109"
+        },
+        {
+          "file": "apps/client/src/components/ui/chart.tsx",
+          "hash": "9175543328576303872"
+        },
+        {
+          "file": "apps/client/src/components/ui/checkbox.tsx",
+          "hash": "5277313382263280533"
+        },
+        {
+          "file": "apps/client/src/components/ui/collapsible.tsx",
+          "hash": "11550741736187478023"
+        },
+        {
+          "file": "apps/client/src/components/ui/command.tsx",
+          "hash": "3585024763164368713"
+        },
+        {
+          "file": "apps/client/src/components/ui/context-menu.tsx",
+          "hash": "14294026152839214859"
+        },
+        {
+          "file": "apps/client/src/components/ui/dialog.tsx",
+          "hash": "6257434488129205118"
+        },
+        {
+          "file": "apps/client/src/components/ui/drawer.tsx",
+          "hash": "12662813428787543576"
+        },
+        {
+          "file": "apps/client/src/components/ui/dropdown-menu.tsx",
+          "hash": "3863589042374472212"
+        },
+        {
+          "file": "apps/client/src/components/ui/form.tsx",
+          "hash": "14373301194178947649"
+        },
+        {
+          "file": "apps/client/src/components/ui/hover-card.tsx",
+          "hash": "17757139602879340400"
+        },
+        {
+          "file": "apps/client/src/components/ui/input-otp.tsx",
+          "hash": "14550022367864184989"
+        },
+        {
+          "file": "apps/client/src/components/ui/input.tsx",
+          "hash": "667422176216627357"
+        },
+        {
+          "file": "apps/client/src/components/ui/label.tsx",
+          "hash": "575553755677390382"
+        },
+        {
+          "file": "apps/client/src/components/ui/language-toggle-index.ts",
+          "hash": "4449608132384360848"
+        },
+        {
+          "file": "apps/client/src/components/ui/menubar.tsx",
+          "hash": "4060921458695533966"
+        },
+        {
+          "file": "apps/client/src/components/ui/navigation-menu.tsx",
+          "hash": "2908858029814184805"
+        },
+        {
+          "file": "apps/client/src/components/ui/pagination.tsx",
+          "hash": "12933609959293049490"
+        },
+        {
+          "file": "apps/client/src/components/ui/popover.tsx",
+          "hash": "15312171688123978149"
+        },
+        {
+          "file": "apps/client/src/components/ui/progress.tsx",
+          "hash": "17647409214643394547"
+        },
+        {
+          "file": "apps/client/src/components/ui/radio-group.tsx",
+          "hash": "12574634384370595430"
+        },
+        {
+          "file": "apps/client/src/components/ui/resizable.tsx",
+          "hash": "7119411678047791219"
+        },
+        {
+          "file": "apps/client/src/components/ui/scroll-area.tsx",
+          "hash": "7372559361306884482"
+        },
+        {
+          "file": "apps/client/src/components/ui/select.tsx",
+          "hash": "17609257409882469506"
+        },
+        {
+          "file": "apps/client/src/components/ui/separator.tsx",
+          "hash": "9152929968593344539"
+        },
+        {
+          "file": "apps/client/src/components/ui/sheet.tsx",
+          "hash": "1045531335628912137"
+        },
+        {
+          "file": "apps/client/src/components/ui/sidebar.tsx",
+          "hash": "11005982684288456909"
+        },
+        {
+          "file": "apps/client/src/components/ui/skeleton.tsx",
+          "hash": "7739192301396167804"
+        },
+        {
+          "file": "apps/client/src/components/ui/slider.tsx",
+          "hash": "13517559721624315127"
+        },
+        {
+          "file": "apps/client/src/components/ui/switch.tsx",
+          "hash": "6768244898163120696"
+        },
+        {
+          "file": "apps/client/src/components/ui/table.tsx",
+          "hash": "12220893068497995597"
+        },
+        {
+          "file": "apps/client/src/components/ui/tabs.tsx",
+          "hash": "13475387194805012451"
+        },
+        {
+          "file": "apps/client/src/components/ui/textarea.tsx",
+          "hash": "11500692197031149961"
+        },
+        {
+          "file": "apps/client/src/components/ui/toast.tsx",
+          "hash": "1326391758004731988"
+        },
+        {
+          "file": "apps/client/src/components/ui/toaster.tsx",
+          "hash": "16997361785471586676"
+        },
+        {
+          "file": "apps/client/src/components/ui/toggle-group.tsx",
+          "hash": "12069551333688425799"
+        },
+        {
+          "file": "apps/client/src/components/ui/toggle.tsx",
+          "hash": "11798874654733838872"
+        },
+        {
+          "file": "apps/client/src/components/ui/tooltip.tsx",
+          "hash": "13615976415397195500"
+        },
+        {
+          "file": "apps/client/src/contexts/AppContext.tsx",
+          "hash": "7102105147436888902"
+        },
+        {
+          "file": "apps/client/src/contexts/AuthContext.tsx",
+          "hash": "17644696548880965734"
+        },
+        {
+          "file": "apps/client/src/contexts/ThemeContext.tsx",
+          "hash": "1260611841720386132"
+        },
+        {
+          "file": "apps/client/src/data/departments.ts",
+          "hash": "12790919058737586268"
+        },
+        {
+          "file": "apps/client/src/hooks/use-mobile.tsx",
+          "hash": "14900138732519213047"
+        },
+        {
+          "file": "apps/client/src/hooks/use-toast.ts",
+          "hash": "16882284538177563600"
+        },
+        {
+          "file": "apps/client/src/hooks/useCheckLimit.ts",
+          "hash": "3038866147500166982"
+        },
+        {
+          "file": "apps/client/src/i18n.ts",
+          "hash": "1022069660129074083"
+        },
+        {
+          "file": "apps/client/src/index.css",
+          "hash": "12713345378659001056"
+        },
+        {
+          "file": "apps/client/src/lib/auth.ts",
+          "hash": "11997624663765812975"
+        },
+        {
+          "file": "apps/client/src/lib/queryClient.ts",
+          "hash": "6172825427421409268"
+        },
+        {
+          "file": "apps/client/src/lib/supabase.ts",
+          "hash": "12051268817479382298"
+        },
+        {
+          "file": "apps/client/src/lib/supabaseApi.ts",
+          "hash": "9328757640424136197"
+        },
+        {
+          "file": "apps/client/src/lib/templateUtils.ts",
+          "hash": "13047929767137541836"
+        },
+        {
+          "file": "apps/client/src/lib/utils.ts",
+          "hash": "6483145186850064023"
+        },
+        {
+          "file": "apps/client/src/locales/en.json",
+          "hash": "2487853026721959675"
+        },
+        {
+          "file": "apps/client/src/locales/ru.json",
+          "hash": "13614667243748854484"
+        },
+        {
+          "file": "apps/client/src/main.tsx",
+          "hash": "18111587500616056961"
+        },
+        {
+          "file": "apps/client/src/pages/AdminLeaveManagement.tsx",
+          "hash": "17921176846566045838"
+        },
+        {
+          "file": "apps/client/src/pages/AdminPanel.tsx",
+          "hash": "15463297378078566814"
+        },
+        {
+          "file": "apps/client/src/pages/AdminReports.tsx",
+          "hash": "9396986508476523758"
+        },
+        {
+          "file": "apps/client/src/pages/AdminTests.tsx",
+          "hash": "2377279194147274239"
+        },
+        {
+          "file": "apps/client/src/pages/ApplicationDetails.tsx",
+          "hash": "13194634135628071042"
+        },
+        {
+          "file": "apps/client/src/pages/Applications.tsx",
+          "hash": "2053093074203463122"
+        },
+        {
+          "file": "apps/client/src/pages/CAD.tsx",
+          "hash": "401329806190478842"
+        },
+        {
+          "file": "apps/client/src/pages/Dashboard.tsx",
+          "hash": "10852603679909231769"
+        },
+        {
+          "file": "apps/client/src/pages/Departments.tsx",
+          "hash": "9248252090558851979"
+        },
+        {
+          "file": "apps/client/src/pages/EntryApplication.tsx",
+          "hash": "14583040989237208993"
+        },
+        {
+          "file": "apps/client/src/pages/FAQ.tsx",
+          "hash": "15391317766423462352"
+        },
+        {
+          "file": "apps/client/src/pages/Forum.tsx",
+          "hash": "16947781832362666924"
+        },
+        {
+          "file": "apps/client/src/pages/Homepage.tsx",
+          "hash": "8946410891483649170"
+        },
+        {
+          "file": "apps/client/src/pages/JointPositions.tsx",
+          "hash": "12243523968448739946"
+        },
+        {
+          "file": "apps/client/src/pages/LeaveManagement.tsx",
+          "hash": "2101090778136262748"
+        },
+        {
+          "file": "apps/client/src/pages/Login.tsx",
+          "hash": "1181609694010194514"
+        },
+        {
+          "file": "apps/client/src/pages/Notifications.tsx",
+          "hash": "8690993957872510339"
+        },
+        {
+          "file": "apps/client/src/pages/Register.tsx",
+          "hash": "17069491196910009883"
+        },
+        {
+          "file": "apps/client/src/pages/Reports.tsx",
+          "hash": "4507483986251305374"
+        },
+        {
+          "file": "apps/client/src/pages/Support.tsx",
+          "hash": "12361750684806663837"
+        },
+        {
+          "file": "apps/client/src/pages/SupportPage.tsx",
+          "hash": "15214945482674496297"
+        },
+        {
+          "file": "apps/client/src/pages/TestExam.tsx",
+          "hash": "5527882291408261130"
+        },
+        {
+          "file": "apps/client/src/pages/Tests.tsx",
+          "hash": "3888667262370307476"
+        },
+        {
+          "file": "apps/client/src/pages/TransferDepartment.tsx",
+          "hash": "2969813716191231201"
+        },
+        {
+          "file": "apps/client/src/pages/UserTicketDetails.tsx",
+          "hash": "477469013824336999"
+        },
+        {
+          "file": "apps/client/src/pages/admin/AdminTicketDetails.tsx",
+          "hash": "17608527906160703794"
+        },
+        {
+          "file": "apps/client/src/pages/admin/SupportPage.tsx",
+          "hash": "4655176306208240590"
+        },
+        {
+          "file": "apps/client/src/pages/admin/index.tsx",
+          "hash": "8801861519073820274"
+        },
+        {
+          "file": "apps/client/src/pages/not-found.tsx",
+          "hash": "5931250611411849856"
+        },
+        {
+          "file": "apps/client/src/setupTests.ts",
+          "hash": "9301510198615664307"
+        },
+        {
+          "file": "apps/client/src/types.ts",
+          "hash": "8914809781405102735"
+        },
+        {
+          "file": "apps/client/tsconfig.json",
+          "hash": "12638486067184504438"
+        },
+        {
+          "file": "apps/client/vite.config.ts",
+          "hash": "6944405763244768754"
+        }
+      ],
+      "shared": [
+        {
+          "file": "libs/shared/project.json",
+          "hash": "9573853802076345087"
+        }
+      ],
+      "server": [
+        {
+          "file": "apps/server/basic-server.js",
+          "hash": "10803031175819672564"
+        },
+        {
+          "file": "apps/server/businessLogic.ts",
+          "hash": "12078816037742482314"
+        },
+        {
+          "file": "apps/server/check-schema.js",
+          "hash": "14199409993978082610"
+        },
+        {
+          "file": "apps/server/check-user.cjs",
+          "hash": "3605683808255429783"
+        },
+        {
+          "file": "apps/server/db/PgStorage.ts",
+          "hash": "16535061069789430964"
+        },
+        {
+          "file": "apps/server/db/SupabaseStorage.ts",
+          "hash": "2389492221093300739"
+        },
+        {
+          "file": "apps/server/db/dev-schema.ts",
+          "hash": "18032683228972239101"
+        },
+        {
+          "file": "apps/server/db/index.ts",
+          "hash": "7270254876910411830"
+        },
+        {
+          "file": "apps/server/db/schema/applications.ts",
+          "hash": "9392092457094567600"
+        },
+        {
+          "file": "apps/server/db/schema/characters.ts",
+          "hash": "2919319977642227857"
+        },
+        {
+          "file": "apps/server/db/schema/departments.ts",
+          "hash": "7984712999829424778"
+        },
+        {
+          "file": "apps/server/db/schema/supportTickets.ts",
+          "hash": "14043432527977732036"
+        },
+        {
+          "file": "apps/server/db/schema/users.ts",
+          "hash": "5885299465835938730"
+        },
+        {
+          "file": "apps/server/db/seedUsers.ts",
+          "hash": "16908495248313490969"
+        },
+        {
+          "file": "apps/server/development.ts",
+          "hash": "11360482141622311242"
+        },
+        {
+          "file": "apps/server/fileUpload.ts",
+          "hash": "7463821900383666540"
+        },
+        {
+          "file": "apps/server/index.ts",
+          "hash": "3904619305838450823"
+        },
+        {
+          "file": "apps/server/middleware/auth.middleware.ts",
+          "hash": "15412397719954678319"
+        },
+        {
+          "file": "apps/server/migrate-schema.js",
+          "hash": "13402682255920908823"
+        },
+        {
+          "file": "apps/server/package-lock.json",
+          "hash": "4128033124445413562"
+        },
+        {
+          "file": "apps/server/package.json",
+          "hash": "9174923296463613459",
+          "deps": [
+            "npm:@jridgewell/trace-mapping",
+            "npm:@supabase/supabase-js",
+            "npm:@types/pg",
+            "npm:bcrypt",
+            "npm:bcryptjs",
+            "npm:cors",
+            "npm:dotenv",
+            "npm:drizzle-orm",
+            "npm:drizzle-zod",
+            "npm:express",
+            "npm:express-rate-limit",
+            "npm:jsonwebtoken",
+            "npm:multer",
+            "npm:nanoid",
+            "npm:pg",
+            "npm:ws",
+            "npm:zod",
+            "npm:@types/bcrypt",
+            "npm:@types/cors",
+            "npm:@types/express",
+            "npm:@types/jest",
+            "npm:@types/jsonwebtoken",
+            "npm:@types/multer",
+            "npm:@types/node",
+            "npm:@types/ws",
+            "npm:esbuild",
+            "npm:eslint",
+            "npm:jest",
+            "npm:ts-jest",
+            "npm:typescript",
+            "npm:bufferutil"
+          ]
+        },
+        {
+          "file": "apps/server/production-entry.ts",
+          "hash": "14942914208494252350"
+        },
+        {
+          "file": "apps/server/production.ts",
+          "hash": "6996106479920727805"
+        },
+        {
+          "file": "apps/server/project.json",
+          "hash": "11758714833567539270"
+        },
+        {
+          "file": "apps/server/quick-test.js",
+          "hash": "8661310337819850254"
+        },
+        {
+          "file": "apps/server/routes.ts",
+          "hash": "3240310642740085855"
+        },
+        {
+          "file": "apps/server/routes/admin/support.routes.ts",
+          "hash": "12947033375211660514"
+        },
+        {
+          "file": "apps/server/routes/admin/support.tickets.list.ts",
+          "hash": "13122696688696044463"
+        },
+        {
+          "file": "apps/server/routes/adminTests.ts",
+          "hash": "1607422537373289233"
+        },
+        {
+          "file": "apps/server/routes/applicationLimits.ts",
+          "hash": "12192381114152422312"
+        },
+        {
+          "file": "apps/server/routes/auth.ts",
+          "hash": "1943600438514174708"
+        },
+        {
+          "file": "apps/server/routes/cad.ts",
+          "hash": "7647436813984515169"
+        },
+        {
+          "file": "apps/server/routes/discord.ts",
+          "hash": "8520101812284634721"
+        },
+        {
+          "file": "apps/server/routes/filledReports.ts",
+          "hash": "12568858418579854122"
+        },
+        {
+          "file": "apps/server/routes/forum.ts",
+          "hash": "16460507924483465706"
+        },
+        {
+          "file": "apps/server/routes/mdt.ts",
+          "hash": "6756788392061066700"
+        },
+        {
+          "file": "apps/server/routes/reportTemplates.ts",
+          "hash": "10264772541946169645"
+        },
+        {
+          "file": "apps/server/routes/scheduler.ts",
+          "hash": "17437295409555935368"
+        },
+        {
+          "file": "apps/server/routes/tests.ts",
+          "hash": "585668747699998133"
+        },
+        {
+          "file": "apps/server/scheduler.ts",
+          "hash": "16780583761872849164"
+        },
+        {
+          "file": "apps/server/security.ts",
+          "hash": "4850919447580530432"
+        },
+        {
+          "file": "apps/server/services/CharacterService.ts",
+          "hash": "17162724225648092473"
+        },
+        {
+          "file": "apps/server/services/MDTService.ts",
+          "hash": "2835477175892879279"
+        },
+        {
+          "file": "apps/server/services/UserService.ts",
+          "hash": "12630495826113628917"
+        },
+        {
+          "file": "apps/server/simple-env-test.js",
+          "hash": "12020528081533620303"
+        },
+        {
+          "file": "apps/server/simple-test-server.js",
+          "hash": "715885988124004092"
+        },
+        {
+          "file": "apps/server/storage.ts",
+          "hash": "6351345828011591670"
+        },
+        {
+          "file": "apps/server/test-auth.js",
+          "hash": "2914429617938241632"
+        },
+        {
+          "file": "apps/server/test-db-connection-fixed.cjs",
+          "hash": "13422477118509363995"
+        },
+        {
+          "file": "apps/server/test-db-connection-fixed.js",
+          "hash": "1094711985089185509"
+        },
+        {
+          "file": "apps/server/test-db-connection.js",
+          "hash": "3434646909165554130"
+        },
+        {
+          "file": "apps/server/test-db.js",
+          "hash": "1458967127380203143"
+        },
+        {
+          "file": "apps/server/test-new-connection.js",
+          "hash": "17326134714988922409"
+        },
+        {
+          "file": "apps/server/test-pgstorage.cjs",
+          "hash": "9339658918127414169"
+        },
+        {
+          "file": "apps/server/test-pgstorage.js",
+          "hash": "13720549805342718753"
+        },
+        {
+          "file": "apps/server/test-server.ts",
+          "hash": "5530018370493027959"
+        },
+        {
+          "file": "apps/server/test-storage-simple.cjs",
+          "hash": "995873466238332648"
+        },
+        {
+          "file": "apps/server/tsconfig.json",
+          "hash": "9718255250949913121"
+        },
+        {
+          "file": "apps/server/types.ts",
+          "hash": "14841973325430910987"
+        },
+        {
+          "file": "apps/server/types/express.d.ts",
+          "hash": "713557345826331833"
+        },
+        {
+          "file": "apps/server/utils/auth.ts",
+          "hash": "16467474169378843204"
+        },
+        {
+          "file": "apps/server/utils/error-handler.ts",
+          "hash": "14581266568802676856"
+        },
+        {
+          "file": "apps/server/vite.ts",
+          "hash": "5545792696318244850"
+        },
+        {
+          "file": "apps/server/websocket.ts",
+          "hash": "1057979234211545507"
+        }
+      ],
+      "mdtclient": [
+        {
+          "file": "apps/mdtclient/.gitignore",
+          "hash": "13046175384202504187"
+        },
+        {
+          "file": "apps/mdtclient/.storybook/main.ts",
+          "hash": "7807222001572908812"
+        },
+        {
+          "file": "apps/mdtclient/.storybook/preview.ts",
+          "hash": "14257839948534562394"
+        },
+        {
+          "file": "apps/mdtclient/ARCHITECTURE_IMPLEMENTATION_SUMMARY.md",
+          "hash": "5927610076832233209"
+        },
+        {
+          "file": "apps/mdtclient/CITIZEN_PORTAL_UPDATE.md",
+          "hash": "9792994363775188583"
+        },
+        {
+          "file": "apps/mdtclient/EMS_FD_SEPARATION_REPORT.md",
+          "hash": "4920015625047539434"
+        },
+        {
+          "file": "apps/mdtclient/ENTITIES_LAYER_PROGRESS_REPORT.md",
+          "hash": "7898961380508018885"
+        },
+        {
+          "file": "apps/mdtclient/FIRE_INCIDENT_ENTITY_COMPLETION_REPORT.md",
+          "hash": "9592196128715900412"
+        },
+        {
+          "file": "apps/mdtclient/FSD_ARCHITECTURE_SETUP_REPORT.md",
+          "hash": "3708380343491484313"
+        },
+        {
+          "file": "apps/mdtclient/GTA 5 Interactive Map _ Map Genie.html",
+          "hash": "3563954564401240452"
+        },
+        {
+          "file": "apps/mdtclient/GTA_MAP_INTEGRATION_REPORT.md",
+          "hash": "7856962871872029381"
+        },
+        {
+          "file": "apps/mdtclient/INCIDENT_ENTITY_COMPLETION_REPORT.md",
+          "hash": "3855224047570875684"
+        },
+        {
+          "file": "apps/mdtclient/PATIENT_ENTITY_COMPLETION_REPORT.md",
+          "hash": "14941316259877725759"
+        },
+        {
+          "file": "apps/mdtclient/README.md",
+          "hash": "18312346845542312600"
+        },
+        {
+          "file": "apps/mdtclient/README_LOCALIZATION.md",
+          "hash": "14003223322045799780"
+        },
+        {
+          "file": "apps/mdtclient/SESSION_SUMMARY_FIRE_INCIDENT_COMPLETION.md",
+          "hash": "8579096109463928713"
+        },
+        {
+          "file": "apps/mdtclient/SESSION_SUMMARY_INCIDENT_ENTITY.md",
+          "hash": "1829641732047448325"
+        },
+        {
+          "file": "apps/mdtclient/SHARED_LAYER_COMPLETION_REPORT.md",
+          "hash": "11087502712071405596"
+        },
+        {
+          "file": "apps/mdtclient/SHARED_LAYER_IMPLEMENTATION_REPORT.md",
+          "hash": "10695302004152092551"
+        },
+        {
+          "file": "apps/mdtclient/backup/App.tsx_backup",
+          "hash": "17294650376381188606"
+        },
+        {
+          "file": "apps/mdtclient/components/AdminPortal.tsx",
+          "hash": "17113277680409886954"
+        },
+        {
+          "file": "apps/mdtclient/components/CargoDetailsModal.tsx",
+          "hash": "13535429630452420063"
+        },
+        {
+          "file": "apps/mdtclient/components/CitizenPortal.tsx",
+          "hash": "14914380992058106550"
+        },
+        {
+          "file": "apps/mdtclient/components/CompanyDetailsModal.tsx",
+          "hash": "14019030393491053271"
+        },
+        {
+          "file": "apps/mdtclient/components/CreateCargoForm.tsx",
+          "hash": "12451557284984818475"
+        },
+        {
+          "file": "apps/mdtclient/components/CreateCompanyForm.tsx",
+          "hash": "3895303478404426254"
+        },
+        {
+          "file": "apps/mdtclient/components/CreateOfficerForm.tsx",
+          "hash": "5296394039489255755"
+        },
+        {
+          "file": "apps/mdtclient/components/CreateOfficerSection.tsx",
+          "hash": "4876796723951272826"
+        },
+        {
+          "file": "apps/mdtclient/components/FullscreenMap.tsx",
+          "hash": "9005236436072961097"
+        },
+        {
+          "file": "apps/mdtclient/components/GTAMap.tsx",
+          "hash": "12678869603730495652"
+        },
+        {
+          "file": "apps/mdtclient/components/ImpoundSection.tsx",
+          "hash": "7128863191198172510"
+        },
+        {
+          "file": "apps/mdtclient/components/LawControlPanel.tsx",
+          "hash": "3285978299225802451"
+        },
+        {
+          "file": "apps/mdtclient/components/LawReportForm.tsx",
+          "hash": "14209623299350893544"
+        },
+        {
+          "file": "apps/mdtclient/components/LawReportsList.tsx",
+          "hash": "12677528058001181130"
+        },
+        {
+          "file": "apps/mdtclient/components/LocationInfo.tsx",
+          "hash": "16718529654077928917"
+        },
+        {
+          "file": "apps/mdtclient/components/MdtPortal.tsx",
+          "hash": "17999431344506126964"
+        },
+        {
+          "file": "apps/mdtclient/components/NotebookSection.tsx",
+          "hash": "14021649531520764981"
+        },
+        {
+          "file": "apps/mdtclient/components/OfficersSection.tsx",
+          "hash": "13476194067575188206"
+        },
+        {
+          "file": "apps/mdtclient/components/PenalCodeSearch.tsx",
+          "hash": "15914922679440214499"
+        },
+        {
+          "file": "apps/mdtclient/components/ReportsPortal.tsx",
+          "hash": "1049513457069156609"
+        },
+        {
+          "file": "apps/mdtclient/components/ShiftLogSection.tsx",
+          "hash": "10761731630722588415"
+        },
+        {
+          "file": "apps/mdtclient/components/SignalNotification.tsx",
+          "hash": "9022694233959598460"
+        },
+        {
+          "file": "apps/mdtclient/components/SignalsManager.tsx",
+          "hash": "7668768202255522505"
+        },
+        {
+          "file": "apps/mdtclient/components/WorkInCompanyForm.tsx",
+          "hash": "10898353053857421188"
+        },
+        {
+          "file": "apps/mdtclient/components/map/index.ts",
+          "hash": "4583133370560918840"
+        },
+        {
+          "file": "apps/mdtclient/components/ui/Theme.tsx",
+          "hash": "12554102447183848107"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/CallQueueWidget.tsx",
+          "hash": "2989297328218040782"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/Calls911Widget.tsx",
+          "hash": "10536318012254194375"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/SearchWidget.tsx",
+          "hash": "4086964536133483786"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/StatsWidget.tsx",
+          "hash": "1932754104636990867"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/StatusWidget.tsx",
+          "hash": "4307176622677948348"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/ToolsWidget.tsx",
+          "hash": "10823356264937928130"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/UnitListWidget.tsx",
+          "hash": "15362518927593609108"
+        },
+        {
+          "file": "apps/mdtclient/components/widgets/index.ts",
+          "hash": "17717662903882366290"
+        },
+        {
+          "file": "apps/mdtclient/constants.ts",
+          "hash": "700038399947639519"
+        },
+        {
+          "file": "apps/mdtclient/contexts/AuthContext.tsx",
+          "hash": "7197435256643385550"
+        },
+        {
+          "file": "apps/mdtclient/contexts/DashboardContext.tsx",
+          "hash": "17505596475896331737"
+        },
+        {
+          "file": "apps/mdtclient/contexts/LocaleContext.tsx",
+          "hash": "13067074809850572023"
+        },
+        {
+          "file": "apps/mdtclient/dist-nui/index.css",
+          "hash": "3875422341144391110"
+        },
+        {
+          "file": "apps/mdtclient/dist-nui/index.html",
+          "hash": "6982665449010861657"
+        },
+        {
+          "file": "apps/mdtclient/dist-nui/index.js",
+          "hash": "11349421669549872882"
+        },
+        {
+          "file": "apps/mdtclient/hooks/useMDT.ts",
+          "hash": "12045851344647797407"
+        },
+        {
+          "file": "apps/mdtclient/index.html",
+          "hash": "15002571136070598666"
+        },
+        {
+          "file": "apps/mdtclient/index.tsx",
+          "hash": "5708829987370292496"
+        },
+        {
+          "file": "apps/mdtclient/lib/i18n.ts",
+          "hash": "2393679874444055496"
+        },
+        {
+          "file": "apps/mdtclient/locales/en.json",
+          "hash": "13246801761551081954"
+        },
+        {
+          "file": "apps/mdtclient/locales/ru.json",
+          "hash": "15356187713403886568"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/0(1).html",
+          "hash": "2739337341270906151"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/0(2).html",
+          "hash": "2739337341270906151"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/0(3).html",
+          "hash": "2739337341270906151"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/0(4).html",
+          "hash": "1930877654953081570"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/0.html",
+          "hash": "2739337341270906151"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/1012963079058946449907",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/12991.html",
+          "hash": "804637976822460649"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/142",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/159",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/1a1c07e870d45c05896c3f9e9973d4b4.gif",
+          "hash": "16399803443647043303"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/22FFE0D0-8981-4BB8-B3E8-0DBFA6A47252.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/3158",
+          "hash": "2101022214321391516"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/5691",
+          "hash": "14736246705388127127"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/63c21d21-5b59-42b0-990d-a27f2cdad303",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/63c21d21-5b59-42b0-990d-a27f2cdad303.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/658861064(1).html",
+          "hash": "14413659757881318820"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/658861064.html",
+          "hash": "11736327522402956508"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/713113.gif",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/85cb4e4139de98a2.html",
+          "hash": "11611236520482197524"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/AGfDK3Mx2uzmnXWH.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/CookieOutbrain.html",
+          "hash": "4271562897338615383"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ImgSync",
+          "hash": "9540863794306222275"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ImgSync(1)",
+          "hash": "10170989791594369587"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ImgSync(2)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ImgSync.html",
+          "hash": "13670084676570468510"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/PugMaster",
+          "hash": "18432277857596864058"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/a184e2218ea9f18e32c70fb304405e72.gif",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/adchoices_blue_wb.png",
+          "hash": "11292484818781915875"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/adview",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/aframe.html",
+          "hash": "7674161570176352864"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/amp-ad-exit-0.1.mjs",
+          "hash": "12199442514453863184"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/amp-analytics-0.1.mjs",
+          "hash": "12708007118159689045"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/amp-fit-text-0.1.mjs",
+          "hash": "12658099355973438022"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/amp-form-0.1.mjs",
+          "hash": "1507205659822253714"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/amp4ads-v0.mjs",
+          "hash": "2374204518305561887"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/app.css",
+          "hash": "17541357055496226056"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/async_usersync",
+          "hash": "8348973304536217266"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/async_usersync.html",
+          "hash": "14023022289672218200"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/auto-user-sync.html",
+          "hash": "17674550196186648020"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/base-theme.css",
+          "hash": "16562385634734227128"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/beacon.js.Без названия",
+          "hash": "8620089189752623590"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/beacon.min.js.Без названия",
+          "hash": "4269011145072970827"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/bootstrap.min.css",
+          "hash": "8163231392736082913"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/bootstrap.min.js.Без названия",
+          "hash": "13708598103777259294"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/bridge3.708.0_en.html",
+          "hash": "16584210165912921463"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/bsync(1).html",
+          "hash": "2004536602544173385"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/bsync.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/btu4jd3a.html",
+          "hash": "2897602959337762490"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cframe(1).js.Без названия",
+          "hash": "6283852305252865866"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cframe.js.Без названия",
+          "hash": "6283852305252865866"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/chartbeat.js.Без названия",
+          "hash": "14497426356599618491"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cks",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cksync(1).html",
+          "hash": "11540839713455889636"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cksync.html",
+          "hash": "7283318257001030892"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cksync.php",
+          "hash": "15032797091834542900"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/client.js.Без названия",
+          "hash": "16682392914372237345"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm",
+          "hash": "9713976165297130906"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm(1)",
+          "hash": "5897951958732485764"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm(3)",
+          "hash": "18294038349701579705"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm(4).html",
+          "hash": "14319986644087114236"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm-notify",
+          "hash": "10170989791594369587"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm-notify(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm-notify.html",
+          "hash": "14386153869786472891"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cm.html",
+          "hash": "10166321573332130378"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cnx_usync.html",
+          "hash": "12295300061093816389"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cnx_usync.js.Без названия",
+          "hash": "6122936087010278063"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/config(1).js.Без названия",
+          "hash": "6196847289056422539"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/config.js.Без названия",
+          "hash": "15180109977773677595"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/connatix",
+          "hash": "15855366231706293210"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/connatix.html",
+          "hash": "10736803621764698136"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cookie",
+          "hash": "10742028810608578633"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cookie(1).html",
+          "hash": "10474085863656596988"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cookie.html",
+          "hash": "4351153390697559774"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cookie_sync",
+          "hash": "9979256325004812459"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cookie_sync.html",
+          "hash": "3774047069834015359"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cs",
+          "hash": "4373852268450721139"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/cs.html",
+          "hash": "16474663537086657097"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/css",
+          "hash": "12777821528571105581"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/css(1)",
+          "hash": "3970787591340484686"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/csync",
+          "hash": "2938255862847064029"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/csync(1)",
+          "hash": "3249300095048778612"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/current",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/current(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/current.html",
+          "hash": "7784398025033469518"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/dc18c0207ee4aec13344ff274b9ad266.gif",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/dcm",
+          "hash": "5476095951829239122"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/dd3f91b3168664e47ebd1aec9512abd4.gif",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/demand",
+          "hash": "599352388694413723"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/dmp",
+          "hash": "9153861012838761479"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/e03deca3316b700a1ce99c41e324fd03.gif",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ebda",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/en.png",
+          "hash": "18400249209254632868"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/encrypted-tag-g.js.Без названия",
+          "hash": "10736751996775402241"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/f(1).txt",
+          "hash": "10489708546827953886"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/f(2).txt",
+          "hash": "8084105156754127045"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/f(3).txt",
+          "hash": "16924916184851782308"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/f(4).txt",
+          "hash": "10628279379406595455"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/f.txt",
+          "hash": "16144406674874820929"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/freewheel",
+          "hash": "4205485171389134681"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic",
+          "hash": "6720593560688201553"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic(1)",
+          "hash": "8161165876731719363"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic(2)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic(3)",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic(4)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic(5).html",
+          "hash": "17627121664160726203"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/generic.html",
+          "hash": "11681216595174655016"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid",
+          "hash": "5069352936008751677"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(1)",
+          "hash": "8417081747960724742"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(10).html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(11).html",
+          "hash": "8341083593560836788"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(12).html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(13).html",
+          "hash": "6869167120772634782"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(2)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(3)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(4)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(5)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(7)",
+          "hash": "3797833304305803804"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(8)",
+          "hash": "3797833304305803804"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid(9)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/getuid.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/gta5-icons.css",
+          "hash": "16688272964041493476"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/gta5.css",
+          "hash": "15049036689069981067"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/gumgum",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/https___s(1).0cf.html",
+          "hash": "408919548706788440"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/https___s.0cf.html",
+          "hash": "5659065305282950878"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/i.html",
+          "hash": "1017497914866486948"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/id5-api.js.Без названия",
+          "hash": "1048416387239591988"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/idsync.html",
+          "hash": "3347384053137384119"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/iframe(1).html",
+          "hash": "754002465003597800"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/iframe.html",
+          "hash": "3423961134589523458"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/img.html",
+          "hash": "7415441805951781037"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/inm",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/inmobi",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/inmobi&gdpr=0&gdpr_consent=",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/inmslw82.gif",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/intro.min.js.Без названия",
+          "hash": "17170244099713491472"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ionicons@4.2.6.min.css",
+          "hash": "982271313717217666"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/isyn.html",
+          "hash": "6321751119200904759"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ixmatch.html",
+          "hash": "1408888123991828718"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/jquery.magnific-popup.min.js.Без названия",
+          "hash": "7842913371169062938"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/jquery.min.js.Без названия",
+          "hash": "4002320517768084615"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/js",
+          "hash": "5308593132151526686"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/js(1)",
+          "hash": "10945912770450686860"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/l",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/lemma.html",
+          "hash": "3855151087291961367"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/list",
+          "hash": "7997388772650132775"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/lmts241.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/load-cookie.html",
+          "hash": "7395927997948124346"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/logo-512.png",
+          "hash": "11082485649060388382"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/logo-small.png",
+          "hash": "5120463788701420775"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/map.js.Без названия",
+          "hash": "10989060914144742328"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/mapbox-gl.css",
+          "hash": "11340901134751298387"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/mapbox-gl.js.Без названия",
+          "hash": "15783253919417410288"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/mapgenie.css",
+          "hash": "14246375512911760815"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/mapgenie.js.Без названия",
+          "hash": "6059124644255625193"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/mapgenie.prebid.js.Без названия",
+          "hash": "18399287226362019988"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/markdown-it.min.js.Без названия",
+          "hash": "11501677968740959822"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/match.html",
+          "hash": "11797948953825028232"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/missena.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/multi-sync(1).html",
+          "hash": "17231954803539393366"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/multi-sync(2).html",
+          "hash": "9498001808496694517"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/multi-sync(3).html",
+          "hash": "3852331347870390793"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/multi-sync(4).html",
+          "hash": "8617493805083456404"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/multi-sync(5).html",
+          "hash": "1878519061726590743"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/multi-sync.html",
+          "hash": "17129171956826856862"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/o",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/o.html",
+          "hash": "1592273857185078179"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/oRTB",
+          "hash": "14392269118137959171"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/ob.html",
+          "hash": "7319351773468860795"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/occ(1).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/occ(2).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/occ(3).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/occ.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/otSDKStub.js.Без названия",
+          "hash": "8477072322482158800"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/otbannersdk.202503.2.0.js.Без названия",
+          "hash": "4169827159599106557"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/otgpp.202503.2.0.js.Без названия",
+          "hash": "15620700404351851597"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/p-EtBqU4Lj3YbAv.gif",
+          "hash": "8846281058183289743"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pbs-user-sync.html",
+          "hash": "16024489849112801311"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pbserverIframe(1).html",
+          "hash": "15245887329053438246"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pbserverIframe.html",
+          "hash": "4016677895038280138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pbsync",
+          "hash": "11095127965782681747"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pd.html",
+          "hash": "2921558699579446401"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pgvideo.js.Без названия",
+          "hash": "11635130219637150738"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(1)",
+          "hash": "15032797091834542900"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(2)",
+          "hash": "599352388694413723"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(3)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(4)",
+          "hash": "599352388694413723"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(5).html",
+          "hash": "16097874520337070028"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(6).html",
+          "hash": "18158159704873869494"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(7).html",
+          "hash": "6759556137091258822"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel(8).html",
+          "hash": "8780866250030926262"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel-vrtcal",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixel.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixelSync",
+          "hash": "8785930662615988568"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixelSync(1)",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixelSync(2)",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pixelSync.html",
+          "hash": "13043383823363655410"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/popper.min.js.Без названия",
+          "hash": "7626208449372952097"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/prbds2s.html",
+          "hash": "3344496936206657593"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/prebid(1).html",
+          "hash": "255007641352075489"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/prebid.html",
+          "hash": "14136335402927564213"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/primisslate.css",
+          "hash": "1057255903363955440"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/psync.html",
+          "hash": "3192333815884360999"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pub.js.Без названия",
+          "hash": "2020971144419509483"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pubcid.min.js.Без названия",
+          "hash": "13069945927803411296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/publisher.js.Без названия",
+          "hash": "578064180812538240"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/pwt.js.Без названия",
+          "hash": "12678071648188105200"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/receive",
+          "hash": "4408922443468043623"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/receive(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/redirect",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/redirect(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/redirect.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/redirectuser",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rmphb",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rmpssp",
+          "hash": "9423565110806092404"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rmpssp(1)",
+          "hash": "11772841920806223209"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rmpssp(2)",
+          "hash": "14382012180711358775"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rmpssp(3).html",
+          "hash": "16656367930859187743"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rmpssp.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rtset",
+          "hash": "1022771743116687056"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rtset(1)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rtset(2)",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/rtset.html",
+          "hash": "6315232342060182312"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource",
+          "hash": "5573371703225457317"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(1).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(10)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(11)",
+          "hash": "1056959282118883274"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(12).html",
+          "hash": "3886548052739649172"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(13).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(14).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(15).html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(16).html",
+          "hash": "558085522669825982"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(17).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(18).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(19).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(2)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(2).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(20).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(21).html",
+          "hash": "5510181585538242575"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(22).html",
+          "hash": "5381587433625938721"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(23).html",
+          "hash": "8515877493134435909"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(24).html",
+          "hash": "7131629383920691211"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(25).html",
+          "hash": "11178819774716703445"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(26).html",
+          "hash": "4107954726984530479"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(27).html",
+          "hash": "4401218324633108366"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(28).html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(29).html",
+          "hash": "4943130891073114459"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(3)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(3).html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(30).html",
+          "hash": "10824518975497341755"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(31).html",
+          "hash": "15596534186672658037"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(32).html",
+          "hash": "4943130891073114459"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(33).html",
+          "hash": "4943130891073114459"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(34).html",
+          "hash": "4943130891073114459"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(35).html",
+          "hash": "5055875086929415682"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(36).html",
+          "hash": "5034534519879875732"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(37).html",
+          "hash": "7994669284173329790"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(38).html",
+          "hash": "16801480261193288751"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(39).html",
+          "hash": "10210307353298501015"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(4)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(4).html",
+          "hash": "558085522669825982"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(5)",
+          "hash": "3797833304305803804"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(5).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(6)",
+          "hash": "10170989791594369587"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(6).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(7)",
+          "hash": "5171259635409194698"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(7).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(8)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(8).html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource(9).html",
+          "hash": "5510181585538242575"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/saved_resource.html",
+          "hash": "9406932491540160659"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/server_match(1).html",
+          "hash": "3515468315145742092"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/server_match.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(1)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(10)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(11).html",
+          "hash": "12872024427456710062"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(12).html",
+          "hash": "11473023182959907765"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(13).html",
+          "hash": "12977358020718166416"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(14).html",
+          "hash": "10363699843641936769"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(15).html",
+          "hash": "17422026946400436717"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(16).html",
+          "hash": "4262970927736772652"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(2)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(3)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(4)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(5)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(6)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(7)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(8)",
+          "hash": "15873732009962944606"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid(9)",
+          "hash": "961549610562617953"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/setuid.html",
+          "hash": "10121993371805521182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sodar",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync",
+          "hash": "17656764262099722146"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(1)",
+          "hash": "2290314176326883076"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(10)",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(11)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(12)",
+          "hash": "5641750812854714601"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(13)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(15)",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(16).html",
+          "hash": "6516922654412304950"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(17).html",
+          "hash": "1759815633790132830"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(18).html",
+          "hash": "3579552163661544864"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(19).html",
+          "hash": "15765063200260560295"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(2)",
+          "hash": "14318800523606888474"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(20).html",
+          "hash": "11499434011874283246"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(21).html",
+          "hash": "2988080910205965614"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(3)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(4)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(5)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(6)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(7)",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(8)",
+          "hash": "15032797091834542900"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync(9)",
+          "hash": "1272444539609607756"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync-container.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync-iframe.html",
+          "hash": "18211886480882511210"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync.html",
+          "hash": "8053577213582763247"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync.min(1).js.Без названия",
+          "hash": "7340174646257075247"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/sync.min.js.Без названия",
+          "hash": "4335229862141277037"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/syncframe.html",
+          "hash": "6479922267502098466"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/tag.min.js.Без названия",
+          "hash": "15848322023439087337"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/toastr.min.css",
+          "hash": "14027134217971608842"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/toastr.min.js.Без названия",
+          "hash": "6986510606329914408"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/topics_frame.html",
+          "hash": "99048968701300539"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/trl",
+          "hash": "8236710959806487182"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/uid",
+          "hash": "8846281058183289743"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/um.html",
+          "hash": "10220991429658919867"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/us",
+          "hash": "12296915891268205974"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/us(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/us(2).html",
+          "hash": "5212982607121762773"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/us(3).html",
+          "hash": "3498968836670545638"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/us.html",
+          "hash": "17297272998676119246"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-matching",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-matching(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-matching(2)",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-matching.html",
+          "hash": "17385662742570728482"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-sync",
+          "hash": "3797833304305803804"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-sync(1)",
+          "hash": "3249300095048778612"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-sync(3).html",
+          "hash": "17346244096186912208"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user-sync.html",
+          "hash": "977675371597289698"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(1).html",
+          "hash": "12277416350739690438"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(10).html",
+          "hash": "11721063480753865379"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(11).html",
+          "hash": "289829293479527677"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(2).html",
+          "hash": "7022281218042919193"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(3).html",
+          "hash": "13498548558966377917"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(4).html",
+          "hash": "3020866965060455001"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(5).html",
+          "hash": "2929627007858168390"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(6).html",
+          "hash": "5057814868462560128"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(7).html",
+          "hash": "3273519363460895156"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(8).html",
+          "hash": "8575024932679798652"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync(9).html",
+          "hash": "8937907675226505430"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/user_sync.html",
+          "hash": "10468450449986124237"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usermatchredir",
+          "hash": "13603777409852006620"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usermatchredir.html",
+          "hash": "8241991185906188359"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(1)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(1).js.Без названия",
+          "hash": "7446253303540192007"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(2)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(3)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(4)",
+          "hash": "5758771623072477296"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(5).html",
+          "hash": "10989052749649731004"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync(6).html",
+          "hash": "4788273524687204522"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync.html",
+          "hash": "18168999281328988097"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usersync.js.Без названия",
+          "hash": "416383153657664628"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(2)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(3).html",
+          "hash": "7137375163549967436"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(4).html",
+          "hash": "2837401123207059107"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(5).html",
+          "hash": "6179422621462143909"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(6).html",
+          "hash": "1715149141041771694"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(7).html",
+          "hash": "10414853395402985146"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync(8).html",
+          "hash": "14664192592799619061"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync.html",
+          "hash": "376000021853852871"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/usync.js.Без названия",
+          "hash": "4935094414923609931"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/v1",
+          "hash": "16005475201593353828"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/v1(1)",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/v1(2)",
+          "hash": "4165967275307508537"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/v1(3)",
+          "hash": "8846281058183289743"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/v1(4).html",
+          "hash": "9941231472464353712"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/v1.html",
+          "hash": "17139712976413885352"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/wpjslib-sync(1).js.Без названия",
+          "hash": "12389106504129045946"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/wpjslib-sync.js.Без названия",
+          "hash": "12389106504129045946"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/wrap(1).js.Без названия",
+          "hash": "11049206239115439398"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/wrap.js.Без названия",
+          "hash": "8442668632938353032"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/z0WVjCBSEeGLoxIxOQVEwQ",
+          "hash": "5553324780588512224"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/z0WVjCBSEeGLoxIxOQVEwQ.min.js.Без названия",
+          "hash": "1313369006855722275"
+        },
+        {
+          "file": "apps/mdtclient/mapgta.html/zd_logo.png",
+          "hash": "12830499835817919647"
+        },
+        {
+          "file": "apps/mdtclient/metadata.json",
+          "hash": "4891983939639945273"
+        },
+        {
+          "file": "apps/mdtclient/package-lock.json",
+          "hash": "17850677676308370956"
+        },
+        {
+          "file": "apps/mdtclient/package.json",
+          "hash": "6036409900862496886",
+          "deps": [
+            "npm:@google/genai",
+            "npm:@tanstack/react-query",
+            "npm:react-router-dom",
+            "npm:class-variance-authority",
+            "npm:clsx",
+            "npm:lucide-react",
+            "npm:react",
+            "npm:react-dom",
+            "npm:@types/node",
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:@vitejs/plugin-react",
+            "npm:eslint",
+            "npm:jest",
+            "npm:ts-jest",
+            "npm:typescript",
+            "npm:vite"
+          ]
+        },
+        {
+          "file": "apps/mdtclient/project.json",
+          "hash": "13580098062515724504"
+        },
+        {
+          "file": "apps/mdtclient/scripts/check-translations.cjs",
+          "hash": "1275257324150386918"
+        },
+        {
+          "file": "apps/mdtclient/services/api.ts",
+          "hash": "14661029860018025234"
+        },
+        {
+          "file": "apps/mdtclient/services/geminiService.ts",
+          "hash": "4452639364964583234"
+        },
+        {
+          "file": "apps/mdtclient/src/App.tsx",
+          "hash": "8286556589267799660"
+        },
+        {
+          "file": "apps/mdtclient/src/README.md",
+          "hash": "18059920808654236579"
+        },
+        {
+          "file": "apps/mdtclient/src/app/config/index.ts",
+          "hash": "8525532855093861276"
+        },
+        {
+          "file": "apps/mdtclient/src/app/index.ts",
+          "hash": "7801641426834149654"
+        },
+        {
+          "file": "apps/mdtclient/src/app/providers/index.ts",
+          "hash": "4323561669326977090"
+        },
+        {
+          "file": "apps/mdtclient/src/app/styles/index.ts",
+          "hash": "2790129040050383193"
+        },
+        {
+          "file": "apps/mdtclient/src/contexts/AuthContext.tsx",
+          "hash": "15767535108574045976"
+        },
+        {
+          "file": "apps/mdtclient/src/contexts/DashboardContext.tsx",
+          "hash": "5702430321089567854"
+        },
+        {
+          "file": "apps/mdtclient/src/contexts/LocaleContext.tsx",
+          "hash": "18419117801970448608"
+        },
+        {
+          "file": "apps/mdtclient/src/contexts/ThemeContext.tsx",
+          "hash": "12489456180775694107"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/citizen/api/citizenApi.ts",
+          "hash": "3345525521226240807"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/citizen/index.ts",
+          "hash": "8066560939381972091"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/citizen/model/types.ts",
+          "hash": "4635840433158633897"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/citizen/ui/CitizenCard.tsx",
+          "hash": "14461358815786872280"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/citizen/ui/CitizenList.tsx",
+          "hash": "4159598880946385060"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/company/api/companyApi.ts",
+          "hash": "5603759835921957686"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/company/index.ts",
+          "hash": "18174754177762096574"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/company/model/types.ts",
+          "hash": "12825352753435138223"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/company/ui/CompanyCard.tsx",
+          "hash": "9879483882578131265"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/company/ui/CompanyList.tsx",
+          "hash": "13660795727187568058"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/company/ui/index.ts",
+          "hash": "4652509451445116727"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/api/dispatchApi.ts",
+          "hash": "12617999479342447875"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/api/index.ts",
+          "hash": "6081358931997789104"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/index.ts",
+          "hash": "7286720867769850603"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/model/index.ts",
+          "hash": "12176448023870534717"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/model/types.ts",
+          "hash": "12075496055424275243"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/ui/Call911Card.tsx",
+          "hash": "18441527161356854847"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/ui/IncidentCard.tsx",
+          "hash": "5406568729800135217"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/ui/UnitStatusCard.tsx",
+          "hash": "8655856364960994222"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/dispatch/ui/index.ts",
+          "hash": "7638833983236967197"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/api/fireIncidentApi.ts",
+          "hash": "3515137541777399497"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/api/index.ts",
+          "hash": "5171318835478855359"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/index.ts",
+          "hash": "9365330527242139193"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/model/index.ts",
+          "hash": "8210919086374595271"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/model/types.ts",
+          "hash": "4697819842816677872"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/ui/FireIncidentCard.tsx",
+          "hash": "9651896908272382986"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/ui/FireIncidentDetails.tsx",
+          "hash": "2898725727136664477"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/ui/FireIncidentList.tsx",
+          "hash": "918072812512275741"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/fire-incident/ui/index.ts",
+          "hash": "9931764805781048866"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/api/incidentApi.ts",
+          "hash": "9616250115299333771"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/api/index.ts",
+          "hash": "11701341945265545447"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/index.ts",
+          "hash": "5014929450288055399"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/model/index.ts",
+          "hash": "7112613502852979907"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/model/types.ts",
+          "hash": "16278613188160988420"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/ui/IncidentCard.tsx",
+          "hash": "5161335751425461225"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/ui/IncidentDetails.tsx",
+          "hash": "404576079720596255"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/ui/IncidentList.tsx",
+          "hash": "4076885141738600335"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/incident/ui/index.ts",
+          "hash": "615388371932798578"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/index.ts",
+          "hash": "8376455793655511008"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/api/PatientApi.ts",
+          "hash": "15209883059702254548"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/api/index.ts",
+          "hash": "16289679470448503431"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/index.ts",
+          "hash": "16040390449080643521"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/model/index.ts",
+          "hash": "1801897325048095258"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/model/types.ts",
+          "hash": "10091835508098583867"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/ui/PatientCard.tsx",
+          "hash": "4242331867279369887"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/ui/PatientDetails.tsx",
+          "hash": "4844115316480360456"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/ui/PatientList.tsx",
+          "hash": "7476146844834996690"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/patient/ui/index.ts",
+          "hash": "8660093967538123104"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/api/vehicleApi.ts",
+          "hash": "16440169980669892576"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/index.ts",
+          "hash": "11469951260948985094"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/model/types.ts",
+          "hash": "3760427604129782051"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/ui/VehicleCard.tsx",
+          "hash": "513196447930947880"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/ui/VehicleDetails.tsx",
+          "hash": "8045825912057063329"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/ui/VehicleList.tsx",
+          "hash": "10000668450908021870"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/vehicle/ui/index.ts",
+          "hash": "15353560275925526331"
+        },
+        {
+          "file": "apps/mdtclient/src/features/auth/index.ts",
+          "hash": "6702844955364196717"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/index.ts",
+          "hash": "13248242111575935588"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/model/index.ts",
+          "hash": "4321969484042704542"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/model/store.ts",
+          "hash": "18003331147001157675"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/model/types.ts",
+          "hash": "17869924611322233665"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/ui/CallQueue.tsx",
+          "hash": "9344816226243844268"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/ui/IncomingCallModal.tsx",
+          "hash": "14629328761120874043"
+        },
+        {
+          "file": "apps/mdtclient/src/features/call-management/ui/index.ts",
+          "hash": "3083404399291748298"
+        },
+        {
+          "file": "apps/mdtclient/src/features/ems-system/index.ts",
+          "hash": "8568490681885352620"
+        },
+        {
+          "file": "apps/mdtclient/src/features/fd-system/index.ts",
+          "hash": "8484732242625347664"
+        },
+        {
+          "file": "apps/mdtclient/src/features/incident-management/index.ts",
+          "hash": "13248242111575935588"
+        },
+        {
+          "file": "apps/mdtclient/src/features/incident-management/model/index.ts",
+          "hash": "4321969484042704542"
+        },
+        {
+          "file": "apps/mdtclient/src/features/incident-management/model/store.ts",
+          "hash": "5962884201198764721"
+        },
+        {
+          "file": "apps/mdtclient/src/features/incident-management/model/types.ts",
+          "hash": "754281025032607607"
+        },
+        {
+          "file": "apps/mdtclient/src/features/incident-management/ui/IncidentList.tsx",
+          "hash": "15538448409891500159"
+        },
+        {
+          "file": "apps/mdtclient/src/features/incident-management/ui/index.ts",
+          "hash": "13148413287117193574"
+        },
+        {
+          "file": "apps/mdtclient/src/features/index.ts",
+          "hash": "16765672522422251824"
+        },
+        {
+          "file": "apps/mdtclient/src/index.css",
+          "hash": "11172213350730530724"
+        },
+        {
+          "file": "apps/mdtclient/src/index.ts",
+          "hash": "5305053516195473591"
+        },
+        {
+          "file": "apps/mdtclient/src/main.tsx",
+          "hash": "9488151918275154098"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/DashboardPage.tsx",
+          "hash": "9987525303523084186"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/civil/CivilDepartmentPage.tsx",
+          "hash": "4148194193590319624"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/dispatch/DispatchDepartmentPage.tsx",
+          "hash": "5142687253167491440"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/ems/EMSDepartmentPage.tsx",
+          "hash": "16409329636903849118"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/ems/index.ts",
+          "hash": "6929661361252290258"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/fd/FDDepartmentPage.tsx",
+          "hash": "17806402921445806052"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/fd/index.ts",
+          "hash": "6688354949297860995"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/index.ts",
+          "hash": "12173537148283981395"
+        },
+        {
+          "file": "apps/mdtclient/src/pages/leo/PoliceDepartmentPage.tsx",
+          "hash": "3277625392725678787"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/index.ts",
+          "hash": "17536389703907091809"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/lib/constants/index.ts",
+          "hash": "16236029015824445943"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/lib/hooks/index.ts",
+          "hash": "8248089147295639513"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/lib/index.ts",
+          "hash": "8036324067578648915"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/lib/utils.ts",
+          "hash": "3751285521829091646"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/lib/utils/index.ts",
+          "hash": "11499630157722288645"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Badge/Badge.tsx",
+          "hash": "4101885814556030955"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Badge/index.ts",
+          "hash": "12534537123139335040"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Button/Button.stories.tsx",
+          "hash": "4148566721618393895"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Button/Button.tsx",
+          "hash": "1429010236798508437"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Button/index.ts",
+          "hash": "11625186192095264867"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Card/Card.tsx",
+          "hash": "12996519333734541524"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Card/index.ts",
+          "hash": "3840548098620480658"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Input/Input.stories.tsx",
+          "hash": "9450561091652856005"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Input/Input.tsx",
+          "hash": "17422035204963152682"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Input/index.ts",
+          "hash": "16289003074665896633"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Modal/Modal.tsx",
+          "hash": "13522364772149996929"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Modal/index.ts",
+          "hash": "14757866773088327140"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/index.ts",
+          "hash": "5895257202318274555"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/index.ts",
+          "hash": "1871277517450802278"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/SearchBar/SearchBar.tsx",
+          "hash": "5443911693118138720"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/SearchBar/index.ts",
+          "hash": "11346612990076922682"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/StatusBadge/StatusBadge.tsx",
+          "hash": "2929995551834588686"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/StatusBadge/index.ts",
+          "hash": "9523334489018983555"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/index.ts",
+          "hash": "6032338340934064713"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/organisms/DataTable/DataTable.tsx",
+          "hash": "2429234358030504168"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/organisms/DataTable/index.ts",
+          "hash": "13259652233468451343"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/organisms/index.ts",
+          "hash": "15697009807652419770"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/templates/index.ts",
+          "hash": "9705272189432950141"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/dispatch-portal/index.ts",
+          "hash": "5674712876161476026"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/dispatch-portal/ui/DispatchPortal.tsx",
+          "hash": "10568327571355771426"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/dispatch-portal/ui/index.ts",
+          "hash": "951287520730301840"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/ems-portal/index.ts",
+          "hash": "5674712876161476026"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/fd-portal/index.ts",
+          "hash": "10516442963700792854"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/index.ts",
+          "hash": "9458649733130275922"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/mdt-portal/ui/MDTLayout.tsx",
+          "hash": "7830011636106592035"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/mdt-portal/ui/NavigationSidebar.tsx",
+          "hash": "3451824946455906301"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/mdt-portal/ui/TopHeader.tsx",
+          "hash": "105279138917996742"
+        },
+        {
+          "file": "apps/mdtclient/tailwind.config.ts",
+          "hash": "6904900642774625895"
+        },
+        {
+          "file": "apps/mdtclient/tsconfig.json",
+          "hash": "7174020091123866630"
+        },
+        {
+          "file": "apps/mdtclient/types.ts",
+          "hash": "13269184491483618818"
+        },
+        {
+          "file": "apps/mdtclient/tz.md",
+          "hash": "15453717712381603111"
+        },
+        {
+          "file": "apps/mdtclient/vite-plugin-fivem.js",
+          "hash": "9286641014585577336"
+        },
+        {
+          "file": "apps/mdtclient/vite.config.ts",
+          "hash": "2718291189977730922"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/model/types.ts",
+          "hash": "14590592451932750648"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/model/index.ts",
+          "hash": "12176448023870534717"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/api/emsApi.ts",
+          "hash": "11403140055655062489"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/api/index.ts",
+          "hash": "7876877551874282191"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/ui/EmsUnitCard.tsx",
+          "hash": "2727791462118444191"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/ui/EmsCallCard.tsx",
+          "hash": "1153578591039151957"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/ui/index.ts",
+          "hash": "14213515361000612636"
+        },
+        {
+          "file": "apps/mdtclient/src/entities/ems/index.ts",
+          "hash": "7286720867769850603"
+        },
+        {
+          "file": "apps/mdtclient/src/features/unit-management/model/store.ts",
+          "hash": "6344717459163599178"
+        },
+        {
+          "file": "apps/mdtclient/src/features/unit-management/model/index.ts",
+          "hash": "17804040662103748585"
+        },
+        {
+          "file": "apps/mdtclient/src/features/unit-management/ui/UnitList.tsx",
+          "hash": "1772857444384508440"
+        },
+        {
+          "file": "apps/mdtclient/src/features/unit-management/ui/index.ts",
+          "hash": "15213501015724552136"
+        },
+        {
+          "file": "apps/mdtclient/src/features/unit-management/index.ts",
+          "hash": "13248242111575935588"
+        },
+        {
+          "file": "apps/mdtclient/src/features/ems-call-management/model/store.ts",
+          "hash": "2876716773272598775"
+        },
+        {
+          "file": "apps/mdtclient/src/features/ems-call-management/ui/EmsCallList.tsx",
+          "hash": "18109155206414696940"
+        },
+        {
+          "file": "apps/mdtclient/src/features/ems-call-management/model/index.ts",
+          "hash": "15695836047864265512"
+        },
+        {
+          "file": "apps/mdtclient/src/features/ems-call-management/ui/index.ts",
+          "hash": "14265309424163177721"
+        },
+        {
+          "file": "apps/mdtclient/src/features/ems-call-management/index.ts",
+          "hash": "13248242111575935588"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/ems-portal/ui/EmsPortal.tsx",
+          "hash": "14451582511144329361"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/ems-portal/ui/index.ts",
+          "hash": "8274136104390361052"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/model/types.ts",
+          "hash": "16979034112431745040"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/model/store.ts",
+          "hash": "8754475195096705353"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/api/reportsApi.ts",
+          "hash": "18031272429523653123"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/ui/EmsReportForm.tsx",
+          "hash": "131622836767400753"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/ui/EmsReportsList.tsx",
+          "hash": "6364028750530495957"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/index.ts",
+          "hash": "2633946654667155094"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/model/index.ts",
+          "hash": "4321969484042704542"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/api/index.ts",
+          "hash": "15583612653725772947"
+        },
+        {
+          "file": "apps/mdtclient/src/features/reports-management/ui/index.ts",
+          "hash": "7062639053626472158"
+        },
+        {
+          "file": "apps/mdtclient/src/features/personnel-management/model/types.ts",
+          "hash": "3330410999583401935"
+        },
+        {
+          "file": "apps/mdtclient/src/features/personnel-management/model/store.ts",
+          "hash": "16470657578556114044"
+        },
+        {
+          "file": "apps/mdtclient/src/features/personnel-management/ui/EmsPersonnelList.tsx",
+          "hash": "5507699512272808300"
+        },
+        {
+          "file": "apps/mdtclient/src/features/personnel-management/index.ts",
+          "hash": "1091219254739688144"
+        },
+        {
+          "file": "apps/mdtclient/src/features/personnel-management/model/index.ts",
+          "hash": "4321969484042704542"
+        },
+        {
+          "file": "apps/mdtclient/src/features/personnel-management/ui/index.ts",
+          "hash": "4767902581751867487"
+        },
+        {
+          "file": "apps/mdtclient/src/features/patient-management/index.ts",
+          "hash": "5449806614170773381"
+        },
+        {
+          "file": "apps/mdtclient/src/features/patient-management/model/patientStore.ts",
+          "hash": "8228243123582085513"
+        },
+        {
+          "file": "apps/mdtclient/src/features/patient-management/ui/PatientSearch.tsx",
+          "hash": "4057578808021346451"
+        },
+        {
+          "file": "apps/mdtclient/src/features/patient-management/ui/PatientManagement.tsx",
+          "hash": "17720276935475419635"
+        },
+        {
+          "file": "apps/mdtclient/src/features/shift-management/index.ts",
+          "hash": "18082802660865362009"
+        },
+        {
+          "file": "apps/mdtclient/src/features/shift-management/model/shiftStore.ts",
+          "hash": "8613779555514729000"
+        },
+        {
+          "file": "apps/mdtclient/src/features/shift-management/ui/ShiftManagement.tsx",
+          "hash": "6618055011681531319"
+        },
+        {
+          "file": "apps/mdtclient/src/features/shift-management/ui/ShiftCalendar.tsx",
+          "hash": "11866366892574841187"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/index.ts",
+          "hash": "14132370943869729957"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/model/types.ts",
+          "hash": "3066351210922985902"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/model/store.ts",
+          "hash": "9467470641837845989"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.tsx",
+          "hash": "4741920638247834248"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.types.ts",
+          "hash": "15997403715509672157"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.styles.ts",
+          "hash": "2626300391248030284"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Select/index.ts",
+          "hash": "8647775107681172089"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Textarea/Textarea.tsx",
+          "hash": "15154089316573906047"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Textarea/Textarea.types.ts",
+          "hash": "17695266811452978385"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Textarea/Textarea.styles.ts",
+          "hash": "14659261527151889112"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Textarea/index.ts",
+          "hash": "14666185758474200678"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Checkbox/Checkbox.tsx",
+          "hash": "10892574402400512561"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Checkbox/Checkbox.types.ts",
+          "hash": "11855365876911754818"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Checkbox/Checkbox.styles.ts",
+          "hash": "8459357483699393285"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/atoms/Checkbox/index.ts",
+          "hash": "17066731033133971372"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/SearchInput/SearchInput.tsx",
+          "hash": "9158893961135622273"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/SearchInput/SearchInput.types.ts",
+          "hash": "13153413469898086286"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/SearchInput/index.ts",
+          "hash": "15157377194444044938"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/DataTable/DataTable.tsx",
+          "hash": "6065100512561110653"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/DataTable/DataTable.types.ts",
+          "hash": "12773776144112497141"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/molecules/DataTable/index.ts",
+          "hash": "2791259777917159286"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/PersonSearch.tsx",
+          "hash": "3607545413144749708"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/PersonDetails.tsx",
+          "hash": "16545396889853385684"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/VehicleDetailsModal.tsx",
+          "hash": "13956377500089466648"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/WeaponDetailsModal.tsx",
+          "hash": "6800619136438002346"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/VehicleSearch.tsx",
+          "hash": "17986354121486504960"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/WeaponSearch.tsx",
+          "hash": "12330003961714080316"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/AddressSearch.tsx",
+          "hash": "6526266141822612732"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/LawReportForm.tsx",
+          "hash": "12564752529791913415"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/LawReportsList.tsx",
+          "hash": "16210271815516968821"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/LawControlPanel.tsx",
+          "hash": "7896257953119921445"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/LawEnforcementPortal.tsx",
+          "hash": "6653977409901609887"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/model/constants.ts",
+          "hash": "17473224440381767080"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/model/index.ts",
+          "hash": "15087120508702934179"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/index.ts",
+          "hash": "16220546097300446850"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/types/index.ts",
+          "hash": "249800618710628659"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/config/index.ts",
+          "hash": "2335414569206469405"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/api/index.ts",
+          "hash": "3189865998461160595"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/citizen-search/index.ts",
+          "hash": "10203158687689521068"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/citizen-search/model/types.ts",
+          "hash": "4128818204864811221"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/citizen-search/model/store.ts",
+          "hash": "9705339508796462621"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/citizen-search/model/index.ts",
+          "hash": "12425259298292955020"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/citizen-search/ui/CitizenSearchWidget.tsx",
+          "hash": "16192834165506099311"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/citizen-search/ui/index.ts",
+          "hash": "4588829244769683926"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/vehicle-search/index.ts",
+          "hash": "9237803422034678746"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/vehicle-search/model/types.ts",
+          "hash": "14925351270533060623"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/vehicle-search/model/store.ts",
+          "hash": "2034498123950376021"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/vehicle-search/model/index.ts",
+          "hash": "12425259298292955020"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/vehicle-search/ui/VehicleSearchWidget.tsx",
+          "hash": "13264375238705061259"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/vehicle-search/ui/index.ts",
+          "hash": "14146553187844138996"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/weapon-search/index.ts",
+          "hash": "5480180976391283248"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/weapon-search/model/types.ts",
+          "hash": "16741366163130044072"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/weapon-search/model/store.ts",
+          "hash": "3603789232861886672"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/weapon-search/model/index.ts",
+          "hash": "12425259298292955020"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/weapon-search/ui/WeaponSearchWidget.tsx",
+          "hash": "7050904116149163243"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/weapon-search/ui/index.ts",
+          "hash": "4908093478143845989"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/address-search/index.ts",
+          "hash": "16253579117883491521"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/address-search/model/types.ts",
+          "hash": "2855583306829239373"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/address-search/model/store.ts",
+          "hash": "3138602423576037958"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/address-search/model/index.ts",
+          "hash": "12425259298292955020"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/address-search/ui/AddressSearchWidget.tsx",
+          "hash": "9860906563343062681"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/address-search/ui/index.ts",
+          "hash": "14756501099307650951"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/report-creation/index.ts",
+          "hash": "1908043796038727886"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/report-creation/model/types.ts",
+          "hash": "6917085166380211561"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/report-creation/model/store.ts",
+          "hash": "13899615240184225930"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/report-creation/model/index.ts",
+          "hash": "12425259298292955020"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/report-creation/ui/ReportCreationWidget.tsx",
+          "hash": "6938422265741257733"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/features/report-creation/ui/index.ts",
+          "hash": "5781456786956599793"
+        },
+        {
+          "file": "apps/mdtclient/src/features/law-enforcement/ui/LawControlPanelNew.tsx",
+          "hash": "2807420588089775218"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/citizen-portal/index.ts",
+          "hash": "12667938336605561374"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/citizen-portal/ui/CitizenPortalNew.tsx",
+          "hash": "105396356713921439"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/index.ts",
+          "hash": "8526958227298398816"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/model/types.ts",
+          "hash": "11642833713894129403"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/model/store.ts",
+          "hash": "10735316815781892677"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/ui/CreateFineForm.tsx",
+          "hash": "17922202981484841763"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/ui/CreateWarningForm.tsx",
+          "hash": "7496543354574330255"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/ui/CreateArrestForm.tsx",
+          "hash": "14223891865643759082"
+        },
+        {
+          "file": "apps/mdtclient/src/features/citizen-registration/ui/CitizenRegistrationWidget.tsx",
+          "hash": "9305399015385122971"
+        },
+        {
+          "file": "apps/mdtclient/src/features/vehicle-registration/index.ts",
+          "hash": "10453878447039571954"
+        },
+        {
+          "file": "apps/mdtclient/src/features/vehicle-registration/model/types.ts",
+          "hash": "663164265666597853"
+        },
+        {
+          "file": "apps/mdtclient/src/features/vehicle-registration/model/store.ts",
+          "hash": "16468362737697466553"
+        },
+        {
+          "file": "apps/mdtclient/src/features/vehicle-registration/ui/VehicleRegistrationWidget.tsx",
+          "hash": "5946760992668475978"
+        },
+        {
+          "file": "apps/mdtclient/src/features/weapon-registration/index.ts",
+          "hash": "6116428020043762420"
+        },
+        {
+          "file": "apps/mdtclient/src/features/weapon-registration/model/types.ts",
+          "hash": "6942373256761528565"
+        },
+        {
+          "file": "apps/mdtclient/src/features/weapon-registration/model/store.ts",
+          "hash": "6017597191000578360"
+        },
+        {
+          "file": "apps/mdtclient/src/features/weapon-registration/ui/WeaponRegistrationWidget.tsx",
+          "hash": "16176664149973322119"
+        },
+        {
+          "file": "apps/mdtclient/src/features/emergency-calls/index.ts",
+          "hash": "11040032730179793125"
+        },
+        {
+          "file": "apps/mdtclient/src/features/emergency-calls/model/types.ts",
+          "hash": "15787384739747429762"
+        },
+        {
+          "file": "apps/mdtclient/src/features/emergency-calls/model/store.ts",
+          "hash": "16663349037576103548"
+        },
+        {
+          "file": "apps/mdtclient/src/features/emergency-calls/ui/EmergencyCallsWidget.tsx",
+          "hash": "12416032784272500560"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/index.ts",
+          "hash": "17048442271884384759"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/model/types.ts",
+          "hash": "15760986618362902125"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/model/companyManagementStore.ts",
+          "hash": "11306056564353583277"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/ui/CreateCompanyForm.tsx",
+          "hash": "10641370590513811502"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/ui/WorkInCompanyForm.tsx",
+          "hash": "14267190367758198189"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/ui/CompanyDetailsModal.tsx",
+          "hash": "14751269007823896423"
+        },
+        {
+          "file": "apps/mdtclient/src/features/company-management/ui/CompanyManagementWidget.tsx",
+          "hash": "5897369373886577472"
+        },
+        {
+          "file": "apps/mdtclient/src/features/cargo-management/index.ts",
+          "hash": "2135817673286330002"
+        },
+        {
+          "file": "apps/mdtclient/src/features/cargo-management/model/types.ts",
+          "hash": "6250999026832498019"
+        },
+        {
+          "file": "apps/mdtclient/src/features/cargo-management/model/cargoManagementStore.ts",
+          "hash": "633988635108471295"
+        },
+        {
+          "file": "apps/mdtclient/src/features/cargo-management/ui/CreateCargoForm.tsx",
+          "hash": "1160571128952682442"
+        },
+        {
+          "file": "apps/mdtclient/src/features/cargo-management/ui/CargoDetailsModal.tsx",
+          "hash": "16009055282284592405"
+        },
+        {
+          "file": "apps/mdtclient/src/features/cargo-management/ui/CargoManagementWidget.tsx",
+          "hash": "17502889673235942098"
+        },
+        {
+          "file": "apps/mdtclient/src/features/profile-management/index.ts",
+          "hash": "16396761734469544833"
+        },
+        {
+          "file": "apps/mdtclient/src/features/profile-management/model/types.ts",
+          "hash": "7624097101380438304"
+        },
+        {
+          "file": "apps/mdtclient/src/features/profile-management/model/profileManagementStore.ts",
+          "hash": "12523400283604593191"
+        },
+        {
+          "file": "apps/mdtclient/src/features/profile-management/ui/ProfileEditForm.tsx",
+          "hash": "17521513688736821994"
+        },
+        {
+          "file": "apps/mdtclient/src/features/profile-management/ui/ProfileManagementWidget.tsx",
+          "hash": "10700718943250606932"
+        },
+        {
+          "file": "apps/mdtclient/src/widgets/citizen-portal/CitizenPortalNew.tsx",
+          "hash": "18369475147544452353"
+        },
+        {
+          "file": "apps/mdtclient/src/features/language-switcher/index.ts",
+          "hash": "14439191576399557522"
+        },
+        {
+          "file": "apps/mdtclient/src/features/language-switcher/ui/LanguageSwitcher.tsx",
+          "hash": "4556941077214097392"
+        },
+        {
+          "file": "apps/mdtclient/src/features/auth/ui/LoginForm.tsx",
+          "hash": "1780580699759174164"
+        },
+        {
+          "file": "apps/mdtclient/src/shared/ui/templates/MainLayout.tsx",
+          "hash": "15487465671744914335"
+        },
+        {
+          "file": "apps/mdtclient/src/features/theme-switcher/index.ts",
+          "hash": "5456061320275294995"
+        },
+        {
+          "file": "apps/mdtclient/src/features/theme-switcher/ui/DispatchThemeManager.tsx",
+          "hash": "16517368442406283945"
+        }
+      ],
+      "shared-types": [
+        {
+          "file": "libs/shared-types/package.json",
+          "hash": "11793928261716304617",
+          "deps": [
+            "shared-schema",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-types/project.json",
+          "hash": "14548515526776661667"
+        },
+        {
+          "file": "libs/shared-types/src/index.ts",
+          "hash": "11903035670571254978"
+        },
+        {
+          "file": "libs/shared-types/tsconfig.json",
+          "hash": "8639147696162716859"
+        }
+      ],
+      "shared-utils": [
+        {
+          "file": "libs/shared-utils/package.json",
+          "hash": "3361493756295011767",
+          "deps": [
+            "shared-types",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-utils/project.json",
+          "hash": "4345799646826105250"
+        },
+        {
+          "file": "libs/shared-utils/src/index.ts",
+          "hash": "2785212028867442622"
+        },
+        {
+          "file": "libs/shared-utils/tsconfig.json",
+          "hash": "13227097114682296264"
+        }
+      ],
+      "shared-schema": [
+        {
+          "file": "libs/shared-schema/.eslintrc.json",
+          "hash": "10905178498824427073"
+        },
+        {
+          "file": "libs/shared-schema/README.md",
+          "hash": "10089104178545327111"
+        },
+        {
+          "file": "libs/shared-schema/jest.config.ts",
+          "hash": "9125256940951724915"
+        },
+        {
+          "file": "libs/shared-schema/package-lock.json",
+          "hash": "1242917731434437884"
+        },
+        {
+          "file": "libs/shared-schema/package.json",
+          "hash": "17840331845400140290",
+          "deps": [
+            "npm:drizzle-orm",
+            "npm:drizzle-zod",
+            "npm:zod",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-schema/project.json",
+          "hash": "13774426364134086009"
+        },
+        {
+          "file": "libs/shared-schema/src/index.ts",
+          "hash": "13038894505859704645"
+        },
+        {
+          "file": "libs/shared-schema/src/lib/shared-schema.spec.ts",
+          "hash": "11633013759709821297"
+        },
+        {
+          "file": "libs/shared-schema/src/lib/shared-schema.ts",
+          "hash": "3390503601335539616"
+        },
+        {
+          "file": "libs/shared-schema/src/websocket-events.ts",
+          "hash": "9120676401046935990"
+        },
+        {
+          "file": "libs/shared-schema/tsconfig.json",
+          "hash": "5840880287502376438"
+        },
+        {
+          "file": "libs/shared-schema/tsconfig.lib.json",
+          "hash": "874530265290128605"
+        },
+        {
+          "file": "libs/shared-schema/tsconfig.spec.json",
+          "hash": "11550347367511341917"
+        },
+        {
+          "file": "libs/shared-schema/vite.config.ts",
+          "hash": "7713191369486854584"
+        }
+      ]
+    }
+  }
+}

@@ -23,7 +23,7 @@ files {
     'ui/index.html',
     'ui/index.css',
     'ui/index.js',
-    'ui/nui-bridge.js'
+    'ui/fivem-nui.js'
 }
 
 exports {

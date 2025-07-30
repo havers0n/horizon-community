@@ -1,0 +1,1 @@
+export { WeaponSearchWidget } from './WeaponSearchWidget';

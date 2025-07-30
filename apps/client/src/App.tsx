@@ -37,6 +37,9 @@ const TransferDepartment = () => import("./pages/TransferDepartment");
 const Notifications = () => import("./pages/Notifications");
 const Forum = () => import("./pages/Forum");
 
+// MDT Application
+const MDTDashboard = () => import("../../mdtclient/src/pages/DashboardPage");
+
 function Router() {
   console.log('Router: render');
   const { user, loading } = useAuth();
@@ -70,6 +73,9 @@ function Router() {
       {/* Protected routes */}
       <Route path="/dashboard">
         <LazyPage component={Dashboard} />
+      </Route>
+      <Route path="/mdt">
+        <LazyPage component={MDTDashboard} />
       </Route>
       <Route path="/departments">
         <LazyPage component={Departments} />

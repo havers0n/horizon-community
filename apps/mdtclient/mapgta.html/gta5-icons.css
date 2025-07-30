@@ -1,0 +1,288 @@
+/**
+Steps to Update GTA 5 Icons
+1) Manually add MARKER_IMAGES & MARKER_IMAGES_HEIGHT
+2) Update with width & background-size css
+3) Update the icon positions css
+4) Cache bust MARKER_IMAGES_URL + css background:
+ */
+
+[class^="icon-"], [class*=" icon-"] {
+    background: url('../../../images/games/gta5/markers.png?6') no-repeat top left;
+    /* Object.entries(MARKER_IMAGES).length * 0.28388059701492535 */
+    /* NB: The above is an incorrect constant number due to it being created when a wrongly sized image was used. But it should be similar, and may not be required anymore */
+    width: 19.02px !important;
+    height: 22px !important;
+    background-size: 19.02px !important;
+}
+
+/*
+const h = 22.0;
+Object.entries(mapData.categories).map(i => i[1]).map(i => `.icon-${i.icon} { background-position: 0 -${MARKER_IMAGES[i.id] * (h / 37)}px; }`).join("")
+*/
+.icon-clothing {
+    background-position: 0 -220px;
+}
+
+.icon-tattoo {
+    background-position: 0 -946px;
+}
+
+.icon-barber {
+    background-position: 0 -88px;
+}
+
+.icon-ammu_nation {
+    background-position: 0 -0px;
+}
+
+.icon-automotive_shop {
+    background-position: 0 -66px;
+}
+
+.icon-parachuting {
+    background-position: 0 -682px;
+}
+
+.icon-darts {
+    background-position: 0 -242px;
+}
+
+.icon-flight_school {
+    background-position: 0 -396px;
+}
+
+.icon-golfing {
+    background-position: 0 -440px;
+}
+
+.icon-shooting {
+    background-position: 0 -792px;
+}
+
+.icon-races {
+    background-position: 0 -748px;
+}
+
+.icon-tennis {
+    background-position: 0 -968px;
+}
+
+.icon-triathlon {
+    background-position: 0 -990px;
+}
+
+.icon-yoga {
+    background-position: 0 -1056px;
+}
+
+.icon-hunting {
+    background-position: 0 -506px;
+}
+
+.icon-strip_club {
+    background-position: 0 -880px;
+}
+
+.icon-cinema {
+    background-position: 0 -198px;
+}
+
+.icon-police_station {
+    background-position: 0 -704px;
+}
+
+.icon-hospital {
+    background-position: 0 -484px;
+}
+
+.icon-car_wash {
+    background-position: 0 -176px;
+}
+
+.icon-property {
+    background-position: 0 -726px;
+}
+
+.icon-lookout_point {
+    background-position: 0 -572px;
+}
+
+.icon-mountain_peak {
+    background-position: 0 -638px;
+}
+
+.icon-convenience_store {
+    background-position: 0 -836px;
+}
+
+.icon-fast_cash {
+    background-position: 0 -330px;
+}
+
+.icon-nuclear_waste {
+    background-position: 0 -660px;
+}
+
+.icon-weapon_pickup {
+    background-position: 0 -1034px;
+}
+
+.icon-body_armor {
+    background-position: 0 -44px;
+}
+
+.icon-miscellaneous {
+    background-position: 0 -594px;
+}
+
+.icon-stunt_location {
+    background-position: 0 -902px;
+}
+
+.icon-letter_scrap {
+    background-position: 0 -550px;
+}
+
+.icon-spaceship_part {
+    background-position: 0 -814px;
+}
+
+.icon-strangers_freaks {
+    background-position: 0 -858px;
+}
+
+.icon-hidden_package {
+    background-position: 0 -132px;
+}
+
+.icon-mission {
+    background-position: 0 -616px;
+}
+
+.icon-vehicle_spawn {
+    background-position: 0 -1012px;
+}
+
+.icon-fire_station {
+    background-position: 0 -374px;
+}
+
+.icon-health_pack {
+    background-position: 0 -462px;
+}
+
+.icon-knife_flight {
+    background-position: 0 -528px;
+}
+
+.icon-under_the_bridge {
+    background-position: 0 -110px;
+}
+
+.icon-epsilon_tract {
+    background-position: 0 -286px;
+}
+
+.icon-food_drink {
+    background-position: 0 -352px;
+}
+
+.icon-submarine_part {
+    background-position: 0 -924px;
+}
+
+.icon-easter_egg {
+    background-position: 0 -264px;
+}
+
+.icon-lenny_avery_realty {
+    background-position: 0 -770px;
+}
+
+.icon-building_of_interest {
+    background-position: 0 -154px;
+}
+
+.icon-apartment {
+    background-position: 0 -22px;
+}
+
+.icon-garage {
+    background-position: 0 -418px;
+}
+
+.icon-random_event {
+    background-position: 0 -1078px;
+}
+
+.icon-gang_attack {
+    background-position: 0 -1100px;
+}
+
+.icon-peyote_plant {
+    background-position: 0 -1122px;
+}
+
+.icon-monkey_mosaic {
+    background-position: 0 -1144px;
+}
+
+.icon-alien_glyphs {
+    background-position: 0 -1166px;
+}
+
+.icon-exotic_export {
+    background-position: 0 -1188px;
+}
+
+.icon-mobile_ops_center {
+    background-position: 0 -1210px;
+}
+
+.icon-bunker {
+    background-position: 0 -1298px;
+}
+
+.icon-playing_card {
+    background-position: 0 -1254px;
+}
+
+.icon-action_figure {
+    background-position: 0 -1276px;
+}
+
+.icon-hanger {
+    background-position: 0 -1232px;
+}
+
+.icon-facility {
+    background-position: 0 -1320px;
+}
+
+.icon-clubhouse {
+    background-position: 0 -1364px;
+}
+
+.icon-executive_office {
+    background-position: 0 -1408px;
+}
+
+.icon-business {
+    background-position: 0 -1342px;
+}
+
+.icon-nightclub {
+    background-position: 0 -1386px;
+}
+
+.icon-warehouse {
+    background-position: 0 -1430px;
+}
+
+.icon-peyote_plant_online {
+    background-position: 0 -1452px;
+}
+
+.icon-clothing_scrap {
+    background-position: 0 -1474px;
+}

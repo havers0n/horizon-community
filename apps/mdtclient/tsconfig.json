@@ -17,6 +17,12 @@
     "types": ["node", "vite/client", "jest"],
     "paths": {
       "@/*": ["./src/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/widgets/*": ["./src/widgets/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/entities/*": ["./src/entities/*"],
+      "@/shared/*": ["./src/shared/*"],
       "@roleplay-identity/shared-types": ["../../libs/shared-types/src/index.ts"],
       "@roleplay-identity/shared-types/*": ["../../libs/shared-types/src/*"],
       "@roleplay-identity/shared-utils": ["../../libs/shared-utils/src/index.ts"],

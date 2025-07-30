@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
-import { db } from './db/index.js';
+import { storage } from './storage.js';
 import { activeUnits, call911, callAttachments } from '@roleplay-identity/shared-schema';
 import { 
   WEBSOCKET_EVENTS, 
@@ -11,7 +11,6 @@ import {
   type WebSocketEvent,
   type WebSocketClient
 } from '@roleplay-identity/shared-schema';
-import { eq } from 'drizzle-orm';
 
 
 
@@ -40,6 +39,7 @@ class CADWebSocketServer {
       console.log(`CAD Client connected: ${clientId}`);
 
       ws.on('message', (message: string) => {
+        console.log(`📨 Сырое сообщение от ${clientId}:`, message.toString().substring(0, 100));
         try {
           const data = JSON.parse(message);
           this.handleMessage(clientId, data);
@@ -75,20 +75,26 @@ class CADWebSocketServer {
     const client = this.clients.get(clientId);
     if (!client) return;
 
+    console.log(`📨 WebSocket сообщение от ${clientId}:`, message.type);
+
     switch (message.type) {
       case 'authenticate':
+        console.log(`🔐 Аутентификация клиента ${clientId}`);
         this.handleAuthentication(clientId, message.data);
         break;
       
       case 'subscribe':
+        console.log(`📡 Подписка клиента ${clientId} на каналы:`, message.data.channels);
         this.handleSubscription(clientId, message.data);
         break;
       
       case 'unsubscribe':
+        console.log(`📡 Отписка клиента ${clientId} от каналов:`, message.data.channels);
         this.handleUnsubscription(clientId, message.data);
         break;
       
       case WEBSOCKET_EVENTS.PING:
+        console.log(`🏓 Ping от клиента ${clientId}`);
         this.sendToClient(clientId, {
           type: WEBSOCKET_EVENTS.PONG,
           data: { timestamp: Date.now() },
@@ -97,6 +103,7 @@ class CADWebSocketServer {
         break;
       
       default:
+        console.log(`❓ Неизвестный тип сообщения от ${clientId}: ${message.type}`);
         this.sendError(clientId, `Unknown message type: ${message.type}`);
     }
   }
@@ -114,7 +121,7 @@ class CADWebSocketServer {
 
     // Здесь должна быть проверка токена через базу данных
     // Для демонстрации используем простую проверку
-    if (token === 'demo-token') {
+    if (token === 'demo-token' || token === 'test-token') {
       client.userId = 1;
       client.departmentId = 1;
       client.isDispatcher = isDispatcher;
@@ -203,8 +210,9 @@ class CADWebSocketServer {
   }
 
   private shouldSendToClient(client: WebSocketClient, eventType: string, channels: string[]): boolean {
-    // Если клиент не аутентифицирован, не отправляем события
-    if (!client.userId) return false;
+    // В тестовом режиме отправляем всем клиентам с подписками
+    // Если клиент не аутентифицирован, но имеет подписки, отправляем
+    if (!client.userId && client.subscriptions.length === 0) return false;
 
     // Проверяем подписки клиента
     if (channels.length > 0) {

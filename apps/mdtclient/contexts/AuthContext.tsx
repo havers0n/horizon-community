@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import apiService, { User, Character } from '../services/api';
+import { apiService, User, Character } from '../services/api';
+import { setTokenGlobally, clearTokenGlobally } from '../src/lib/auth-init';
 
 interface AuthContextType {
   user: User | null;
@@ -40,9 +41,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         const { user: userData, session } = response.data;
         
-        // Сохраняем токен из сессии
+        // Сохраняем токен из сессии во все системы
         if (session?.access_token) {
-          apiService.setToken(session.access_token);
+          setTokenGlobally(session.access_token);
         }
         
         setUser(userData);
@@ -83,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    apiService.logout();
+    clearTokenGlobally();
     setUser(null);
     setCharacters([]);
   };

@@ -229,6 +229,7 @@ export const activeUnits = pgTable("active_units", {
   vehicleId: integer("vehicle_id").references(() => vehicles.id),
   departmentId: integer("department_id").notNull().references(() => departments.id),
   isPanic: boolean("is_panic").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true), // Добавляем поле isActive
   lastUpdate: timestamp("last_update").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -913,6 +914,143 @@ export type EntryApplicationData = z.infer<typeof entryApplicationSchema>;
 // === НОВЫЕ ТИПЫ ДЛЯ SNailyCAD ===
 export type CreateUserData = z.infer<typeof createUserSchema>;
 export type UpdateUserData = z.infer<typeof updateUserSchema>;
+
+// === НОВЫЕ ТИПЫ ДЛЯ MDT СИСТЕМЫ ===
+
+// MDT Units
+export interface MDTUnit {
+  id: string;
+  unitNumber: string;
+  department: string;
+  status: string;
+  location?: any;
+  currentCallId?: string;
+  partnerId?: string;
+  vehicleId?: string;
+  isPanic: boolean;
+  lastUpdate: Date;
+  createdAt: Date;
+  // Дополнительная информация
+  characterName?: string;
+  badgeNumber?: string;
+  callsign?: string;
+  vehiclePlate?: string;
+  vehicleModel?: string;
+}
+
+// MDT Calls 911
+export interface MDTCall911 {
+  id: string;
+  callerName?: string;
+  callerPhone?: string;
+  location: string;
+  description: string;
+  type: string;
+  priority: number;
+  status: string;
+  assignedUnits: number[];
+  patientInfo?: any;
+  fireInfo?: any;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// MDT Signals
+export interface Signal {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  authorId: string;
+  authorName?: string;
+  priority: string;
+  location?: string;
+  coordinates?: any;
+  isActive: boolean;
+  expiresAt?: Date;
+  createdAt: Date;
+}
+
+// Signal Notifications
+export interface SignalNotification {
+  id: string;
+  signalId: string;
+  recipientId: string;
+  isRead: boolean;
+  createdAt: Date;
+}
+
+// Location interface
+export interface Location {
+  x: number;
+  y: number;
+  z: number;
+}
+
+// Data interfaces for API
+export interface CreateUnitData {
+  characterId: number;
+  unitNumber: string;
+  departmentId: number;
+  status?: string;
+  location?: Location;
+  vehicleId?: number;
+  authorId?: number;
+}
+
+export interface UpdateUnitData {
+  status?: string;
+  location?: Location;
+  vehicleId?: number;
+}
+
+export interface CreateCallData {
+  callerName?: string;
+  callerPhone?: string;
+  location: string;
+  description: string;
+  type: string;
+  priority?: number;
+  status?: string;
+  patientInfo?: any;
+  fireInfo?: any;
+  authorId?: number;
+}
+
+export interface UpdateCallData {
+  callerName?: string;
+  callerPhone?: string;
+  location?: string;
+  description?: string;
+  type?: string;
+  priority?: number;
+  status?: string;
+  patientInfo?: any;
+  fireInfo?: any;
+}
+
+export interface CreateSignalData {
+  title: string;
+  description: string;
+  type: string;
+  authorId: number;
+  priority?: string;
+  location?: string;
+  coordinates?: Location;
+  isActive?: boolean;
+  expiresAt?: string;
+}
+
+export interface UpdateSignalData {
+  title?: string;
+  description?: string;
+  type?: string;
+  priority?: string;
+  location?: string;
+  coordinates?: Location;
+  isActive?: boolean;
+  expiresAt?: string;
+}
 
 // Re-export WebSocket events
 export * from './websocket-events';
