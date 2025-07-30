@@ -4,7 +4,7 @@ import { BoloApi, CreateBoloData, UpdateBoloData } from '../api/boloApi';
 
 export interface BOLO {
   id: string;
-  type: 'vehicle' | 'person' | 'general';
+  type: 'vehicle' | 'person' | 'general' | 'test_type';
   description: string;
   vehicle?: string;
   plate?: string;
