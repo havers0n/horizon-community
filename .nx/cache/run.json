@@ -1,29 +1,29 @@
 {
   "run": {
     "command": "nx run-many --target=serve --projects=client,server --parallel",
-    "startTime": "2025-07-30T15:59:54.675Z",
-    "endTime": "2025-07-30T16:11:49.795Z",
+    "startTime": "2025-07-30T20:06:12.019Z",
+    "endTime": "2025-07-30T20:15:55.000Z",
     "inner": false
   },
   "tasks": [
     {
-      "taskId": "client:serve:development",
+      "taskId": "server:serve:development",
       "target": "serve",
-      "projectName": "client",
-      "hash": "8798913840303606370",
-      "startTime": "2025-07-30T15:59:54.697Z",
-      "endTime": "2025-07-30T16:11:49.791Z",
+      "projectName": "server",
+      "hash": "6854294984403562188",
+      "startTime": "2025-07-30T20:06:12.081Z",
+      "endTime": "2025-07-30T20:15:54.987Z",
       "params": "",
       "cacheStatus": "cache-miss",
       "status": 1
     },
     {
-      "taskId": "server:serve:development",
+      "taskId": "client:serve:development",
       "target": "serve",
-      "projectName": "server",
-      "hash": "16460739928885470519",
-      "startTime": "2025-07-30T15:59:54.697Z",
-      "endTime": "2025-07-30T16:11:49.794Z",
+      "projectName": "client",
+      "hash": "8798913840303606370",
+      "startTime": "2025-07-30T20:06:12.081Z",
+      "endTime": "2025-07-30T20:15:54.999Z",
       "params": "",
       "cacheStatus": "cache-miss",
       "status": 1

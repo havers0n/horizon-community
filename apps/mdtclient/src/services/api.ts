@@ -1,18 +1,162 @@
-import type { 
-  Character, 
-  Vehicle, 
-  Weapon, 
-  Report, 
-  Call911, 
-  ActiveUnit, 
-  Department,
-  CitizenFilters,
-  VehicleFilters,
-  WeaponFilters,
-  ReportFilters,
-  CallFilters,
-  UnitFilters
-} from '@roleplay-identity/shared-schema';
+// ===== ТИПЫ =====
+
+// Временные типы (заменят импорт из shared-schema)
+export interface Character {
+  id: number;
+  ownerId: number;
+  type: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  address: string;
+  insuranceNumber: string;
+  licenses: Record<string, any>;
+  medicalInfo: Record<string, any>;
+  mugshotUrl?: string;
+  isUnit: boolean;
+  unitInfo?: Record<string, any>;
+  departmentId?: number;
+  rankId?: number;
+  divisionId?: number;
+  unitId?: number;
+  badgeNumber?: string;
+  employeeId?: string;
+  hireDate?: string;
+  terminationDate?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  gender?: string;
+  ethnicity?: string;
+  height?: string;
+  weight?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  phoneNumber?: string;
+  postal?: string;
+  occupation?: string;
+  dead: boolean;
+  dateOfDead?: string;
+  missing: boolean;
+  arrested: boolean;
+  callsign?: string;
+  callsign2?: string;
+  suspended: boolean;
+  whitelistStatus: string;
+  radioChannelId?: string;
+}
+
+export interface Vehicle {
+  id: number;
+  ownerId: number;
+  plate: string;
+  vin: string;
+  model: string;
+  color: string;
+  registration: string;
+  insurance: string;
+  createdAt: string;
+}
+
+export interface Weapon {
+  id: number;
+  ownerId: number;
+  serialNumber: string;
+  model: string;
+  registration: string;
+  createdAt: string;
+}
+
+export interface Report {
+  id: number;
+  authorId: number;
+  status: string;
+  fileUrl: string;
+  supervisorComment?: string;
+  createdAt: string;
+}
+
+export interface Call911 {
+  id: number;
+  location: string;
+  description: string;
+  status: string;
+  type: string;
+  priority: number;
+  callerInfo?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActiveUnit {
+  id: number;
+  characterId: number;
+  status: string;
+  callsign: string;
+  location: Record<string, any>;
+  partnerId?: number;
+  vehicleId?: number;
+  departmentId: number;
+  isPanic: boolean;
+  isActive: boolean;
+  lastUpdate: string;
+  createdAt: string;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  fullName: string;
+  logoUrl?: string;
+  description?: string;
+  gallery: string[];
+}
+
+// Фильтры
+export interface CitizenFilters {
+  type?: string;
+  departmentId?: number;
+  isActive?: boolean;
+}
+
+export interface VehicleFilters {
+  ownerId?: number;
+  registration?: string;
+  insurance?: string;
+}
+
+export interface WeaponFilters {
+  ownerId?: number;
+  registration?: string;
+}
+
+export interface ReportFilters {
+  authorId?: number;
+  status?: string;
+}
+
+export interface CallFilters {
+  status?: string;
+  type?: string;
+  priority?: number;
+}
+
+export interface UnitFilters {
+  characterId?: number;
+  status?: string;
+  departmentId?: number;
+  isActive?: boolean;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+  name?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 // ===== КОНФИГУРАЦИЯ =====
 
@@ -55,12 +199,13 @@ async function makeRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  const defaultHeaders = {
+  const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
   // Добавляем токен аутентификации, если он есть
-  const token = localStorage.getItem('authToken');
+  // ИСПРАВЛЕНО: Используем правильный ключ auth_token вместо authToken
+  const token = localStorage.getItem('auth_token');
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
@@ -483,6 +628,29 @@ export class ApiService {
 
   // ===== АУТЕНТИФИКАЦИЯ =====
 
+  async login(credentials: { email: string; password: string }): Promise<ApiResponse<any>> {
+    const response: ApiResponse<any> = await makeRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    
+    return response;
+  }
+
+  async register(userData: { username: string; email: string; password: string }): Promise<ApiResponse<any>> {
+    const response: ApiResponse<any> = await makeRequest('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+    
+    return response;
+  }
+
+  async getCurrentUser(): Promise<ApiResponse<any>> {
+    const response: ApiResponse<any> = await makeRequest('/auth/me');
+    return response;
+  }
+
   async authenticate(token: string): Promise<any> {
     const response: ApiResponse<any> = await makeRequest('/auth/me', {
       headers: {
@@ -547,15 +715,18 @@ export class ApiService {
   // ===== УТИЛИТЫ =====
 
   setAuthToken(token: string): void {
-    localStorage.setItem('authToken', token);
+    // ИСПРАВЛЕНО: Используем правильный ключ auth_token
+    localStorage.setItem('auth_token', token);
   }
 
   getAuthToken(): string | null {
-    return localStorage.getItem('authToken');
+    // ИСПРАВЛЕНО: Используем правильный ключ auth_token
+    return localStorage.getItem('auth_token');
   }
 
   removeAuthToken(): void {
-    localStorage.removeItem('authToken');
+    // ИСПРАВЛЕНО: Используем правильный ключ auth_token
+    localStorage.removeItem('auth_token');
   }
 
   isAuthenticated(): boolean {

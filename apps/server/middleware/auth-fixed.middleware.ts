@@ -22,27 +22,21 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
-      console.log('❌ No token provided in request');
       return res.status(401).json({ 
         error: 'Access token required',
         code: 'MISSING_TOKEN'
       });
     }
 
-    console.log('🔍 Authenticating token...');
-    
     // Используем только Supabase Auth для проверки токена
     const user = await authService.authenticate(token);
     req.user = user;
-    console.log('✅ Token authenticated successfully for user:', user.username);
     next();
   } catch (error) {
-    console.error('❌ Token authentication error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
+    console.error('Token authentication error:', error);
     return res.status(401).json({ 
       error: 'Invalid or expired token',
-      code: 'INVALID_TOKEN',
-      details: errorMessage
+      code: 'INVALID_TOKEN'
     });
   }
 };
@@ -316,55 +310,3 @@ export const corsMiddleware = (req: Request, res: Response, next: NextFunction) 
     next();
   }
 }; 
-
-// ===== КОМБИНИРОВАННЫЕ MIDDLEWARE =====
-
-/**
- * Middleware для администраторов
- */
-export const requireAdmin = [
-  authenticateAny,
-  requireActiveStatus,
-  requireRole('admin')
-];
-
-/**
- * Middleware для супервайзеров
- */
-export const requireSupervisor = [
-  authenticateAny,
-  requireActiveStatus,
-  requireRole('supervisor')
-];
-
-/**
- * Middleware для участников
- */
-export const requireMember = [
-  authenticateAny,
-  requireActiveStatus,
-  requireRole('member')
-];
-
-/**
- * Middleware для кандидатов и выше
- */
-export const requireCandidate = [
-  authenticateAny,
-  requireActiveStatus,
-  requireRole('candidate')
-];
-
-/**
- * Middleware для администраторов или супервайзеров
- */
-export const requireAdminOrSupervisor = [
-  authenticateAny,
-  requireActiveStatus,
-  requireRole('supervisor')
-];
-
-/**
- * Middleware для проверки JWT токена (устаревший, используйте authenticateToken)
- */
-export const verifyJWT = authenticateToken; 

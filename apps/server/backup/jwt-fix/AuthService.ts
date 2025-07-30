@@ -78,22 +78,15 @@ export class AuthService {
       // Проверка токена в Supabase
       const { data: { user: supabaseUser }, error } = await this.supabase.auth.getUser(token);
       
-      if (error) {
-        console.error('Supabase auth error:', error);
-        throw new Error(`Supabase auth error: ${error.message}`);
-      }
-      
-      if (!supabaseUser) {
-        console.error('No user returned from Supabase');
-        throw new Error('No user found for token');
+      if (error || !supabaseUser) {
+        throw new Error('Invalid token');
       }
 
       // Синхронизация с локальной БД
       return await this.syncUser(supabaseUser);
     } catch (error) {
       console.error('Authentication error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
-      throw new Error(`Authentication failed: ${errorMessage}`);
+      throw new Error(`Authentication failed: ${error.message}`);
     }
   }
 

@@ -12383,11 +12383,6 @@
       },
       {
         "source": "server",
-        "target": "npm:jsonwebtoken",
-        "type": "static"
-      },
-      {
-        "source": "server",
         "target": "npm:multer",
         "type": "static"
       },
@@ -12424,11 +12419,6 @@
       {
         "source": "server",
         "target": "npm:@types/jest",
-        "type": "static"
-      },
-      {
-        "source": "server",
-        "target": "npm:@types/jsonwebtoken",
         "type": "static"
       },
       {

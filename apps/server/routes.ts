@@ -22,6 +22,7 @@ import adminTestsRoutes from './routes/adminTests.js';
 import forumRoutes from './routes/forum.js';
 import mdtRoutes from './routes/mdt.js';
 import realtimeRoutes from './routes/realtime-simple.js';
+import testRoutes from './routes/test.routes';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -90,6 +91,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       environment: process.env.NODE_ENV || 'development'
     });
   });
+
+  // Тестовые маршруты без аутентификации
+  app.use('/api/test', testRoutes);
   
   // Authentication routes
   app.post('/api/auth/register', async (req, res) => {
@@ -665,8 +669,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test routes
   const businessLogic = new BusinessLogic(storage);
-  const testRoutes = createTestRoutes(storage, businessLogic);
-  app.use('/api/tests', testRoutes);
+  const testRoutesWithLogic = createTestRoutes(storage, businessLogic);
+  app.use('/api/tests', testRoutesWithLogic);
 
   // Joint positions routes
   app.get('/api/joint-positions', authenticateToken, async (req: any, res) => {
