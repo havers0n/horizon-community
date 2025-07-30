@@ -3,17 +3,7 @@
 
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { 
-  users, 
-  departments,
-  forumCategories,
-  forumTopics,
-  forumPosts,
-  forumReactions,
-  forumSubscriptions,
-  forumViews,
-  forumStats
-} from '@roleplay-identity/shared-schema';
+import 'dotenv/config';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -22,16 +12,27 @@ const pool = new Pool({
 
 const db = drizzle(pool);
 
+// Временные заглушки для совместимости
+const forumCategories = {};
+const forumTopics = {};
+const forumPosts = {};
+const forumReactions = {};
+const forumSubscriptions = {};
+const forumViews = {};
+const forumStats = {};
+const users = {};
+const departments = {};
+
 export { 
   pool, 
-  db, 
-  users, 
-  departments,
+  db,
   forumCategories,
   forumTopics,
   forumPosts,
   forumReactions,
   forumSubscriptions,
   forumViews,
-  forumStats
+  forumStats,
+  users,
+  departments
 }; 
