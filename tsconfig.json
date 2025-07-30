@@ -1,5 +1,5 @@
 {
-  "include": ["client/src/**/*", "mdtclient/src/**/*", "server/**/*", "shared/**/*"],
+  "include": ["apps/*/src/**/*", "libs/*/src/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.tsx"],
   "compilerOptions": {
     "incremental": true,
@@ -16,17 +16,21 @@
     "baseUrl": ".",
     "types": ["node", "vite/client", "jest"],
     "paths": {
-      "@client/*": ["./client/src/*"],
-      "@mdtclient/*": ["./mdtclient/src/*"],
-      "@server/*": ["./server/*"],
-      "@shared/*": ["./shared/*"],
-      "@assets/*": ["./attached_assets/*"]
+      "@client/*": ["./apps/client/src/*"],
+      "@mdtclient/*": ["./apps/mdtclient/src/*"],
+      "@server/*": ["./apps/server/*"],
+      "@shared-schema/*": ["./libs/shared-schema/src/*"],
+      "@shared-types/*": ["./libs/shared-types/src/*"],
+      "@shared-utils/*": ["./libs/shared-utils/src/*"],
+      "@assets/*": ["./public/*"]
     }
   },
   "references": [
-    { "path": "./client" },
-    { "path": "./mdtclient" },
-    { "path": "./server" },
-    { "path": "./shared" }
+    { "path": "./apps/client" },
+    { "path": "./apps/mdtclient" },
+    { "path": "./apps/server" },
+    { "path": "./libs/shared-schema" },
+    { "path": "./libs/shared-types" },
+    { "path": "./libs/shared-utils" }
   ]
 }

@@ -31,7 +31,7 @@ export default defineConfig(({ mode, command }) => {
     },
     server: {
       port: 3001,
-      host: true,
+      host: '0.0.0.0',
       fs: {
         allow: ['..', '../../']
       },

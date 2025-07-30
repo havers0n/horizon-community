@@ -6,6 +6,14 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
     "../../libs/shared-types/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared-schema/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared-utils/src/**/*.{js,jsx,ts,tsx}",
+    // Более специфичные пути для избежания сканирования node_modules
+    "../../apps/mdtclient/src/**/*.{js,jsx,ts,tsx}",
+    "../../apps/client/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared-types/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared-schema/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared-utils/src/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
@@ -32,6 +40,17 @@ export default {
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+          950: "#020617"
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -48,6 +67,18 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        // Сдержанные цвета для статусов
+        status: {
+          available: "#27AE60", // Спокойный зеленый
+          busy: "#F2994A", // Янтарный
+          onscene: "#9B59B6", // Глубокий фиолетовый
+          panic: "#E74C3C", // Ярко-красный для паники
+          enroute: "#3498DB", // Синий для "в пути"
+          unavailable: "#95A5A6", // Серый для недоступности
+        },
+      },
+      fontFamily: {
+        mono: ['"Roboto Mono"', 'monospace'],
       },
       keyframes: {
         "accordion-down": {

@@ -1,0 +1,1 @@
+export { CitizenPortalNew } from './ui/CitizenPortalNew';

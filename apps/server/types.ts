@@ -9,12 +9,22 @@ export interface User {
   departmentId: number | null;
   secondaryDepartmentId: number | null;
   rank: string | null;
+  division?: string | null;
+  qualifications: string[];
   gameWarnings: number;
   adminWarnings: number;
+  cadToken?: string | null;
+  discordId?: string | null;
+  discordUsername?: string | null;
+  discordAccessToken?: string | null;
+  discordRefreshToken?: string | null;
   authId: string;
+  has2FA: boolean;
+  isDarkTheme: boolean;
+  soundSettings: any;
+  apiToken: string | null;
   createdAt: Date;
   updatedAt: Date;
-  apiToken: string | null;
 }
 
 export interface InsertUser {
@@ -26,9 +36,19 @@ export interface InsertUser {
   departmentId?: number | null;
   secondaryDepartmentId?: number | null;
   rank?: string | null;
+  division?: string | null;
+  qualifications?: string[];
   gameWarnings?: number;
   adminWarnings?: number;
+  cadToken?: string | null;
+  discordId?: string | null;
+  discordUsername?: string | null;
+  discordAccessToken?: string | null;
+  discordRefreshToken?: string | null;
   authId: string;
+  has2FA?: boolean;
+  isDarkTheme?: boolean;
+  soundSettings?: any;
   apiToken?: string | null;
 }
 
@@ -245,6 +265,7 @@ export interface IStorage {
   
   // Department operations
   getDepartment(id: number): Promise<Department | undefined>;
+  getDepartments(): Promise<Department[]>;
   getAllDepartments(): Promise<Department[]>;
   createDepartment(department: InsertDepartment): Promise<Department>;
   

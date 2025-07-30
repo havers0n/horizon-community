@@ -16,22 +16,37 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --fix",
     "clean": "rm -rf dist dist-nui",
-    "check-translations": "node scripts/check-translations.cjs"
+    "check-translations": "node scripts/check-translations.cjs",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@google/genai": "^1.11.0",
+    "@tanstack/react-query": "^5.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.8.0",
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
+    "@storybook/react": "^8.0.0",
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.19",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "jest": "^30.0.4",
+    "msw": "^2.0.0",
+    "postcss": "^8.4.38",
+    "storybook": "^8.0.0",
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
+    "terser": "^5.43.1",
     "ts-jest": "^29.4.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"

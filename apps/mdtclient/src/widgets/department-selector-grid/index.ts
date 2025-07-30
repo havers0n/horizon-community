@@ -1,0 +1,1 @@
+export { DepartmentSelectorGrid } from './ui/DepartmentSelectorGrid'; 

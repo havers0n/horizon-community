@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDT Debug Test</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .debug-info {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .error {
+            background-color: #dc2626;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #059669;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MDT Debug Test</h1>
+    
+    <div class="debug-info">
+        <h3>Информация о системе:</h3>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+        <p><strong>Screen Resolution:</strong> <span id="screenRes"></span></p>
+        <p><strong>Window Size:</strong> <span id="windowSize"></span></p>
+        <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+    </div>
+
+    <div class="debug-info">
+        <h3>Проверка JavaScript:</h3>
+        <p id="jsTest">JavaScript работает: <span id="jsStatus">Проверяется...</span></p>
+    </div>
+
+    <div class="debug-info">
+        <h3>Проверка сетевого подключения:</h3>
+        <p id="networkTest">Сетевое подключение: <span id="networkStatus">Проверяется...</span></p>
+    </div>
+
+    <div class="debug-info">
+        <h3>Консоль браузера:</h3>
+        <p>Откройте консоль разработчика (F12) и проверьте наличие ошибок</p>
+        <button onclick="testConsole()">Тест консоли</button>
+        <button onclick="testError()">Тест ошибки</button>
+    </div>
+
+    <script>
+        // Заполняем информацию о системе
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('screenRes').textContent = screen.width + 'x' + screen.height;
+        document.getElementById('windowSize').textContent = window.innerWidth + 'x' + window.innerHeight;
+        document.getElementById('currentTime').textContent = new Date().toLocaleString();
+
+        // Проверка JavaScript
+        document.getElementById('jsStatus').textContent = '✅ Работает';
+        document.getElementById('jsStatus').style.color = '#059669';
+
+        // Проверка сетевого подключения
+        if (navigator.onLine) {
+            document.getElementById('networkStatus').textContent = '✅ Онлайн';
+            document.getElementById('networkStatus').style.color = '#059669';
+        } else {
+            document.getElementById('networkStatus').textContent = '❌ Офлайн';
+            document.getElementById('networkStatus').style.color = '#dc2626';
+        }
+
+        // Функции для тестирования
+        function testConsole() {
+            console.log('✅ Тест консоли: сообщение успешно выведено');
+            console.warn('⚠️ Тест консоли: предупреждение');
+            console.info('ℹ️ Тест консоли: информация');
+            
+            const testDiv = document.createElement('div');
+            testDiv.className = 'success';
+            testDiv.textContent = '✅ Сообщения в консоль отправлены успешно!';
+            document.body.appendChild(testDiv);
+        }
+
+        function testError() {
+            console.error('❌ Тест ошибки: это тестовая ошибка');
+            
+            const testDiv = document.createElement('div');
+            testDiv.className = 'error';
+            testDiv.textContent = '❌ Тестовая ошибка отправлена в консоль!';
+            document.body.appendChild(testDiv);
+        }
+
+        // Автоматический тест при загрузке
+        window.addEventListener('load', function() {
+            console.log('🔄 Страница загружена успешно');
+            console.log('📊 Информация о браузере:', {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine
+            });
+        });
+
+        // Отслеживание ошибок
+        window.addEventListener('error', function(e) {
+            console.error('🚨 Ошибка JavaScript:', e.error);
+            console.error('📄 Файл:', e.filename);
+            console.error('📍 Строка:', e.lineno);
+            console.error('📍 Колонка:', e.colno);
+        });
+
+        // Отслеживание необработанных промисов
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🚨 Необработанная ошибка промиса:', e.reason);
+        });
+    </script>
+</body>
+</html>

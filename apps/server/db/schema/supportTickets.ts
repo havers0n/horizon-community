@@ -1,14 +1,11 @@
-import { pgTable, serial, integer, text, timestamp, jsonb, pgEnum } from 'drizzle-orm/pg-core';
-import { users } from './users';
+import { pgTable, serial, text, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
 
-export const ticketStatusEnum = pgEnum('ticket_status', ['open', 'closed']);
-
-export const supportTickets = pgTable('support_tickets', {
-  id: serial('id').primaryKey(),
-  authorId: integer('author_id').references(() => users.id).notNull(),
-  status: ticketStatusEnum('status').default('open').notNull(),
-  handlerId: integer('handler_id').references(() => users.id),
-  messages: jsonb('messages').default('[]').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+export const supportTickets = pgTable("public.support_tickets", {
+  id: serial("id").primaryKey(),
+  authorId: integer("author_id").notNull(),
+  status: text("status").notNull().default("open"),
+  handlerId: integer("handler_id"),
+  messages: jsonb("messages").notNull().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

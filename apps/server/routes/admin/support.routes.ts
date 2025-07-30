@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { verifyJWT, requireAdminOrSupervisor } from '../../middleware/auth.middleware';
+import { authenticateToken, requireAdmin } from '../../middleware/auth.middleware';
 import { pool } from '../../db/index.js';
 
 const router: import('express').Router = Router();
 
 // POST /api/admin/support/tickets/:ticketId/reply
-router.post('/tickets/:ticketId/reply', verifyJWT, requireAdminOrSupervisor, async (req, res) => {
+router.post('/tickets/:ticketId/reply', authenticateToken, ...requireAdmin, async (req, res) => {
   try {
     const { ticketId } = req.params;
     const { content } = req.body;

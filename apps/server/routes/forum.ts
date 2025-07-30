@@ -10,7 +10,7 @@ import {
   forumStats,
   users,
   departments
-} from '@roleplay-identity/shared-schema';
+} from '../db/index.js';
 import { eq, desc, asc, and, or, like, sql, count } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { rateLimit } from 'express-rate-limit';
@@ -248,12 +248,12 @@ router.get('/topics/:topicId', async (req, res) => {
       .where(eq(forumPosts.topicId, Number(topicId)));
     
     // Увеличиваем счетчик просмотров
-    await db.insert(forumViews).values({
-      topicId: Number(topicId),
-      userId: req.user?.id || null,
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent')
-    });
+    if (req.user?.id) {
+      await db.insert(forumViews).values({
+        topicId: Number(topicId),
+        userId: req.user.id
+      });
+    }
     
     res.json({
       topic,
@@ -435,6 +435,7 @@ router.post('/posts/:postId/reactions', authenticateToken, async (req, res) => {
       await db.insert(forumReactions).values({
         postId: Number(postId),
         userId: userId!,
+        type: reactionType,
         reactionType
       });
       res.json({ message: 'Реакция добавлена' });

@@ -1,7 +1,8 @@
 import { config } from 'dotenv';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { Pool } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,22 +43,33 @@ try {
     console.log(`  - ${row.table_name}`);
   });
   
-  // Проверяем таблицу departments
-  console.log("\n🔍 Проверяем таблицу departments...");
-  const deptResult = await client.query(`
-    SELECT COUNT(*) as count 
-    FROM information_schema.tables 
-    WHERE table_schema = 'public' AND table_name = 'departments'
-  `);
+  // Проверяем пользователя
+  console.log("\n🔍 Проверяем пользователя...");
+  const authId = 'c65bfdf0-820b-449a-b798-f853090da2c4';
+  const email = 'danypetrov2000@gmail.com';
   
-  if (deptResult.rows[0].count > 0) {
-    console.log("✅ Таблица departments найдена!");
-    
-    // Проверяем данные в departments
-    const dataResult = await client.query('SELECT COUNT(*) as count FROM departments');
-    console.log(`📊 В таблице departments: ${dataResult.rows[0].count} записей`);
+  // Проверяем по auth_id
+  const userResult = await client.query(
+    'SELECT * FROM public.users WHERE auth_id = $1',
+    [authId]
+  );
+  
+  if (userResult.rows.length > 0) {
+    console.log("✅ Пользователь найден по auth_id:", userResult.rows[0]);
   } else {
-    console.log("❌ Таблица departments НЕ найдена!");
+    console.log("❌ Пользователь НЕ найден по auth_id");
+    
+    // Проверяем по email
+    const emailResult = await client.query(
+      'SELECT * FROM public.users WHERE email = $1',
+      [email]
+    );
+    
+    if (emailResult.rows.length > 0) {
+      console.log("✅ Пользователь найден по email:", emailResult.rows[0]);
+    } else {
+      console.log("❌ Пользователь НЕ найден по email");
+    }
   }
   
   client.release();
