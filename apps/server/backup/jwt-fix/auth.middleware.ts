@@ -10,11 +10,10 @@ declare global {
   }
 }
 
-// ===== ИСПРАВЛЕННЫЙ MIDDLEWARE АУТЕНТИФИКАЦИИ =====
+// ===== MIDDLEWARE АУТЕНТИФИКАЦИИ =====
 
 /**
- * Middleware для аутентификации по JWT токену (только Supabase Auth)
- * Убирает локальную JWT валидацию и полагается только на Supabase
+ * Middleware для аутентификации по JWT токену (Supabase)
  */
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,27 +21,20 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
-      console.log('❌ No token provided in request');
       return res.status(401).json({ 
         error: 'Access token required',
         code: 'MISSING_TOKEN'
       });
     }
 
-    console.log('🔍 Authenticating token...');
-    
-    // Используем только Supabase Auth для проверки токена
     const user = await authService.authenticate(token);
     req.user = user;
-    console.log('✅ Token authenticated successfully for user:', user.username);
     next();
   } catch (error) {
-    console.error('❌ Token authentication error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
+    console.error('Token authentication error:', error);
     return res.status(401).json({ 
       error: 'Invalid or expired token',
-      code: 'INVALID_TOKEN',
-      details: errorMessage
+      code: 'INVALID_TOKEN'
     });
   }
 };
@@ -52,16 +44,16 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
  */
 export const authenticateCadToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cadToken = req.headers['x-cad-token'] as string;
-    
-    if (!cadToken) {
+    const token = req.headers['x-cad-token'] as string;
+
+    if (!token) {
       return res.status(401).json({ 
         error: 'CAD token required',
         code: 'MISSING_CAD_TOKEN'
       });
     }
 
-    const result = await authService.validateCadToken(cadToken);
+    const result = await authService.validateCadToken(token);
     
     if (!result.success) {
       return res.status(401).json({ 
@@ -86,16 +78,16 @@ export const authenticateCadToken = async (req: Request, res: Response, next: Ne
  */
 export const authenticateApiToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const apiToken = req.headers['x-api-token'] as string;
-    
-    if (!apiToken) {
+    const token = req.headers['x-api-token'] as string;
+
+    if (!token) {
       return res.status(401).json({ 
         error: 'API token required',
         code: 'MISSING_API_TOKEN'
       });
     }
 
-    const result = await authService.validateApiToken(apiToken);
+    const result = await authService.validateApiToken(token);
     
     if (!result.valid) {
       return res.status(401).json({ 
@@ -117,11 +109,10 @@ export const authenticateApiToken = async (req: Request, res: Response, next: Ne
 
 /**
  * Универсальный middleware аутентификации (пробует все типы токенов)
- * Исправленная версия без локальной JWT валидации
  */
 export const authenticateAny = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Пробуем JWT токен (только через Supabase)
+    // Пробуем JWT токен
     const authHeader = req.headers.authorization;
     const jwtToken = authHeader && authHeader.split(' ')[1];
 
@@ -131,7 +122,6 @@ export const authenticateAny = async (req: Request, res: Response, next: NextFun
         req.user = user;
         return next();
       } catch (error) {
-        console.log('JWT token failed, trying next method...');
         // Продолжаем к следующему типу токена
       }
     }
@@ -146,7 +136,6 @@ export const authenticateAny = async (req: Request, res: Response, next: NextFun
           return next();
         }
       } catch (error) {
-        console.log('CAD token failed, trying next method...');
         // Продолжаем к следующему типу токена
       }
     }
@@ -161,7 +150,6 @@ export const authenticateAny = async (req: Request, res: Response, next: NextFun
           return next();
         }
       } catch (error) {
-        console.log('API token failed...');
         // Продолжаем к следующему типу токена
       }
     }
@@ -206,7 +194,7 @@ export const requireRole = (minimumRole: string) => {
 };
 
 /**
- * Middleware для проверки точной роли
+ * Middleware для проверки конкретной роли
  */
 export const requireExactRole = (role: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -220,7 +208,7 @@ export const requireExactRole = (role: string) => {
     if (!authService.hasRole(req.user, role)) {
       return res.status(403).json({ 
         error: `Role '${role}' required`,
-        code: 'INSUFFICIENT_ROLE'
+        code: 'WRONG_ROLE'
       });
     }
 
@@ -229,7 +217,7 @@ export const requireExactRole = (role: string) => {
 };
 
 /**
- * Middleware для проверки разрешений
+ * Middleware для проверки разрешения
  */
 export const requirePermission = (permission: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -272,51 +260,6 @@ export const requireActiveStatus = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-// ===== ДОПОЛНИТЕЛЬНЫЕ MIDDLEWARE =====
-
-/**
- * Middleware для логирования запросов
- */
-export const logRequest = (req: Request, res: Response, next: NextFunction) => {
-  const start = Date.now();
-  
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    const userId = req.user?.id || 'anonymous';
-    
-    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms - User: ${userId}`);
-  });
-  
-  next();
-};
-
-/**
- * Middleware для обработки ошибок
- */
-export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', error);
-  
-  res.status(500).json({
-    error: 'Internal server error',
-    code: 'INTERNAL_ERROR'
-  });
-};
-
-/**
- * Middleware для CORS
- */
-export const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CAD-Token, X-API-Token');
-  
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-}; 
-
 // ===== КОМБИНИРОВАННЫЕ MIDDLEWARE =====
 
 /**
@@ -355,16 +298,63 @@ export const requireCandidate = [
   requireRole('candidate')
 ];
 
-/**
- * Middleware для администраторов или супервайзеров
- */
-export const requireAdminOrSupervisor = [
-  authenticateAny,
-  requireActiveStatus,
-  requireRole('supervisor')
-];
+// ===== УТИЛИТЫ =====
 
 /**
- * Middleware для проверки JWT токена (устаревший, используйте authenticateToken)
+ * Middleware для логирования запросов
  */
-export const verifyJWT = authenticateToken; 
+export const logRequest = (req: Request, res: Response, next: NextFunction) => {
+  const startTime = Date.now();
+  
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - User: ${req.user?.username || 'anonymous'}`);
+  
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+  });
+  
+  next();
+};
+
+/**
+ * Middleware для обработки ошибок
+ */
+export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error('Request error:', error);
+  
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Validation error',
+      details: error.message,
+      code: 'VALIDATION_ERROR'
+    });
+  }
+  
+  if (error.name === 'UnauthorizedError') {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      code: 'UNAUTHORIZED'
+    });
+  }
+  
+  return res.status(500).json({
+    error: 'Internal server error',
+    code: 'INTERNAL_ERROR'
+  });
+};
+
+/**
+ * Middleware для CORS
+ */
+export const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  res.header('Access-Control-Allow-Origin', process.env.CLIENT_URL || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CAD-Token, X-API-Token');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+};

@@ -3,7 +3,7 @@
  */
 
 import { authUtils } from './auth';
-import { apiService } from '../../services/api';
+import { apiService } from '../services/api';
 
 /**
  * Инициализирует глобальные объекты для синхронизации токенов
@@ -21,7 +21,9 @@ export const initializeAuthSync = () => {
     if (token) {
       // Устанавливаем токен в обе системы
       authUtils.setToken(token);
-      apiService.setToken(token);
+      if (apiService && typeof apiService.setAuthToken === 'function') {
+        apiService.setAuthToken(token);
+      }
     }
   }
 };
@@ -30,7 +32,7 @@ export const initializeAuthSync = () => {
  * Получить текущий токен из любой доступной системы
  */
 export const getCurrentToken = (): string | null => {
-  return authUtils.getToken() || apiService.getToken();
+  return authUtils.getToken() || (apiService && typeof apiService.getAuthToken === 'function' ? apiService.getAuthToken() : null);
 };
 
 /**
@@ -38,7 +40,9 @@ export const getCurrentToken = (): string | null => {
  */
 export const setTokenGlobally = (token: string): void => {
   authUtils.setToken(token);
-  apiService.setToken(token);
+  if (apiService && typeof apiService.setAuthToken === 'function') {
+    apiService.setAuthToken(token);
+  }
 };
 
 /**
@@ -46,5 +50,7 @@ export const setTokenGlobally = (token: string): void => {
  */
 export const clearTokenGlobally = (): void => {
   authUtils.removeToken();
-  apiService.clearToken();
+  if (apiService && typeof apiService.removeAuthToken === 'function') {
+    apiService.removeAuthToken();
+  }
 }; 

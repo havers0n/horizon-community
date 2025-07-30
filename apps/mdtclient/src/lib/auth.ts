@@ -21,8 +21,9 @@ export const authUtils = {
     localStorage.setItem(TOKEN_KEY, token);
     
     // Синхронизируем с apiService если он доступен
-    if (typeof window !== 'undefined' && (window as any).apiService) {
-      (window as any).apiService.setToken(token);
+    // ИСПРАВЛЕНО: Используем правильное имя метода setAuthToken
+    if (typeof window !== 'undefined' && (window as any).apiService && typeof (window as any).apiService.setAuthToken === 'function') {
+      (window as any).apiService.setAuthToken(token);
     }
   },
 
@@ -34,8 +35,9 @@ export const authUtils = {
     localStorage.removeItem(TOKEN_KEY);
     
     // Синхронизируем с apiService если он доступен
-    if (typeof window !== 'undefined' && (window as any).apiService) {
-      (window as any).apiService.clearToken();
+    // ИСПРАВЛЕНО: Используем правильное имя метода removeAuthToken
+    if (typeof window !== 'undefined' && (window as any).apiService && typeof (window as any).apiService.removeAuthToken === 'function') {
+      (window as any).apiService.removeAuthToken();
     }
   },
 
