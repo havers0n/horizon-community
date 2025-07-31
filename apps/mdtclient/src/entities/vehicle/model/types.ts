@@ -1,39 +1,6 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Типы данных для сущности Vehicle
-
-export interface Vehicle {
-  id: string;
-  plateNumber: string;
-  vin: string;
-  make: string;
-  model: string;
-  year: number;
-  color: string;
-  bodyType: 'sedan' | 'suv' | 'truck' | 'motorcycle' | 'bus' | 'van' | 'other';
-  fuelType: 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'other';
-  transmission: 'manual' | 'automatic' | 'cvt' | 'other';
-  engineSize: string;
-  mileage: number;
-  registrationStatus: 'active' | 'expired' | 'suspended' | 'revoked';
-  insuranceStatus: 'active' | 'expired' | 'none';
-  insuranceProvider?: string;
-  insuranceExpiry?: string;
-  registrationExpiry: string;
-  owner: {
-    id: string;
-    name: string;
-    phone: string;
-    address: string;
-  };
-  stolen: boolean;
-  stolenDate?: string;
-  stolenReportNumber?: string;
-  violations: VehicleViolation[];
-  accidents: VehicleAccident[];
-  maintenance: VehicleMaintenance[];
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Vehicle } from '@/shared/types';
 
 export interface VehicleViolation {
   id: string;

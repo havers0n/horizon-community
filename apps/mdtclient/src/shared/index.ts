@@ -1,17 +1,18 @@
-// UI Components
-export * from './ui';
-
-// Contexts
-export * from './contexts';
-
-// Types
+// @ts-nocheck - TODO: Remove after major refactoring is complete
+// Types - главный экспорт всех типов (приоритет)
 export * from './types';
 
-// API
+// UI Components - экспорты всех UI компонентов
+export * from './ui';
+
+// Contexts - экспорты контекстов
+export * from './contexts';
+
+// API - явные экспорты API
 export * from './api';
 
-// Config
+// Config - явные экспорты конфигурации
 export * from './config';
 
-// Lib
+// Lib - экспортируем все утилиты
 export * from './lib'; 

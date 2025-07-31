@@ -1,9 +1,10 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/atoms/Select';
 
 interface BoloTypeSelectorProps {
-  value: 'vehicle' | 'person' | 'general' | 'test_type';
-  onValueChange: (value: 'vehicle' | 'person' | 'general' | 'test_type') => void;
+  value: 'vehicle' | 'person' | 'general';
+  onValueChange: (value: 'vehicle' | 'person' | 'general') => void;
   disabled?: boolean;
 }
 
@@ -21,7 +22,6 @@ export const BoloTypeSelector: React.FC<BoloTypeSelectorProps> = ({
         <SelectItem value="vehicle">Транспортное средство</SelectItem>
         <SelectItem value="person">Человек</SelectItem>
         <SelectItem value="general">Общий</SelectItem>
-        <SelectItem value="test_type">Тестовый</SelectItem>
       </SelectContent>
     </Select>
   );

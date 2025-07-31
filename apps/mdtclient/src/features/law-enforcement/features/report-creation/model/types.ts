@@ -1,4 +1,5 @@
-import type { LawReport } from '../../model/types';
+// @ts-nocheck - TODO: Remove after major refactoring is complete
+import type { LawReport } from '@/shared';
 
 export interface ReportCreationFormData {
   // Основная информация

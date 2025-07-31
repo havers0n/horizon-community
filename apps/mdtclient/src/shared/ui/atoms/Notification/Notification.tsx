@@ -7,6 +7,7 @@ export type NotificationVariant = 'info' | 'success' | 'warning' | 'error';
 
 export interface NotificationProps {
   variant?: NotificationVariant;
+  type?: string;
   title?: string;
   message: string;
   onClose?: () => void;

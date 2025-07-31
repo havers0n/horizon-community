@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MOCK_CITIZENS_EXTENDED } from '../../../model/constants';
+import { MOCK_CITIZENS_EXTENDED } from '@/shared';
 import type { CitizenSearchState, CitizenSearchActions, CitizenSearchResult } from './types';
 
 type CitizenSearchStore = CitizenSearchState & CitizenSearchActions;

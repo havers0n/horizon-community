@@ -425,6 +425,10 @@ export interface FireIncidentExportResponse {
 // UTILITY TYPES - Утилитарные типы
 // ============================================================================
 
+// Алиасы для совместимости с существующим кодом
+export type CreateFireIncidentRequest = CreateFireIncidentParams;
+export type UpdateFireIncidentRequest = UpdateFireIncidentParams;
+
 // Фильтры для UI
 export interface FireIncidentFilters {
   type: FireIncidentType[];

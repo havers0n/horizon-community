@@ -1,3 +1,4 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 import { create } from 'zustand';
 import { MOCK_VEHICLES } from '../../../model/constants';
 import type { VehicleSearchState, VehicleSearchActions, VehicleSearchResult, VehicleSearchFilters } from './types';

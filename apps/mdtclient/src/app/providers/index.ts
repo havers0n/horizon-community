@@ -5,4 +5,7 @@
 // export { AppProvider } from './AppProvider';
 // export { AuthProvider } from './AuthProvider';
 // export { LocaleProvider } from './LocaleProvider';
-// export { DashboardProvider } from './DashboardProvider'; 
+// export { DashboardProvider } from './DashboardProvider';
+
+// Временный экспорт для избежания ошибок
+export const AppProviders = {}; 

@@ -1,1 +1,2 @@
-export { EmsCallList } from './EmsCallList'; 
+// EMS Call Management UI components
+export { EmsCallManagementWidget } from './EmsCallManagementWidget'; 

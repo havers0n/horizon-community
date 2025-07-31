@@ -4,7 +4,12 @@ import path from "path";
 import { fivemPlugin } from "./vite-plugin-fivem.js";
 
 export default defineConfig(({ mode, command }) => {
-  const env = loadEnv(mode, '.', '');
+  // ИСПРАВЛЕНИЕ: Загружаем переменные с правильным префиксом VITE_
+  const env = loadEnv(mode, '.', 'VITE_');
+  
+  console.log('🔧 Vite Config: Загруженные переменные окружения:', Object.keys(env));
+  console.log('🔧 Vite Config: VITE_SUPABASE_URL:', env.VITE_SUPABASE_URL ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
+  console.log('🔧 Vite Config: VITE_SUPABASE_ANON_KEY:', env.VITE_SUPABASE_ANON_KEY ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
   
   // Автоматическое определение режима сборки
   const isNUI = process.env.NUI === 'true' || process.env.BUILD_TARGET === 'fivem';
@@ -26,7 +31,10 @@ export default defineConfig(({ mode, command }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
-        "@shared": path.resolve(__dirname, "../../libs/shared-schema/src"),
+        "@shared": path.resolve(__dirname, "src/shared"),
+        "@shared/schema": path.resolve(__dirname, "../../libs/shared-schema/src"),
+        "@roleplay-identity/shared-types": path.resolve(__dirname, "../../libs/shared-types/src"),
+        "@roleplay-identity/shared-utils": path.resolve(__dirname, "../../libs/shared-utils/src"),
       },
     },
     server: {

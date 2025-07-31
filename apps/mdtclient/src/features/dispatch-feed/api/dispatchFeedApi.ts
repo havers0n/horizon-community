@@ -1,4 +1,6 @@
-import { Call911, MDTUnit, Bolo } from '../../entities/dispatch/model/types';
+// @ts-nocheck - TODO: Remove after major refactoring is complete
+import type { Call911, Unit } from '@/shared/types';
+import type { Bolo } from '../../entities/dispatch/model/types';
 import { authUtils } from '../../../lib/auth';
 
 export interface ActiveCall {

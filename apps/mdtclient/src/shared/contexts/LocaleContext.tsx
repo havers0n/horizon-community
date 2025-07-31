@@ -70,4 +70,6 @@ export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
       {children}
     </LocaleContext.Provider>
   );
-}; 
+};
+
+export { LocaleContext }; 

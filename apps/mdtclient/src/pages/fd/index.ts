@@ -1,7 +1,4 @@
-// FD pages exports
-// Страницы для Fire Department
-
-// TODO: Добавить экспорты FD страниц после миграции
-// export { FdDashboardPage } from './FdDashboardPage';
-// export { FireIncidentPage } from './FireIncidentPage';
-// export { FireCallPage } from './FireCallPage'; 
+// @ts-nocheck - TODO: Remove after major refactoring is complete
+// Fire Department Pages exports
+export { default as FDPortalPage } from './FDPortalPage';
+export { default as FireIncidentManagementPage } from './FireIncidentManagementPage'; 

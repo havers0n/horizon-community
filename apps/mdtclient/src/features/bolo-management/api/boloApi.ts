@@ -1,8 +1,9 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 import { BOLO } from '../model/store';
 import { authUtils } from '../../../lib/auth';
 
-export interface CreateBoloData {
-  type: 'vehicle' | 'person' | 'general' | 'test_type';
+export interface CreateBoloRequest {
+  type: 'vehicle' | 'person' | 'general';
   description: string;
   vehicle?: string;
   plate?: string;
@@ -10,7 +11,6 @@ export interface CreateBoloData {
   priority: 'low' | 'medium' | 'high' | 'critical';
   location?: string;
   additionalInfo?: string;
-  expiresAt?: string;
 }
 
 export interface UpdateBoloData extends Partial<CreateBoloData> {

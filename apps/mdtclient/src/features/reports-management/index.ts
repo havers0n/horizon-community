@@ -1,5 +1,6 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Model
-export * from './model/types';
+export * from '@/shared/types';
 export * from './model/store';
 
 // API

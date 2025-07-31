@@ -1,4 +1,4 @@
-import type { Citizen } from '../../model/types';
+import type { Citizen } from '@/shared';
 
 export interface CitizenSearchResult {
   id: string;

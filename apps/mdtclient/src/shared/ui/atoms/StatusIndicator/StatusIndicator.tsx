@@ -13,6 +13,7 @@ export type StatusVariant =
 
 export interface StatusIndicatorProps {
   variant?: StatusVariant;
+  status?: string;
   size?: 'sm' | 'md' | 'lg';
   animated?: boolean;
   className?: string;
