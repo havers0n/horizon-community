@@ -22,7 +22,7 @@ export const PersonSearchWidget: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isLiveSearch, setIsLiveSearch] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Live search с debounce
   useEffect(() => {

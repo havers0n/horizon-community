@@ -1,4 +1,4 @@
-import type { Vehicle } from '../../model/types';
+import type { Vehicle } from '@/shared';
 
 export interface VehicleSearchResult {
   id: string;

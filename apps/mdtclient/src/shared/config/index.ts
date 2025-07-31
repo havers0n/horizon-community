@@ -1,4 +1,4 @@
 // Config exports
-// Конфигурация приложения
-
-// TODO: Добавить экспорты конфигурации после миграции
+export * from './app.config';
+export * from './api.config';
+export * from './theme.config';

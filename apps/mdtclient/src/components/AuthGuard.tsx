@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { LoginForm } from '../features/auth/ui/LoginForm';
+import { useAuth } from '@/shared/contexts/AuthContext';
+import { LoginForm } from './LoginForm';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -8,6 +8,8 @@ interface AuthGuardProps {
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
+
+  console.log('[AuthGuard] State:', { isAuthenticated, isLoading });
 
   // Показываем загрузку пока проверяем авторизацию
   if (isLoading) {

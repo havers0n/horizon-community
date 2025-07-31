@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from '@/shared/contexts/ThemeContext';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider } from '@/shared/contexts/AuthContext';
 import { UIProvider } from '@/shared/contexts/UIContext';
 import { LocaleProvider } from '@/shared/contexts/LocaleContext';
 import { AuthGuard } from './components/AuthGuard';
-import { TestTokenInserter } from './components/TestTokenInserter';
+
 import { DashboardPage } from './pages/DashboardPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { initializeAuthSync } from './lib/auth-init';
 
 // Create a client
@@ -42,7 +43,6 @@ function App() {
     UIProvider: !!UIProvider,
     LocaleProvider: !!LocaleProvider,
     AuthGuard: !!AuthGuard,
-    TestTokenInserter: !!TestTokenInserter,
     DashboardPage: !!DashboardPage,
     Router: !!Router,
     QueryClientProvider: !!QueryClientProvider
@@ -82,13 +82,15 @@ function App() {
             <UIProvider>
               <Router>
                 <AuthGuard>
-                  <div className="min-h-screen text-white overflow-hidden relative">
-                    <div className="relative z-10">
-                      <DashboardPage />
+                  <ErrorBoundary>
+                    <div className="min-h-screen text-white overflow-hidden relative">
+                      <div className="relative z-10">
+                        <DashboardPage />
+                      </div>
                     </div>
-                  </div>
+                  </ErrorBoundary>
                 </AuthGuard>
-                <TestTokenInserter />
+
               </Router>
             </UIProvider>
           </LocaleProvider>

@@ -160,7 +160,7 @@ export interface User {
 
 // ===== КОНФИГУРАЦИЯ =====
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5002/api';
+const API_BASE_URL = '/api';
 
 // ===== ТИПЫ ОТВЕТОВ =====
 
@@ -199,6 +199,8 @@ async function makeRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  console.log('[API] Making request to:', url);
+  
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -208,6 +210,9 @@ async function makeRequest<T>(
   const token = localStorage.getItem('auth_token');
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
+    console.log('[API] Token found and added to headers');
+  } else {
+    console.log('[API] No token found');
   }
 
   const config: RequestInit = {
@@ -219,6 +224,7 @@ async function makeRequest<T>(
   };
 
   try {
+    console.log('[API] Sending request with config:', { url, method: config.method || 'GET' });
     const response = await fetch(url, config);
     
     if (!response.ok) {

@@ -32,6 +32,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log('[AuthProvider] Initializing with isLoading:', isLoading);
+
   const isAuthenticated = !!user;
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -98,6 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setCharacters(response.data.characters);
       } else {
         // Если не удалось получить пользователя, возможно токен истек
+        console.log('Failed to get current user, logging out');
         logout();
       }
     } catch (error) {
@@ -109,15 +112,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Проверяем аутентификацию при загрузке
   useEffect(() => {
     const checkAuth = async () => {
+      console.log('[AuthProvider] Starting auth check...');
       try {
         const token = apiService.getToken();
+        console.log('[AuthProvider] Token found:', !!token);
         
         if (token) {
+          console.log('[AuthProvider] Token exists, refreshing user...');
           await refreshUser();
+        } else {
+          console.log('[AuthProvider] No token found, user not authenticated');
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('[AuthProvider] Auth check failed:', error);
       } finally {
+        console.log('[AuthProvider] Setting isLoading to false');
         setIsLoading(false);
       }
     };

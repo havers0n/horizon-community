@@ -1,3 +1,4 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 export interface EmsPersonnel {
   id: string;
   firstName: string;

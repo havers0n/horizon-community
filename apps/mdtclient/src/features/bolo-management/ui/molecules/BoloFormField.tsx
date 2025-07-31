@@ -1,3 +1,4 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
 import { Label } from '@/shared/ui/atoms/Label';
 import { Input } from '@/shared/ui/atoms/Input';

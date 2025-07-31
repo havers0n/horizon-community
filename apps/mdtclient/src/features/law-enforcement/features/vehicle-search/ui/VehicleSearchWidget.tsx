@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, Button } from '@/shared/ui/atoms';
+import { Card, CardHeader, Button, Input } from '@/shared/ui/atoms';
 import { DataTable } from '@/shared/ui/molecules';
 import { Search, Eye } from 'lucide-react';
 import { useLocale } from '@/shared/contexts/LocaleContext';

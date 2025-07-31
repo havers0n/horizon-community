@@ -1,4 +1,4 @@
-import type { Weapon } from '../../model/types';
+import type { Weapon } from '@/shared';
 
 export interface WeaponSearchResult {
   id: string;

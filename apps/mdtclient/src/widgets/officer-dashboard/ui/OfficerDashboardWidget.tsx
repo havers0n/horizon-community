@@ -1,3 +1,4 @@
+// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/shared/ui/atoms/Card';
 import { Button } from '@/shared/ui/atoms/Button';

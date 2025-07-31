@@ -4,4 +4,7 @@
 // TODO: Добавить экспорты стилей после миграции
 // export * from './globals.css';
 // export * from './themes';
-// export * from './tailwind.config'; 
+// export * from './tailwind.config';
+
+// Временный экспорт для избежания ошибок
+export const AppStyles = {}; 

@@ -1,7 +1,8 @@
-import { InputHTMLAttributes } from 'react';
+import React from 'react';
 
-export interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  label?: string;
+  error?: string;
   variant?: 'default' | 'outline' | 'ghost';
-  size?: 'sm' | 'default' | 'lg';
-  className?: string;
+  size?: 'default' | 'sm' | 'lg';
 }

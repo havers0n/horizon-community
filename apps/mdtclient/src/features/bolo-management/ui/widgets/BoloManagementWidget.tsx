@@ -18,14 +18,22 @@ const priorityConfig = {
 const typeConfig = {
   vehicle: { label: 'Транспорт', icon: Car },
   person: { label: 'Человек', icon: User },
-  general: { label: 'Общий', icon: Info },
-  test_type: { label: 'Тестовый', icon: AlertTriangle } // Добавляем поддержку test_type
+  general: { label: 'Общий', icon: Info }
 };
 
 const BoloCard: React.FC<{ bolo: BOLO }> = ({ bolo }) => {
-  // Безопасный доступ к typeConfig с fallback
-  const typeConfigItem = typeConfig[bolo.type as keyof typeof typeConfig];
-  const TypeIcon = typeConfigItem?.icon || AlertTriangle; // Fallback на AlertTriangle если тип неизвестен
+  // Безопасный доступ к typeConfig с улучшенным fallback
+  const getTypeConfig = (type: string) => {
+    const config = typeConfig[type as keyof typeof typeConfig];
+    if (!config) {
+      console.warn(`Unknown BOLO type: ${type}`);
+      return { label: 'Неизвестный', icon: AlertTriangle };
+    }
+    return config;
+  };
+  
+  const typeConfigItem = getTypeConfig(bolo.type);
+  const TypeIcon = typeConfigItem.icon;
   
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -101,7 +109,6 @@ export const BoloManagementWidget: React.FC = () => {
   const vehicleBolos = bolos.filter(bolo => bolo.type === 'vehicle');
   const personBolos = bolos.filter(bolo => bolo.type === 'person');
   const generalBolos = bolos.filter(bolo => bolo.type === 'general');
-  const testTypeBolos = bolos.filter(bolo => bolo.type === 'test_type');
 
   const handleCreateSuccess = () => {
     fetchBOLOs();
@@ -164,7 +171,6 @@ export const BoloManagementWidget: React.FC = () => {
           <TabsTrigger value="vehicle">Транспорт ({vehicleBolos.length})</TabsTrigger>
           <TabsTrigger value="person">Люди ({personBolos.length})</TabsTrigger>
           <TabsTrigger value="general">Общие ({generalBolos.length})</TabsTrigger>
-          <TabsTrigger value="test_type">Тестовые ({testTypeBolos.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
@@ -237,25 +243,6 @@ export const BoloManagementWidget: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {generalBolos.map((bolo) => (
-                <BoloCard key={bolo.id} bolo={bolo} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="test_type" className="mt-6">
-          {testTypeBolos.length === 0 ? (
-            <Card>
-              <CardContent className="flex items-center justify-center h-32">
-                <div className="text-center">
-                  <AlertTriangle className="h-8 w-8 text-gray-400 mx-auto" />
-                  <p className="mt-2 text-sm text-gray-500">Нет тестовых BOLO</p>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {testTypeBolos.map((bolo) => (
                 <BoloCard key={bolo.id} bolo={bolo} />
               ))}
             </div>
