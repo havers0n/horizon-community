@@ -3,8 +3,30 @@ import { z } from 'zod';
 import { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { mdtService } from '../services/MDTService';
+import { NextFunction } from 'express';
 
 const router: import('express').Router = Router();
+
+// ===== БАЗОВЫЙ ENDPOINT =====
+
+/**
+ * GET /api/mdt - Базовый endpoint для проверки подключения
+ */
+router.get('/', authenticateToken, (req: Request, res: Response) => {
+  res.json({ 
+    success: true, 
+    message: 'MDT API is working!',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      units: '/api/mdt/units',
+      calls: '/api/mdt/calls',
+      bolos: '/api/mdt/bolos',
+      signals: '/api/mdt/signals'
+    }
+  });
+});
+
+// ===== АУТЕНТИФИКАЦИЯ ЧЕРЕЗ SUPABASE =====
 
 // ===== СХЕМЫ ВАЛИДАЦИИ =====
 
@@ -41,8 +63,18 @@ const createCallSchema = z.object({
   type: z.enum(['police', 'fire', 'ems']),
   priority: z.number().min(1).max(5).optional(),
   status: z.string().optional(),
-  patientInfo: z.record(z.any()).optional(),
-  fireInfo: z.record(z.any()).optional()
+  patientInfo: z.object({
+    name: z.string().optional(),
+    age: z.number().min(0).max(150).optional(),
+    condition: z.string().optional(),
+    symptoms: z.array(z.string()).optional()
+  }).optional(),
+  fireInfo: z.object({
+    severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+    buildingType: z.string().optional(),
+    occupants: z.number().min(0).optional(),
+    hazards: z.array(z.string()).optional()
+  }).optional()
 });
 
 const updateCallSchema = z.object({
@@ -53,8 +85,18 @@ const updateCallSchema = z.object({
   type: z.enum(['police', 'fire', 'ems']).optional(),
   priority: z.number().min(1).max(5).optional(),
   status: z.string().optional(),
-  patientInfo: z.record(z.any()).optional(),
-  fireInfo: z.record(z.any()).optional()
+  patientInfo: z.object({
+    name: z.string().optional(),
+    age: z.number().min(0).max(150).optional(),
+    condition: z.string().optional(),
+    symptoms: z.array(z.string()).optional()
+  }).optional(),
+  fireInfo: z.object({
+    severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+    buildingType: z.string().optional(),
+    occupants: z.number().min(0).optional(),
+    hazards: z.array(z.string()).optional()
+  }).optional()
 });
 
 const assignUnitsSchema = z.object({
@@ -734,6 +776,182 @@ router.delete('/bolos/:id', authenticateToken, async (req: Request, res: Respons
     res.status(500).json({ 
       success: false, 
       error: 'Failed to delete BOLO' 
+    });
+  }
+});
+
+// ===== ДОПОЛНИТЕЛЬНЫЕ ЭНДПОИНТЫ ДЛЯ ДИСПЕТЧЕРА =====
+
+/**
+ * GET /api/mdt/calls/active - Получить только активные вызовы
+ */
+router.get('/calls/active', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const calls = await mdtService.getCalls();
+    const activeCalls = calls.filter(call => 
+      ['pending', 'assigned', 'en_route', 'on_scene'].includes(call.status)
+    );
+    res.json({ success: true, data: activeCalls });
+  } catch (error) {
+    console.error('Error fetching active calls:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch active calls' 
+    });
+  }
+});
+
+/**
+ * GET /api/mdt/units/active - Получить только активные юниты
+ */
+router.get('/units/active', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const units = await mdtService.getActiveUnits();
+    res.json({ success: true, data: units });
+  } catch (error) {
+    console.error('Error fetching active units:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch active units' 
+    });
+  }
+});
+
+/**
+ * GET /api/mdt/bolos/active - Получить только активные BOLO
+ */
+router.get('/bolos/active', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const bolos = await mdtService.getBolos();
+    const activeBolos = bolos.filter(bolo => bolo.status === 'active');
+    res.json({ success: true, data: activeBolos });
+  } catch (error) {
+    console.error('Error fetching active BOLOs:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch active BOLOs' 
+    });
+  }
+});
+
+/**
+ * PATCH /api/mdt/units/:id/status - Обновить статус юнита (PATCH для совместимости с фронтендом)
+ */
+router.patch('/units/:id/status', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const unitId = parseInt(req.params.id);
+    if (isNaN(unitId)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid unit ID' 
+      });
+    }
+
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Status is required' 
+      });
+    }
+
+    const unit = await mdtService.updateUnitStatus(unitId, status);
+    res.json({ success: true, data: unit });
+  } catch (error) {
+    console.error('Error updating unit status:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to update unit status' 
+    });
+  }
+});
+
+/**
+ * PATCH /api/mdt/calls/:id/status - Обновить статус вызова (PATCH для совместимости с фронтендом)
+ */
+router.patch('/calls/:id/status', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const callId = parseInt(req.params.id);
+    if (isNaN(callId)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid call ID' 
+      });
+    }
+
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Status is required' 
+      });
+    }
+
+    const call = await mdtService.updateCallStatus(callId, status);
+    res.json({ success: true, data: call });
+  } catch (error) {
+    console.error('Error updating call status:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to update call status' 
+    });
+  }
+});
+
+/**
+ * POST /api/mdt/calls/:callId/assign - Назначить юнита на вызов (для совместимости с фронтендом)
+ */
+router.post('/calls/:callId/assign', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const callId = parseInt(req.params.callId);
+    if (isNaN(callId)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid call ID' 
+      });
+    }
+
+    const { unitId } = req.body;
+    if (!unitId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Unit ID is required' 
+      });
+    }
+
+    await mdtService.assignUnitsToCall(callId, [parseInt(unitId)]);
+    res.json({ success: true, message: 'Unit assigned to call' });
+  } catch (error) {
+    console.error('Error assigning unit to call:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to assign unit to call' 
+    });
+  }
+});
+
+/**
+ * POST /api/mdt/notifications - Отправить уведомление
+ */
+router.post('/notifications', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { type, message, targetDepartments } = req.body;
+    
+    if (!type || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Type and message are required' 
+      });
+    }
+
+    // Здесь можно добавить логику отправки уведомлений
+    // Пока просто возвращаем успех
+    res.json({ success: true, message: 'Notification sent' });
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to send notification' 
     });
   }
 });

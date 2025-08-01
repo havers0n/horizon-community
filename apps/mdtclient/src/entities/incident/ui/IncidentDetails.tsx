@@ -39,6 +39,7 @@ import {
   VehicleRole,
   UnitStatus
 } from '../model';
+import { UnitStatuses } from '@/shared/types';
 
 export interface IncidentDetailsProps {
   incident: Incident;
@@ -115,11 +116,11 @@ const getVehicleRoleLabel = (role: VehicleRole) => {
 
 const getUnitStatusLabel = (status: UnitStatus) => {
   const labels = {
-    [UnitStatus.DISPATCHED]: 'Отправлен',
-    [UnitStatus.EN_ROUTE]: 'В пути',
-    [UnitStatus.ON_SCENE]: 'На месте',
-    [UnitStatus.CLEARED]: 'Завершен',
-    [UnitStatus.UNAVAILABLE]: 'Недоступен',
+    [UnitStatuses.DISPATCHED]: 'Отправлен',
+    [UnitStatuses.EN_ROUTE]: 'В пути',
+    [UnitStatuses.ON_SCENE]: 'На месте',
+    [UnitStatuses.CLEARED]: 'Завершен',
+    [UnitStatuses.UNAVAILABLE]: 'Недоступен',
   };
   return labels[status] || status;
 };

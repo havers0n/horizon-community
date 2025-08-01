@@ -1,13 +1,13 @@
 import request from 'supertest';
 import express from 'express';
 import { authenticateToken, requireAdmin } from '../../middleware/auth.middleware.js';
-import { databaseService } from '../../services/DatabaseService.js';
+import { storage } from '../../storage.js';
 import { cacheService } from '../../services/CacheService.js';
 import { logger } from '../../services/LoggerService.js';
 
 // Мокаем сервисы
-jest.mock('../../services/DatabaseService.js', () => ({
-  databaseService: {
+jest.mock('../../storage.js', () => ({
+  storage: {
     getCacheInfo: jest.fn(),
     invalidateAllCache: jest.fn(),
     getSystemStats: jest.fn()
@@ -44,8 +44,8 @@ describe('API Monitoring Integration Tests', () => {
     // Создаем тестовые маршруты
     app.get('/api/monitoring/performance', authenticateToken, ...requireAdmin, async (req, res) => {
       try {
-        const cacheInfo = await databaseService.getCacheInfo();
-        const systemStats = await databaseService.getSystemStats();
+        const cacheInfo = await storage.getCacheInfo();
+        const systemStats = await storage.getSystemStats();
         
         res.json({
           success: true,
@@ -66,7 +66,7 @@ describe('API Monitoring Integration Tests', () => {
 
     app.post('/api/monitoring/invalidate-cache', authenticateToken, ...requireAdmin, async (req, res) => {
       try {
-        await databaseService.invalidateAllCache();
+        await storage.invalidateAllCache();
         res.json({
           success: true,
           message: 'Cache invalidated successfully'

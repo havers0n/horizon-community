@@ -22,7 +22,7 @@ app.get('/api/test', (req, res) => {
 const port = process.env.PORT || 5000;
 const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
 
-app.listen(port, host, () => {
+app.listen(Number(port), host, () => {
   console.log(`🚀 Simple test server running on ${host}:${port}`);
   console.log(`📊 Health check: http://${host}:${port}/api/health`);
   console.log(`🧪 Test endpoint: http://${host}:${port}/api/test`);

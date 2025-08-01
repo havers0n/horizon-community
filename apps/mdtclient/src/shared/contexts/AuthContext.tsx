@@ -71,9 +71,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Получаем данные пользователя из базы данных
             try {
               const { data: userData, error } = await supabase
-                .from('users')
+                .from('profiles')
                 .select('*')
-                .eq('auth_id', session.user.id)
+                .eq('id', session.user.id)
                 .single();
                 
               if (error) {
@@ -148,9 +148,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         console.log('[Auth] Fetching user data for auth_id:', session.user.id);
         const { data: userData, error: userError } = await supabase
-          .from('users')
+          .from('profiles')
           .select('*')
-          .eq('auth_id', session.user.id)
+          .eq('id', session.user.id)
           .single();
         console.log('[Auth] User data result:', { userData: !!userData, userError: !!userError });
           
@@ -221,9 +221,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (data.user) {
         try {
           const { data: userData, error: userError } = await supabase
-            .from('users')
+            .from('profiles')
             .select('*')
-            .eq('auth_id', data.user.id)
+            .eq('id', data.user.id)
             .single();
             
           if (userError) {

@@ -229,7 +229,7 @@ router.get('/characters/stats', authenticateToken, async (req, res) => {
 // ===== ДЕПАРТАМЕНТЫ =====
 
 // Получить все департаменты
-router.get('/departments', async (req, res) => {
+router.get('/departments', authenticateToken, async (req, res) => {
   try {
     const departments = await storage.getDepartments();
     res.json(departments);
@@ -240,7 +240,7 @@ router.get('/departments', async (req, res) => {
 });
 
 // Получить департамент по ID
-router.get('/departments/:id', async (req, res) => {
+router.get('/departments/:id', authenticateToken, async (req, res) => {
   try {
     const departmentId = parseInt(req.params.id);
     if (isNaN(departmentId)) {

@@ -1,5 +1,134 @@
 // =================================================================
-// 1. ОСНОВНЫЕ СУЩНОСТИ (ЗОЛОТЫЕ ТИПЫ)
+// 1. ЦЕНТРАЛЬНАЯ СУЩНОСТЬ: ПЕРСОНАЖ (CHARACTER)
+// Этот интерфейс теперь ТОЧНО соответствует вашей таблице в БД
+// =================================================================
+export interface Character {
+  id: string; // В коде лучше использовать string, даже если в БД integer
+  ownerId: string; // ID аккаунта игрока
+
+  // --- Базовые/Гражданские поля ---
+  firstName: string; // camelCase для фронтенда
+  lastName: string;
+  dateOfBirth: string; // date
+  gender?: string;
+  ethnicity?: string;
+  height?: string;
+  weight?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  address?: string;
+  phoneNumber?: string;
+  postal?: string;
+  occupation?: string;
+  mugshotUrl?: string;
+  licenses?: any; // jsonb - пока оставляем any, потом можно типизировать
+  medicalInfo?: any; // jsonb
+  flags?: string[];
+  addressFlags?: string[];
+  dead?: boolean;
+  missing?: boolean;
+  arrested?: boolean;
+
+  // --- Поля сотрудника LEO/EMS (служебный профиль) ---
+  isUnit?: boolean;
+  badgeNumber?: string;
+  callsign?: string;
+  callsign2?: string;
+  departmentId?: number;
+  divisionId?: number;
+  rankId?: number;
+  hireDate?: string; // date
+  terminationDate?: string; // date
+  isActive?: boolean;
+  suspended?: boolean;
+  whitelistStatus?: string;
+  radioChannelId?: string;
+
+  // --- Метаданные ---
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =================================================================
+// 2. ТИПЫ ДЛЯ СОЗДАНИЯ И ОБНОВЛЕНИЯ
+// =================================================================
+
+export interface CreateCharacterRequest {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender?: string;
+  ethnicity?: string;
+  height?: string;
+  weight?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  address?: string;
+  phoneNumber?: string;
+  postal?: string;
+  occupation?: string;
+  mugshotUrl?: string;
+  licenses?: any;
+  medicalInfo?: any;
+  flags?: string[];
+  addressFlags?: string[];
+  dead?: boolean;
+  missing?: boolean;
+  arrested?: boolean;
+  isUnit?: boolean;
+  badgeNumber?: string;
+  callsign?: string;
+  callsign2?: string;
+  departmentId?: number;
+  divisionId?: number;
+  rankId?: number;
+  hireDate?: string;
+  terminationDate?: string;
+  isActive?: boolean;
+  suspended?: boolean;
+  whitelistStatus?: string;
+  radioChannelId?: string;
+}
+
+export interface UpdateCharacterRequest {
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  ethnicity?: string;
+  height?: string;
+  weight?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  address?: string;
+  phoneNumber?: string;
+  postal?: string;
+  occupation?: string;
+  mugshotUrl?: string;
+  licenses?: any;
+  medicalInfo?: any;
+  flags?: string[];
+  addressFlags?: string[];
+  dead?: boolean;
+  missing?: boolean;
+  arrested?: boolean;
+  isUnit?: boolean;
+  badgeNumber?: string;
+  callsign?: string;
+  callsign2?: string;
+  departmentId?: number;
+  divisionId?: number;
+  rankId?: number;
+  hireDate?: string;
+  terminationDate?: string;
+  isActive?: boolean;
+  suspended?: boolean;
+  whitelistStatus?: string;
+  radioChannelId?: string;
+}
+
+// =================================================================
+// 3. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ (ОСТАВЛЯЕМ СУЩЕСТВУЮЩИЕ)
 // =================================================================
 
 export type UserRole = 'admin' | 'leo' | 'ems' | 'fd' | 'dispatch' | 'citizen';
@@ -26,7 +155,7 @@ export interface User {
   // ... любые другие поля пользователя
 }
 
-export type UnitStatus = 'available' | 'busy' | 'enRoute' | 'onScene' | 'unavailable' | 'panic';
+export type UnitStatus = 'available' | 'busy' | 'enRoute' | 'onScene' | 'unavailable' | 'panic' | 'transporting' | 'outOfService' | 'training' | 'dispatched' | 'cleared';
 
 // Константы для enum-подобного использования
 export const UnitStatuses = {
@@ -36,6 +165,11 @@ export const UnitStatuses = {
   ON_SCENE: 'onScene' as const,
   UNAVAILABLE: 'unavailable' as const,
   PANIC: 'panic' as const,
+  TRANSPORTING: 'transporting' as const,
+  OUT_OF_SERVICE: 'outOfService' as const,
+  TRAINING: 'training' as const,
+  DISPATCHED: 'dispatched' as const,
+  CLEARED: 'cleared' as const,
 } as const;
 
 export interface Unit {
@@ -52,25 +186,6 @@ export interface Unit {
   crew?: User[];
   equipment?: string[];
   unitType?: 'patrol' | 'medic' | 'fire_truck' | 'dispatch';
-}
-
-export interface Citizen {
-  id: string;
-  name: string;
-  surname: string;
-  firstName?: string; // Для обратной совместимости
-  lastName?: string; // Для обратной совместимости
-  dateOfBirth: string;
-  gender: 'Male' | 'Female' | 'male' | 'female'; // Добавлены варианты
-  address: string;
-  phoneNumber: string;
-  occupation?: string;
-  photoUrl?: string;
-  imageUrl?: string; // Для обратной совместимости
-  ssn?: string; // Добавлено для PersonSearch
-  flags?: string[];
-  addressFlags?: string[];
-  // ... все остальные поля гражданина
 }
 
 export interface Vehicle {
@@ -139,10 +254,27 @@ export interface Call911 {
     timestamp: string;
     createdAt?: string; // Добавлено для CallQueueWidget
     type?: string; // Добавлено для CallQueueWidget
+    notes?: string;
+    coordinates?: { lat: number; lng: number };
+    estimatedResponseTime?: number;
+}
+
+export interface DispatchStats {
+  activeUnitsCount: number;
+  activeCallsCount: number;
+  activeBolosCount: number;
+  pendingCallsCount: number;
+}
+
+export interface UnitAssignment {
+  callId: string;
+  unitId: string;
+  assignedAt: string;
+  status: 'assigned' | 'en_route' | 'on_scene' | 'cleared';
 }
 
 // =================================================================
-// 2. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ
+// 4. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ
 // =================================================================
 
 export interface BOLO {
@@ -156,14 +288,14 @@ export interface BOLO {
   // ... другие поля BOLO
 }
 
-export interface CitizenSearchResult {
+export interface CharacterSearchResult {
   id: string;
-  name: string;
-  surname: string;
+  firstName: string;
+  lastName: string;
   dateOfBirth: string;
-  citizens: Citizen[]; // Добавлено для CitizenList
-  total: number; // Добавлено для CitizenList
-  hasMore: boolean; // Добавлено для CitizenList
+  characters: Character[]; // Добавлено для CharacterList
+  total: number; // Добавлено для CharacterList
+  hasMore: boolean; // Добавлено для CharacterList
   // ... другие поля для поиска
 }
 
@@ -190,12 +322,12 @@ export interface EmsUnit extends Unit {
 }
 
 // =================================================================
-// 3. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ CITIZEN
+// 5. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ CHARACTER
 // =================================================================
 
 export interface CriminalRecord {
   id: string;
-  citizenId: string;
+  characterId: string;
   offense: string;
   date: string;
   severity: 'misdemeanor' | 'felony';
@@ -205,7 +337,7 @@ export interface CriminalRecord {
 
 export interface MedicalInfo {
   id: string;
-  citizenId: string;
+  characterId: string;
   bloodType?: string;
   allergies?: string[];
   conditions?: string[];
@@ -215,7 +347,7 @@ export interface MedicalInfo {
 
 export interface EmergencyContact {
   id: string;
-  citizenId: string;
+  characterId: string;
   name: string;
   relationship: string;
   phone: string;
@@ -225,7 +357,7 @@ export interface EmergencyContact {
 
 export interface EmploymentInfo {
   id: string;
-  citizenId: string;
+  characterId: string;
   employer: string;
   position: string;
   startDate: string;
@@ -235,33 +367,10 @@ export interface EmploymentInfo {
 }
 
 // =================================================================
-// 4. API ТИПЫ
+// 6. API ТИПЫ
 // =================================================================
 
-export interface CreateCitizenRequest {
-  name: string;
-  surname: string;
-  dateOfBirth: string;
-  gender: 'Male' | 'Female' | 'male' | 'female';
-  address: string;
-  phoneNumber: string;
-  occupation?: string;
-  // ... другие поля
-}
-
-export interface UpdateCitizenRequest {
-  id: string;
-  name?: string;
-  surname?: string;
-  dateOfBirth?: string;
-  gender?: 'Male' | 'Female' | 'male' | 'female';
-  address?: string;
-  phoneNumber?: string;
-  occupation?: string;
-  // ... другие поля
-}
-
-export interface CitizenSearchParams {
+export interface CharacterSearchParams {
   query?: string;
   gender?: string;
   licenseStatus?: string;
@@ -272,15 +381,30 @@ export interface CitizenSearchParams {
   // ... другие параметры поиска
 }
 
-export interface CitizenExportData {
-  citizens: Citizen[];
+export interface CharacterExportData {
+  characters: Character[];
   total: number;
   exportedAt: string;
   // ... другие поля экспорта
 }
 
 // =================================================================
-// 5. ПЕРЕ-ЭКСПОРТЫ ИЗ ДРУГИХ ФАЙЛОВ (если нужно)
+// 7. ПЕРЕ-ЭКСПОРТЫ ИЗ ДРУГИХ ФАЙЛОВ
 // =================================================================
-// Сюда можно будет добавить экспорты из других файлов, если понадобится,
-// но пока что держим этот файл как единственный источник правды для основных типов.
+// ВРЕМЕННО ОТКЛЮЧЕНО ИЗ-ЗА КОНФЛИКТОВ ТИПОВ
+// TODO: Решить конфликты типов между файлами перед включением пере-экспортов
+
+// Пере-экспорты из dispatch.ts
+// export * from './dispatch';
+
+// Пере-экспорты из citizens.ts
+// export * from './citizens';
+
+// Пере-экспорты из units.ts
+// export * from './units';
+
+// Пере-экспорты из user.ts
+// export * from './user';
+
+// Пере-экспорты из departments.ts
+// export * from './departments';

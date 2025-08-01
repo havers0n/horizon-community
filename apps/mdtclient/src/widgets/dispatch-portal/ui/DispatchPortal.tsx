@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { GTAMap } from '@/features/gta-map';
 import { DispatchFeed } from '@/features/dispatch-feed';
 import { BoloManagementWidget } from '@/features/bolo-management';
+import { CallQueue } from '@/widgets/call-queue-widget/ui/CallQueue';
+import { UnitList } from '@/widgets/unit-list-widget/ui/UnitList';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Button } from '@/shared/ui/atoms/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/atoms/Tabs';
 import { useRealTime } from '../../../../hooks/useRealTime';
-import { DispatchFeedApi } from '../../../features/dispatch-feed/api/dispatchFeedApi';
+import { DispatchApi } from '@/shared/api/dispatch';
+import { Call911, Unit } from '@/shared/types';
 import {
   MapPin,
   Radio,
@@ -14,7 +17,8 @@ import {
   AlertTriangle,
   ArrowLeft,
   FileText,
-  Users
+  Users,
+  Phone
 } from 'lucide-react';
 
 interface DispatchPortalProps {
@@ -24,26 +28,43 @@ interface DispatchPortalProps {
 export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules }) => {
   const { isConnected, stats, subscribe } = useRealTime(['units', 'calls', 'alerts']);
 
+  const [activeUnits, setActiveUnits] = useState<Unit[]>([]);
+  const [activeCalls, setActiveCalls] = useState<Call911[]>([]);
+  const [activeBolos, setActiveBolos] = useState<any[]>([]);
   const [activeUnitsCount, setActiveUnitsCount] = useState(0);
   const [activeCallsCount, setActiveCallsCount] = useState(0);
   const [activeBolosCount, setActiveBolosCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [selectedCall, setSelectedCall] = useState<Call911 | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
 
   useEffect(() => {
     subscribe(['units', 'calls', 'alerts']);
   }, [subscribe]);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const stats = await DispatchFeedApi.getDispatchStats();
+        const [units, calls, bolos, stats] = await Promise.all([
+          DispatchApi.getActiveUnits(),
+          DispatchApi.getActiveCalls(),
+          DispatchApi.getActiveBolos(),
+          DispatchApi.getDispatchStats()
+        ]);
+
+        setActiveUnits(units);
+        setActiveCalls(calls);
+        setActiveBolos(bolos);
         setActiveUnitsCount(stats.activeUnitsCount);
         setActiveCallsCount(stats.activeCallsCount);
         setActiveBolosCount(stats.activeBolosCount);
       } catch (error) {
-        console.error('Error fetching dispatch stats:', error);
+        console.error('Error fetching dispatch data:', error);
         // Fallback to default values
+        setActiveUnits([]);
+        setActiveCalls([]);
+        setActiveBolos([]);
         setActiveUnitsCount(0);
         setActiveCallsCount(0);
         setActiveBolosCount(0);
@@ -52,13 +73,44 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
       }
     };
 
-    fetchStats();
+    fetchData();
 
-    // Обновляем статистику каждые 30 секунд
-    const interval = setInterval(fetchStats, 30000);
+    // Обновляем данные каждые 30 секунд
+    const interval = setInterval(fetchData, 30000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleCallSelect = (call: Call911) => {
+    setSelectedCall(call);
+    // Можно добавить логику для выделения вызова на карте
+  };
+
+  const handleUnitSelect = (unit: Unit) => {
+    setSelectedUnit(unit);
+    // Можно добавить логику для выделения юнита на карте
+  };
+
+  const handleAssignUnit = (callId: string, unitId: string) => {
+    // Обновляем локальное состояние
+    setActiveCalls(prev => prev.map(call => 
+      call.id === callId 
+        ? { ...call, assignedUnits: [...(call.assignedUnits || []), unitId] }
+        : call
+    ));
+  };
+
+  const handleUpdateCallStatus = (callId: string, status: string) => {
+    setActiveCalls(prev => prev.map(call => 
+      call.id === callId ? { ...call, status } : call
+    ));
+  };
+
+  const handleUnitStatusChange = (unitId: string, status: string) => {
+    setActiveUnits(prev => prev.map(unit => 
+      unit.id === unitId ? { ...unit, status } : unit
+    ));
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -146,7 +198,12 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
             </TabsList>
 
             <TabsContent value="dispatch" className="h-full mt-4">
-              <DispatchFeed />
+              <CallQueue
+                calls={activeCalls}
+                onCallSelect={handleCallSelect}
+                onAssignUnit={handleAssignUnit}
+                onUpdateStatus={handleUpdateCallStatus}
+              />
             </TabsContent>
 
             <TabsContent value="bolo" className="h-full mt-4 overflow-y-auto">
@@ -154,13 +211,11 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
             </TabsContent>
 
             <TabsContent value="units" className="h-full mt-4">
-              <Card className="h-full">
-                <div className="p-6 text-center">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">Управление юнитами</h3>
-                  <p className="text-gray-500">Функция будет доступна в следующем обновлении</p>
-                </div>
-              </Card>
+              <UnitList
+                units={activeUnits}
+                onUnitSelect={handleUnitSelect}
+                onStatusChange={handleUnitStatusChange}
+              />
             </TabsContent>
           </Tabs>
         </div>

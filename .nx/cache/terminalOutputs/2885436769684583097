@@ -1,0 +1,562 @@
+[4m[34mapps\client\src\App.tsx:41:35[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/pages/DashboardPage.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 39 | [39m[0m
+[0m [90m 40 | [39m[90m// MDT Application[39m[0m
+[0m[31m[1m>[22m[39m[90m 41 | [39m[36mconst[39m [33mMDTDashboard[39m [33m=[39m () [33m=>[39m [36mimport[39m([32m"../../mdtclient/src/pages/DashboardPage"[39m)[33m;[39m[0m
+[0m [90m    | [39m                                  [31m[1m^[22m[39m[0m
+[0m [90m 42 | [39m[0m
+[0m [90m 43 | [39m[36mfunction[39m [33mRouter[39m() {[0m
+[0m [90m 44 | [39m  console[33m.[39mlog([32m'Router: render'[39m)[33m;[39m[0m
+
+[4m[34mapps\client\src\App.tsx:78:19[39m[24m - [31m[1merror[22m[39m [90mTS2322[39m: Type '() => Promise<typeof import("C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/pages/DashboardPage")>' is not assignable to type '() => Promise<{ default: ComponentType<any>; }>'.
+  Type 'Promise<typeof import("C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/pages/DashboardPage")>' is not assignable to type 'Promise<{ default: ComponentType<any>; }>'.
+    Property 'default' is missing in type 'typeof import("C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/pages/DashboardPage")' but required in type '{ default: ComponentType<any>; }'.
+
+[0m [90m 76 | [39m      [33m<[39m[33m/[39m[33mRoute[39m[33m>[39m[0m
+[0m [90m 77 | [39m      [33m<[39m[33mRoute[39m path[33m=[39m[32m"/mdt"[39m[33m>[39m[0m
+[0m[31m[1m>[22m[39m[90m 78 | [39m        [33m<[39m[33mLazyPage[39m component[33m=[39m{[33mMDTDashboard[39m} [33m/[39m[33m>[39m[0m
+[0m [90m    | [39m                  [31m[1m^[22m[39m[0m
+[0m [90m 79 | [39m      [33m<[39m[33m/[39m[33mRoute[39m[33m>[39m[0m
+[0m [90m 80 | [39m      [33m<[39m[33mRoute[39m path[33m=[39m[32m"/departments"[39m[33m>[39m[0m
+[0m [90m 81 | [39m        [33m<[39m[33mLazyPage[39m component[33m=[39m{[33mDepartments[39m} [33m/[39m[33m>[39m[0m
+
+[4m[34mapps\client\src\components\EntryApplicationModal.tsx:18:67[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 16 | [39m[36mimport[39m { useCheckLimit } from [32m"@/hooks/useCheckLimit"[39m[33m;[39m[0m
+[0m [90m 17 | [39m[36mimport[39m { [33mPlus[39m[33m,[39m [33mUser[39m[33m,[39m [33mBuilding[39m[33m,[39m [33mCalendar[39m[33m,[39m [33mMic[39m[33m,[39m [33mMonitor[39m[33m,[39m [33mLink[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHistory[39m[33m,[39m [33mChevronLeft[39m[33m,[39m [33mChevronRight[39m[33m,[39m [33mCheck[39m } from [32m"lucide-react"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 18 | [39m[36mimport[39m { entryApplicationSchema[33m,[39m type [33mEntryApplicationData[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                                                                  [31m[1m^[22m[39m[0m
+[0m [90m 19 | [39m[36mimport[39m { useTranslation } from [32m"react-i18next"[39m[33m;[39m[0m
+[0m [90m 20 | [39m[0m
+[0m [90m 21 | [39minterface [33mEntryApplicationModalProps[39m {[0m
+
+[4m[34mapps\client\src\components\InteractivePDFForm.tsx:20:32[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 18 | [39m  [33mEyeOff[39m[0m
+[0m [90m 19 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 20 | [39m[36mimport[39m { [33mReportTemplate[39m } from [32m'@shared/schema'[39m[33m;[39m[0m
+[0m [90m    | [39m                               [31m[1m^[22m[39m[0m
+[0m [90m 21 | [39m[36mimport[39m { [0m
+[0m [90m 22 | [39m  extractVariables[33m,[39m [0m
+[0m [90m 23 | [39m  renderPreview[33m,[39m [0m
+
+[4m[34mapps\client\src\components\JointModal.tsx:18:28[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 16 | [39m[36mimport[39m { apiRequest[33m,[39m queryClient } from [32m"@/lib/queryClient"[39m[33m;[39m[0m
+[0m [90m 17 | [39m[36mimport[39m { useToast } from [32m"@/hooks/use-toast"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 18 | [39m[36mimport[39m { [33mDepartment[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                           [31m[1m^[22m[39m[0m
+[0m [90m 19 | [39m[36mimport[39m { useCheckLimit } from [32m"@/hooks/useCheckLimit"[39m[33m;[39m[0m
+[0m [90m 20 | [39m[36mimport[39m { useTranslation } from [32m"react-i18next"[39m[33m;[39m[0m
+[0m [90m 21 | [39m[0m
+
+[4m[34mapps\client\src\components\ReportFiller.tsx:10:32[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m  8 | [39m[36mimport[39m { [33mBadge[39m } from [32m'@/components/ui/badge'[39m[33m;[39m[0m
+[0m [90m  9 | [39m[36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mCopy[39m[33m,[39m [33mSend[39m[33m,[39m [33mDownload[39m } from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 10 | [39m[36mimport[39m { [33mReportTemplate[39m } from [32m'@shared/schema'[39m[33m;[39m[0m
+[0m [90m    | [39m                               [31m[1m^[22m[39m[0m
+[0m [90m 11 | [39m[36mimport[39m { [0m
+[0m [90m 12 | [39m  extractVariables[33m,[39m [0m
+[0m [90m 13 | [39m  renderPreview[33m,[39m [0m
+
+[4m[34mapps\client\src\components\TemplateBrowser.tsx:37:44[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 35 | [39m  [33mList[39m[0m
+[0m [90m 36 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 37 | [39m[36mimport[39m { [33mReportTemplate[39m[33m,[39m [33mDepartment[39m } from [32m'@shared/schema'[39m[33m;[39m[0m
+[0m [90m    | [39m                                           [31m[1m^[22m[39m[0m
+[0m [90m 38 | [39m[36mimport[39m { extractVariables } from [32m'@/lib/templateUtils'[39m[33m;[39m[0m
+[0m [90m 39 | [39m[0m
+[0m [90m 40 | [39minterface [33mTemplateBrowserProps[39m {[0m
+
+[4m[34mapps\client\src\components\TemplateBrowser.tsx:84:46[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'tag' implicitly has an 'any' type.
+
+[0m [90m 82 | [39m    [36mconst[39m matchesSearch [33m=[39m template[33m.[39mtitle[33m.[39mtoLowerCase()[33m.[39mincludes(searchTerm[33m.[39mtoLowerCase()) [33m||[39m[0m
+[0m [90m 83 | [39m                         template[33m.[39mpurpose[33m?[39m[33m.[39mtoLowerCase()[33m.[39mincludes(searchTerm[33m.[39mtoLowerCase()) [33m||[39m[0m
+[0m[31m[1m>[22m[39m[90m 84 | [39m                         template[33m.[39mtags[33m?[39m[33m.[39msome(tag [33m=>[39m tag[33m.[39mtoLowerCase()[33m.[39mincludes(searchTerm[33m.[39mtoLowerCase()))[33m;[39m[0m
+[0m [90m    | [39m                                             [31m[1m^[22m[39m[0m
+[0m [90m 85 | [39m    [36mconst[39m matchesCategory [33m=[39m categoryFilter [33m===[39m [32m'all'[39m [33m||[39m template[33m.[39mcategory [33m===[39m categoryFilter[33m;[39m[0m
+[0m [90m 86 | [39m    [36mconst[39m matchesDifficulty [33m=[39m difficultyFilter [33m===[39m [32m'all'[39m [33m||[39m template[33m.[39mdifficulty [33m===[39m difficultyFilter[33m;[39m[0m
+[0m [90m 87 | [39m    [36mconst[39m matchesDepartment [33m=[39m [33m![39mdepartmentFilter [33m||[39m template[33m.[39mdepartmentId [33m===[39m departmentFilter[33m;[39m[0m
+
+[4m[34mapps\client\src\components\TemplateBrowser.tsx:356:52[39m[24m - [31m[1merror[22m[39m [90mTS7006[39m: Parameter 'tag' implicitly has an 'any' type.
+
+[0m [90m 354 | [39m                {template[33m.[39mtags [33m&&[39m template[33m.[39mtags[33m.[39mlength [33m>[39m [35m0[39m [33m&&[39m ([0m
+[0m [90m 355 | [39m                  [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex flex-wrap gap-1"[39m[33m>[39m[0m
+[0m[31m[1m>[22m[39m[90m 356 | [39m                    {template[33m.[39mtags[33m.[39mslice([35m0[39m[33m,[39m [35m3[39m)[33m.[39mmap(tag [33m=>[39m ([0m
+[0m [90m     | [39m                                                   [31m[1m^[22m[39m[0m
+[0m [90m 357 | [39m                      [33m<[39m[33mBadge[39m key[33m=[39m{tag} variant[33m=[39m[32m"secondary"[39m className[33m=[39m[32m"text-xs"[39m[33m>[39m[0m
+[0m [90m 358 | [39m                        {tag}[0m
+[0m [90m 359 | [39m                      [33m<[39m[33m/[39m[33mBadge[39m[33m>[39m[0m
+
+[4m[34mapps\client\src\components\TemplateEditor.tsx:11:32[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m  9 | [39m[36mimport[39m { [33mSelect[39m[33m,[39m [33mSelectContent[39m[33m,[39m [33mSelectItem[39m[33m,[39m [33mSelectTrigger[39m[33m,[39m [33mSelectValue[39m } from [32m'@/components/ui/select'[39m[33m;[39m[0m
+[0m [90m 10 | [39m[36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mSave[39m[33m,[39m [33mEye[39m[33m,[39m [33mFileText[39m[33m,[39m [33mCheckCircle[39m } from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 11 | [39m[36mimport[39m { [33mReportTemplate[39m } from [32m'@shared/schema'[39m[33m;[39m[0m
+[0m [90m    | [39m                               [31m[1m^[22m[39m[0m
+[0m [90m 12 | [39m[36mimport[39m { extractVariables[33m,[39m validateTemplate } from [32m'@/lib/templateUtils'[39m[33m;[39m[0m
+[0m [90m 13 | [39m[36mimport[39m { useToast } from [32m'@/hooks/use-toast'[39m[33m;[39m[0m
+[0m [90m 14 | [39m[0m
+
+[4m[34mapps\client\src\components\TemplateManager.tsx:32:44[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 30 | [39m  [33mMoreHorizontal[39m [0m
+[0m [90m 31 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 32 | [39m[36mimport[39m { [33mReportTemplate[39m[33m,[39m [33mDepartment[39m } from [32m'@shared/schema'[39m[33m;[39m[0m
+[0m [90m    | [39m                                           [31m[1m^[22m[39m[0m
+[0m [90m 33 | [39m[36mimport[39m { extractVariables } from [32m'@/lib/templateUtils'[39m[33m;[39m[0m
+[0m [90m 34 | [39m[36mimport[39m { useToast } from [32m'@/hooks/use-toast'[39m[33m;[39m[0m
+[0m [90m 35 | [39m[0m
+
+[4m[34mapps\client\src\components\TransferModal.tsx:21:28[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 19 | [39m[36mimport[39m { apiRequest[33m,[39m queryClient } from [32m"@/lib/queryClient"[39m[33m;[39m[0m
+[0m [90m 20 | [39m[36mimport[39m { useToast } from [32m"@/hooks/use-toast"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 21 | [39m[36mimport[39m { [33mDepartment[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                           [31m[1m^[22m[39m[0m
+[0m [90m 22 | [39m[36mimport[39m { format } from [32m"date-fns"[39m[33m;[39m[0m
+[0m [90m 23 | [39m[36mimport[39m { useTranslation } from [32m"react-i18next"[39m[33m;[39m[0m
+[0m [90m 24 | [39m[0m
+
+[4m[34mapps\client\src\contexts\AuthContext.tsx:3:27[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m[33m,[39m { createContext[33m,[39m useContext[33m,[39m useEffect[33m,[39m useState } from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { setAuthState[33m,[39m clearAuthState[33m,[39m getAuthState[33m,[39m getAuthHeaders } from [32m'@/lib/auth'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m type { [33mUser[39m } from [32m'@shared/schema'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[0m
+[0m [90m 5 | [39minterface [33mAuthContextType[39m {[0m
+[0m [90m 6 | [39m  user[33m:[39m [33mOmit[39m[33m<[39m[33mUser[39m[33m,[39m [32m'passwordHash'[39m[33m>[39m [33m|[39m [36mnull[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\lib\auth.ts:1:22[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m[31m[1m>[22m[39m[90m 1 | [39m[36mimport[39m { [33mUser[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m   | [39m                     [31m[1m^[22m[39m[0m
+[0m [90m 2 | [39m[0m
+[0m [90m 3 | [39m[36mexport[39m interface [33mAuthState[39m {[0m
+[0m [90m 4 | [39m  user[33m:[39m [33mOmit[39m[33m<[39m[33mUser[39m[33m,[39m [32m'passwordHash'[39m[33m>[39m [33m|[39m [36mnull[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\pages\Homepage.tsx:25:28[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 23 | [39m  [33mMapPin[39m[0m
+[0m [90m 24 | [39m} from [32m"lucide-react"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 25 | [39m[36mimport[39m { [33mDepartment[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                           [31m[1m^[22m[39m[0m
+[0m [90m 26 | [39m[36mimport[39m { [33mDiscordIcon[39m } from [32m"@/components/ui/DiscordIcon"[39m[33m;[39m[0m
+[0m [90m 27 | [39m[36mimport[39m { [33mVKIcon[39m } from [32m"@/components/ui/VKIcon"[39m[33m;[39m[0m
+[0m [90m 28 | [39m[0m
+
+[4m[34mapps\client\src\pages\Login.tsx:10:45[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m  8 | [39m[36mimport[39m { useForm } from [32m"react-hook-form"[39m[33m;[39m[0m
+[0m [90m  9 | [39m[36mimport[39m { zodResolver } from [32m"@hookform/resolvers/zod"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 10 | [39m[36mimport[39m { loginSchema[33m,[39m type [33mLoginData[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                                            [31m[1m^[22m[39m[0m
+[0m [90m 11 | [39m[36mimport[39m { useAuth } from [32m"@/contexts/AuthContext"[39m[33m;[39m[0m
+[0m [90m 12 | [39m[36mimport[39m { useToast } from [32m"@/hooks/use-toast"[39m[33m;[39m[0m
+[0m [90m 13 | [39m[36mimport[39m { [33mShield[39m } from [32m"lucide-react"[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\pages\Register.tsx:10:51[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m  8 | [39m[36mimport[39m { useForm } from [32m"react-hook-form"[39m[33m;[39m[0m
+[0m [90m  9 | [39m[36mimport[39m { zodResolver } from [32m"@hookform/resolvers/zod"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 10 | [39m[36mimport[39m { registerSchema[33m,[39m type [33mRegisterData[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                                                  [31m[1m^[22m[39m[0m
+[0m [90m 11 | [39m[36mimport[39m { useAuth } from [32m"@/contexts/AuthContext"[39m[33m;[39m[0m
+[0m [90m 12 | [39m[36mimport[39m { useToast } from [32m"@/hooks/use-toast"[39m[33m;[39m[0m
+[0m [90m 13 | [39m[36mimport[39m { [33mShield[39m } from [32m"lucide-react"[39m[33m;[39m[0m
+
+[4m[34mapps\client\src\pages\Reports.tsx:16:66[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@shared/schema' or its corresponding type declarations.
+
+[0m [90m 14 | [39m[36mimport[39m { apiRequest[33m,[39m queryClient } from [32m"@/lib/queryClient"[39m[33m;[39m[0m
+[0m [90m 15 | [39m[36mimport[39m { useToast } from [32m"@/hooks/use-toast"[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 16 | [39m[36mimport[39m { [33mReport[39m[33m,[39m [33mReportTemplate[39m[33m,[39m [33mFilledReport[39m[33m,[39m [33mDepartment[39m } from [32m"@shared/schema"[39m[33m;[39m[0m
+[0m [90m    | [39m                                                                 [31m[1m^[22m[39m[0m
+[0m [90m 17 | [39m[36mimport[39m { [33mLayout[39m } from [32m"@/components/Layout"[39m[33m;[39m[0m
+[0m [90m 18 | [39m[36mimport[39m { useAuth } from [32m"@/contexts/AuthContext"[39m[33m;[39m[0m
+[0m [90m 19 | [39m[36mimport[39m [33mTemplateEditor[39m from [32m"@/components/TemplateEditor"[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\hooks\useRealTime.ts:2:27[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/lib/auth.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+  The file is in the program because:
+    Imported via '../src/lib/auth' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/hooks/useRealTime.ts'
+    Imported via '../../../lib/auth' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/features/dispatch-feed/api/dispatchFeedApi.ts'
+
+[0m [90m 1 | [39m[36mimport[39m { useEffect[33m,[39m useRef[33m,[39m useState[33m,[39m useCallback } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 2 | [39m[36mimport[39m { authUtils } from [32m'../src/lib/auth'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 3 | [39m[0m
+[0m [90m 4 | [39m[90m// Локальные константы WebSocket событий[39m[0m
+[0m [90m 5 | [39m[36mconst[39m [33mWEBSOCKET_EVENTS[39m [33m=[39m {[0m
+
+[4m[34mapps\mdtclient\src\features\dispatch-feed\api\dispatchFeedApi.ts:1:40[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '../../entities/dispatch/model/types' or its corresponding type declarations.
+
+[0m[31m[1m>[22m[39m[90m 1 | [39m[36mimport[39m { [33mCall911[39m[33m,[39m [33mMDTUnit[39m[33m,[39m [33mBolo[39m } from [32m'../../entities/dispatch/model/types'[39m[33m;[39m[0m
+[0m [90m   | [39m                                       [31m[1m^[22m[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { authUtils } from [32m'../../../lib/auth'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[0m
+[0m [90m 4 | [39m[36mexport[39m interface [33mActiveCall[39m {[0m
+
+[4m[34mapps\mdtclient\src\pages\DashboardPage.tsx:2:42[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useState } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 2 | [39m[36mimport[39m { [33mCard[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mButton[39m } from [32m'@/shared/ui/atoms'[39m[33m;[39m[0m
+[0m [90m   | [39m                                         [31m[1m^[22m[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [0m
+[0m [90m 4 | [39m  [33mLayoutDashboard[39m[33m,[39m [0m
+[0m [90m 5 | [39m  [33mUsers[39m[33m,[39m [0m
+
+[4m[34mapps\mdtclient\src\pages\DashboardPage.tsx:27:27[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/contexts/LocaleContext' or its corresponding type declarations.
+
+[0m [90m 25 | [39m  [33mUser[39m[0m
+[0m [90m 26 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 27 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m [90m    | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 28 | [39m[36mimport[39m { [33mPersonSearchWidget[39m } from [32m'@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget'[39m[33m;[39m[0m
+[0m [90m 29 | [39m[36mimport[39m { useNavigationStore } from [32m'@/shared/model/navigationStore'[39m[33m;[39m[0m
+[0m [90m 30 | [39m[0m
+
+[4m[34mapps\mdtclient\src\pages\DashboardPage.tsx:28:36[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget' or its corresponding type declarations.
+
+[0m [90m 26 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m [90m 27 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 28 | [39m[36mimport[39m { [33mPersonSearchWidget[39m } from [32m'@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget'[39m[33m;[39m[0m
+[0m [90m    | [39m                                   [31m[1m^[22m[39m[0m
+[0m [90m 29 | [39m[36mimport[39m { useNavigationStore } from [32m'@/shared/model/navigationStore'[39m[33m;[39m[0m
+[0m [90m 30 | [39m[0m
+[0m [90m 31 | [39m[90m// Импортируем наши порталы[39m[0m
+
+[4m[34mapps\mdtclient\src\pages\DashboardPage.tsx:29:36[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/model/navigationStore' or its corresponding type declarations.
+
+[0m [90m 27 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m [90m 28 | [39m[36mimport[39m { [33mPersonSearchWidget[39m } from [32m'@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 29 | [39m[36mimport[39m { useNavigationStore } from [32m'@/shared/model/navigationStore'[39m[33m;[39m[0m
+[0m [90m    | [39m                                   [31m[1m^[22m[39m[0m
+[0m [90m 30 | [39m[0m
+[0m [90m 31 | [39m[90m// Импортируем наши порталы[39m[0m
+[0m [90m 32 | [39m[36mimport[39m { [33mDispatchPortal[39m } from [32m'../widgets/dispatch-portal'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\pages\DashboardPage.tsx:32:32[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/dispatch-portal/index.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 30 | [39m[0m
+[0m [90m 31 | [39m[90m// Импортируем наши порталы[39m[0m
+[0m[31m[1m>[22m[39m[90m 32 | [39m[36mimport[39m { [33mDispatchPortal[39m } from [32m'../widgets/dispatch-portal'[39m[33m;[39m[0m
+[0m [90m    | [39m                               [31m[1m^[22m[39m[0m
+[0m [90m 33 | [39m[36mimport[39m { [33mMdtPortal[39m } from [32m'../widgets/mdt-portal'[39m[33m;[39m[0m
+[0m [90m 34 | [39m[0m
+[0m [90m 35 | [39m[90m// Простые тестовые компоненты для проверки работы[39m[0m
+
+[4m[34mapps\mdtclient\src\pages\DashboardPage.tsx:33:27[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/index.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 31 | [39m[90m// Импортируем наши порталы[39m[0m
+[0m [90m 32 | [39m[36mimport[39m { [33mDispatchPortal[39m } from [32m'../widgets/dispatch-portal'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 33 | [39m[36mimport[39m { [33mMdtPortal[39m } from [32m'../widgets/mdt-portal'[39m[33m;[39m[0m
+[0m [90m    | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 34 | [39m[0m
+[0m [90m 35 | [39m[90m// Простые тестовые компоненты для проверки работы[39m[0m
+[0m [90m 36 | [39m[36mconst[39m [33mTestModule[39m[33m:[39m [33mReact[39m[33m.[39m[33mFC[39m[33m<[39m{ name[33m:[39m string[33m;[39m description[33m:[39m string }[33m>[39m [33m=[39m ({ name[33m,[39m description }) [33m=>[39m ([0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\index.ts:1:15[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/dispatch-portal/ui/index.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m[31m[1m>[22m[39m[90m 1 | [39m[36mexport[39m [33m*[39m from [32m'./ui'[39m[33m;[39m [0m
+[0m [90m   | [39m              [31m[1m^[22m[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:2:24[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/gta-map' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useEffect[33m,[39m useState } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 2 | [39m[36mimport[39m { [33mGTAMap[39m } from [32m'@/features/gta-map'[39m[33m;[39m[0m
+[0m [90m   | [39m                       [31m[1m^[22m[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mDispatchFeed[39m } from [32m'@/features/dispatch-feed'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mBoloManagementWidget[39m } from [32m'@/features/bolo-management'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:3:30[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/dispatch-feed' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useEffect[33m,[39m useState } from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { [33mGTAMap[39m } from [32m'@/features/gta-map'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mDispatchFeed[39m } from [32m'@/features/dispatch-feed'[39m[33m;[39m[0m
+[0m [90m   | [39m                             [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mBoloManagementWidget[39m } from [32m'@/features/bolo-management'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:4:38[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/bolo-management' or its corresponding type declarations.
+
+[0m [90m 2 | [39m[36mimport[39m { [33mGTAMap[39m } from [32m'@/features/gta-map'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mDispatchFeed[39m } from [32m'@/features/dispatch-feed'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { [33mBoloManagementWidget[39m } from [32m'@/features/bolo-management'[39m[33m;[39m[0m
+[0m [90m   | [39m                                     [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mimport[39m { [33mTabs[39m[33m,[39m [33mTabsContent[39m[33m,[39m [33mTabsList[39m[33m,[39m [33mTabsTrigger[39m } from [32m'@/shared/ui/atoms/Tabs'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:5:22[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms/Card' or its corresponding type declarations.
+
+[0m [90m 3 | [39m[36mimport[39m { [33mDispatchFeed[39m } from [32m'@/features/dispatch-feed'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mBoloManagementWidget[39m } from [32m'@/features/bolo-management'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 5 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m [90m   | [39m                     [31m[1m^[22m[39m[0m
+[0m [90m 6 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mimport[39m { [33mTabs[39m[33m,[39m [33mTabsContent[39m[33m,[39m [33mTabsList[39m[33m,[39m [33mTabsTrigger[39m } from [32m'@/shared/ui/atoms/Tabs'[39m[33m;[39m[0m
+[0m [90m 8 | [39m[36mimport[39m { useRealTime } from [32m'../../../../hooks/useRealTime'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:6:24[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms/Button' or its corresponding type declarations.
+
+[0m [90m 4 | [39m[36mimport[39m { [33mBoloManagementWidget[39m } from [32m'@/features/bolo-management'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 6 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m [90m   | [39m                       [31m[1m^[22m[39m[0m
+[0m [90m 7 | [39m[36mimport[39m { [33mTabs[39m[33m,[39m [33mTabsContent[39m[33m,[39m [33mTabsList[39m[33m,[39m [33mTabsTrigger[39m } from [32m'@/shared/ui/atoms/Tabs'[39m[33m;[39m[0m
+[0m [90m 8 | [39m[36mimport[39m { useRealTime } from [32m'../../../../hooks/useRealTime'[39m[33m;[39m[0m
+[0m [90m 9 | [39m[36mimport[39m { [33mDispatchFeedApi[39m } from [32m'../../../features/dispatch-feed/api/dispatchFeedApi'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:7:58[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms/Tabs' or its corresponding type declarations.
+
+[0m [90m  5 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m [90m  6 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 | [39m[36mimport[39m { [33mTabs[39m[33m,[39m [33mTabsContent[39m[33m,[39m [33mTabsList[39m[33m,[39m [33mTabsTrigger[39m } from [32m'@/shared/ui/atoms/Tabs'[39m[33m;[39m[0m
+[0m [90m    | [39m                                                         [31m[1m^[22m[39m[0m
+[0m [90m  8 | [39m[36mimport[39m { useRealTime } from [32m'../../../../hooks/useRealTime'[39m[33m;[39m[0m
+[0m [90m  9 | [39m[36mimport[39m { [33mDispatchFeedApi[39m } from [32m'../../../features/dispatch-feed/api/dispatchFeedApi'[39m[33m;[39m[0m
+[0m [90m 10 | [39m[36mimport[39m {[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:8:29[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/hooks/useRealTime.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m  6 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m [90m  7 | [39m[36mimport[39m { [33mTabs[39m[33m,[39m [33mTabsContent[39m[33m,[39m [33mTabsList[39m[33m,[39m [33mTabsTrigger[39m } from [32m'@/shared/ui/atoms/Tabs'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m  8 | [39m[36mimport[39m { useRealTime } from [32m'../../../../hooks/useRealTime'[39m[33m;[39m[0m
+[0m [90m    | [39m                            [31m[1m^[22m[39m[0m
+[0m [90m  9 | [39m[36mimport[39m { [33mDispatchFeedApi[39m } from [32m'../../../features/dispatch-feed/api/dispatchFeedApi'[39m[33m;[39m[0m
+[0m [90m 10 | [39m[36mimport[39m {[0m
+[0m [90m 11 | [39m  [33mMapPin[39m[33m,[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\DispatchPortal.tsx:9:33[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/features/dispatch-feed/api/dispatchFeedApi.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m  7 | [39m[36mimport[39m { [33mTabs[39m[33m,[39m [33mTabsContent[39m[33m,[39m [33mTabsList[39m[33m,[39m [33mTabsTrigger[39m } from [32m'@/shared/ui/atoms/Tabs'[39m[33m;[39m[0m
+[0m [90m  8 | [39m[36mimport[39m { useRealTime } from [32m'../../../../hooks/useRealTime'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 | [39m[36mimport[39m { [33mDispatchFeedApi[39m } from [32m'../../../features/dispatch-feed/api/dispatchFeedApi'[39m[33m;[39m[0m
+[0m [90m    | [39m                                [31m[1m^[22m[39m[0m
+[0m [90m 10 | [39m[36mimport[39m {[0m
+[0m [90m 11 | [39m  [33mMapPin[39m[33m,[39m[0m
+[0m [90m 12 | [39m  [33mRadio[39m[33m,[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\dispatch-portal\ui\index.ts:1:32[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/dispatch-portal/ui/DispatchPortal.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m[31m[1m>[22m[39m[90m 1 | [39m[36mexport[39m { [33mDispatchPortal[39m } from [32m'./DispatchPortal'[39m[33m;[39m [0m
+[0m [90m   | [39m                               [31m[1m^[22m[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\index.ts:4:27[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/MdtPortal.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 2 | [39m[90m// Виджет для системы управления правоохранительными органами[39m[0m
+[0m [90m 3 | [39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mexport[39m { [33mMdtPortal[39m } from [32m'./ui/MdtPortal'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mexport[39m { [33mModuleRenderer[39m } from [32m'./ui/ModuleRenderer'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mexport[39m { [33mMDTLayout[39m } from [32m'./ui/MDTLayout'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mexport[39m { [33mNavigationSidebar[39m } from [32m'./ui/NavigationSidebar'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\index.ts:6:27[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/MDTLayout.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 4 | [39m[36mexport[39m { [33mMdtPortal[39m } from [32m'./ui/MdtPortal'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mexport[39m { [33mModuleRenderer[39m } from [32m'./ui/ModuleRenderer'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 6 | [39m[36mexport[39m { [33mMDTLayout[39m } from [32m'./ui/MDTLayout'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 7 | [39m[36mexport[39m { [33mNavigationSidebar[39m } from [32m'./ui/NavigationSidebar'[39m[33m;[39m[0m
+[0m [90m 8 | [39m[36mexport[39m { [33mTopHeader[39m } from [32m'./ui/TopHeader'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\index.ts:7:35[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/NavigationSidebar.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 5 | [39m[36mexport[39m { [33mModuleRenderer[39m } from [32m'./ui/ModuleRenderer'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mexport[39m { [33mMDTLayout[39m } from [32m'./ui/MDTLayout'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 7 | [39m[36mexport[39m { [33mNavigationSidebar[39m } from [32m'./ui/NavigationSidebar'[39m[33m;[39m[0m
+[0m [90m   | [39m                                  [31m[1m^[22m[39m[0m
+[0m [90m 8 | [39m[36mexport[39m { [33mTopHeader[39m } from [32m'./ui/TopHeader'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\index.ts:8:27[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/TopHeader.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 6 | [39m[36mexport[39m { [33mMDTLayout[39m } from [32m'./ui/MDTLayout'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mexport[39m { [33mNavigationSidebar[39m } from [32m'./ui/NavigationSidebar'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 8 | [39m[36mexport[39m { [33mTopHeader[39m } from [32m'./ui/TopHeader'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\model\store.ts:15:3[39m[24m - [31m[1merror[22m[39m [90mTS2322[39m: Type 'undefined' is not assignable to type 'string | null'.
+
+[0m [90m 13 | [39m[36mexport[39m [36mconst[39m useMdtPortalStore [33m=[39m create[33m<[39m[33mMdtPortalState[39m[33m>[39m((set) [33m=>[39m ({[0m
+[0m [90m 14 | [39m  currentView[33m:[39m [32m'dashboard'[39m[33m,[39m[0m
+[0m[31m[1m>[22m[39m[90m 15 | [39m  activeModule[33m:[39m undefined[33m,[39m[0m
+[0m [90m    | [39m  [31m[1m^[22m[39m[0m
+[0m [90m 16 | [39m  setView[33m:[39m (view[33m,[39m moduleId [33m=[39m undefined) [33m=>[39m set({ currentView[33m:[39m view[33m,[39m activeModule[33m:[39m moduleId })[33m,[39m[0m
+[0m [90m 17 | [39m  goToDashboard[33m:[39m () [33m=>[39m set({ currentView[33m:[39m [32m'dashboard'[39m[33m,[39m activeModule[33m:[39m undefined })[33m,[39m[0m
+[0m [90m 18 | [39m  goToModule[33m:[39m (moduleId) [33m=>[39m set({ currentView[33m:[39m [32m'module'[39m[33m,[39m activeModule[33m:[39m moduleId })[33m,[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\MdtPortal.tsx:2:35[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/model/store.ts' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+  The file is in the program because:
+    Imported via '../model/store' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/MdtPortal.tsx'
+    Imported via '../model/store' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/MdtSidebar.tsx'
+    Imported via '../model/store' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/ModuleRenderer.tsx'
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 2 | [39m[36mimport[39m { useMdtPortalStore } from [32m'../model/store'[39m[33m;[39m[0m
+[0m [90m   | [39m                                  [31m[1m^[22m[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mMdtDashboardWidget[39m } from [32m'@/widgets/mdt-dashboard'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mMdtSidebar[39m } from [32m'./MdtSidebar'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mModuleRenderer[39m } from [32m'./ModuleRenderer'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\MdtPortal.tsx:3:36[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/widgets/mdt-dashboard' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { useMdtPortalStore } from [32m'../model/store'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mMdtDashboardWidget[39m } from [32m'@/widgets/mdt-dashboard'[39m[33m;[39m[0m
+[0m [90m   | [39m                                   [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mMdtSidebar[39m } from [32m'./MdtSidebar'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mModuleRenderer[39m } from [32m'./ModuleRenderer'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\MdtPortal.tsx:4:28[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/MdtSidebar.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+
+[0m [90m 2 | [39m[36mimport[39m { useMdtPortalStore } from [32m'../model/store'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mMdtDashboardWidget[39m } from [32m'@/widgets/mdt-dashboard'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { [33mMdtSidebar[39m } from [32m'./MdtSidebar'[39m[33m;[39m[0m
+[0m [90m   | [39m                           [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mModuleRenderer[39m } from [32m'./ModuleRenderer'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[0m
+[0m [90m 7 | [39minterface [33mMdtPortalProps[39m {[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\MdtPortal.tsx:5:32[39m[24m - [31m[1merror[22m[39m [90mTS6307[39m: File 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/ModuleRenderer.tsx' is not listed within the file list of project ''. Projects must list all files or use an 'include' pattern.
+  The file is in the program because:
+    Imported via './ModuleRenderer' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/ui/MdtPortal.tsx'
+    Imported via './ui/ModuleRenderer' from file 'C:/Projects/HorizonProject/RolePlayIdentity/apps/mdtclient/src/widgets/mdt-portal/index.ts'
+
+[0m [90m 3 | [39m[36mimport[39m { [33mMdtDashboardWidget[39m } from [32m'@/widgets/mdt-dashboard'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mMdtSidebar[39m } from [32m'./MdtSidebar'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 5 | [39m[36mimport[39m { [33mModuleRenderer[39m } from [32m'./ModuleRenderer'[39m[33m;[39m[0m
+[0m [90m   | [39m                               [31m[1m^[22m[39m[0m
+[0m [90m 6 | [39m[0m
+[0m [90m 7 | [39minterface [33mMdtPortalProps[39m {[0m
+[0m [90m 8 | [39m  onBackToModules[33m?[39m[33m:[39m () [33m=>[39m [36mvoid[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\MdtSidebar.tsx:3:24[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms/Button' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { useNavigate } from [32m'react-router-dom'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m [90m   | [39m                       [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { useMdtPortalStore } from [32m'../model/store'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [0m
+[0m [90m 6 | [39m  [33mSearch[39m[33m,[39m [0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:2:36[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 2 | [39m[36mimport[39m { [33mPersonSearchWidget[39m } from [32m'@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget'[39m[33m;[39m[0m
+[0m [90m   | [39m                                   [31m[1m^[22m[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mVehicleSearch[39m } from [32m'@/features/vehicle-registration'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mReportsList[39m } from [32m'@/features/reports-management'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mUnitList[39m } from [32m'@/features/unit-management'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:3:31[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/vehicle-registration' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { [33mPersonSearchWidget[39m } from [32m'@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { [33mVehicleSearch[39m } from [32m'@/features/vehicle-registration'[39m[33m;[39m[0m
+[0m [90m   | [39m                              [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mReportsList[39m } from [32m'@/features/reports-management'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mUnitList[39m } from [32m'@/features/unit-management'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m { [33mShiftManagement[39m } from [32m'@/features/shift-management'[39m[33m;[39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:4:29[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/reports-management' or its corresponding type declarations.
+
+[0m [90m 2 | [39m[36mimport[39m { [33mPersonSearchWidget[39m } from [32m'@/features/law-enforcement/features/citizen-search/ui/PersonSearchWidget'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { [33mVehicleSearch[39m } from [32m'@/features/vehicle-registration'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { [33mReportsList[39m } from [32m'@/features/reports-management'[39m[33m;[39m[0m
+[0m [90m   | [39m                            [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mUnitList[39m } from [32m'@/features/unit-management'[39m[33m;[39m[0m
+[0m [90m 6 | [39m[36mimport[39m { [33mShiftManagement[39m } from [32m'@/features/shift-management'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mimport[39m { [0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:5:26[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/unit-management' or its corresponding type declarations.
+
+[0m [90m 3 | [39m[36mimport[39m { [33mVehicleSearch[39m } from [32m'@/features/vehicle-registration'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mReportsList[39m } from [32m'@/features/reports-management'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 5 | [39m[36mimport[39m { [33mUnitList[39m } from [32m'@/features/unit-management'[39m[33m;[39m[0m
+[0m [90m   | [39m                         [31m[1m^[22m[39m[0m
+[0m [90m 6 | [39m[36mimport[39m { [33mShiftManagement[39m } from [32m'@/features/shift-management'[39m[33m;[39m[0m
+[0m [90m 7 | [39m[36mimport[39m { [0m
+[0m [90m 8 | [39m  [33mSearch[39m[33m,[39m [0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:6:33[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/features/shift-management' or its corresponding type declarations.
+
+[0m [90m 4 | [39m[36mimport[39m { [33mReportsList[39m } from [32m'@/features/reports-management'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [33mUnitList[39m } from [32m'@/features/unit-management'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 6 | [39m[36mimport[39m { [33mShiftManagement[39m } from [32m'@/features/shift-management'[39m[33m;[39m[0m
+[0m [90m   | [39m                                [31m[1m^[22m[39m[0m
+[0m [90m 7 | [39m[36mimport[39m { [0m
+[0m [90m 8 | [39m  [33mSearch[39m[33m,[39m [0m
+[0m [90m 9 | [39m  [33mCar[39m[33m,[39m [0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:18:24[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms/Button' or its corresponding type declarations.
+
+[0m [90m 16 | [39m  [33mArrowLeft[39m[0m
+[0m [90m 17 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 18 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m [90m    | [39m                       [31m[1m^[22m[39m[0m
+[0m [90m 19 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m [90m 20 | [39m[36mimport[39m { useMdtPortalStore } from [32m'../model/store'[39m[33m;[39m[0m
+[0m [90m 21 | [39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\ModuleRenderer.tsx:19:22[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/ui/atoms/Card' or its corresponding type declarations.
+
+[0m [90m 17 | [39m} from [32m'lucide-react'[39m[33m;[39m[0m
+[0m [90m 18 | [39m[36mimport[39m { [33mButton[39m } from [32m'@/shared/ui/atoms/Button'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 19 | [39m[36mimport[39m { [33mCard[39m } from [32m'@/shared/ui/atoms/Card'[39m[33m;[39m[0m
+[0m [90m    | [39m                     [31m[1m^[22m[39m[0m
+[0m [90m 20 | [39m[36mimport[39m { useMdtPortalStore } from [32m'../model/store'[39m[33m;[39m[0m
+[0m [90m 21 | [39m[0m
+[0m [90m 22 | [39minterface [33mModuleRendererProps[39m {[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\NavigationSidebar.tsx:3:27[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/contexts/LocaleContext' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { [33mLink[39m[33m,[39m useLocation } from [32m'react-router-dom'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { useAuth } from [32m'@/shared/contexts/AuthContext'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [0m
+[0m [90m 6 | [39m  [33mLayoutDashboard[39m[33m,[39m [0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\NavigationSidebar.tsx:4:25[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/contexts/AuthContext' or its corresponding type declarations.
+
+[0m [90m 2 | [39m[36mimport[39m { [33mLink[39m[33m,[39m useLocation } from [32m'react-router-dom'[39m[33m;[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 | [39m[36mimport[39m { useAuth } from [32m'@/shared/contexts/AuthContext'[39m[33m;[39m[0m
+[0m [90m   | [39m                        [31m[1m^[22m[39m[0m
+[0m [90m 5 | [39m[36mimport[39m { [0m
+[0m [90m 6 | [39m  [33mLayoutDashboard[39m[33m,[39m [0m
+[0m [90m 7 | [39m  [33mBell[39m[33m,[39m [0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\TopHeader.tsx:2:25[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/contexts/AuthContext' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m useEffect } from [32m'react'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 2 | [39m[36mimport[39m { useAuth } from [32m'@/shared/contexts/AuthContext'[39m[33m;[39m[0m
+[0m [90m   | [39m                        [31m[1m^[22m[39m[0m
+[0m [90m 3 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mGlobe[39m[33m,[39m [33mChevronDown[39m } from [32m'lucide-react'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[0m
+
+[4m[34mapps\mdtclient\src\widgets\mdt-portal\ui\TopHeader.tsx:3:27[39m[24m - [31m[1merror[22m[39m [90mTS2307[39m: Cannot find module '@/shared/contexts/LocaleContext' or its corresponding type declarations.
+
+[0m [90m 1 | [39m[36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m useEffect } from [32m'react'[39m[33m;[39m[0m
+[0m [90m 2 | [39m[36mimport[39m { useAuth } from [32m'@/shared/contexts/AuthContext'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 3 | [39m[36mimport[39m { useLocale } from [32m'@/shared/contexts/LocaleContext'[39m[33m;[39m[0m
+[0m [90m   | [39m                          [31m[1m^[22m[39m[0m
+[0m [90m 4 | [39m[36mimport[39m { [33mGlobe[39m[33m,[39m [33mChevronDown[39m } from [32m'lucide-react'[39m[33m;[39m[0m
+[0m [90m 5 | [39m[0m
+[0m [90m 6 | [39m[36mexport[39m [36mconst[39m [33mTopHeader[39m[33m:[39m [33mReact[39m[33m.[39m[33mFC[39m [33m=[39m () [33m=>[39m {[0m
+
+Found 57 errors.
+
+ [31m>[39m [0m[7m[1m[31m NX [39m[22m[27m[0m  [31mFound type errors. See above.[39m
+
+   Pass --verbose to see the stacktrace.
+
