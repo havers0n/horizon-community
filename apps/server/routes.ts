@@ -12,6 +12,7 @@ import cadRoutes from "./routes/cad";
 import discordRoutes from "./routes/discord";
 import reportTemplatesRoutes from "./routes/reportTemplates";
 import filledReportsRoutes from "./routes/filledReports";
+import normalizedCharacterRoutes from "./routes/normalized-character.routes.js";
 import { initializeCADWebSocket } from "./websocket";
 import fs from 'fs/promises';
 import path from 'path';
@@ -19,7 +20,7 @@ import { authenticateToken, requireSupervisor, requireAdmin } from './middleware
 import { uploadMiddleware, handleUpload } from './fileUpload';
 import adminSupportRoutes from './routes/admin/support.routes.js';
 import adminTestsRoutes from './routes/adminTests.js';
-import forumRoutes from './routes/forum.js';
+// import forumRoutes from './routes/forum.js';
 import mdtRoutes from './routes/mdt.js';
 import realtimeRoutes from './routes/realtime-simple.js';
 import testRoutes from './routes/test.routes';
@@ -663,6 +664,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/cad', cadRoutes);
   app.use('/api/discord', discordRoutes);
 
+  // Normalized Character System routes
+  app.use('/api/characters', normalizedCharacterRoutes);
+
   // Report templates and filled reports routes
   app.use('/api/report-templates', reportTemplatesRoutes);
   app.use('/api/filled-reports', filledReportsRoutes);
@@ -878,7 +882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/admin/tests', adminTestsRoutes);
 
   // Forum routes
-  app.use('/api/forum', forumRoutes);
+  // app.use('/api/forum', forumRoutes);
 
   // MDT routes
   app.use('/api/mdt', mdtRoutes);

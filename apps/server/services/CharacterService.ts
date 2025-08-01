@@ -1,208 +1,257 @@
-import { pool } from '../db/index.js';
-import type { 
-  Character,
-  InsertCharacter 
-} from '../types';
+import { supabaseStorage } from './SupabaseStorage.js';
+import type { Character, InsertCharacter } from '../types.js';
+
+// ===== CHARACTER SERVICE - БИЗНЕС-ЛОГИКА ДЛЯ ПЕРСОНАЖЕЙ =====
 
 export class CharacterService {
   
-  /**
-   * Создать нового персонажа
-   */
-  public async createCharacter(ownerId: number, data: any): Promise<Character> {
-    const characterData = {
-      owner_id: ownerId,
-      first_name: data.firstName,
-      last_name: data.lastName,
-      department_id: data.departmentId || 1,
-      rank: data.rank,
-      status: data.status || 'active',
-      insurance_number: data.insuranceNumber,
-      address: data.address
+  // ===== АДАПТЕРЫ ТИПОВ =====
+  
+  private adaptSupabaseCharacterToCharacter(supabaseCharacter: any): Character {
+    return {
+      id: supabaseCharacter.id,
+      ownerId: supabaseCharacter.owner_id,
+      firstName: supabaseCharacter.first_name,
+      lastName: supabaseCharacter.last_name,
+      dateOfBirth: supabaseCharacter.date_of_birth,
+      gender: supabaseCharacter.gender,
+      nationality: supabaseCharacter.nationality,
+      phoneNumber: supabaseCharacter.phone_number || undefined,
+      address: supabaseCharacter.address || undefined,
+      createdAt: new Date(supabaseCharacter.created_at),
+      updatedAt: new Date(supabaseCharacter.updated_at)
     };
+  }
 
-    const result = await pool.query(`
-      INSERT INTO characters (
-        owner_id, first_name, last_name, department_id, rank, status, insurance_number, address,
-        created_at, updated_at
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()
-      ) RETURNING *
-    `, [
-      characterData.owner_id, characterData.first_name, characterData.last_name,
-      characterData.department_id, characterData.rank, characterData.status,
-      characterData.insurance_number, characterData.address
-    ]);
+  private adaptCharacterToSupabaseCharacter(character: InsertCharacter): any {
+    return {
+      owner_id: character.ownerId,
+      first_name: character.firstName,
+      last_name: character.lastName,
+      date_of_birth: character.dateOfBirth,
+      gender: character.gender,
+      nationality: character.nationality,
+      phone_number: character.phoneNumber || null,
+      address: character.address || null
+    };
+  }
 
-    if (!result.rows[0]) {
+  // ===== ОСНОВНЫЕ ОПЕРАЦИИ =====
+  
+  async getCharacter(id: number): Promise<Character | undefined> {
+    const data = await supabaseStorage.getById('characters', id);
+    return data ? this.adaptSupabaseCharacterToCharacter(data) : undefined;
+  }
+
+  async getCharactersByOwner(ownerId: number): Promise<Character[]> {
+    const data = await supabaseStorage.list('characters', { owner_id: ownerId });
+    return data.map(character => this.adaptSupabaseCharacterToCharacter(character));
+  }
+
+  async createCharacter(character: InsertCharacter): Promise<Character> {
+    const supabaseCharacter = this.adaptCharacterToSupabaseCharacter(character);
+    const data = await supabaseStorage.insert('characters', supabaseCharacter);
+    
+    if (!data) {
       throw new Error('Failed to create character');
     }
-
-    return this.mapDbRowToCharacter(result.rows[0]);
-  }
-
-  /**
-   * Получить персонажа по ID
-   */
-  public async getCharacterById(id: number, ownerId?: number): Promise<Character | null> {
-    const whereClause = ownerId 
-      ? 'WHERE id = $1 AND owner_id = $2'
-      : 'WHERE id = $1';
     
-    const params = ownerId ? [id, ownerId] : [id];
-
-    const result = await pool.query(`
-      SELECT * FROM characters ${whereClause}
-    `, params);
-
-    return result.rows[0] ? this.mapDbRowToCharacter(result.rows[0]) : null;
+    return this.adaptSupabaseCharacterToCharacter(data);
   }
 
-  /**
-   * Получить всех персонажей пользователя
-   */
-  public async getCharactersByOwner(ownerId: number): Promise<Character[]> {
-    const result = await pool.query(`
-      SELECT * FROM characters 
-      WHERE owner_id = $1 
-      ORDER BY created_at DESC
-    `, [ownerId]);
-
-    return result.rows.map(row => this.mapDbRowToCharacter(row));
-  }
-
-  /**
-   * Обновить персонажа
-   */
-  public async updateCharacter(id: number, ownerId: number, data: any): Promise<Character> {
-    // Подготавливаем данные для обновления
-    const updateData: Partial<InsertCharacter> = {};
+  async updateCharacter(id: number, updates: Partial<Character>): Promise<Character | undefined> {
+    const supabaseUpdates: any = {};
     
-    if (data.firstName !== undefined) updateData.firstName = data.firstName;
-    if (data.lastName !== undefined) updateData.lastName = data.lastName;
-    if (data.departmentId !== undefined) updateData.departmentId = data.departmentId;
-    if (data.rank !== undefined) updateData.rank = data.rank;
-    if (data.status !== undefined) updateData.status = data.status;
-    if (data.insuranceNumber !== undefined) updateData.insuranceNumber = data.insuranceNumber;
-    if (data.address !== undefined) updateData.address = data.address;
-
-    const result = await pool.query(`
-      UPDATE characters SET
-        first_name = $1, last_name = $2, department_id = $3, rank = $4, status = $5,
-        insurance_number = $6, address = $7, updated_at = NOW()
-      WHERE id = $8 AND owner_id = $9
-      RETURNING *
-    `, [
-      updateData.firstName, updateData.lastName, updateData.departmentId, updateData.rank,
-      updateData.status, updateData.insuranceNumber, updateData.address, id, ownerId
-    ]);
-
-    if (!result.rows[0]) {
-      throw new Error('Character not found or access denied');
-    }
-
-    return this.mapDbRowToCharacter(result.rows[0]);
-  }
-
-  /**
-   * Удалить персонажа
-   */
-  public async deleteCharacter(id: number, ownerId: number): Promise<boolean> {
-    const result = await pool.query(`
-      DELETE FROM characters WHERE id = $1 AND owner_id = $2
-    `, [id, ownerId]);
-
-    return (result.rowCount || 0) > 0;
-  }
-
-  /**
-   * Поиск персонажей по различным критериям
-   */
-  public async searchCharacters(query: string, ownerId?: number): Promise<Character[]> {
-    const whereClause = ownerId 
-      ? 'WHERE owner_id = $1 AND (first_name ILIKE $2 OR last_name ILIKE $3 OR insurance_number ILIKE $4)'
-      : 'WHERE first_name ILIKE $1 OR last_name ILIKE $2 OR insurance_number ILIKE $3';
+    if (updates.ownerId !== undefined) supabaseUpdates.owner_id = updates.ownerId;
+    if (updates.firstName !== undefined) supabaseUpdates.first_name = updates.firstName;
+    if (updates.lastName !== undefined) supabaseUpdates.last_name = updates.lastName;
+    if (updates.dateOfBirth !== undefined) supabaseUpdates.date_of_birth = updates.dateOfBirth;
+    if (updates.gender !== undefined) supabaseUpdates.gender = updates.gender;
+    if (updates.nationality !== undefined) supabaseUpdates.nationality = updates.nationality;
+    if (updates.phoneNumber !== undefined) supabaseUpdates.phone_number = updates.phoneNumber;
+    if (updates.address !== undefined) supabaseUpdates.address = updates.address;
     
-    const params = ownerId ? [ownerId, `%${query}%`, `%${query}%`, `%${query}%`] : [`%${query}%`, `%${query}%`, `%${query}%`];
-
-    const result = await pool.query(`
-      SELECT * FROM characters ${whereClause}
-      ORDER BY first_name ASC, last_name ASC
-    `, params);
-
-    return result.rows.map(row => this.mapDbRowToCharacter(row));
+    const data = await supabaseStorage.update('characters', id, supabaseUpdates);
+    return data ? this.adaptSupabaseCharacterToCharacter(data) : undefined;
   }
 
-  /**
-   * Получить персонажей по типу (civilian, leo, fire, ems)
-   */
-  public async getCharactersByType(type: string, ownerId?: number): Promise<Character[]> {
-    const whereClause = ownerId 
-      ? 'WHERE owner_id = $1 AND type = $2'
-      : 'WHERE type = $1';
-    
-    const params = ownerId ? [ownerId, type] : [type];
-
-    const result = await pool.query(`
-      SELECT * FROM characters ${whereClause}
-      ORDER BY created_at DESC
-    `, params);
-
-    return result.rows.map(row => this.mapDbRowToCharacter(row));
+  async deleteCharacter(id: number): Promise<boolean> {
+    return await supabaseStorage.delete('characters', id);
   }
 
-  /**
-   * Получить статистику персонажей пользователя
-   */
-  public async getCharacterStats(ownerId: number): Promise<{
-    total: number;
-    byType: Record<string, number>;
-    active: number;
-    dead: number;
-    missing: number;
-    arrested: number;
-  }> {
-    const userCharacters = await this.getCharactersByOwner(ownerId);
-    
-    const stats = {
-      total: userCharacters.length,
-      byType: {} as Record<string, number>,
-      active: 0,
-      dead: 0,
-      missing: 0,
-      arrested: 0,
-    };
+  async getAllCharacters(): Promise<Character[]> {
+    const data = await supabaseStorage.list('characters');
+    return data.map(character => this.adaptSupabaseCharacterToCharacter(character));
+  }
 
-    userCharacters.forEach(character => {
-      // Подсчет по статусам (используем только доступные поля)
-      if (character.status === 'dead') stats.dead++;
-      else if (character.status === 'missing') stats.missing++;
-      else if (character.status === 'arrested') stats.arrested++;
-      else stats.active++;
+  // ===== ПОИСК И ФИЛЬТРАЦИЯ =====
+  
+  async searchCharacters(query: string, limit: number = 10): Promise<Character[]> {
+    const data = await supabaseStorage.search('characters', ['first_name', 'last_name'], query, limit);
+    return data.map(character => this.adaptSupabaseCharacterToCharacter(character));
+  }
+
+  async getCharactersWithFilters(filters: {
+    ownerId?: number;
+    gender?: string;
+    nationality?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Character[]> {
+    const supabaseFilters: Record<string, any> = {};
+    
+    if (filters.ownerId !== undefined) supabaseFilters.owner_id = filters.ownerId;
+    if (filters.gender !== undefined) supabaseFilters.gender = filters.gender;
+    if (filters.nationality !== undefined) supabaseFilters.nationality = filters.nationality;
+    
+    const data = await supabaseStorage.list('characters', supabaseFilters, {
+      limit: filters.limit,
+      offset: filters.offset,
+      orderBy: { column: 'created_at', ascending: false }
     });
-
-    return stats;
+    
+    return data.map(character => this.adaptSupabaseCharacterToCharacter(character));
   }
 
-  /**
-   * Преобразовать строку БД в объект Character
-   */
-  private mapDbRowToCharacter(row: any): Character {
+  async getCharactersByGender(gender: string): Promise<Character[]> {
+    const data = await supabaseStorage.list('characters', { gender });
+    return data.map(character => this.adaptSupabaseCharacterToCharacter(character));
+  }
+
+  async getCharactersByNationality(nationality: string): Promise<Character[]> {
+    const data = await supabaseStorage.list('characters', { nationality });
+    return data.map(character => this.adaptSupabaseCharacterToCharacter(character));
+  }
+
+  // ===== СТАТИСТИКА =====
+  
+  async getCharacterCount(): Promise<number> {
+    return await supabaseStorage.count('characters');
+  }
+
+  async getCharacterCountByOwner(ownerId: number): Promise<number> {
+    return await supabaseStorage.count('characters', { owner_id: ownerId });
+  }
+
+  async getCharacterCountByGender(gender: string): Promise<number> {
+    return await supabaseStorage.count('characters', { gender });
+  }
+
+  async getCharacterCountByNationality(nationality: string): Promise<number> {
+    return await supabaseStorage.count('characters', { nationality });
+  }
+
+  // ===== БИЗНЕС-ЛОГИКА =====
+  
+  async getCharacterFullName(id: number): Promise<string | undefined> {
+    const character = await this.getCharacter(id);
+    if (!character) return undefined;
+    
+    return `${character.firstName} ${character.lastName}`;
+  }
+
+  async getCharacterAge(id: number): Promise<number | undefined> {
+    const character = await this.getCharacter(id);
+    if (!character) return undefined;
+    
+    const birthDate = new Date(character.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  }
+
+  async isCharacterAdult(id: number): Promise<boolean> {
+    const age = await this.getCharacterAge(id);
+    return age !== undefined && age >= 18;
+  }
+
+  async transferCharacterOwnership(characterId: number, newOwnerId: number): Promise<Character | undefined> {
+    return await this.updateCharacter(characterId, { ownerId: newOwnerId });
+  }
+
+  async getCharactersByAgeRange(minAge: number, maxAge: number): Promise<Character[]> {
+    const allCharacters = await this.getAllCharacters();
+    const charactersInRange: Character[] = [];
+    
+    for (const character of allCharacters) {
+      const age = await this.getCharacterAge(character.id);
+      if (age !== undefined && age >= minAge && age <= maxAge) {
+        charactersInRange.push(character);
+      }
+    }
+    
+    return charactersInRange;
+  }
+
+  async getCharactersByBirthYear(year: number): Promise<Character[]> {
+    const allCharacters = await this.getAllCharacters();
+    return allCharacters.filter(character => {
+      const birthYear = new Date(character.dateOfBirth).getFullYear();
+      return birthYear === year;
+    });
+  }
+
+  async getCharactersByBirthMonth(month: number): Promise<Character[]> {
+    const allCharacters = await this.getAllCharacters();
+    return allCharacters.filter(character => {
+      const birthMonth = new Date(character.dateOfBirth).getMonth() + 1; // +1 because getMonth() returns 0-11
+      return birthMonth === month;
+    });
+  }
+
+  async validateCharacterData(character: InsertCharacter): Promise<{ isValid: boolean; errors: string[] }> {
+    const errors: string[] = [];
+    
+    if (!character.firstName || character.firstName.trim().length === 0) {
+      errors.push('First name is required');
+    }
+    
+    if (!character.lastName || character.lastName.trim().length === 0) {
+      errors.push('Last name is required');
+    }
+    
+    if (!character.dateOfBirth) {
+      errors.push('Date of birth is required');
+    } else {
+      const birthDate = new Date(character.dateOfBirth);
+      if (isNaN(birthDate.getTime())) {
+        errors.push('Invalid date of birth format');
+      } else {
+        const today = new Date();
+        if (birthDate > today) {
+          errors.push('Date of birth cannot be in the future');
+        }
+      }
+    }
+    
+    if (!character.gender || character.gender.trim().length === 0) {
+      errors.push('Gender is required');
+    }
+    
+    if (!character.nationality || character.nationality.trim().length === 0) {
+      errors.push('Nationality is required');
+    }
+    
+    if (character.phoneNumber && character.phoneNumber.trim().length > 0) {
+      // Простая валидация телефона
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      if (!phoneRegex.test(character.phoneNumber.replace(/\s/g, ''))) {
+        errors.push('Invalid phone number format');
+      }
+    }
+    
     return {
-      id: row.id,
-      ownerId: row.owner_id,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      departmentId: row.department_id || 1, // Значение по умолчанию
-      rank: row.rank || undefined,
-      status: row.status || 'active',
-      insuranceNumber: row.insurance_number || undefined,
-      address: row.address || undefined,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
+      isValid: errors.length === 0,
+      errors
     };
   }
 }
 
-// Экспортируем экземпляр сервиса
+// Экспортируем единственный экземпляр
 export const characterService = new CharacterService(); 

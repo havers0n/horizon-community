@@ -700,21 +700,23 @@ export class MDTService {
     return {
       id: row.id.toString(),
       unitNumber: row.unit_number,
-      department: row.department_name,
+      departmentId: row.department_id,
+      departmentName: row.department_name,
       status: row.status,
       location: row.location,
-      currentCallId: row.current_call_id?.toString(),
-      partnerId: row.partner_id?.toString(),
-      vehicleId: row.vehicle_id?.toString(),
+      currentCallId: row.current_call_id,
+      partnerId: row.partner_id,
+      vehicleId: row.vehicle_id,
+      vehiclePlate: row.vehicle_plate,
+      vehicleModel: row.vehicle_model,
       isPanic: row.is_panic,
       lastUpdate: row.last_update,
       createdAt: row.created_at,
-      // Дополнительная информация
-      characterName: `${row.first_name} ${row.last_name}`,
+      characterId: row.character_id,
+      firstName: row.first_name,
+      lastName: row.last_name,
       badgeNumber: row.badge_number,
-      callsign: row.callsign,
-      vehiclePlate: row.vehicle_plate,
-      vehicleModel: row.vehicle_model
+      callsign: row.callsign
     };
   }
 
@@ -748,14 +750,14 @@ export class MDTService {
       title: row.title,
       description: row.description,
       type: row.type,
-      authorId: row.author_id.toString(),
-      authorName: row.author_name,
       priority: row.priority,
       location: row.location,
       coordinates: row.coordinates,
       isActive: row.is_active,
       expiresAt: row.expires_at,
-      createdAt: row.created_at
+      authorId: row.author_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
     };
   }
 }

@@ -1,21 +1,14 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
-import { 
-  forumCategories, 
-  forumTopics, 
-  forumPosts, 
-  forumReactions, 
-  forumSubscriptions, 
-  forumViews, 
-  forumStats,
-  users,
-  departments
-} from '../db/index.js';
-import { eq, desc, asc, and, or, like, sql, count } from 'drizzle-orm';
+import { storage } from '../storage.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { rateLimit } from 'express-rate-limit';
 
 const router: import('express').Router = Router();
+
+// TODO: Временно закомментировано - нужно создать ForumService
+// и добавить методы в storage для работы с форумом
+
+/*
 
 // Rate limiting для API форума
 const forumRateLimit = rateLimit({
@@ -31,7 +24,7 @@ const postRateLimit = rateLimit({
 });
 
 // Получение статистики форума
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticateToken, async (req, res) => {
   try {
     const stats = await db.select().from(forumStats).limit(1);
     
@@ -55,7 +48,7 @@ router.get('/stats', async (req, res) => {
 });
 
 // Получение всех категорий форума
-router.get('/categories', async (req, res) => {
+router.get('/categories', authenticateToken, async (req, res) => {
   try {
     const categories = await db
       .select({
@@ -85,7 +78,7 @@ router.get('/categories', async (req, res) => {
 });
 
 // Получение тем в категории
-router.get('/categories/:categoryId/topics', async (req, res) => {
+router.get('/categories/:categoryId/topics', authenticateToken, async (req, res) => {
   try {
     const { categoryId } = req.params;
     const { page = 1, limit = 20, sort = 'latest' } = req.query;
@@ -188,7 +181,7 @@ router.post('/topics', authenticateToken, postRateLimit, async (req, res) => {
 });
 
 // Получение темы с сообщениями
-router.get('/topics/:topicId', async (req, res) => {
+router.get('/topics/:topicId', authenticateToken, async (req, res) => {
   try {
     const { topicId } = req.params;
     const { page = 1, limit = 20 } = req.query;
@@ -494,7 +487,7 @@ router.post('/topics/:topicId/subscribe', authenticateToken, async (req, res) =>
 });
 
 // Поиск по форуму
-router.get('/search', async (req, res) => {
+router.get('/search', authenticateToken, async (req, res) => {
   try {
     const { q, categoryId, page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -557,7 +550,7 @@ router.get('/search', async (req, res) => {
 });
 
 // Получение последних активных тем
-router.get('/recent', async (req, res) => {
+router.get('/recent', authenticateToken, async (req, res) => {
   try {
     const { limit = 10 } = req.query;
     
@@ -586,5 +579,7 @@ router.get('/recent', async (req, res) => {
     res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 });
+
+*/
 
 export default router; 

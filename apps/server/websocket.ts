@@ -1,17 +1,218 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { storage } from './storage.js';
-import { activeUnits, call911, callAttachments } from '@roleplay-identity/shared-schema';
-import { 
-  WEBSOCKET_EVENTS, 
-  WEBSOCKET_CHANNELS, 
-  USER_PERMISSIONS,
-  getDefaultPermissions,
-  getChannelForEvent,
-  type WebSocketEvent,
-  type WebSocketClient
-} from '@roleplay-identity/shared-schema';
 
+// ===== ЛОКАЛЬНЫЕ ТИПЫ И КОНСТАНТЫ =====
+
+// WebSocket события
+export const WEBSOCKET_EVENTS = {
+  WELCOME: 'welcome',
+  AUTHENTICATED: 'authenticated',
+  ERROR: 'error',
+  PING: 'ping',
+  PONG: 'pong',
+  SUBSCRIBED: 'subscribed',
+  UNSUBSCRIBED: 'unsubscribed',
+  UNIT_STATUS_UPDATE: 'unit_status_update',
+  UNIT_LOCATION_UPDATE: 'unit_location_update',
+  NEW_CALL: 'new_call',
+  CALL_STATUS_UPDATE: 'call_status_update',
+  PANIC_ALERT: 'panic_alert',
+  BOLO_ALERT: 'bolo_alert',
+  CALL_CREATED: 'call_created',
+  CALL_UPDATED: 'call_updated',
+  CALL_ENDED: 'call_ended',
+  INCIDENT_CREATED: 'incident_created',
+  INCIDENT_UPDATED: 'incident_updated',
+  WARRANT_CREATED: 'warrant_created',
+  WARRANT_UPDATED: 'warrant_updated',
+  TOW_CALL_CREATED: 'tow_call_created',
+  TOW_CALL_UPDATED: 'tow_call_updated',
+  TOW_CALL_ENDED: 'tow_call_ended',
+  TAXI_CALL_CREATED: 'taxi_call_created',
+  TAXI_CALL_UPDATED: 'taxi_call_updated',
+  TAXI_CALL_ENDED: 'taxi_call_ended',
+  UNIT_OFF_DUTY: 'unit_off_duty',
+  OFFICER_STATUS_UPDATED: 'officer_status_updated',
+  EMS_FD_STATUS_UPDATED: 'ems_fd_status_updated',
+  BOLO_CREATED: 'bolo_created',
+  BOLO_UPDATED: 'bolo_updated',
+  BOLO_DELETED: 'bolo_deleted',
+  PANIC_BUTTON_ON: 'panic_button_on',
+  PANIC_BUTTON_OFF: 'panic_button_off',
+  SIGNAL_100: 'signal_100',
+  ROLEPLAY_STOPPED: 'roleplay_stopped',
+  AREA_OF_PLAY_UPDATED: 'area_of_play_updated',
+  DISPATCHER_UPDATE: 'dispatcher_update',
+  SIGNAL_100_ON: 'signal_100_on',
+  SIGNAL_100_OFF: 'signal_100_off',
+  DISPATCHER_UPDATED: 'dispatcher_updated',
+  HEARTBEAT: 'heartbeat'
+} as const;
+
+// WebSocket каналы
+export const WEBSOCKET_CHANNELS = {
+  ALL: 'all',
+  DISPATCH: 'dispatch',
+  LAW_ENFORCEMENT: 'law_enforcement',
+  EMS: 'ems',
+  FIRE: 'fire',
+  ADMIN: 'admin',
+  SUPERVISOR: 'supervisor',
+  UNITS: 'units',
+  CALLS: 'calls',
+  ALERTS: 'alerts',
+  INCIDENTS: 'incidents',
+  WARRANTS: 'warrants',
+  TOW_CALLS: 'tow_calls',
+  TAXI_CALLS: 'taxi_calls',
+  SYSTEM: 'system',
+  DISPATCHERS: 'dispatchers'
+} as const;
+
+// Права пользователей
+export const USER_PERMISSIONS = {
+  VIEW_DISPATCH: 'view_dispatch',
+  CREATE_CALLS: 'create_calls',
+  UPDATE_CALLS: 'update_calls',
+  VIEW_LAW_ENFORCEMENT: 'view_law_enforcement',
+  VIEW_EMS: 'view_ems',
+  VIEW_FIRE: 'view_fire',
+  VIEW_ADMIN: 'view_admin',
+  VIEW_SUPERVISOR: 'view_supervisor',
+  SEND_PANIC_ALERT: 'send_panic_alert',
+  CREATE_BOLO: 'create_bolo',
+  UPDATE_BOLO: 'update_bolo',
+  DELETE_BOLO: 'delete_bolo'
+} as const;
+
+// Типы
+export type WebSocketEventType = typeof WEBSOCKET_EVENTS[keyof typeof WEBSOCKET_EVENTS];
+export type WebSocketChannelType = typeof WEBSOCKET_CHANNELS[keyof typeof WEBSOCKET_CHANNELS];
+export type UserPermissionType = typeof USER_PERMISSIONS[keyof typeof USER_PERMISSIONS];
+
+export interface WebSocketEvent {
+  type: WebSocketEventType;
+  data: any;
+  timestamp: number;
+  channels?: WebSocketChannelType[];
+}
+
+export interface WebSocketClient {
+  ws: WebSocket;
+  permissions: UserPermissionType[];
+  subscriptions: WebSocketChannelType[];
+  userId?: number;
+  characterId?: number;
+  departmentId?: number;
+  role?: string;
+  isDispatcher?: boolean;
+  isAdmin?: boolean;
+}
+
+// Функции для работы с правами
+export function getDefaultPermissions(role: string): UserPermissionType[] {
+  const permissions: UserPermissionType[] = [];
+  
+  switch (role) {
+    case 'admin':
+      permissions.push(
+        USER_PERMISSIONS.VIEW_DISPATCH,
+        USER_PERMISSIONS.CREATE_CALLS,
+        USER_PERMISSIONS.UPDATE_CALLS,
+        USER_PERMISSIONS.VIEW_LAW_ENFORCEMENT,
+        USER_PERMISSIONS.VIEW_EMS,
+        USER_PERMISSIONS.VIEW_FIRE,
+        USER_PERMISSIONS.VIEW_ADMIN,
+        USER_PERMISSIONS.VIEW_SUPERVISOR,
+        USER_PERMISSIONS.SEND_PANIC_ALERT,
+        USER_PERMISSIONS.CREATE_BOLO,
+        USER_PERMISSIONS.UPDATE_BOLO,
+        USER_PERMISSIONS.DELETE_BOLO
+      );
+      break;
+    case 'supervisor':
+      permissions.push(
+        USER_PERMISSIONS.VIEW_DISPATCH,
+        USER_PERMISSIONS.CREATE_CALLS,
+        USER_PERMISSIONS.UPDATE_CALLS,
+        USER_PERMISSIONS.VIEW_LAW_ENFORCEMENT,
+        USER_PERMISSIONS.VIEW_EMS,
+        USER_PERMISSIONS.VIEW_FIRE,
+        USER_PERMISSIONS.VIEW_SUPERVISOR,
+        USER_PERMISSIONS.SEND_PANIC_ALERT,
+        USER_PERMISSIONS.CREATE_BOLO,
+        USER_PERMISSIONS.UPDATE_BOLO
+      );
+      break;
+    case 'officer':
+      permissions.push(
+        USER_PERMISSIONS.VIEW_DISPATCH,
+        USER_PERMISSIONS.VIEW_LAW_ENFORCEMENT,
+        USER_PERMISSIONS.SEND_PANIC_ALERT
+      );
+      break;
+    case 'ems':
+      permissions.push(
+        USER_PERMISSIONS.VIEW_DISPATCH,
+        USER_PERMISSIONS.VIEW_EMS,
+        USER_PERMISSIONS.SEND_PANIC_ALERT
+      );
+      break;
+    case 'fire':
+      permissions.push(
+        USER_PERMISSIONS.VIEW_DISPATCH,
+        USER_PERMISSIONS.VIEW_FIRE,
+        USER_PERMISSIONS.SEND_PANIC_ALERT
+      );
+      break;
+    default:
+      permissions.push(USER_PERMISSIONS.VIEW_DISPATCH);
+  }
+  
+  return permissions;
+}
+
+export function getChannelForEvent(eventType: WebSocketEventType): WebSocketChannelType[] {
+  switch (eventType) {
+    case WEBSOCKET_EVENTS.NEW_CALL:
+    case WEBSOCKET_EVENTS.CALL_STATUS_UPDATE:
+    case WEBSOCKET_EVENTS.CALL_CREATED:
+    case WEBSOCKET_EVENTS.CALL_UPDATED:
+    case WEBSOCKET_EVENTS.CALL_ENDED:
+      return [WEBSOCKET_CHANNELS.DISPATCH];
+    
+    case WEBSOCKET_EVENTS.UNIT_STATUS_UPDATE:
+    case WEBSOCKET_EVENTS.UNIT_LOCATION_UPDATE:
+    case WEBSOCKET_EVENTS.UNIT_OFF_DUTY:
+    case WEBSOCKET_EVENTS.OFFICER_STATUS_UPDATED:
+      return [WEBSOCKET_CHANNELS.DISPATCH, WEBSOCKET_CHANNELS.LAW_ENFORCEMENT];
+    
+    case WEBSOCKET_EVENTS.EMS_FD_STATUS_UPDATED:
+      return [WEBSOCKET_CHANNELS.DISPATCH, WEBSOCKET_CHANNELS.EMS, WEBSOCKET_CHANNELS.FIRE];
+    
+    case WEBSOCKET_EVENTS.PANIC_ALERT:
+    case WEBSOCKET_EVENTS.PANIC_BUTTON_ON:
+    case WEBSOCKET_EVENTS.PANIC_BUTTON_OFF:
+      return [WEBSOCKET_CHANNELS.DISPATCH, WEBSOCKET_CHANNELS.LAW_ENFORCEMENT, WEBSOCKET_CHANNELS.EMS, WEBSOCKET_CHANNELS.FIRE];
+    
+    case WEBSOCKET_EVENTS.BOLO_ALERT:
+    case WEBSOCKET_EVENTS.BOLO_CREATED:
+    case WEBSOCKET_EVENTS.BOLO_UPDATED:
+    case WEBSOCKET_EVENTS.BOLO_DELETED:
+      return [WEBSOCKET_CHANNELS.DISPATCH, WEBSOCKET_CHANNELS.LAW_ENFORCEMENT];
+    
+    case WEBSOCKET_EVENTS.SIGNAL_100:
+    case WEBSOCKET_EVENTS.ROLEPLAY_STOPPED:
+    case WEBSOCKET_EVENTS.AREA_OF_PLAY_UPDATED:
+      return [WEBSOCKET_CHANNELS.ALL];
+    
+    default:
+      return [WEBSOCKET_CHANNELS.DISPATCH];
+  }
+}
+
+// ===== ОСНОВНОЙ КОД =====
 
 
 class CADWebSocketServer {
@@ -128,7 +329,7 @@ class CADWebSocketServer {
       client.isAdmin = isAdmin;
       
       // Устанавливаем разрешения на основе ролей
-      client.permissions = getDefaultPermissions();
+      client.permissions = getDefaultPermissions('officer'); // Пример роли для аутентификации
       
       this.sendToClient(clientId, {
         type: WEBSOCKET_EVENTS.AUTHENTICATED,
@@ -220,8 +421,8 @@ class CADWebSocketServer {
     }
 
     // Используем маппинг событий на каналы
-    const expectedChannel = getChannelForEvent(eventType as any);
-    return client.subscriptions.includes(expectedChannel) || client.subscriptions.includes(WEBSOCKET_CHANNELS.ALL);
+    const expectedChannels = getChannelForEvent(eventType as any);
+    return expectedChannels.some(channel => client.subscriptions.includes(channel)) || client.subscriptions.includes(WEBSOCKET_CHANNELS.ALL);
   }
 
   // ===== СУЩЕСТВУЮЩИЕ МЕТОДЫ (сохранены для обратной совместимости) =====

@@ -4,8 +4,8 @@ import { Request, Response } from 'express';
 
 const router = Router();
 
-// Простой тестовый endpoint без аутентификации
-router.get('/test', (req, res) => {
+// Простой тестовый endpoint с аутентификацией
+router.get('/test', authenticateToken, (req, res) => {
   res.json({
     message: 'Сервер работает!',
     timestamp: new Date().toISOString(),
@@ -16,12 +16,12 @@ router.get('/test', (req, res) => {
   });
 });
 
-// Health check без аутентификации
-router.get('/health', (req, res) => {
+// Health check с аутентификацией
+router.get('/health', authenticateToken, (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    message: 'Сервер работает без аутентификации'
+    message: 'Сервер работает с аутентификацией'
   });
 });
 
@@ -39,8 +39,8 @@ router.get('/auth-test', authenticateToken, (req: any, res) => {
   });
 });
 
-// Тестовый endpoint без аутентификации для получения токена
-router.get('/get-token', async (req: Request, res: Response) => {
+// Тестовый endpoint с аутентификацией для получения токена
+router.get('/get-token', authenticateToken, async (req: Request, res: Response) => {
   try {
     // Создаем тестовый токен для демонстрации
     const testToken = {

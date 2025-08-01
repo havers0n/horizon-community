@@ -28,15 +28,15 @@ export interface Database {
           password_hash: string;
           role: string;
           status: string;
-          department_id?: number;
-          secondary_department_id?: number;
-          rank?: string;
-          division?: string;
+          department_id: number | null;
+          secondary_department_id: number | null;
+          rank: string | null;
+          division: string | null;
           qualifications: string[];
           game_warnings: number;
           admin_warnings: number;
-          auth_id?: string;
-          api_token?: string;
+          auth_id: string | null;
+          api_token: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -47,15 +47,15 @@ export interface Database {
           password_hash: string;
           role: string;
           status: string;
-          department_id?: number;
-          secondary_department_id?: number;
-          rank?: string;
-          division?: string;
+          department_id?: number | null;
+          secondary_department_id?: number | null;
+          rank?: string | null;
+          division?: string | null;
           qualifications?: string[];
           game_warnings?: number;
           admin_warnings?: number;
-          auth_id?: string;
-          api_token?: string;
+          auth_id?: string | null;
+          api_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -66,15 +66,15 @@ export interface Database {
           password_hash?: string;
           role?: string;
           status?: string;
-          department_id?: number;
-          secondary_department_id?: number;
-          rank?: string;
-          division?: string;
+          department_id?: number | null;
+          secondary_department_id?: number | null;
+          rank?: string | null;
+          division?: string | null;
           qualifications?: string[];
           game_warnings?: number;
           admin_warnings?: number;
-          auth_id?: string;
-          api_token?: string;
+          auth_id?: string | null;
+          api_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -83,17 +83,17 @@ export interface Database {
         Row: {
           id: number;
           name: string;
-          description?: string;
+          description: string | null;
         };
         Insert: {
           id?: number;
           name: string;
-          description?: string;
+          description?: string | null;
         };
         Update: {
           id?: number;
           name?: string;
-          description?: string;
+          description?: string | null;
         };
       };
       characters: {
@@ -105,8 +105,8 @@ export interface Database {
           date_of_birth: string;
           gender: string;
           nationality: string;
-          phone_number?: string;
-          address?: string;
+          phone_number: string | null;
+          address: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -118,8 +118,8 @@ export interface Database {
           date_of_birth: string;
           gender: string;
           nationality: string;
-          phone_number?: string;
-          address?: string;
+          phone_number?: string | null;
+          address?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -131,8 +131,8 @@ export interface Database {
           date_of_birth?: string;
           gender?: string;
           nationality?: string;
-          phone_number?: string;
-          address?: string;
+          phone_number?: string | null;
+          address?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -143,60 +143,66 @@ export interface Database {
           user_id: number;
           type: string;
           status: string;
-          content: any;
-          submitted_at: string;
-          reviewed_at?: string;
-          reviewed_by?: number;
-          notes?: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          type: string;
-          status?: string;
-          content: any;
-          submitted_at?: string;
-          reviewed_at?: string;
-          reviewed_by?: number;
-          notes?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          type?: string;
-          status?: string;
-          content?: any;
-          submitted_at?: string;
-          reviewed_at?: string;
-          reviewed_by?: number;
-          notes?: string;
-        };
-      };
-      reports: {
-        Row: {
-          id: number;
-          user_id: number;
-          title: string;
-          content: string;
-          status: string;
+          data: any;
+          reviewer_id: number | null;
+          review_comment: string | null;
+          character_id: number | null;
+          status_history: any | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: number;
           user_id: number;
-          title: string;
-          content: string;
+          type: string;
           status?: string;
+          data: any;
+          reviewer_id?: number | null;
+          review_comment?: string | null;
+          character_id?: number | null;
+          status_history?: any | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: number;
           user_id?: number;
-          title?: string;
-          content?: string;
+          type?: string;
           status?: string;
+          data?: any;
+          reviewer_id?: number | null;
+          review_comment?: string | null;
+          character_id?: number | null;
+          status_history?: any | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      reports: {
+        Row: {
+          id: number;
+          user_id: number;
+          status: string;
+          file_url: string;
+          supervisor_comment: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id: number;
+          status?: string;
+          file_url: string;
+          supervisor_comment?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: number;
+          status?: string;
+          file_url?: string;
+          supervisor_comment?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -205,30 +211,190 @@ export interface Database {
         Row: {
           id: number;
           user_id: number;
-          subject: string;
-          message: string;
           status: string;
-          priority: string;
+          messages: any[];
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: number;
           user_id: number;
-          subject: string;
-          message: string;
           status?: string;
-          priority?: string;
+          messages?: any[];
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: number;
           user_id?: number;
-          subject?: string;
-          message?: string;
           status?: string;
-          priority?: string;
+          messages?: any[];
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      notifications: {
+        Row: {
+          id: number;
+          user_id: number;
+          message: string;
+          link: string | null;
+          is_read: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id: number;
+          message: string;
+          link?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: number;
+          message?: string;
+          link?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      complaints: {
+        Row: {
+          id: number;
+          author_id: number;
+          subject: string;
+          content: string;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          author_id: number;
+          subject: string;
+          content: string;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          author_id?: number;
+          subject?: string;
+          content?: string;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      tests: {
+        Row: {
+          id: number;
+          title: string;
+          description: string;
+          questions: any[];
+          time_limit: number;
+          passing_score: number;
+          department_id: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          title: string;
+          description: string;
+          questions: any[];
+          time_limit: number;
+          passing_score: number;
+          department_id: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          title?: string;
+          description?: string;
+          questions?: any[];
+          time_limit?: number;
+          passing_score?: number;
+          department_id?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      test_sessions: {
+        Row: {
+          id: number;
+          user_id: number;
+          test_id: number;
+          status: string;
+          start_time: string;
+          end_time: string | null;
+          answers: any[];
+          score: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id: number;
+          test_id: number;
+          status?: string;
+          start_time: string;
+          end_time?: string | null;
+          answers?: any[];
+          score?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: number;
+          test_id?: number;
+          status?: string;
+          start_time?: string;
+          end_time?: string | null;
+          answers?: any[];
+          score?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      test_results: {
+        Row: {
+          id: number;
+          user_id: number;
+          test_id: number;
+          session_id: number;
+          score: number;
+          passed: boolean;
+          completed_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id: number;
+          test_id: number;
+          session_id: number;
+          score: number;
+          passed: boolean;
+          completed_at: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: number;
+          test_id?: number;
+          session_id?: number;
+          score?: number;
+          passed?: boolean;
+          completed_at?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -237,7 +403,6 @@ export interface Database {
   };
 }
 
-// Экспортируем типы для использования в других модулях
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
 export type Inserts<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
 export type Updates<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']; 

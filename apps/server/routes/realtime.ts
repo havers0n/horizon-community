@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { realTimeService } from '../services/RealTimeService.js';
-import { testAuthenticateToken } from '../middleware/test-auth.middleware.js';
+import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
@@ -8,7 +8,7 @@ const router = Router();
  * POST /api/realtime/broadcast
  * Отправка события всем клиентам
  */
-router.post('/broadcast', testAuthenticateToken, (req: Request, res: Response) => {
+router.post('/broadcast', authenticateToken, (req: Request, res: Response) => {
   try {
     const { type, data, channels = ['all'] } = req.body;
     
@@ -40,7 +40,7 @@ router.post('/broadcast', testAuthenticateToken, (req: Request, res: Response) =
  * GET /api/realtime/events
  * Получение событий для HTTP polling клиентов
  */
-router.get('/events', testAuthenticateToken, (req: Request, res: Response) => {
+router.get('/events', authenticateToken, (req: Request, res: Response) => {
   try {
     const channels = req.query.channels as string || 'all';
     const since = req.query.since ? parseInt(req.query.since as string) : undefined;
@@ -68,7 +68,7 @@ router.get('/events', testAuthenticateToken, (req: Request, res: Response) => {
  * GET /api/realtime/stats
  * Получение статистики real-time системы
  */
-router.get('/stats', testAuthenticateToken, (req: Request, res: Response) => {
+router.get('/stats', authenticateToken, (req: Request, res: Response) => {
   try {
     const stats = realTimeService.getCacheStats();
     const wsServer = require('../websocket.js').getCADWebSocket();
@@ -95,7 +95,7 @@ router.get('/stats', testAuthenticateToken, (req: Request, res: Response) => {
  * POST /api/realtime/subscribe
  * Подписка на каналы (для совместимости с WebSocket)
  */
-router.post('/subscribe', testAuthenticateToken, (req: Request, res: Response) => {
+router.post('/subscribe', authenticateToken, (req: Request, res: Response) => {
   try {
     const { channels } = req.body;
     
@@ -125,7 +125,7 @@ router.post('/subscribe', testAuthenticateToken, (req: Request, res: Response) =
  * POST /api/realtime/unsubscribe
  * Отписка от каналов (для совместимости с WebSocket)
  */
-router.post('/unsubscribe', testAuthenticateToken, (req: Request, res: Response) => {
+router.post('/unsubscribe', authenticateToken, (req: Request, res: Response) => {
   try {
     const { channels } = req.body;
     
@@ -155,7 +155,7 @@ router.post('/unsubscribe', testAuthenticateToken, (req: Request, res: Response)
  * POST /api/realtime/heartbeat
  * Heartbeat для поддержания соединения
  */
-router.post('/heartbeat', testAuthenticateToken, (req: Request, res: Response) => {
+router.post('/heartbeat', authenticateToken, (req: Request, res: Response) => {
   try {
     res.json({
       success: true,

@@ -12,7 +12,7 @@ export class LoggerService {
   }
 
   private shouldLog(level: string): boolean {
-    const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+    const levels: Record<string, number> = { debug: 0, info: 1, warn: 2, error: 3 };
     return levels[level] >= levels[this.logLevel];
   }
 

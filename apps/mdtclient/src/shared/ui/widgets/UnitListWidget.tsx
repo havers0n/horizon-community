@@ -7,6 +7,7 @@ import { useMDTUnits } from '@/hooks/useMDT';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { Users, MapPin, Clock } from 'lucide-react';
 import type { UnitStatus } from '@/shared/types';
+import { UnitStatuses } from '@/shared/types';
 
 interface UnitListWidgetProps {
   isCompact?: boolean;
@@ -30,15 +31,15 @@ export const UnitListWidget: React.FC<UnitListWidgetProps> = ({
 
   const getStatusColor = (status: UnitStatus) => {
     switch (status) {
-      case UnitStatus.AVAILABLE:
+      case UnitStatuses.AVAILABLE:
         return 'bg-green-600';
-      case UnitStatus.BUSY:
+      case UnitStatuses.BUSY:
         return 'bg-yellow-600';
-      case UnitStatus.EN_ROUTE:
+      case UnitStatuses.EN_ROUTE:
         return 'bg-blue-600';
-      case UnitStatus.ON_SCENE:
+      case UnitStatuses.ON_SCENE:
         return 'bg-purple-600';
-      case UnitStatus.PANIC:
+      case UnitStatuses.PANIC:
         return 'bg-red-600';
       default:
         return 'bg-secondary-600';

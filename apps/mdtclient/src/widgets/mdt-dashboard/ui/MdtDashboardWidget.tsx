@@ -26,14 +26,15 @@ import {
   useDashboardRealTime 
 } from '../model';
 import type { UnitStatus } from '@/shared/types';
+import { UnitStatuses } from '@/shared/types';
 
 // Опции статусов для кнопок
 const statusOptions = [
-  { value: UnitStatus.AVAILABLE, label: 'Доступен (10-8)', color: 'bg-green-500', icon: Shield },
-  { value: UnitStatus.BUSY, label: 'Занят (10-12)', color: 'bg-yellow-500', icon: AlertTriangle },
-  { value: UnitStatus.EN_ROUTE, label: 'В пути (10-31)', color: 'bg-blue-500', icon: Car },
-  { value: UnitStatus.ON_SCENE, label: 'На месте (10-97)', color: 'bg-orange-500', icon: MapPin },
-  { value: UnitStatus.UNAVAILABLE, label: 'Недоступен (10-7)', color: 'bg-red-500', icon: Clock }
+  { value: UnitStatuses.AVAILABLE, label: 'Доступен (10-8)', color: 'bg-green-500', icon: Shield },
+  { value: UnitStatuses.BUSY, label: 'Занят (10-12)', color: 'bg-yellow-500', icon: AlertTriangle },
+  { value: UnitStatuses.EN_ROUTE, label: 'В пути (10-31)', color: 'bg-blue-500', icon: Car },
+  { value: UnitStatuses.ON_SCENE, label: 'На месте (10-97)', color: 'bg-orange-500', icon: MapPin },
+  { value: UnitStatuses.UNAVAILABLE, label: 'Недоступен (10-7)', color: 'bg-red-500', icon: Clock }
 ];
 
 // Утилиты для отображения

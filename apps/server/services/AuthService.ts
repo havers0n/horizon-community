@@ -1,9 +1,5 @@
-// Загружаем переменные окружения
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { createClient } from '@supabase/supabase-js';
-import { SupabaseStorage } from './SupabaseStorage.js';
+import { userService } from './UserService.js';
 import type { User } from '../types.js';
 
 // ===== ТИПЫ =====
@@ -48,7 +44,6 @@ export interface TokenValidationResult {
 
 export class AuthService {
   private supabase: any;
-  private storage: SupabaseStorage;
 
   constructor() {
     // Проверяем наличие необходимых переменных окружения
@@ -65,7 +60,6 @@ export class AuthService {
       supabaseUrl,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
-    this.storage = new SupabaseStorage();
   }
 
   // ===== ОСНОВНАЯ АУТЕНТИФИКАЦИЯ =====
@@ -75,95 +69,136 @@ export class AuthService {
    */
   async authenticate(token: string): Promise<AuthUser> {
     try {
+      console.log('[AuthService] 🔍 Starting token authentication...');
+      
       // Проверка токена в Supabase
       const { data: { user: supabaseUser }, error } = await this.supabase.auth.getUser(token);
       
       if (error) {
-        console.error('Supabase auth error:', error);
+        console.error('[AuthService] ❌ Supabase auth error:', error);
         throw new Error(`Supabase auth error: ${error.message}`);
       }
       
       if (!supabaseUser) {
-        console.error('No user returned from Supabase');
+        console.error('[AuthService] ❌ No user returned from Supabase');
         throw new Error('No user found for token');
       }
+
+      console.log('[AuthService] ✅ Supabase user found:', {
+        id: supabaseUser.id,
+        email: supabaseUser.email
+      });
 
       // Синхронизация с локальной БД
       return await this.syncUser(supabaseUser);
     } catch (error) {
-      console.error('Authentication error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
-      throw new Error(`Authentication failed: ${errorMessage}`);
+      console.error('[AuthService] ❌ Authentication failed:', error);
+      throw error;
     }
   }
 
   /**
-   * Синхронизация пользователя между Supabase и локальной БД
+   * Синхронизация пользователя с локальной БД
    */
   async syncUser(supabaseUser: any): Promise<AuthUser> {
     try {
-      // Поиск пользователя в локальной БД по authId
-      let user = await this.storage.getUserByAuthId(supabaseUser.id);
+      console.log('[AuthService] 🔄 Syncing user with local database...');
+      
+      // Ищем пользователя в таблице profiles
+      const { data: profile, error: profileError } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('auth_id', supabaseUser.id)
+        .single();
 
-      if (!user) {
-        // Создание нового пользователя
-        user = await this.createLocalUser(supabaseUser);
-      } else {
-        // Обновление существующего пользователя
-        user = await this.updateLocalUser(user.id, supabaseUser);
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('[AuthService] ❌ Error getting profile:', profileError);
+        throw new Error(`Database error: ${profileError.message}`);
       }
 
-      return this.mapUserToAuthUser(user);
-    } catch (error) {
-      console.error('Error syncing user:', error);
-      throw new Error('Failed to sync user');
-    }
-  }
+      if (!profile) {
+        console.log('[AuthService] 📝 Creating new local profile...');
+        return await this.createLocalProfile(supabaseUser);
+      }
 
-  /**
-   * Создание пользователя в локальной БД
-   */
-  async createLocalUser(supabaseUser: any): Promise<User> {
-    try {
-      const userData = {
-        username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0],
-        email: supabaseUser.email,
-        passwordHash: '', // Пароль хранится в Supabase
-        role: 'candidate',
-        status: 'active',
-        authId: supabaseUser.id,
+      // Маппинг профиля в AuthUser
+      const authUser: AuthUser = {
+        id: parseInt(profile.id.replace(/-/g, '').substring(0, 8), 16), // Генерируем числовой ID из UUID
+        username: profile.email.split('@')[0], // Используем email как username
+        email: profile.email,
+        role: profile.role || 'user',
+        status: profile.is_active ? 'active' : 'inactive',
+        departmentId: profile.department_id,
+        rank: profile.badge_number,
+        qualifications: [],
+        gameWarnings: 0,
+        adminWarnings: 0,
         has2FA: false,
         isDarkTheme: false,
         soundSettings: {},
-        createdAt: new Date()
+        createdAt: new Date(profile.created_at),
+        authId: profile.auth_id
       };
 
-      return await this.storage.createUser(userData);
+      console.log('[AuthService] ✅ User synced successfully');
+      return authUser;
     } catch (error) {
-      console.error('Error creating local user:', error);
-      throw new Error('Failed to create local user');
+      console.error('[AuthService] ❌ Error syncing user:', error);
+      throw error;
     }
   }
 
   /**
-   * Обновление пользователя в локальной БД
+   * Создание нового профиля в локальной БД
    */
-  async updateLocalUser(userId: number, supabaseUser: any): Promise<User> {
+  async createLocalProfile(supabaseUser: any): Promise<AuthUser> {
     try {
-      const updates = {
+      console.log('[AuthService] 📝 Creating new local profile...');
+      
+      const profileData = {
+        auth_id: supabaseUser.id,
         email: supabaseUser.email,
-        username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0],
-        updatedAt: new Date()
+        first_name: supabaseUser.user_metadata?.first_name || '',
+        last_name: supabaseUser.user_metadata?.last_name || '',
+        role: supabaseUser.user_metadata?.role || 'user',
+        is_active: true
       };
 
-      const updatedUser = await this.storage.updateUser(userId, updates);
-      if (!updatedUser) {
-        throw new Error('User not found for update');
+      const { data: profile, error } = await this.supabase
+        .from('profiles')
+        .insert(profileData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[AuthService] ❌ Error creating profile:', error);
+        throw new Error(`Failed to create profile: ${error.message}`);
       }
-      return updatedUser;
+
+      // Маппинг профиля в AuthUser
+      const authUser: AuthUser = {
+        id: parseInt(profile.id.replace(/-/g, '').substring(0, 8), 16),
+        username: profile.email.split('@')[0],
+        email: profile.email,
+        role: profile.role || 'user',
+        status: 'active',
+        departmentId: profile.department_id,
+        rank: profile.badge_number,
+        qualifications: [],
+        gameWarnings: 0,
+        adminWarnings: 0,
+        has2FA: false,
+        isDarkTheme: false,
+        soundSettings: {},
+        createdAt: new Date(profile.created_at),
+        authId: profile.auth_id
+      };
+
+      console.log('[AuthService] ✅ Local profile created successfully');
+      return authUser;
     } catch (error) {
-      console.error('Error updating local user:', error);
-      throw new Error('Failed to update local user');
+      console.error('[AuthService] ❌ Error creating local profile:', error);
+      throw new Error('Failed to create local profile');
     }
   }
 
@@ -176,8 +211,8 @@ export class AuthService {
     try {
       // TODO: Добавить поле cadToken в схему пользователя
       // Пока используем временную логику
-      const allUsers = await this.storage.getAllUsers();
-      const user = allUsers.find(u => (u as any).cadToken === token);
+      const allUsers = await userService.getAllUsers();
+      const user = allUsers.find((u: any) => u.cadToken === token);
 
       if (!user) {
         return {
@@ -201,21 +236,18 @@ export class AuthService {
       console.error('Error validating CAD token:', error);
       return {
         success: false,
-        error: 'Token validation failed'
+        error: 'Internal server error'
       };
     }
   }
 
   /**
-   * Генерация нового CAD токена для пользователя
+   * Генерация CAD токена для пользователя
    */
   async generateCadToken(userId: number): Promise<string> {
     try {
       const token = this.generateSecureToken();
-      
-      // TODO: Добавить поле cadToken в схему пользователя
-      await this.storage.updateUser(userId, { cadToken: token } as any);
-
+      await userService.updateUser(userId, { apiToken: token });
       return token;
     } catch (error) {
       console.error('Error generating CAD token:', error);
@@ -228,8 +260,7 @@ export class AuthService {
    */
   async revokeCadToken(userId: number): Promise<void> {
     try {
-      // TODO: Добавить поле cadToken в схему пользователя
-      await this.storage.updateUser(userId, { cadToken: null } as any);
+      await userService.updateUser(userId, { apiToken: null });
     } catch (error) {
       console.error('Error revoking CAD token:', error);
       throw new Error('Failed to revoke CAD token');
@@ -239,14 +270,12 @@ export class AuthService {
   // ===== API ТОКЕНЫ =====
 
   /**
-   * Генерация API токена для пользователя
+   * Генерация API токена
    */
   async generateApiToken(userId: number): Promise<string> {
     try {
       const token = this.generateSecureToken();
-      
-      await this.storage.updateUser(userId, { apiToken: token });
-
+      await userService.updateUser(userId, { apiToken: token });
       return token;
     } catch (error) {
       console.error('Error generating API token:', error);
@@ -259,8 +288,8 @@ export class AuthService {
    */
   async validateApiToken(token: string): Promise<TokenValidationResult> {
     try {
-      const allUsers = await this.storage.getAllUsers();
-      const user = allUsers.find(u => u.apiToken === token);
+      const allUsers = await userService.getAllUsers();
+      const user = allUsers.find((u: any) => u.apiToken === token);
 
       if (!user) {
         return {
@@ -284,7 +313,7 @@ export class AuthService {
       console.error('Error validating API token:', error);
       return {
         valid: false,
-        error: 'Token validation failed'
+        error: 'Internal server error'
       };
     }
   }
@@ -294,7 +323,7 @@ export class AuthService {
    */
   async revokeApiToken(userId: number): Promise<void> {
     try {
-      await this.storage.updateUser(userId, { apiToken: null });
+      await userService.updateUser(userId, { apiToken: null });
     } catch (error) {
       console.error('Error revoking API token:', error);
       throw new Error('Failed to revoke API token');
@@ -308,11 +337,11 @@ export class AuthService {
    */
   async getUserById(id: number): Promise<AuthUser | null> {
     try {
-      const user = await this.storage.getUser(id);
+      const user = await userService.getUser(id);
       return user ? this.mapUserToAuthUser(user) : null;
     } catch (error) {
-      console.error('Error getting user by id:', error);
-      throw new Error('Failed to get user');
+      console.error('Error getting user by ID:', error);
+      return null;
     }
   }
 
@@ -321,11 +350,11 @@ export class AuthService {
    */
   async getUserByEmail(email: string): Promise<AuthUser | null> {
     try {
-      const user = await this.storage.getUserByEmail(email);
+      const user = await userService.getUserByEmail(email);
       return user ? this.mapUserToAuthUser(user) : null;
     } catch (error) {
       console.error('Error getting user by email:', error);
-      throw new Error('Failed to get user');
+      return null;
     }
   }
 
@@ -334,11 +363,17 @@ export class AuthService {
    */
   async updateUserProfile(userId: number, data: any): Promise<AuthUser> {
     try {
-      const updatedUser = await this.storage.updateUser(userId, {
-        ...data,
-        updatedAt: new Date()
-      });
+      const updates: any = {};
+      
+      if (data.username) updates.username = data.username;
+      if (data.email) updates.email = data.email;
+      if (data.departmentId !== undefined) updates.departmentId = data.departmentId;
+      if (data.secondaryDepartmentId !== undefined) updates.secondaryDepartmentId = data.secondaryDepartmentId;
+      if (data.rank) updates.rank = data.rank;
+      if (data.division) updates.division = data.division;
+      if (data.qualifications) updates.qualifications = data.qualifications;
 
+      const updatedUser = await userService.updateUser(userId, updates);
       if (!updatedUser) {
         throw new Error('User not found');
       }
@@ -351,15 +386,11 @@ export class AuthService {
   }
 
   /**
-   * Изменение роли пользователя
+   * Обновление роли пользователя
    */
   async updateUserRole(userId: number, role: string): Promise<AuthUser> {
     try {
-      const updatedUser = await this.storage.updateUser(userId, {
-        role,
-        updatedAt: new Date()
-      });
-
+      const updatedUser = await userService.updateUser(userId, { role });
       if (!updatedUser) {
         throw new Error('User not found');
       }
@@ -372,15 +403,11 @@ export class AuthService {
   }
 
   /**
-   * Изменение статуса пользователя
+   * Обновление статуса пользователя
    */
   async updateUserStatus(userId: number, status: string): Promise<AuthUser> {
     try {
-      const updatedUser = await this.storage.updateUser(userId, {
-        status,
-        updatedAt: new Date()
-      });
-
+      const updatedUser = await userService.updateUser(userId, { status });
       if (!updatedUser) {
         throw new Error('User not found');
       }
@@ -392,95 +419,19 @@ export class AuthService {
     }
   }
 
-  // ===== DISCORD ИНТЕГРАЦИЯ =====
-
-  /**
-   * Привязка Discord аккаунта
-   */
-  async linkDiscordAccount(userId: number, discordData: any): Promise<AuthUser> {
-    try {
-      const updatedUser = await this.storage.updateUser(userId, {
-        discordId: discordData.id,
-        discordUsername: discordData.username,
-        // TODO: Добавить поля для Discord токенов в схему
-        updatedAt: new Date()
-      } as any);
-
-      if (!updatedUser) {
-        throw new Error('User not found');
-      }
-
-      return this.mapUserToAuthUser(updatedUser);
-    } catch (error) {
-      console.error('Error linking Discord account:', error);
-      throw new Error('Failed to link Discord account');
-    }
-  }
-
-  /**
-   * Отвязка Discord аккаунта
-   */
-  async unlinkDiscordAccount(userId: number): Promise<AuthUser> {
-    try {
-      const updatedUser = await this.storage.updateUser(userId, {
-        discordId: null,
-        discordUsername: null,
-        // TODO: Добавить поля для Discord токенов в схему
-        updatedAt: new Date()
-      } as any);
-
-      if (!updatedUser) {
-        throw new Error('User not found');
-      }
-
-      return this.mapUserToAuthUser(updatedUser);
-    } catch (error) {
-      console.error('Error unlinking Discord account:', error);
-      throw new Error('Failed to unlink Discord account');
-    }
-  }
-
-  // ===== НАСТРОЙКИ ПОЛЬЗОВАТЕЛЯ =====
-
-  /**
-   * Обновление настроек пользователя
-   */
-  async updateUserSettings(userId: number, settings: any): Promise<AuthUser> {
-    try {
-      const updatedUser = await this.storage.updateUser(userId, {
-        isDarkTheme: settings.isDarkTheme,
-        soundSettings: settings.soundSettings,
-        has2FA: settings.has2FA,
-        updatedAt: new Date()
-      });
-
-      if (!updatedUser) {
-        throw new Error('User not found');
-      }
-
-      return this.mapUserToAuthUser(updatedUser);
-    } catch (error) {
-      console.error('Error updating user settings:', error);
-      throw new Error('Failed to update user settings');
-    }
-  }
-
   // ===== УТИЛИТЫ =====
 
   /**
    * Генерация безопасного токена
    */
   private generateSecureToken(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let token = '';
-    for (let i = 0; i < 32; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return token;
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2);
+    return `token_${timestamp}_${random}`;
   }
 
   /**
-   * Маппинг пользователя БД в AuthUser
+   * Преобразование User в AuthUser
    */
   private mapUserToAuthUser(user: User): AuthUser {
     return {
@@ -494,34 +445,28 @@ export class AuthService {
       rank: user.rank || undefined,
       division: user.division || undefined,
       qualifications: user.qualifications || [],
-      gameWarnings: user.gameWarnings,
-      adminWarnings: user.adminWarnings,
-      cadToken: (user as any).cadToken || undefined,
-      discordId: (user as any).discordId || undefined,
-      discordUsername: (user as any).discordUsername || undefined,
-      has2FA: user.has2FA,
-      isDarkTheme: user.isDarkTheme,
-      soundSettings: user.soundSettings || {},
+      gameWarnings: user.gameWarnings || 0,
+      adminWarnings: user.adminWarnings || 0,
+      cadToken: undefined, // TODO: Добавить в схему
+      discordId: undefined, // TODO: Добавить в схему
+      discordUsername: undefined, // TODO: Добавить в схему
+      has2FA: false, // TODO: Добавить в схему
+      isDarkTheme: false, // TODO: Добавить в схему
+      soundSettings: {}, // TODO: Добавить в схему
       apiToken: user.apiToken || undefined,
       createdAt: user.createdAt,
       authId: user.authId || undefined
     };
   }
 
+  // ===== ПРОВЕРКИ ПРАВ =====
+
   /**
-   * Проверка прав доступа
+   * Проверка наличия разрешения у пользователя
    */
   hasPermission(user: AuthUser, permission: string): boolean {
-    const rolePermissions = {
-      admin: ['*'], // Все права
-      supervisor: ['read', 'write', 'delete', 'manage_users'],
-      member: ['read', 'write'],
-      candidate: ['read']
-    };
-
-    const userPermissions = rolePermissions[user.role as keyof typeof rolePermissions] || [];
-    
-    return userPermissions.includes('*') || userPermissions.includes(permission);
+    // TODO: Реализовать систему разрешений
+    return user.role === 'admin' || user.role === 'supervisor';
   }
 
   /**
@@ -532,14 +477,15 @@ export class AuthService {
   }
 
   /**
-   * Проверка минимальной роли
+   * Проверка минимальной роли пользователя
    */
   hasMinimumRole(user: AuthUser, minimumRole: string): boolean {
     const roleHierarchy = {
-      candidate: 1,
-      member: 2,
-      supervisor: 3,
-      admin: 4
+      'candidate': 0,
+      'member': 1,
+      'officer': 2,
+      'supervisor': 3,
+      'admin': 4
     };
 
     const userLevel = roleHierarchy[user.role as keyof typeof roleHierarchy] || 0;
@@ -549,5 +495,5 @@ export class AuthService {
   }
 }
 
-// Экспорт экземпляра сервиса
+// Экспортируем единственный экземпляр
 export const authService = new AuthService(); 
