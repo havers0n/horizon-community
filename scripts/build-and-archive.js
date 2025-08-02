@@ -43,8 +43,10 @@ function logInfo(message) {
 // Проверка существования пути
 function pathExists(pathToCheck) {
   try {
-    return fs.existsSync(pathToCheck);
+    const exists = fs.existsSync(pathToCheck);
+    return exists;
   } catch (error) {
+    console.error(`Ошибка при проверке пути ${pathToCheck}:`, error.message);
     return false;
   }
 }
@@ -126,9 +128,7 @@ async function main() {
     const buildPaths = [
       { name: 'Client Build', path: 'apps/client/dist', required: true },
       { name: 'MDT Client Build', path: 'apps/mdtclient/dist', required: true },
-      { name: 'Server Build (apps/server/dist)', path: 'apps/server/dist', required: false },
-      { name: 'Server Build (dist/apps/server)', path: 'dist/apps/server', required: false },
-      { name: 'Server Build (dist)', path: 'dist', required: false }
+      { name: 'Server Build', path: 'apps/server/dist', required: false }
     ];
     
     const existingPaths = [];
@@ -170,8 +170,43 @@ async function main() {
       logInfo('Удален старый архив deployment.tar.gz');
     }
     
-    // Создание команды для архивирования
-    const tarPaths = existingPaths.map(bp => bp.path).join(' ');
+    // Создание списка путей для архивирования
+    const deploymentPaths = [
+      // Билд-артефакты
+      ...existingPaths.map(bp => bp.path),
+      // Конфигурационные файлы
+      'package.json',
+      'package-lock.json',
+      // Директории проекта
+      'scripts/',
+      'supabase/',
+      'migrations/',
+      'docs/',
+      // Документация
+      'README.md',
+      'ARCHITECTURE.md',
+      'QUICK_START_GUIDE.md'
+    ];
+    
+    // Фильтрация только существующих путей
+    const existingDeploymentPaths = [];
+    for (const path of deploymentPaths) {
+      const exists = pathExists(path);
+      logInfo(`Проверка пути: ${path} - ${exists ? 'существует' : 'не существует'}`);
+      if (exists) {
+        existingDeploymentPaths.push(path);
+        logInfo(`Добавлен в архив: ${path}`);
+      } else {
+        logWarning(`Пропущен (не существует): ${path}`);
+      }
+    }
+    
+    if (existingDeploymentPaths.length === 0) {
+      logError('Не найдено ни одного файла для архивирования');
+      process.exit(1);
+    }
+    
+    const tarPaths = existingDeploymentPaths.join(' ');
     
     try {
       // Для Windows используем PowerShell команду
