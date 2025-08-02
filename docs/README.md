@@ -1,138 +1,251 @@
-# 📚 Документация проекта RolePlayIdentity
+# RolePlayIdentity - Supabase Migration
 
-Добро пожаловать в документацию проекта RolePlayIdentity! Здесь вы найдете всю необходимую информацию для работы с системой.
+Система управления департаментами для ролевого сервера, мигрированная на Supabase.
 
-## 📁 Структура документации
+## 🚀 Деплой на VPS
 
-### 🏗️ [Архитектура](./architecture/)
-Документы по архитектуре системы, дизайн-системе и техническим решениям:
-- [Краткая сводка архитектуры](./architecture/ARCHITECTURE_SUMMARY.md)
-- [Анализ архитектуры бэкенда](./architecture/BACKEND_ARCHITECTURE_ANALYSIS.md)
-- [Дизайн-система](./architecture/DESIGN_SYSTEM.md)
-- [Реализация дизайн-системы](./architecture/DESIGN_SYSTEM_IMPLEMENTATION.md)
-- [Цветовая палитра](./architecture/COLOR_PALETTE_IMPLEMENTATION_REPORT.md)
-- [Обновление цветовой палитры](./architecture/COLOR_PALETTE_UPDATE.md)
-- [Создание новых страниц](./architecture/FEATURE_SCAFFOLDING.md)
+### Автоматический деплой через GitHub Actions
 
-### 🔗 [API и интеграции](./api-and-integrations/)
-Документация по API, интеграциям и внешним сервисам:
-- [Анализ API](./api-and-integrations/API_ANALYSIS_REPORT.md)
-- [Детальный анализ API](./api-and-integrations/API_DETAILED_ANALYSIS.json)
-- [Интеграция с SnailyCAD](./api-and-integrations/API_SNAILYCAD_INTEGRATION.md)
-- [Отчет по интеграции SnailyCAD](./api-and-integrations/BACKEND_SNAILYCAD_INTEGRATION_REPORT.md)
-- [WebSocket анализ](./api-and-integrations/WEBSOCKET_ANALYSIS_REPORT.md)
-- [Примеры использования WebSocket](./api-and-integrations/WEBSOCKET_USAGE_EXAMPLES.md)
-- [План интеграции Socket.IO](./api-and-integrations/SOCKET_IO_INTEGRATION_PLAN.md)
-- [Маппинг данных](./api-and-integrations/DATA_MODEL_MAPPING.md)
-- [Таблица маппинга](./api-and-integrations/MAPPING_TABLE.md)
-- [Анализ несовместимых полей](./api-and-integrations/INCOMPATIBLE_FIELDS_ANALYSIS.md)
-- [Аутентификация](./api-and-integrations/AUTHENTICATION.md)
+Проект настроен для автоматического развертывания на VPS через GitHub Actions.
 
-### 🚔 [MDT система](./mdt-system/)
-Документация по Mobile Data Terminal (MDT) системе:
-- [Интеграция frontend и backend](./mdt-system/MDT_FRONTEND_BACKEND_INTEGRATION_REPORT.md)
-- [Руководство по миграции MDT](./mdt-system/MDT_MIGRATION_GUIDE.md)
-- [Сводка реализации MDT](./mdt-system/MDT_IMPLEMENTATION_SUMMARY.md)
-- [Аудит backend MDT](./mdt-system/MDT_BACKEND_AUDIT_REPORT.md)
-- [Независимость фреймворка MDT](./mdt-system/MDT_FRAMEWORK_INDEPENDENCE_REPORT.md)
-- [README CAD MDT](./mdt-system/CAD_MDT_README.md)
+**Быстрый старт:**
+1. Настройте [GitHub Secrets](docs/QUICK_DEPLOY_SETUP.md)
+2. Подготовьте VPS согласно [руководству](VPS_DEPLOYMENT_GUIDE.md)
+3. Push в ветку `main` → автоматический деплой
 
-### 🚀 [Развертывание](./deployment/)
-Инструкции по развертыванию и деплою:
-- [Основное руководство по развертыванию](./deployment/DEPLOYMENT.md)
-- [Инструкции по развертыванию](./deployment/DEPLOYMENT_INSTRUCTIONS.md)
-- [Миграция в облако](./deployment/CLOUD_MIGRATION_GUIDE.md)
-- [Развертывание FiveM](./deployment/FIVEM_DEPLOYMENT_GUIDE.md)
-- [Упрощенная сборка FiveM](./deployment/УПРОЩЁННАЯ_СБОРКА_FIVEM.md)
-- [Оптимизации развертывания](./deployment/DEPLOYMENT_OPTIMIZATIONS.md)
-- [Быстрая настройка деплоя](./deployment/QUICK_DEPLOY_SETUP.md)
-- [Настройка GitHub Actions](./deployment/GITHUB_ACTIONS_SETUP.md)
-- [Экстренное исправление VPS](./deployment/IMMEDIATE_VPS_FIX.md)
-- [Критическое исправление деплоя](./deployment/CRITICAL_DEPLOYMENT_FIX.md)
-- [Анализ проблем Vite](./deployment/VITE_ISSUE_ANALYSIS.md)
+### Ручной деплой на Supabase Cloud
 
-### 🧪 [Тестирование](./testing/)
-Документация по тестированию системы:
-- [Руководство по тестированию](./testing/TESTING_GUIDE.md)
-- [Комплексный план тестирования](./testing/COMPREHENSIVE_TESTING_PLAN.md)
-- [Система админ-тестов](./testing/ADMIN_TESTS_SYSTEM.md)
-- [Локальное тестирование](./testing/LOCAL_TESTING_GUIDE.md)
-- [Отчет по тестированию переводов](./testing/TEST_TRANSLATION_REPORT.md)
-- [Тестовые пользователи](./testing/test-users.md)
+#### Предварительные требования
 
-### 📊 [Отчеты о реализации](./implementation-reports/)
-Отчеты о выполненных задачах и реализованных функциях:
-- [EMS/FD отчеты](./implementation-reports/EMS_FD_REPORTS_IMPLEMENTATION_REPORT.md)
-- [EMS/FD портал](./implementation-reports/EMS_FD_PORTAL_IMPLEMENTATION_REPORT.md)
-- [Секция офицеров](./implementation-reports/OFFICERS_SECTION_IMPLEMENTATION_REPORT.md)
-- [Система отчетов правоохранительных органов](./implementation-reports/LAW_REPORT_SYSTEM_IMPLEMENTATION.md)
-- [Система сигналов](./implementation-reports/SIGNALS_SYSTEM_IMPLEMENTATION_REPORT.md)
-- [Блокнот](./implementation-reports/NOTEBOOK_IMPLEMENTATION_REPORT.md)
-- [Панель управления правоохранительными органами](./implementation-reports/LAW_CONTROL_PANEL_IMPLEMENTATION_REPORT.md)
-- [Система компаний](./implementation-reports/COMPANIES_SYSTEM_COMPLETION_REPORT.md)
-- [Создание офицеров](./implementation-reports/OFFICER_CREATION_SECTION_REPORT.md)
-- [Миграция React](./implementation-reports/REACT_MIGRATION_COMPLETION_REPORT.md)
-- [Финальная сводка миграции React](./implementation-reports/REACT_MIGRATION_FINAL_SUMMARY.md)
-- [Унификация React](./implementation-reports/REACT_UNIFICATION_REPORT.md)
-- [Руководство по миграции React 19](./implementation-reports/REACT_19_MIGRATION_GUIDE.md)
-- [Расширенные шаблоны](./implementation-reports/ENHANCED_TEMPLATES_COMPLETION_REPORT.md)
-- [Настройка расширенных шаблонов](./implementation-reports/ENHANCED_TEMPLATES_SETUP.md)
-- [Система отчетов](./implementation-reports/REPORTS_SYSTEM_COMPLETION_REPORT.md)
-- [Обновление департаментов](./implementation-reports/DEPARTMENTS_UPDATE_REPORT.md)
-- [Этап 3 завершен](./implementation-reports/STAGE_3_COMPLETION_REPORT.md)
-- [Этап 2 завершен](./implementation-reports/STAGE_2_COMPLETION_REPORT.md)
-- [Исправление модального окна отпусков](./implementation-reports/LEAVE_MODAL_FIX_REPORT.md)
-- [Критические исправления](./implementation-reports/CRITICAL_FIXES_REPORT.md)
-- [Синхронизация быстрых действий](./implementation-reports/QUICK_ACTIONS_SYNC_REPORT.md)
-- [Интерактивная форма A4](./implementation-reports/INTERACTIVE_A4_FORM_IMPLEMENTATION.md)
-- [Исправление заявок](./implementation-reports/ENTRY_APPLICATION_FIX.md)
-- [FAQ исправление темной темы](./implementation-reports/FAQ_DARK_THEME_FIX.md)
-- [Исправление текста темной темы](./implementation-reports/DARK_THEME_TEXT_FIX.md)
-- [Полное обновление системы](./implementation-reports/COMPLETE_SYSTEM_UPDATE_REPORT.md)
+1. **Supabase CLI** установлен
+2. **PostgreSQL client tools** (psql) для загрузки данных
+3. **Node.js** для запуска скриптов
 
-### 📖 [Руководства пользователя](./user-guides/)
-Руководства для пользователей системы:
-- [Руководство по системе отчетов](./user-guides/REPORTS_SYSTEM_GUIDE.md)
-- [Документация системы отчетов](./user-guides/REPORTS_SYSTEM_DOCUMENTATION.md)
-- [Документация системы персонажей](./user-guides/CHARACTER_SYSTEM_DOCUMENTATION.md)
-- [Документация системы отпусков](./user-guides/LEAVE_SYSTEM_DOCUMENTATION.md)
-- [Система совместных должностей](./user-guides/JOINT_POSITIONS_SYSTEM.md)
-- [Система форума](./user-guides/FORUM_SYSTEM.md)
-- [Обновление дизайна департаментов](./user-guides/DEPARTMENTS_DESIGN_UPDATE.md)
-- [Заблаговременное уведомление об отпуске](./user-guides/LEAVE_ADVANCE_NOTICE_UPDATE.md)
-- [Инструкции по миграции](./user-guides/MIGRATION_INSTRUCTIONS.md)
-- [Ручные инструкции по миграции](./user-guides/MANUAL_MIGRATION_INSTRUCTIONS.md)
-- [Правила создания новых страниц](./user-guides/newpagecreaterules.md)
-- [Дорожная карта](./user-guides/roadmap.md)
+### Шаг 1: Подключение к облачному проекту
 
-### 📋 [Технические спецификации](./technical-specs/)
-Технические требования и спецификации:
-- [Техническое задание](./technical-specs/тз.md)
-- [Техническое задание v2](./technical-specs/tzv2.md)
-- [Аудит базы данных](./technical-specs/DATABASE_AUDIT_REPORT.md)
-- [Отчет об аудите](./technical-specs/AUDIT_REPORT.md)
-- [Комплексный план аудита](./technical-specs/COMPREHENSIVE_AUDIT_PLAN.md)
-- [Документация текущего состояния](./technical-specs/AS-IS_DOCUMENTATION.md)
-- [Анализ статуса проекта](./technical-specs/PROJECT_STATUS_ANALYSIS.md)
-- [Улучшения безопасности](./technical-specs/SECURITY_IMPROVEMENTS.md)
-- [Аудит системы отчетов](./technical-specs/REPORTS_SYSTEM_AUDIT.md)
-- [Политики RLS для гостей](./technical-specs/rls-guest-policies.md)
+```bash
+# Войти в Supabase
+npx supabase login
 
-## 🚀 Быстрый старт
+# Подключиться к проекту
+npx supabase link --project-ref axgtvvcimqoyxbfvdrok
+```
 
-1. **Для разработчиков**: Начните с [архитектурной документации](./architecture/)
-2. **Для развертывания**: Изучите [руководства по развертыванию](./deployment/)
-3. **Для пользователей**: Ознакомьтесь с [руководствами пользователя](./user-guides/)
-4. **Для тестирования**: Изучите [документацию по тестированию](./testing/)
+### Шаг 2: Применение миграций
 
-## 📝 Обновления документации
+```bash
+# Применить миграции к облачной базе данных
+npx supabase db push
+```
 
-Документация обновляется автоматически при внесении изменений в проект. Все отчеты о реализации создаются автоматически после завершения задач.
+### Шаг 3: Загрузка тестовых данных
 
-## 🤝 Вклад в документацию
+#### Способ 1: Через PowerShell (Windows)
+```powershell
+# Запустить PowerShell скрипт
+.\scripts\upload-seed-data.ps1
+```
 
-При создании новых функций или изменении существующих, пожалуйста, обновляйте соответствующую документацию в соответствующих папках.
+#### Способ 2: Через psql напрямую
+```bash
+# Замените [PASSWORD] на ваш пароль базы данных
+psql \"postgresql://postgres.axgtvvcimqoyxbfvdrok:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres\" < supabase/seed.sql
+```
 
----
+#### Способ 3: Автоматический скрипт
+```bash
+# Запустить скрипт деплоя
+node scripts/deploy-to-cloud.js
+```
 
-*Последнее обновление: $(Get-Date -Format "dd.MM.yyyy HH:mm")* 
+### Шаг 4: Настройка переменных окружения
+
+Создайте файл `.env.production` на основе `.env.production.example`:
+
+```env
+# Базовые настройки
+NODE_ENV="production"
+DATABASE_URL="postgresql://postgres.axgtvvcimqoyxbfvdrok:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
+
+# Supabase
+SUPABASE_URL="https://axgtvvcimqoyxbfvdrok.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# Приложение
+APP_URL="https://your-domain.com"
+JWT_SECRET="your-production-jwt-secret"
+```
+
+### Шаг 5: Настройка аутентификации
+
+1. Перейдите в [Supabase Dashboard](https://supabase.com/dashboard/project/axgtvvcimqoyxbfvdrok)
+2. Настройте **Settings > Authentication**:
+   - Site URL: `https://your-domain.com`
+   - Redirect URLs: `https://your-domain.com/auth/callback`
+3. Настройте провайдеров OAuth при необходимости
+
+### Шаг 6: Проверка Row Level Security
+
+Политики RLS уже настроены в миграции. Проверьте их в Dashboard:
+
+1. Перейдите в **Authentication > Policies**
+2. Убедитесь, что все политики применены
+3. Протестируйте доступ к данным
+
+## 📊 Структура базы данных
+
+### Таблицы
+
+- **users** - Пользователи системы
+- **departments** - Департаменты
+- **applications** - Заявки на вступление/повышение
+- **support_tickets** - Тикеты поддержки
+- **complaints** - Жалобы
+- **reports** - Отчеты
+- **notifications** - Уведомления
+- **tests** - Тесты для пользователей
+
+### Особенности
+
+- **Row Level Security (RLS)** включен для всех таблиц
+- **Связь с auth.users** через поле `auth_id`
+- **Политики безопасности** для разных ролей пользователей
+- **Индексы** для оптимизации производительности
+
+## 🔧 Разработка
+
+### Локальная разработка
+
+```bash
+# Запустить локальный Supabase
+npx supabase start
+
+# Сбросить локальную базу данных
+npx supabase db reset
+
+# Создать новую миграцию
+npx supabase migration new migration_name
+```
+
+### Синхронизация с облаком
+
+```bash
+# Посмотреть различия
+npx supabase db diff --schema public
+
+# Создать миграцию из различий
+npx supabase db diff --schema public --file migration_name
+```
+
+## 📈 Мониторинг
+
+### Supabase Dashboard
+
+- **Logs**: Просмотр логов API и базы данных
+- **Metrics**: Мониторинг производительности
+- **Realtime**: Отслеживание активности в реальном времени
+
+### Backup
+
+```bash
+# Создать backup
+npx supabase db dump --project-ref axgtvvcimqoyxbfvdrok > backup.sql
+
+# Восстановить из backup
+psql "connection-string" < backup.sql
+```
+
+## 🛠️ Полезные команды
+
+```bash
+# Посмотреть проекты
+npx supabase projects list
+
+# Получить API ключи
+npx supabase projects api-keys
+
+# Статус локального окружения
+npx supabase status
+
+# Остановить локальное окружение
+npx supabase stop
+```
+
+## 🔐 Безопасность
+
+### Важные моменты
+
+1. **Никогда не коммитьте** файлы с продакшн переменными
+2. **Используйте SSL** для продакшн подключений
+3. **Настройте RLS политики** для защиты данных
+4. **Ограничьте доступ по IP** в настройках Supabase
+5. **Мониторьте логи** на подозрительную активность
+
+### Роли пользователей
+
+- **candidate** - Кандидат на вступление
+- **member** - Член департамента
+- **supervisor** - Супервайзер
+- **admin** - Администратор
+
+## 🚨 Troubleshooting
+
+### Проблемы с подключением
+
+1. Проверьте пароль базы данных
+2. Убедитесь, что IP разрешен в Supabase
+3. Проверьте настройки SSL
+
+### Проблемы с RLS
+
+1. Убедитесь, что пользователь авторизован
+2. Проверьте политики безопасности
+3. Используйте service_role для отладки
+
+### Медленные запросы
+
+1. Добавьте индексы для часто используемых полей
+2. Оптимизируйте SQL запросы
+3. Используйте EXPLAIN ANALYZE для анализа
+
+## 🔄 CI/CD с GitHub Actions
+
+### Автоматический деплой
+
+Проект настроен для автоматического развертывания на VPS при каждом push в ветку `main`.
+
+**Файлы конфигурации:**
+- `.github/workflows/deploy.yml` - основной workflow
+- `docs/QUICK_DEPLOY_SETUP.md` - быстрая инструкция по настройке
+- `docs/GITHUB_ACTIONS_SETUP.md` - подробная инструкция
+
+**Возможности:**
+- ✅ Автоматическая сборка и деплой
+- ✅ Проверка здоровья приложения
+- ✅ Уведомления о статусе деплоя
+- ✅ Откат к предыдущим версиям
+- ✅ Мониторинг и логирование
+
+**Настройка:**
+1. Создайте SSH ключ для деплоя
+2. Настройте GitHub Secrets (VPS_HOST, VPS_USER, DEPLOY_KEY)
+3. Подготовьте VPS с PM2
+4. Настройте переменные окружения
+
+Быстрая инструкция: [Quick Deploy Setup](docs/QUICK_DEPLOY_SETUP.md)
+Подробная инструкция: [GitHub Actions Setup](docs/GITHUB_ACTIONS_SETUP.md)
+
+## 📞 Поддержка
+
+- **Supabase Docs**: https://supabase.com/docs
+- **Supabase Community**: https://github.com/supabase/supabase/discussions
+- **PostgreSQL Docs**: https://www.postgresql.org/docs/
+
+## 🎯 Roadmap
+
+- [x] Настройка CI/CD pipeline
+- [ ] Добавление мониторинга и алертов
+- [ ] Интеграция с Discord API
+- [ ] Добавление unit тестов
+- [ ] Оптимизация производительности
