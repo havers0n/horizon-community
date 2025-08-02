@@ -72,12 +72,22 @@ jobs:
               echo "⚠️ ВНИМАНИЕ: .env файл не найден в /var/www/app/. Приложение может не запуститься."
             fi
 
-            # Запускаем/перезапускаем приложение через PM2
+            # ПРАВИЛЬНАЯ ЛОГИКА "START OR RELOAD" ДЛЯ СКРИПТОВ
             echo "🚀 Запускаем/перезапускаем приложение через PM2..."
-            # УКАЗЫВАЕМ ПРАВИЛЬНЫЙ ПУТЬ К СЕРВЕРУ
-            NODE_ENV=production pm2 startOrReload dist/apps/server/main.js --name roleplayidentity
+            # Сначала проверяем, запущен ли уже процесс
+            if pm2 list | grep -q "roleplayidentity"; then
+              # Если да, плавно перезагружаем его
+              echo "🔄 Перезагружаем существующий процесс..."
+              pm2 reload roleplayidentity
+            else
+              # Если нет, запускаем его в первый раз
+              echo "✨ Запускаем новый процесс..."
+              NODE_ENV=production pm2 start dist/apps/server/main.js --name roleplayidentity
+            fi
             
+            # Сохраняем список процессов, чтобы они восстановились после перезагрузки сервера
             pm2 save
+            
             echo "✅ Деплой завершен успешно!"
 
       - name: Health check
