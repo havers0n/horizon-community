@@ -33,11 +33,13 @@ export default defineConfig({
       "@roleplay-identity/shared-utils": path.resolve(__dirname, "../../libs/shared-utils/src"),
       "@assets": path.resolve(__dirname, "../attached_assets"),
     },
+    preserveSymlinks: true,
   },
   build: {
     outDir: path.resolve(__dirname, "../dist/client"),
     emptyOutDir: true,
     rollupOptions: {
+      external: ['zod'],
       output: {
         manualChunks: {
           // Выносим React и React DOM в самостоятельный чанк
@@ -58,7 +60,7 @@ export default defineConfig({
           // Выносим графики и визуализацию
           'charts-vendor': ['recharts', 'html2canvas', 'jspdf'],
           // Выносим формы и валидацию
-          'forms-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'forms-vendor': ['react-hook-form', '@hookform/resolvers'],
           // Выносим интернационализацию
           'i18n-vendor': ['i18next', 'react-i18next'],
           // Выносим анимации
@@ -133,24 +135,6 @@ export default defineConfig({
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('✅ MDT Proxy response:', proxyRes.statusCode, req.url);
-          });
-        },
-      },
-      // Прокси для CAD интерфейса
-      '/cad': {
-        target: 'http://127.0.0.1:3002',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/cad/, ''),
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('🔴 CAD Proxy error:', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('🔄 CAD Proxying:', req.method, req.url, '→', proxyReq.path);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('✅ CAD Proxy response:', proxyRes.statusCode, req.url);
           });
         },
       },

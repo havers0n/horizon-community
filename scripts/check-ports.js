@@ -1,9 +1,8 @@
 const http = require('http');
 
 const ports = [
-  { port: 3000, name: 'Основной интерфейс' },
+  { port: 3000, name: 'Личный кабинет' },
   { port: 3001, name: 'MDT System' },
-  { port: 3002, name: 'CAD System' },
   { port: 5000, name: 'API Server' }
 ];
 

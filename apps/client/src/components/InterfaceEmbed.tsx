@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { X, RefreshCw, ExternalLink } from 'lucide-react';
 
 interface InterfaceEmbedProps {
-  type: 'mdt' | 'cad';
+  type: 'mdt';
   onClose?: () => void;
 }
 
@@ -17,11 +17,6 @@ export function InterfaceEmbed({ type, onClose }: InterfaceEmbedProps) {
       url: 'http://localhost:3001',
       title: 'MDT System',
       description: 'Система управления данными'
-    },
-    cad: {
-      url: 'http://localhost:3002',
-      title: 'CAD System',
-      description: 'Система диспетчеризации'
     }
   };
 
