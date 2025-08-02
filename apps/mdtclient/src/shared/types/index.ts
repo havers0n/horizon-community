@@ -251,6 +251,35 @@ export interface CreateWeaponRequest {
   notes?: string;
 }
 
+export interface CreateVehicleRequest {
+  ownerId: string;
+  plate: string;
+  vin: string;
+  model: string;
+  make?: string;
+  year?: number;
+  color: string;
+  bodyType?: string;
+  mileage?: number;
+  engineSize?: string;
+  registration?: string;
+  registrationExpiry?: string;
+  insurance?: string;
+  stolen?: boolean;
+}
+
+export interface CreateEmergencyCallRequest {
+  caller: string;
+  callerName?: string;
+  callerPhone?: string;
+  location: string;
+  description: string;
+  priority: CallPriority;
+  type?: string;
+  notes?: string;
+  coordinates?: { lat: number; lng: number };
+}
+
 export type CallPriority = 'low' | 'medium' | 'high' | 'critical' | 'panic';
 export type CallStatus = 'pending' | 'assigned' | 'resolved' | 'closed' | 'active'; // Добавлен 'active'
 
