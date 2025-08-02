@@ -58,16 +58,22 @@ jobs:
 
       - name: Create deployment package
         run: |
-          tar -czf deployment.tar.gz \
-            dist/ \
-            package.json \
-            package-lock.json \
-            scripts/ \
-            supabase/ \
-            migrations/ \
-            docs/ \
-            README.md \
-            node_modules/
+          # Используем умный скрипт для правильного архивирования
+          npm run build:archive:correct
+          
+          # Проверяем, что архив создан
+          if [ ! -f deployment.tar.gz ]; then
+            echo "❌ Архив deployment.tar.gz не был создан"
+            echo "📋 Содержимое текущей директории:"
+            ls -la
+            echo "📋 Проверяем наличие билд-артефактов:"
+            ls -la dist/ 2>/dev/null || echo "dist/ не найден"
+            ls -la apps/*/dist/ 2>/dev/null || echo "apps/*/dist/ не найдены"
+            exit 1
+          fi
+          
+          echo "✅ Архив deployment.tar.gz создан успешно"
+          ls -lh deployment.tar.gz
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
