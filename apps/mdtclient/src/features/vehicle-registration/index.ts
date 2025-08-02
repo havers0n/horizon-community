@@ -2,4 +2,4 @@
 export { VehicleRegistrationWidget } from './ui/VehicleRegistrationWidget';
 export { VehicleSearch } from './ui/VehicleSearch';
 export { vehicleRegistrationStore } from './model/store';
-export type { VehicleRegistrationFormData, VehicleRegistrationState } from '@/shared/types';
+export type { VehicleRegistrationFormData, VehicleRegistrationState } from './model/types';

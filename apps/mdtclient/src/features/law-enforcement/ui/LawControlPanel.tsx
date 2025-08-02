@@ -19,7 +19,7 @@ import { WeaponSearch } from './WeaponSearch';
 import { AddressSearch } from './AddressSearch';
 import { LawReportForm } from './LawReportForm';
 import { LawReportsList } from './LawReportsList';
-import type { LawReport } from '@/shared/types';
+import type { LawReport } from '../model/types';
 
 interface LawControlPanelProps {
   activeView: string;

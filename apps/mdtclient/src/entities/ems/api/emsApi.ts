@@ -1,5 +1,5 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
-import { EmsUnit, EmsCall, EmsReport, EmsShiftLog, UnitStatus } from '@/shared/types';
+import { EmsUnit, EmsCall, EmsReport, EmsShiftLog, UnitStatus, UnitStatuses } from '@/shared/types';
 
 // Моковые данные для демонстрации
 const MOCK_EMS_UNITS: EmsUnit[] = [
@@ -7,7 +7,7 @@ const MOCK_EMS_UNITS: EmsUnit[] = [
     id: 'unit_1',
     name: 'EMS-1',
     unitType: 'ambulance',
-    status: UnitStatus.AVAILABLE,
+    status: UnitStatuses.AVAILABLE,
     crew: [
       { id: 'crew_1', name: 'Джон Смит', rank: 'Парамедик', qualifications: ['EMT-P', 'ACLS'], isDriver: true, isCommander: false },
       { id: 'crew_2', name: 'Сара Джонсон', rank: 'Фельдшер', qualifications: ['EMT-B', 'PALS'], isDriver: false, isCommander: true }
@@ -19,7 +19,7 @@ const MOCK_EMS_UNITS: EmsUnit[] = [
     id: 'unit_2',
     name: 'FD-1',
     unitType: 'fire_engine',
-    status: UnitStatus.AVAILABLE,
+    status: UnitStatuses.AVAILABLE,
     crew: [
       { id: 'crew_3', name: 'Майк Браун', rank: 'Капитан', qualifications: ['Firefighter', 'Hazmat'], isDriver: true, isCommander: true },
       { id: 'crew_4', name: 'Лиза Дэвис', rank: 'Лейтенант', qualifications: ['Firefighter', 'Rescue'], isDriver: false, isCommander: false }

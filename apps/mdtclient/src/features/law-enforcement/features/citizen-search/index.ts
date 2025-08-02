@@ -4,7 +4,7 @@ export * from './ui';
 export * from './model';
 
 // Types
-export type { CitizenSearchResult } from '@/shared/types';
+export type { CitizenSearchResult } from './model/types';
 
 // Store
 export { useCitizenSearchStore } from './model/store';

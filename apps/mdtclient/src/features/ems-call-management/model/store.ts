@@ -1,7 +1,7 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import { create } from 'zustand';
 import { EmsCall } from '@/shared/types';
-import { EmsApi } from '@/shared/types';
+import { EmsApi } from '@/entities/ems/api';
 
 interface EmsCallManagementState {
   calls: EmsCall[];

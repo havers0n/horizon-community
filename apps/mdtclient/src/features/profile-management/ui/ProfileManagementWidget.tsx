@@ -5,7 +5,7 @@ import { User, Edit, Phone, Mail, MapPin, Heart, Shield, Car, Gun } from 'lucide
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { profileManagementStore } from '../model/profileManagementStore';
 import { ProfileEditForm } from './ProfileEditForm';
-import type { CitizenProfile } from '@/shared/types';
+import type { CitizenProfile } from '../model/types';
 
 export const ProfileManagementWidget: React.FC = () => {
     const { t } = useLocale();

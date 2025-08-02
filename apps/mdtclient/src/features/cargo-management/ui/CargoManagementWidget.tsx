@@ -6,7 +6,7 @@ import { useLocale } from '@/shared/contexts/LocaleContext';
 import { cargoManagementStore } from '../model/cargoManagementStore';
 import { CreateCargoForm } from './CreateCargoForm';
 import { CargoDetailsModal } from './CargoDetailsModal';
-import type { Cargo } from '@/shared/types';
+import type { Cargo } from '../model/types';
 
 export const CargoManagementWidget: React.FC = () => {
     const { t } = useLocale();

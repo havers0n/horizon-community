@@ -1,6 +1,7 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import { create } from 'zustand';
-import { Call911, DispatchStatus, DispatchApi } from '@/shared/types';
+import { Call911, DispatchStatus } from '@/shared/types';
+import { DispatchApi } from '@/shared/api/dispatch';
 import { CallManagementStore } from './types';
 
 export const useCallManagementStore = create<CallManagementStore>((set, get) => ({

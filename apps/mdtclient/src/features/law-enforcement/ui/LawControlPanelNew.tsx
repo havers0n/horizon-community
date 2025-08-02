@@ -19,7 +19,7 @@ import { WeaponSearchWidget } from '../features/weapon-search/ui/WeaponSearchWid
 import { AddressSearchWidget } from '../features/address-search/ui/AddressSearchWidget';
 import { ReportCreationWidget } from '../features/report-creation/ui/ReportCreationWidget';
 import { LawReportsList } from './LawReportsList';
-import type { LawReport } from '@/shared/types';
+import type { LawReport } from '../model/types';
 
 interface LawControlPanelNewProps {
   activeView: string;

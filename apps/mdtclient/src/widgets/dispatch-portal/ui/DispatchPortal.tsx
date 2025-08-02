@@ -105,6 +105,37 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
     // Можно добавить логику для выделения юнита на карте
   };
 
+  // Преобразуем данные для карты
+  const mapUnits = activeUnits.map(unit => ({
+    id: unit.id,
+    name: unit.name || unit.unit_number || 'Неизвестный юнит',
+    status: unit.status,
+    location: { x: 50, y: 50 }, // Временные координаты, нужно заменить на реальные
+    type: 'leo' as const // Временный тип, нужно определить по департаменту
+  }));
+
+  const mapCalls = activeCalls.map(call => ({
+    id: call.id,
+    description: call.description,
+    location: { x: 30, y: 40 }, // Временные координаты, нужно заменить на реальные
+    priority: 'medium' as const, // Временный приоритет, нужно определить по данным
+    status: call.status
+  }));
+
+  const handleMapUnitClick = (unit: any) => {
+    const realUnit = activeUnits.find(u => u.id === unit.id);
+    if (realUnit) {
+      handleUnitSelect(realUnit);
+    }
+  };
+
+  const handleMapCallClick = (call: any) => {
+    const realCall = activeCalls.find(c => c.id === call.id);
+    if (realCall) {
+      handleCallSelect(realCall);
+    }
+  };
+
   const handleAssignUnit = (callId: string, unitId: string) => {
     // Обновляем локальное состояние
     setActiveCalls(prev => prev.map(call => 
@@ -259,36 +290,41 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Column - Map (65%) */}
         <div className="w-2/3 p-4">
-          <Card className="h-full bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
-            <div className="relative h-full">
-              <GTAMap />
-              
-              {/* Map Overlay Controls */}
-              <div className="absolute top-4 right-4 flex flex-col gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-slate-300 hover:bg-slate-700"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-slate-300 hover:bg-slate-700"
-                >
-                  <Filter className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-slate-300 hover:bg-slate-700"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className="h-full bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg overflow-hidden">
+            <GTAMap 
+              showHeader={false}
+              className="h-full"
+              units={mapUnits}
+              calls={mapCalls}
+              onUnitClick={handleMapUnitClick}
+              onCallClick={handleMapCallClick}
+            />
+            
+            {/* Map Overlay Controls */}
+            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Right Column - Management Panel (35%) */}

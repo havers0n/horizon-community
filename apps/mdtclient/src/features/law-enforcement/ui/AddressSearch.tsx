@@ -5,6 +5,7 @@ import { Search, Eye } from 'lucide-react';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { MOCK_CITIZENS_EXTENDED } from '@/shared';
 import type { Citizen } from '@/shared/types';
+import type { AddressSearchResult } from '../features/address-search/model/types';
 
 export const AddressSearch: React.FC = () => {
   const { t } = useLocale();

@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { UnitList } from '@/features/unit-management';
 import { EmsCallList } from '@/features/ems-call-management';
-import { EmsReportsList, EmsReportForm } from '@/shared/types';
-import { EmsPersonnelList } from '@/shared/types';
+// ВРЕМЕННЫЕ ЗАГЛУШКИ
+const EmsReportsList = () => <div className="text-yellow-500">[EmsReportsList Placeholder]</div>;
+const EmsReportForm = () => <div className="text-yellow-500">[EmsReportForm Placeholder]</div>;
+const EmsPersonnelList = () => <div className="text-yellow-500">[EmsPersonnelList Placeholder]</div>;
 import { PatientSearch } from '@/features/patient-management';
 import { ShiftManagement } from '@/features/shift-management';
 import { 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, Button } from '@/shared/ui/atoms';
 import { useLocale } from '@/shared/contexts/LocaleContext';
-import type { CitizenProfile, ProfileUpdateData } from '@/shared/types';
+import type { CitizenProfile, ProfileUpdateData } from '../model/types';
 
 interface ProfileEditFormProps {
     profile: CitizenProfile;

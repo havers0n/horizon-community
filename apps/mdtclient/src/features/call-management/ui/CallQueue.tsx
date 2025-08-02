@@ -1,7 +1,7 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useEffect } from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
-import { Call911Card } from '@/shared/types';
+import { Call911Card } from '@/entities/dispatch/ui/Call911Card';
 import { useCallManagementStore } from '../model/store';
 import { Phone, AlertTriangle } from 'lucide-react';
 
