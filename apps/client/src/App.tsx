@@ -22,7 +22,6 @@ const Homepage = () => import("@/pages/Homepage");
 const FAQ = () => import("@/pages/FAQ");
 const NotFound = () => import("@/pages/not-found");
 const MDT = () => import("@/pages/MDT");
-const CAD = () => import("@/pages/CAD");
 
 function Router() {
   const { loading } = useAuth();
@@ -50,9 +49,6 @@ function Router() {
       {/* Interface routes */}
       <Route path="/mdt">
         <LazyPage component={MDT} />
-      </Route>
-      <Route path="/cad">
-        <LazyPage component={CAD} />
       </Route>
       
       {/* Protected routes */}
