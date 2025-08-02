@@ -1,0 +1,80 @@
+name: Build and Archive
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+jobs:
+  build-and-archive:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build and Archive
+      run: npm run build:archive
+      
+    - name: Upload deployment archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-archive
+        path: deployment.tar.gz
+        retention-days: 30
+        
+    - name: Show archive info
+      run: |
+        echo "=== Archive Information ==="
+        ls -la deployment.tar.gz
+        echo "Archive size: $(du -h deployment.tar.gz | cut -f1)"
+        echo "Archive contents:"
+        tar -tzf deployment.tar.gz | head -20
+        echo "... (showing first 20 files)"
+        
+  # Опциональный job для деплоя (можно настроить под ваши нужды)
+  deploy:
+    needs: build-and-archive
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download deployment archive
+      uses: actions/download-artifact@v4
+      with:
+        name: deployment-archive
+        path: ./
+        
+    - name: Show deployment files
+      run: |
+        echo "=== Deployment Files ==="
+        ls -la
+        echo "Archive contents for deployment:"
+        tar -tzf deployment.tar.gz
+        
+    # Здесь можно добавить шаги для деплоя на сервер
+    # Например:
+    # - name: Deploy to server
+    #   run: |
+    #     # Команды для деплоя
+    #     echo "Deploying to ${{ github.event.inputs.environment }}" 
