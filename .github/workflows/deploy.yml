@@ -71,82 +71,18 @@ jobs:
           echo "--- Размеры билдов: ---"
           du -sh dist/apps/*
 
-      - name: Deploy to Server and Restart App
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          script: |
-            # 1. Гарантированно создаем директорию для деплоя
-            echo "🔧 Создаем директорию /var/www/app, если она не существует..."
-            mkdir -p /var/www/app
-
-      - name: Copy application files
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          source: "dist/*"  # <-- ВАЖНО: копируем содержимое папки dist
-          target: "/var/www/app"
-          overwrite: true
-
-      - name: Setup and restart application
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          script: |
-            # Переходим в рабочую директорию
-            cd /var/www/app
-
-            # Проверяем, что файлы на месте
-            echo "🔍 Проверяем структуру файлов на сервере..."
-            ls -la
-            ls -la apps/
-
-            # Проверяем .env файл (если он должен быть вне папки dist)
-            # Если .env лежит на уровень выше, используйте `cd .. && ls -la`
-            echo "🔍 Проверяем .env файл..."
-            if [ -f .env ]; then
-              echo "✅ .env файл найден"
-              head -3 .env
-            else
-              echo "⚠️ .env файл не найден (это может быть нормально, если он не требуется)"
-            fi
-
-            # Безопасный рестарт через PM2
-            if pm2 list | grep -q "roleplayidentity"; then
-              echo "🔄 Релоадим приложение через pm2..."
-              pm2 reload roleplayidentity
-            else
-              echo "🚀 Первый старт приложения через pm2..."
-              # Путь к серверу теперь прямой, без папки dist
-              NODE_ENV=production pm2 start apps/server/main.js --name roleplayidentity
-            fi
-
-            pm2 save
-            echo "📊 Статус приложения:"
-            pm2 status
-            echo "✅ Деплой завершен успешно!"
-
-      - name: Health check
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          script: |
-            sleep 5
-            pm2 status
-
-            if curl -f http://localhost:5000/api/health > /dev/null 2>&1; then
-              echo "✅ Приложение доступно на localhost:5000"
-            else
-              echo "❌ Приложение недоступно на localhost:5000"
-              echo "📋 Последние 10 строк логов PM2:"
-              pm2 logs roleplayidentity --lines 10 --nostream
-              exit 1
-            fi
+      - name: Manual SSH Connection Test (DEBUG)
+        run: |
+          echo "Шаг 1: Подготовка приватного ключа"
+          # Сохраняем ключ из секрета в файл
+          echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
+          # Устанавливаем строгие права доступа (обязательно для SSH)
+          chmod 600 deploy_key
+          
+          echo "Шаг 2: Запуск SSH-соединения с максимальной отладкой (-vvv)"
+          # Выполняем SSH-команду с флагом -vvv для самого подробного вывода
+          # -o StrictHostKeyChecking=no - чтобы не спрашивать про отпечаток сервера
+          # -i deploy_key - чтобы использовать наш файл с ключом
+          ssh -vvv -o StrictHostKeyChecking=no -i deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo '>>> СОЕДИНЕНИЕ УСПЕШНО <<<'"
+          
+          echo "Шаг 3: Тест завершен"
