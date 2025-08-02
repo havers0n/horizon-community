@@ -1,21 +1,9 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
-import { BOLO } from '../model/store';
+import type { Bolo, CreateBoloData, UpdateBoloData } from '../../../entities/dispatch/model/types';
 import { authUtils } from '../../../lib/auth';
 
-export interface CreateBoloRequest {
-  type: 'vehicle' | 'person' | 'general';
-  description: string;
-  vehicle?: string;
-  plate?: string;
-  reason: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  location?: string;
-  additionalInfo?: string;
-}
-
-export interface UpdateBoloData extends Partial<CreateBoloData> {
-  status?: 'active' | 'resolved' | 'expired';
-}
+// Используем единый тип Bolo
+export type BOLO = Bolo;
 
 export class BoloApi {
   private static baseUrl = '/api/mdt';
@@ -46,20 +34,61 @@ export class BoloApi {
    */
   static async createBolo(data: CreateBoloData): Promise<BOLO> {
     try {
+      console.log('[BoloApi] Creating BOLO with data:', data);
+      console.log('[BoloApi] Request URL:', `${this.baseUrl}/bolos`);
+      
+      const headers = {
+        ...authUtils.getAuthHeaders(),
+        'Content-Type': 'application/json'
+      };
+      
+      console.log('[BoloApi] Request headers:', headers);
+      console.log('[BoloApi] Auth token present:', !!headers.Authorization);
+      
       const response = await fetch(`${this.baseUrl}/bolos`, {
         method: 'POST',
-        headers: authUtils.getAuthHeaders(),
+        headers,
         body: JSON.stringify(data)
       });
 
+      console.log('[BoloApi] Response status:', response.status);
+      console.log('[BoloApi] Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        let errorDetails = null;
+        
+        try {
+          const errorData = await response.json();
+          console.log('[BoloApi] Error response data:', errorData);
+          
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+          if (errorData.details) {
+            errorDetails = errorData.details;
+          }
+        } catch (parseError) {
+          console.log('[BoloApi] Could not parse error response as JSON');
+        }
+        
+        const fullError = errorDetails 
+          ? `${errorMessage} - Details: ${JSON.stringify(errorDetails)}`
+          : errorMessage;
+          
+        throw new Error(fullError);
       }
 
       const result = await response.json();
+      console.log('[BoloApi] Success response:', result);
+      
+      if (!result.data) {
+        throw new Error('No data received from server');
+      }
+      
       return this.mapBoloFromApi(result.data);
     } catch (error) {
-      console.error('Error creating BOLO:', error);
+      console.error('[BoloApi] Error creating BOLO:', error);
       throw error;
     }
   }
@@ -76,7 +105,8 @@ export class BoloApi {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
@@ -98,7 +128,8 @@ export class BoloApi {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
     } catch (error) {
       console.error('Error deleting BOLO:', error);
@@ -113,16 +144,16 @@ export class BoloApi {
     return {
       id: apiData.id,
       type: apiData.type,
-      description: apiData.description,
-      vehicle: apiData.vehicle,
-      plate: apiData.plate,
+      description: apiData.subjectDescription || apiData.description || '',
+      vehicle: apiData.vehicleDescription || apiData.vehicle,
+      plate: apiData.vehiclePlate || apiData.plate,
       reason: apiData.reason,
       timestamp: apiData.created_at || apiData.timestamp,
-      priority: apiData.priority,
+      priority: apiData.priority || 'medium',
       issuedBy: apiData.issued_by || apiData.author_name || 'Unknown',
-      status: apiData.status,
+      status: apiData.status || 'active',
       location: apiData.location,
-      additionalInfo: apiData.additional_info || apiData.notes
+      additionalInfo: apiData.additional_info || apiData.notes || ''
     };
   }
 } 

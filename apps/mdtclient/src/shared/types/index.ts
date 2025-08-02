@@ -9,7 +9,11 @@ export interface Character {
   // --- Базовые/Гражданские поля ---
   firstName: string; // camelCase для фронтенда
   lastName: string;
+  name?: string; // Добавлено для обратной совместимости
+  surname?: string; // Добавлено для обратной совместимости
+  middleName?: string; // Добавлено для обратной совместимости
   dateOfBirth: string; // date
+  ssn?: string; // Добавлено для обратной совместимости
   gender?: string;
   ethnicity?: string;
   height?: string;
@@ -18,11 +22,20 @@ export interface Character {
   eyeColor?: string;
   address?: string;
   phoneNumber?: string;
+  phone?: string; // Добавлено для обратной совместимости
+  email?: string; // Добавлено для обратной совместимости
   postal?: string;
   occupation?: string;
   mugshotUrl?: string;
+  imageUrl?: string; // Добавлено для обратной совместимости
+  photoUrl?: string; // Добавлено для обратной совместимости
   licenses?: any; // jsonb - пока оставляем any, потом можно типизировать
+  licenseNumber?: string; // Добавлено для обратной совместимости
+  licenseStatus?: string; // Добавлено для обратной совместимости
   medicalInfo?: any; // jsonb
+  criminalRecord?: any[]; // Добавлено для обратной совместимости
+  emergencyContacts?: any[]; // Добавлено для совместимости с мок-данными
+  employment?: any; // Добавлено для совместимости с мок-данными
   flags?: string[];
   addressFlags?: string[];
   dead?: boolean;
@@ -34,9 +47,9 @@ export interface Character {
   badgeNumber?: string;
   callsign?: string;
   callsign2?: string;
-  departmentId?: number;
-  divisionId?: number;
-  rankId?: number;
+  departmentId?: string;
+  divisionId?: string;
+  rankId?: string;
   hireDate?: string; // date
   terminationDate?: string; // date
   isActive?: boolean;
@@ -48,6 +61,9 @@ export interface Character {
   createdAt: string;
   updatedAt: string;
 }
+
+// Алиас для обратной совместимости
+export type Citizen = Character;
 
 // =================================================================
 // 2. ТИПЫ ДЛЯ СОЗДАНИЯ И ОБНОВЛЕНИЯ
@@ -79,9 +95,9 @@ export interface CreateCharacterRequest {
   badgeNumber?: string;
   callsign?: string;
   callsign2?: string;
-  departmentId?: number;
-  divisionId?: number;
-  rankId?: number;
+  departmentId?: string;
+  divisionId?: string;
+  rankId?: string;
   hireDate?: string;
   terminationDate?: string;
   isActive?: boolean;
@@ -116,9 +132,9 @@ export interface UpdateCharacterRequest {
   badgeNumber?: string;
   callsign?: string;
   callsign2?: string;
-  departmentId?: number;
-  divisionId?: number;
-  rankId?: number;
+  departmentId?: string;
+  divisionId?: string;
+  rankId?: string;
   hireDate?: string;
   terminationDate?: string;
   isActive?: boolean;
@@ -155,14 +171,14 @@ export interface User {
   // ... любые другие поля пользователя
 }
 
-export type UnitStatus = 'available' | 'busy' | 'enRoute' | 'onScene' | 'unavailable' | 'panic' | 'transporting' | 'outOfService' | 'training' | 'dispatched' | 'cleared';
+export type UnitStatus = 'available' | 'busy' | 'enRoute' | 'en_route' | 'onScene' | 'on_scene' | 'unavailable' | 'panic' | 'transporting' | 'outOfService' | 'training' | 'dispatched' | 'cleared';
 
 // Константы для enum-подобного использования
 export const UnitStatuses = {
   AVAILABLE: 'available' as const,
   BUSY: 'busy' as const,
-  EN_ROUTE: 'enRoute' as const,
-  ON_SCENE: 'onScene' as const,
+  EN_ROUTE: 'en_route' as const, // Исправлено для совместимости
+  ON_SCENE: 'on_scene' as const, // Исправлено для совместимости
   UNAVAILABLE: 'unavailable' as const,
   PANIC: 'panic' as const,
   TRANSPORTING: 'transporting' as const,
@@ -176,7 +192,7 @@ export interface Unit {
   id: string;
   unitNumber: string;
   name?: string; // Для обратной совместимости
-  departmentId: number;
+  departmentId: string; // Изменено с number на string для UUID
   department?: string; // Для обратной совместимости
   status: UnitStatus;
   isPanic?: boolean;
@@ -192,11 +208,22 @@ export interface Vehicle {
   id: string;
   ownerId: string;
   plate: string;
+  plateNumber?: string; // Добавлено для обратной совместимости
   vin: string;
   model: string;
+  make?: string; // Добавлено для обратной совместимости
+  year?: number; // Добавлено для обратной совместимости
   color: string;
+  bodyType?: string; // Добавлено для обратной совместимости
+  mileage?: number; // Добавлено для обратной совместимости
+  engineSize?: string; // Добавлено для обратной совместимости
   registration: 'valid' | 'invalid' | 'expired' | string; // Добавлен string для обратной совместимости
+  registrationStatus?: string; // Добавлено для обратной совместимости
+  registrationExpiry?: string; // Добавлено для обратной совместимости
   insurance: 'valid' | 'invalid' | 'expired' | string; // Добавлен string для обратной совместимости
+  insuranceStatus?: string; // Добавлено для обратной совместимости
+  stolen?: boolean; // Добавлено для обратной совместимости
+  owner?: any; // Добавлено для обратной совместимости
   // ... все остальные поля транспорта
 }
 
@@ -213,7 +240,7 @@ export interface Weapon {
   // ... все остальные поля оружия
 }
 
-export type CallPriority = 'low' | 'medium' | 'high' | 'critical';
+export type CallPriority = 'low' | 'medium' | 'high' | 'critical' | 'panic';
 export type CallStatus = 'pending' | 'assigned' | 'resolved' | 'closed' | 'active'; // Добавлен 'active'
 
 // Константы для enum-подобного использования
@@ -277,16 +304,8 @@ export interface UnitAssignment {
 // 4. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ
 // =================================================================
 
-export interface BOLO {
-  id: string;
-  type: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'active' | 'resolved';
-  createdAt: string;
-  updatedAt: string;
-  // ... другие поля BOLO
-}
+// BOLO тип перенесен в @/entities/dispatch/model/types
+// Импортируйте его оттуда: import type { Bolo } from '@/entities/dispatch/model/types';
 
 export interface CharacterSearchResult {
   id: string;
@@ -386,6 +405,82 @@ export interface CharacterExportData {
   total: number;
   exportedAt: string;
   // ... другие поля экспорта
+}
+
+// =================================================================
+// ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ API
+// =================================================================
+
+export interface Report {
+  id: string;
+  authorId: string;
+  status: string;
+  fileUrl: string;
+  supervisorComment?: string;
+  createdAt: string;
+  updatedAt?: string;
+  title?: string;
+  content?: string;
+  type?: string;
+}
+
+export interface ActiveUnit {
+  id: string;
+  unitNumber: string;
+  name?: string;
+  departmentId: string;
+  department?: string;
+  status: UnitStatus;
+  isPanic: boolean;
+  characterName?: string;
+  lastUpdate: string;
+  location: Record<string, any>; // Координаты для активного юнита
+  crew?: User[];
+  equipment?: string[];
+  unitType?: 'patrol' | 'medic' | 'fire_truck' | 'dispatch';
+  characterId: string;
+  partnerId?: string;
+  vehicleId?: string;
+  createdAt: string;
+}
+
+// =================================================================
+// ТИПЫ ДЛЯ ФИЛЬТРОВ
+// =================================================================
+
+export interface CitizenFilters {
+  type?: string;
+  departmentId?: string;
+  isActive?: boolean;
+}
+
+export interface VehicleFilters {
+  ownerId?: string;
+  registration?: string;
+  insurance?: string;
+}
+
+export interface WeaponFilters {
+  ownerId?: string;
+  registration?: string;
+}
+
+export interface ReportFilters {
+  authorId?: string;
+  status?: string;
+}
+
+export interface CallFilters {
+  status?: string;
+  type?: string;
+  priority?: number;
+}
+
+export interface UnitFilters {
+  characterId?: string;
+  status?: string;
+  departmentId?: string;
+  isActive?: boolean;
 }
 
 // =================================================================

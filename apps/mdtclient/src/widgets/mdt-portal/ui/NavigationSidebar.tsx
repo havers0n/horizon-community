@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { 
@@ -26,7 +25,6 @@ interface NavItem {
 export const NavigationSidebar: React.FC = () => {
   const { t } = useLocale();
   const { user, logout } = useAuth();
-  const location = useLocation();
 
   const navItems: NavItem[] = [
     { path: '/', icon: <LayoutDashboard className="w-5 h-5" />, label: t('dashboard') },
@@ -38,10 +36,9 @@ export const NavigationSidebar: React.FC = () => {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
+    // Временная заглушка - всегда возвращаем false
+    // TODO: Реализовать через Zustand store
+    return false;
   };
 
   const handleLogout = () => {
@@ -55,9 +52,12 @@ export const NavigationSidebar: React.FC = () => {
         <ul className="space-y-2 px-2">
           {navItems.map((item) => (
             <li key={item.path}>
-              <Link
-                to={item.path}
-                className={`flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 ease-in-out rounded-lg transform hover:scale-105 ${
+              <button
+                onClick={() => {
+                  // TODO: Реализовать навигацию через Zustand store
+                  console.log('Navigate to:', item.path);
+                }}
+                className={`flex items-center w-full px-4 py-3 text-sm font-medium transition-all duration-200 ease-in-out rounded-lg transform hover:scale-105 ${
                   isActive(item.path)
                     ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25 glow-primary'
                     : 'text-slate-300 hover:bg-gradient-to-r hover:from-slate-700/50 hover:to-slate-600/50 hover:text-white hover:shadow-md'
@@ -67,7 +67,7 @@ export const NavigationSidebar: React.FC = () => {
                   {item.icon}
                 </span>
                 {item.label}
-              </Link>
+              </button>
             </li>
           ))}
         </ul>

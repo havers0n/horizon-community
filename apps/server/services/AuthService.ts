@@ -1,17 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
-import { userService } from './UserService.js';
-import type { User } from '../types.js';
+import type { Tables } from '../../../packages/db-types/src/index';
 
-// ===== ТИПЫ =====
+// ===== ТИПЫ ИЗ НОВОЙ БД =====
+
+type Profile = Tables<'profiles'>;
+type Character = Tables<{ schema: 'common' }, 'characters'>;
+
+// ===== ИНТЕРФЕЙСЫ =====
 
 export interface AuthUser {
-  id: number;
-  username: string;
-  email: string;
+  id: string; // UUID из profiles
+  username: string | null;
+  email: string | null;
   role: string;
   status: string;
-  departmentId?: number;
-  secondaryDepartmentId?: number;
+  departmentId?: string;
+  secondaryDepartmentId?: string;
   rank?: string;
   division?: string;
   qualifications: string[];
@@ -24,7 +28,7 @@ export interface AuthUser {
   isDarkTheme: boolean;
   soundSettings: any;
   apiToken?: string;
-  createdAt: Date;
+  createdAt: string | null;
   authId?: string;
 }
 
@@ -108,7 +112,7 @@ export class AuthService {
       const { data: profile, error: profileError } = await this.supabase
         .from('profiles')
         .select('*')
-        .eq('auth_id', supabaseUser.id)
+        .eq('id', supabaseUser.id)
         .single();
 
       if (profileError && profileError.code !== 'PGRST116') {
@@ -123,21 +127,27 @@ export class AuthService {
 
       // Маппинг профиля в AuthUser
       const authUser: AuthUser = {
-        id: parseInt(profile.id.replace(/-/g, '').substring(0, 8), 16), // Генерируем числовой ID из UUID
-        username: profile.email.split('@')[0], // Используем email как username
+        id: profile.id, // UUID
+        username: profile.username,
         email: profile.email,
         role: profile.role || 'user',
-        status: profile.is_active ? 'active' : 'inactive',
-        departmentId: profile.department_id,
-        rank: profile.badge_number,
-        qualifications: [],
-        gameWarnings: 0,
-        adminWarnings: 0,
-        has2FA: false,
-        isDarkTheme: false,
-        soundSettings: {},
-        createdAt: new Date(profile.created_at),
-        authId: profile.auth_id
+        status: 'active', // По умолчанию активный
+        departmentId: undefined, // Будет из user_metadata
+        secondaryDepartmentId: undefined, // Будет из user_metadata
+        rank: undefined, // Будет из user_metadata
+        division: undefined, // Будет из user_metadata
+        qualifications: [], // Будет из user_metadata
+        gameWarnings: 0, // Будет из user_metadata
+        adminWarnings: 0, // Будет из user_metadata
+        cadToken: supabaseUser.user_metadata?.cadToken,
+        discordId: supabaseUser.user_metadata?.discordId,
+        discordUsername: supabaseUser.user_metadata?.discordUsername,
+        has2FA: supabaseUser.user_metadata?.has2FA || false,
+        isDarkTheme: supabaseUser.user_metadata?.isDarkTheme || false,
+        soundSettings: supabaseUser.user_metadata?.soundSettings || {},
+        apiToken: supabaseUser.user_metadata?.apiToken,
+        createdAt: profile.created_at,
+        authId: profile.id // В новой схеме auth_id = id
       };
 
       console.log('[AuthService] ✅ User synced successfully');
@@ -156,12 +166,10 @@ export class AuthService {
       console.log('[AuthService] 📝 Creating new local profile...');
       
       const profileData = {
-        auth_id: supabaseUser.id,
+        id: supabaseUser.id, // UUID
         email: supabaseUser.email,
-        first_name: supabaseUser.user_metadata?.first_name || '',
-        last_name: supabaseUser.user_metadata?.last_name || '',
-        role: supabaseUser.user_metadata?.role || 'user',
-        is_active: true
+        username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0] || null,
+        role: supabaseUser.user_metadata?.role || 'user'
       };
 
       const { data: profile, error } = await this.supabase
@@ -177,21 +185,27 @@ export class AuthService {
 
       // Маппинг профиля в AuthUser
       const authUser: AuthUser = {
-        id: parseInt(profile.id.replace(/-/g, '').substring(0, 8), 16),
-        username: profile.email.split('@')[0],
+        id: profile.id, // UUID
+        username: profile.username,
         email: profile.email,
         role: profile.role || 'user',
         status: 'active',
-        departmentId: profile.department_id,
-        rank: profile.badge_number,
+        departmentId: undefined,
+        secondaryDepartmentId: undefined,
+        rank: undefined,
+        division: undefined,
         qualifications: [],
         gameWarnings: 0,
         adminWarnings: 0,
-        has2FA: false,
-        isDarkTheme: false,
-        soundSettings: {},
-        createdAt: new Date(profile.created_at),
-        authId: profile.auth_id
+        cadToken: supabaseUser.user_metadata?.cadToken,
+        discordId: supabaseUser.user_metadata?.discordId,
+        discordUsername: supabaseUser.user_metadata?.discordUsername,
+        has2FA: supabaseUser.user_metadata?.has2FA || false,
+        isDarkTheme: supabaseUser.user_metadata?.isDarkTheme || false,
+        soundSettings: supabaseUser.user_metadata?.soundSettings || {},
+        apiToken: supabaseUser.user_metadata?.apiToken,
+        createdAt: profile.created_at,
+        authId: profile.id
       };
 
       console.log('[AuthService] ✅ Local profile created successfully');
@@ -209,31 +223,77 @@ export class AuthService {
    */
   async validateCadToken(token: string): Promise<CadAuthResult> {
     try {
-      // TODO: Добавить поле cadToken в схему пользователя
-      // Пока используем временную логику
-      const allUsers = await userService.getAllUsers();
-      const user = allUsers.find((u: any) => u.cadToken === token);
+      console.log('[AuthService] 🔍 Validating CAD token...');
+      
+      // Ищем пользователя по CAD токену в user_metadata
+      const { data: { users }, error } = await this.supabase.auth.admin.listUsers();
+      
+      if (error) {
+        console.error('[AuthService] ❌ Error listing users:', error);
+        return {
+          success: false,
+          error: 'Failed to validate CAD token'
+        };
+      }
 
-      if (!user) {
+      const userWithCadToken = users.find(user => 
+        user.user_metadata?.cadToken === token
+      );
+
+      if (!userWithCadToken) {
+        console.log('[AuthService] ❌ No user found with CAD token');
         return {
           success: false,
           error: 'Invalid CAD token'
         };
       }
 
-      if (user.status !== 'active') {
+      // Получаем профиль пользователя
+      const { data: profile, error: profileError } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userWithCadToken.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('[AuthService] ❌ Profile not found for CAD token user');
         return {
           success: false,
-          error: 'User account is not active'
+          error: 'User profile not found'
         };
       }
 
+      const authUser: AuthUser = {
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        role: profile.role || 'user',
+        status: 'active',
+        departmentId: userWithCadToken.user_metadata?.departmentId,
+        secondaryDepartmentId: userWithCadToken.user_metadata?.secondaryDepartmentId,
+        rank: userWithCadToken.user_metadata?.rank,
+        division: userWithCadToken.user_metadata?.division,
+        qualifications: userWithCadToken.user_metadata?.qualifications || [],
+        gameWarnings: userWithCadToken.user_metadata?.gameWarnings || 0,
+        adminWarnings: userWithCadToken.user_metadata?.adminWarnings || 0,
+        cadToken: userWithCadToken.user_metadata?.cadToken,
+        discordId: userWithCadToken.user_metadata?.discordId,
+        discordUsername: userWithCadToken.user_metadata?.discordUsername,
+        has2FA: userWithCadToken.user_metadata?.has2FA || false,
+        isDarkTheme: userWithCadToken.user_metadata?.isDarkTheme || false,
+        soundSettings: userWithCadToken.user_metadata?.soundSettings || {},
+        apiToken: userWithCadToken.user_metadata?.apiToken,
+        createdAt: profile.created_at,
+        authId: profile.id
+      };
+
+      console.log('[AuthService] ✅ CAD token validated successfully');
       return {
         success: true,
-        user: this.mapUserToAuthUser(user)
+        user: authUser
       };
     } catch (error) {
-      console.error('Error validating CAD token:', error);
+      console.error('[AuthService] ❌ Error validating CAD token:', error);
       return {
         success: false,
         error: 'Internal server error'
@@ -244,13 +304,26 @@ export class AuthService {
   /**
    * Генерация CAD токена для пользователя
    */
-  async generateCadToken(userId: number): Promise<string> {
+  async generateCadToken(userId: string): Promise<string> {
     try {
+      console.log('[AuthService] 🔑 Generating CAD token for user:', userId);
+      
       const token = this.generateSecureToken();
-      await userService.updateUser(userId, { apiToken: token });
+      
+      // Обновляем user_metadata в Supabase Auth
+      const { error } = await this.supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { cadToken: token }
+      });
+
+      if (error) {
+        console.error('[AuthService] ❌ Error updating user metadata:', error);
+        throw new Error('Failed to generate CAD token');
+      }
+
+      console.log('[AuthService] ✅ CAD token generated successfully');
       return token;
     } catch (error) {
-      console.error('Error generating CAD token:', error);
+      console.error('[AuthService] ❌ Error generating CAD token:', error);
       throw new Error('Failed to generate CAD token');
     }
   }
@@ -258,11 +331,23 @@ export class AuthService {
   /**
    * Отзыв CAD токена
    */
-  async revokeCadToken(userId: number): Promise<void> {
+  async revokeCadToken(userId: string): Promise<void> {
     try {
-      await userService.updateUser(userId, { apiToken: null });
+      console.log('[AuthService] 🔒 Revoking CAD token for user:', userId);
+      
+      // Удаляем CAD токен из user_metadata
+      const { error } = await this.supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { cadToken: null }
+      });
+
+      if (error) {
+        console.error('[AuthService] ❌ Error revoking CAD token:', error);
+        throw new Error('Failed to revoke CAD token');
+      }
+
+      console.log('[AuthService] ✅ CAD token revoked successfully');
     } catch (error) {
-      console.error('Error revoking CAD token:', error);
+      console.error('[AuthService] ❌ Error revoking CAD token:', error);
       throw new Error('Failed to revoke CAD token');
     }
   }
@@ -272,13 +357,26 @@ export class AuthService {
   /**
    * Генерация API токена
    */
-  async generateApiToken(userId: number): Promise<string> {
+  async generateApiToken(userId: string): Promise<string> {
     try {
+      console.log('[AuthService] 🔑 Generating API token for user:', userId);
+      
       const token = this.generateSecureToken();
-      await userService.updateUser(userId, { apiToken: token });
+      
+      // Обновляем user_metadata в Supabase Auth
+      const { error } = await this.supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { apiToken: token }
+      });
+
+      if (error) {
+        console.error('[AuthService] ❌ Error updating user metadata:', error);
+        throw new Error('Failed to generate API token');
+      }
+
+      console.log('[AuthService] ✅ API token generated successfully');
       return token;
     } catch (error) {
-      console.error('Error generating API token:', error);
+      console.error('[AuthService] ❌ Error generating API token:', error);
       throw new Error('Failed to generate API token');
     }
   }
@@ -288,29 +386,77 @@ export class AuthService {
    */
   async validateApiToken(token: string): Promise<TokenValidationResult> {
     try {
-      const allUsers = await userService.getAllUsers();
-      const user = allUsers.find((u: any) => u.apiToken === token);
+      console.log('[AuthService] 🔍 Validating API token...');
+      
+      // Ищем пользователя по API токену в user_metadata
+      const { data: { users }, error } = await this.supabase.auth.admin.listUsers();
+      
+      if (error) {
+        console.error('[AuthService] ❌ Error listing users:', error);
+        return {
+          valid: false,
+          error: 'Failed to validate API token'
+        };
+      }
 
-      if (!user) {
+      const userWithApiToken = users.find(user => 
+        user.user_metadata?.apiToken === token
+      );
+
+      if (!userWithApiToken) {
+        console.log('[AuthService] ❌ No user found with API token');
         return {
           valid: false,
           error: 'Invalid API token'
         };
       }
 
-      if (user.status !== 'active') {
+      // Получаем профиль пользователя
+      const { data: profile, error: profileError } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userWithApiToken.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('[AuthService] ❌ Profile not found for API token user');
         return {
           valid: false,
-          error: 'User account is not active'
+          error: 'User profile not found'
         };
       }
 
+      const authUser: AuthUser = {
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        role: profile.role || 'user',
+        status: 'active',
+        departmentId: userWithApiToken.user_metadata?.departmentId,
+        secondaryDepartmentId: userWithApiToken.user_metadata?.secondaryDepartmentId,
+        rank: userWithApiToken.user_metadata?.rank,
+        division: userWithApiToken.user_metadata?.division,
+        qualifications: userWithApiToken.user_metadata?.qualifications || [],
+        gameWarnings: userWithApiToken.user_metadata?.gameWarnings || 0,
+        adminWarnings: userWithApiToken.user_metadata?.adminWarnings || 0,
+        cadToken: userWithApiToken.user_metadata?.cadToken,
+        discordId: userWithApiToken.user_metadata?.discordId,
+        discordUsername: userWithApiToken.user_metadata?.discordUsername,
+        has2FA: userWithApiToken.user_metadata?.has2FA || false,
+        isDarkTheme: userWithApiToken.user_metadata?.isDarkTheme || false,
+        soundSettings: userWithApiToken.user_metadata?.soundSettings || {},
+        apiToken: userWithApiToken.user_metadata?.apiToken,
+        createdAt: profile.created_at,
+        authId: profile.id
+      };
+
+      console.log('[AuthService] ✅ API token validated successfully');
       return {
         valid: true,
-        user: this.mapUserToAuthUser(user)
+        user: authUser
       };
     } catch (error) {
-      console.error('Error validating API token:', error);
+      console.error('[AuthService] ❌ Error validating API token:', error);
       return {
         valid: false,
         error: 'Internal server error'
@@ -321,11 +467,23 @@ export class AuthService {
   /**
    * Отзыв API токена
    */
-  async revokeApiToken(userId: number): Promise<void> {
+  async revokeApiToken(userId: string): Promise<void> {
     try {
-      await userService.updateUser(userId, { apiToken: null });
+      console.log('[AuthService] 🔒 Revoking API token for user:', userId);
+      
+      // Удаляем API токен из user_metadata
+      const { error } = await this.supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { apiToken: null }
+      });
+
+      if (error) {
+        console.error('[AuthService] ❌ Error revoking API token:', error);
+        throw new Error('Failed to revoke API token');
+      }
+
+      console.log('[AuthService] ✅ API token revoked successfully');
     } catch (error) {
-      console.error('Error revoking API token:', error);
+      console.error('[AuthService] ❌ Error revoking API token:', error);
       throw new Error('Failed to revoke API token');
     }
   }
@@ -335,12 +493,58 @@ export class AuthService {
   /**
    * Получение пользователя по ID
    */
-  async getUserById(id: number): Promise<AuthUser | null> {
+  async getUserById(id: string): Promise<AuthUser | null> {
     try {
-      const user = await userService.getUser(id);
-      return user ? this.mapUserToAuthUser(user) : null;
+      console.log('[AuthService] 🔍 Getting user by ID:', id);
+      
+      // Получаем профиль из БД
+      const { data: profile, error: profileError } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (profileError || !profile) {
+        console.log('[AuthService] ❌ Profile not found for ID:', id);
+        return null;
+      }
+
+      // Получаем данные пользователя из Supabase Auth
+      const { data: { user: authUser }, error: authError } = await this.supabase.auth.admin.getUserById(id);
+
+      if (authError || !authUser) {
+        console.log('[AuthService] ❌ Auth user not found for ID:', id);
+        return null;
+      }
+
+      const user: AuthUser = {
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        role: profile.role || 'user',
+        status: 'active',
+        departmentId: authUser.user_metadata?.departmentId,
+        secondaryDepartmentId: authUser.user_metadata?.secondaryDepartmentId,
+        rank: authUser.user_metadata?.rank,
+        division: authUser.user_metadata?.division,
+        qualifications: authUser.user_metadata?.qualifications || [],
+        gameWarnings: authUser.user_metadata?.gameWarnings || 0,
+        adminWarnings: authUser.user_metadata?.adminWarnings || 0,
+        cadToken: authUser.user_metadata?.cadToken,
+        discordId: authUser.user_metadata?.discordId,
+        discordUsername: authUser.user_metadata?.discordUsername,
+        has2FA: authUser.user_metadata?.has2FA || false,
+        isDarkTheme: authUser.user_metadata?.isDarkTheme || false,
+        soundSettings: authUser.user_metadata?.soundSettings || {},
+        apiToken: authUser.user_metadata?.apiToken,
+        createdAt: profile.created_at,
+        authId: profile.id
+      };
+
+      console.log('[AuthService] ✅ User retrieved successfully');
+      return user;
     } catch (error) {
-      console.error('Error getting user by ID:', error);
+      console.error('[AuthService] ❌ Error getting user by ID:', error);
       return null;
     }
   }
@@ -350,10 +554,56 @@ export class AuthService {
    */
   async getUserByEmail(email: string): Promise<AuthUser | null> {
     try {
-      const user = await userService.getUserByEmail(email);
-      return user ? this.mapUserToAuthUser(user) : null;
+      console.log('[AuthService] 🔍 Getting user by email:', email);
+      
+      // Получаем профиль из БД
+      const { data: profile, error: profileError } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (profileError || !profile) {
+        console.log('[AuthService] ❌ Profile not found for email:', email);
+        return null;
+      }
+
+      // Получаем данные пользователя из Supabase Auth
+      const { data: { user: authUser }, error: authError } = await this.supabase.auth.admin.getUserById(profile.id);
+
+      if (authError || !authUser) {
+        console.log('[AuthService] ❌ Auth user not found for email:', email);
+        return null;
+      }
+
+      const user: AuthUser = {
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        role: profile.role || 'user',
+        status: 'active',
+        departmentId: authUser.user_metadata?.departmentId,
+        secondaryDepartmentId: authUser.user_metadata?.secondaryDepartmentId,
+        rank: authUser.user_metadata?.rank,
+        division: authUser.user_metadata?.division,
+        qualifications: authUser.user_metadata?.qualifications || [],
+        gameWarnings: authUser.user_metadata?.gameWarnings || 0,
+        adminWarnings: authUser.user_metadata?.adminWarnings || 0,
+        cadToken: authUser.user_metadata?.cadToken,
+        discordId: authUser.user_metadata?.discordId,
+        discordUsername: authUser.user_metadata?.discordUsername,
+        has2FA: authUser.user_metadata?.has2FA || false,
+        isDarkTheme: authUser.user_metadata?.isDarkTheme || false,
+        soundSettings: authUser.user_metadata?.soundSettings || {},
+        apiToken: authUser.user_metadata?.apiToken,
+        createdAt: profile.created_at,
+        authId: profile.id
+      };
+
+      console.log('[AuthService] ✅ User retrieved successfully');
+      return user;
     } catch (error) {
-      console.error('Error getting user by email:', error);
+      console.error('[AuthService] ❌ Error getting user by email:', error);
       return null;
     }
   }
@@ -361,26 +611,60 @@ export class AuthService {
   /**
    * Обновление профиля пользователя
    */
-  async updateUserProfile(userId: number, data: any): Promise<AuthUser> {
+  async updateUserProfile(userId: string, data: any): Promise<AuthUser> {
     try {
-      const updates: any = {};
+      console.log('[AuthService] 🔄 Updating user profile:', userId);
       
-      if (data.username) updates.username = data.username;
-      if (data.email) updates.email = data.email;
-      if (data.departmentId !== undefined) updates.departmentId = data.departmentId;
-      if (data.secondaryDepartmentId !== undefined) updates.secondaryDepartmentId = data.secondaryDepartmentId;
-      if (data.rank) updates.rank = data.rank;
-      if (data.division) updates.division = data.division;
-      if (data.qualifications) updates.qualifications = data.qualifications;
+      const updates: any = {};
+      const metadataUpdates: any = {};
+      
+      // Обновляем профиль в БД
+      if (data.username !== undefined) updates.username = data.username;
+      if (data.email !== undefined) updates.email = data.email;
+      if (data.role !== undefined) updates.role = data.role;
+      
+      // Обновляем user_metadata в Supabase Auth
+      if (data.departmentId !== undefined) metadataUpdates.departmentId = data.departmentId;
+      if (data.secondaryDepartmentId !== undefined) metadataUpdates.secondaryDepartmentId = data.secondaryDepartmentId;
+      if (data.rank !== undefined) metadataUpdates.rank = data.rank;
+      if (data.division !== undefined) metadataUpdates.division = data.division;
+      if (data.qualifications !== undefined) metadataUpdates.qualifications = data.qualifications;
 
-      const updatedUser = await userService.updateUser(userId, updates);
-      if (!updatedUser) {
-        throw new Error('User not found');
+      // Обновляем профиль
+      if (Object.keys(updates).length > 0) {
+        const { error: profileError } = await this.supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', userId);
+
+        if (profileError) {
+          console.error('[AuthService] ❌ Error updating profile:', profileError);
+          throw new Error('Failed to update profile');
+        }
       }
 
-      return this.mapUserToAuthUser(updatedUser);
+      // Обновляем user_metadata
+      if (Object.keys(metadataUpdates).length > 0) {
+        const { error: metadataError } = await this.supabase.auth.admin.updateUserById(userId, {
+          user_metadata: metadataUpdates
+        });
+
+        if (metadataError) {
+          console.error('[AuthService] ❌ Error updating user metadata:', metadataError);
+          throw new Error('Failed to update user metadata');
+        }
+      }
+
+      // Получаем обновленного пользователя
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error('User not found after update');
+      }
+
+      console.log('[AuthService] ✅ User profile updated successfully');
+      return updatedUser;
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      console.error('[AuthService] ❌ Error updating user profile:', error);
       throw new Error('Failed to update user profile');
     }
   }
@@ -388,16 +672,29 @@ export class AuthService {
   /**
    * Обновление роли пользователя
    */
-  async updateUserRole(userId: number, role: string): Promise<AuthUser> {
+  async updateUserRole(userId: string, role: string): Promise<AuthUser> {
     try {
-      const updatedUser = await userService.updateUser(userId, { role });
-      if (!updatedUser) {
-        throw new Error('User not found');
+      console.log('[AuthService] 🔄 Updating user role:', userId, 'to:', role);
+      
+      const { error } = await this.supabase
+        .from('profiles')
+        .update({ role })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('[AuthService] ❌ Error updating user role:', error);
+        throw new Error('Failed to update user role');
       }
 
-      return this.mapUserToAuthUser(updatedUser);
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error('User not found after role update');
+      }
+
+      console.log('[AuthService] ✅ User role updated successfully');
+      return updatedUser;
     } catch (error) {
-      console.error('Error updating user role:', error);
+      console.error('[AuthService] ❌ Error updating user role:', error);
       throw new Error('Failed to update user role');
     }
   }
@@ -405,16 +702,29 @@ export class AuthService {
   /**
    * Обновление статуса пользователя
    */
-  async updateUserStatus(userId: number, status: string): Promise<AuthUser> {
+  async updateUserStatus(userId: string, status: string): Promise<AuthUser> {
     try {
-      const updatedUser = await userService.updateUser(userId, { status });
-      if (!updatedUser) {
-        throw new Error('User not found');
+      console.log('[AuthService] 🔄 Updating user status:', userId, 'to:', status);
+      
+      // Обновляем статус в user_metadata
+      const { error } = await this.supabase.auth.admin.updateUserById(userId, {
+        user_metadata: { status }
+      });
+
+      if (error) {
+        console.error('[AuthService] ❌ Error updating user status:', error);
+        throw new Error('Failed to update user status');
       }
 
-      return this.mapUserToAuthUser(updatedUser);
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error('User not found after status update');
+      }
+
+      console.log('[AuthService] ✅ User status updated successfully');
+      return updatedUser;
     } catch (error) {
-      console.error('Error updating user status:', error);
+      console.error('[AuthService] ❌ Error updating user status:', error);
       throw new Error('Failed to update user status');
     }
   }
@@ -428,35 +738,6 @@ export class AuthService {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2);
     return `token_${timestamp}_${random}`;
-  }
-
-  /**
-   * Преобразование User в AuthUser
-   */
-  private mapUserToAuthUser(user: User): AuthUser {
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      departmentId: user.departmentId || undefined,
-      secondaryDepartmentId: user.secondaryDepartmentId || undefined,
-      rank: user.rank || undefined,
-      division: user.division || undefined,
-      qualifications: user.qualifications || [],
-      gameWarnings: user.gameWarnings || 0,
-      adminWarnings: user.adminWarnings || 0,
-      cadToken: undefined, // TODO: Добавить в схему
-      discordId: undefined, // TODO: Добавить в схему
-      discordUsername: undefined, // TODO: Добавить в схему
-      has2FA: false, // TODO: Добавить в схему
-      isDarkTheme: false, // TODO: Добавить в схему
-      soundSettings: {}, // TODO: Добавить в схему
-      apiToken: user.apiToken || undefined,
-      createdAt: user.createdAt,
-      authId: user.authId || undefined
-    };
   }
 
   // ===== ПРОВЕРКИ ПРАВ =====
@@ -481,9 +762,9 @@ export class AuthService {
    */
   hasMinimumRole(user: AuthUser, minimumRole: string): boolean {
     const roleHierarchy = {
-      'candidate': 0,
-      'member': 1,
-      'officer': 2,
+      'user': 0,
+      'candidate': 1,
+      'member': 2,
       'supervisor': 3,
       'admin': 4
     };

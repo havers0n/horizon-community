@@ -1,7 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
 import { normalizedCharacterService } from '../services/NormalizedCharacterService.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -18,10 +18,32 @@ const createCharacterSchema = z.object({
   occupation: z.string().optional(),
   photoUrl: z.string().optional(),
   ssn: z.string().optional(),
-  licenses: z.any().optional(),
-  medicalInfo: z.any().optional(),
-  flags: z.array(z.string()).optional(),
-  addressFlags: z.array(z.string()).optional()
+  licenseNumber: z.string().optional(),
+  licenseClass: z.string().optional(),
+  licenseExpiry: z.string().optional(),
+  insuranceNumber: z.string().optional(),
+  insuranceProvider: z.string().optional(),
+  insuranceExpiry: z.string().optional(),
+  emergencyContact: z.object({
+    name: z.string().optional(),
+    relationship: z.string().optional(),
+    phone: z.string().optional()
+  }).optional(),
+  medicalInfo: z.object({
+    bloodType: z.string().optional(),
+    allergies: z.array(z.string()).optional(),
+    conditions: z.array(z.string()).optional(),
+    medications: z.array(z.string()).optional()
+  }).optional(),
+  criminalRecord: z.array(z.object({
+    offense: z.string(),
+    date: z.string(),
+    sentence: z.string().optional(),
+    status: z.string()
+  })).optional(),
+  // ---- ДОБАВЛЯЕМ owner_id В СХЕМУ ----
+  owner_id: z.string().min(1, 'Owner ID is required')
+  // -------------------------------------
 });
 
 // Схема для обновления персонажа
@@ -182,17 +204,17 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // GET /api/characters/my - Получить персонажей текущего пользователя
-router.get('/my', authenticateToken, async (req, res) => {
+router.get('/my', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
+    const user = req.user;
+    if (!user || !user.id) {
       return res.status(401).json({
         success: false,
-        error: 'User not authenticated'
+        error: 'User not authenticated or missing user ID'
       });
     }
 
-    const characters = await normalizedCharacterService.getCharactersByOwner(userId);
+    const characters = await normalizedCharacterService.getCharactersByOwner(user.id);
     res.json({
       success: true,
       data: characters,
@@ -208,19 +230,34 @@ router.get('/my', authenticateToken, async (req, res) => {
 });
 
 // POST /api/characters - Создать нового персонажа
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
+    // Получаем пользователя из middleware с правильной типизацией
+    const user = req.user;
+    
+    // Проверяем, что пользователь аутентифицирован
+    if (!user || !user.id) {
       return res.status(401).json({
         success: false,
-        error: 'User not authenticated'
+        error: 'User not authenticated or missing user ID'
       });
     }
 
+    console.log('[CharacterRoutes] Creating character for user:', user.id);
+    console.log('[CharacterRoutes] Request body:', JSON.stringify(req.body, null, 2));
+
+    // ---- ИСПРАВЛЕНИЕ: Добавляем owner_id к данным ПЕРЕД валидацией ----
+    const characterDataWithOwner = {
+      ...req.body,
+      owner_id: user.id
+    };
+    console.log('[CharacterRoutes] Data with owner_id:', JSON.stringify(characterDataWithOwner, null, 2));
+    // ----------------------------------------------------------------
+
     // Валидация входных данных
-    const validationResult = createCharacterSchema.safeParse(req.body);
+    const validationResult = createCharacterSchema.safeParse(characterDataWithOwner);
     if (!validationResult.success) {
+      console.log('[CharacterRoutes] Data validation failed:', validationResult.error.errors.map(e => e.message));
       return res.status(400).json({
         success: false,
         error: 'Validation failed',
@@ -228,30 +265,25 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    const characterData = validationResult.data;
+    const validatedData = validationResult.data;
+    console.log('[CharacterRoutes] Validated character data:', JSON.stringify(validatedData, null, 2));
 
-    // Дополнительная валидация данных
-    const dataValidation = await normalizedCharacterService.validateCharacterData(characterData);
-    if (!dataValidation.isValid) {
-      return res.status(400).json({
-        success: false,
-        error: 'Data validation failed',
-        details: dataValidation.errors
-      });
-    }
-
-    const newCharacter = await normalizedCharacterService.createCharacter(userId, characterData);
+    // Создаем персонажа через сервис
+    const newCharacter = await normalizedCharacterService.createCharacter(user.id, validatedData);
     
+    console.log('[CharacterRoutes] Character created successfully:', newCharacter.id);
+
     res.status(201).json({
       success: true,
       data: newCharacter,
       message: 'Character created successfully'
     });
   } catch (error) {
-    console.error('Error creating character:', error);
+    console.error('[CharacterRoutes] Error creating character:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to create character'
+      error: 'Failed to create character',
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -309,15 +341,15 @@ router.get('/:id/full', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/characters/:id - Обновить персонажа
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params as { id: string };
-    const userId = req.user?.id;
+    const user = req.user;
     
-    if (!userId) {
+    if (!user || !user.id) {
       return res.status(401).json({
         success: false,
-        error: 'User not authenticated'
+        error: 'User not authenticated or missing user ID'
       });
     }
 
@@ -332,7 +364,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     const updateData = validationResult.data;
-    const updatedCharacter = await normalizedCharacterService.updateCharacter(id, userId, updateData);
+    const updatedCharacter = await normalizedCharacterService.updateCharacter(id, user.id, updateData);
     
     if (!updatedCharacter) {
       return res.status(404).json({
@@ -356,19 +388,19 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 // DELETE /api/characters/:id - Удалить персонажа
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params as { id: string };
-    const userId = req.user?.id;
+    const user = req.user;
     
-    if (!userId) {
+    if (!user || !user.id) {
       return res.status(401).json({
         success: false,
-        error: 'User not authenticated'
+        error: 'User not authenticated or missing user ID'
       });
     }
 
-    const deleted = await normalizedCharacterService.deleteCharacter(id, userId);
+    const deleted = await normalizedCharacterService.deleteCharacter(id, user.id);
     
     if (!deleted) {
       return res.status(404).json({
@@ -911,11 +943,12 @@ router.delete('/:id/fire-profile', authenticateToken, async (req, res) => {
 // ===== СТАТИСТИКА =====
 
 // GET /api/characters/stats - Получить статистику
-router.get('/stats', authenticateToken, async (req, res) => {
+router.get('/stats', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const totalCharacters = await normalizedCharacterService.getCharacterCount();
-    const userCharacters = req.user?.id ? 
-      await normalizedCharacterService.getCharacterCountByOwner(req.user.id) : 0;
+    const user = req.user;
+    const userCharacters = user?.id ? 
+      await normalizedCharacterService.getCharacterCountByOwner(user.id) : 0;
 
     res.json({
       success: true,

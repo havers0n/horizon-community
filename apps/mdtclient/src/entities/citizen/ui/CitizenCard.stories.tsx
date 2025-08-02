@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { CitizenCard } from './CitizenCard';
-import type { Citizen } from '@/shared/types';
+import type { Citizen, Character } from '@/shared/types';
 
 const meta: Meta<typeof CitizenCard> = {
   title: 'Entities/Citizen/CitizenCard',
@@ -126,8 +126,8 @@ export const WithActions: Story = {
   args: {
     citizen: mockCitizen,
     showActions: true,
-    onEdit: (citizen) => console.log('Edit citizen:', citizen),
-    onDelete: (citizen) => console.log('Delete citizen:', citizen),
+    onEdit: (citizen: Character) => console.log('Edit citizen:', citizen),
+    onDelete: (citizen: Character) => console.log('Delete citizen:', citizen),
   },
 };
 
@@ -182,7 +182,7 @@ export const WithRevokedLicense: Story = {
 export const InteractiveCard: Story = {
   args: {
     citizen: mockCitizen,
-    onClick: (citizen) => {
+    onClick: (citizen: Character) => {
       console.log('Citizen clicked:', citizen);
       alert(`Выбран гражданин: ${citizen.name} ${citizen.surname}`);
     },

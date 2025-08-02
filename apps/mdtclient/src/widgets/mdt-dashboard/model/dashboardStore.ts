@@ -6,6 +6,7 @@ import type { Call911, Unit, UnitStatus } from '@/shared/types';
 import type { Bolo } from '@/entities/dispatch/model/types';
 import { useRealTime } from '../../../../hooks/useRealTime';
 import { authUtils } from '@/lib/auth';
+import { DispatchApi } from '@/shared/api/dispatch';
 
 // Временные константы для WebSocket событий (пока не подключена схема)
 const WEBSOCKET_EVENTS = {
@@ -131,8 +132,6 @@ export const useDashboardStore = create<DashboardStore>()(
 
           // Проверяем аутентификацию перед загрузкой данных
           const token = authUtils.getToken();
-          console.log('🔍 Токен перед API запросами:', token);
-          console.log('🔍 Заголовки авторизации:', authUtils.getAuthHeaders());
           
           if (!token) {
             setError('Требуется авторизация');
@@ -142,17 +141,17 @@ export const useDashboardStore = create<DashboardStore>()(
 
           // Параллельная загрузка всех данных
           const [callsResponse, bolosResponse, statsResponse, unitsResponse] = await Promise.allSettled([
-            DispatchApi.getCalls911({ status: 'PENDING,ACCEPTED' }),
-            DispatchApi.getBolos(),
+            DispatchApi.getActiveCalls(),
+            DispatchApi.getActiveBolos(),
             DispatchApi.getDispatchStats(),
-            DispatchApi.getUnits(),
+            DispatchApi.getActiveUnits(),
           ]);
 
           // Обработка результатов вызовов
           if (callsResponse.status === 'fulfilled') {
-            // Проверяем, что value содержит items
-            if (callsResponse.value && typeof callsResponse.value === 'object' && 'items' in callsResponse.value) {
-              setActiveCalls(callsResponse.value.items);
+            // API возвращает массив напрямую
+            if (Array.isArray(callsResponse.value)) {
+              setActiveCalls(callsResponse.value);
             } else {
               console.warn('Unexpected calls response format:', callsResponse.value);
               setActiveCalls([]);
@@ -166,7 +165,24 @@ export const useDashboardStore = create<DashboardStore>()(
           if (bolosResponse.status === 'fulfilled') {
             // Безопасная проверка, что value является массивом
             if (Array.isArray(bolosResponse.value)) {
-              const activeBolos = bolosResponse.value.filter(bolo => bolo.isActive);
+              const activeBolos = bolosResponse.value
+                .filter(bolo => bolo.status === 'active')
+                .map(bolo => ({
+                  ...bolo,
+                  // Маппинг полей для совместимости с интерфейсом BOLO
+                  createdAt: bolo.created_at || new Date().toISOString(),
+                  author: bolo.author_full_name || bolo.author_name || bolo.author_character_id,
+                  // Для обратной совместимости с существующими компонентами
+                  person: bolo.subject_name ? {
+                    name: bolo.subject_name,
+                    description: bolo.subject_description
+                  } : undefined,
+                  vehicle: bolo.vehicle_plate ? {
+                    plate: bolo.vehicle_plate,
+                    model: bolo.vehicle_description || '',
+                    color: ''
+                  } : undefined
+                }));
               setActiveBolos(activeBolos);
             } else {
               console.warn('Unexpected BOLOs response format:', bolosResponse.value);
@@ -181,7 +197,15 @@ export const useDashboardStore = create<DashboardStore>()(
           if (statsResponse.status === 'fulfilled') {
             // Проверяем, что value является объектом с нужными полями
             if (statsResponse.value && typeof statsResponse.value === 'object') {
-              setStats(statsResponse.value);
+              // Преобразуем API статистику в формат дашборда
+              const apiStats = statsResponse.value;
+              setStats({
+                totalCalls: apiStats.activeCallsCount || 0,
+                activeIncidents: apiStats.activeBolosCount || 0,
+                availableUnits: apiStats.activeUnitsCount || 0,
+                pendingCalls: apiStats.pendingCallsCount || 0,
+                completedCalls: 0, // API не предоставляет эту информацию
+              });
             } else {
               console.warn('Unexpected stats response format:', statsResponse.value);
               setStats({
@@ -209,7 +233,7 @@ export const useDashboardStore = create<DashboardStore>()(
             if (Array.isArray(unitsResponse.value)) {
               // TODO: Определить текущего офицера по ID пользователя
               // Пока берем первого доступного офицера
-              const currentOfficer = unitsResponse.value.find(unit => unit.status === UnitStatus.AVAILABLE) || null;
+              const currentOfficer = unitsResponse.value.find(unit => unit.status === 'available') || null;
               setCurrentOfficer(currentOfficer);
             } else {
               console.warn('Unexpected units response format:', unitsResponse.value);
@@ -256,8 +280,9 @@ export const useDashboardStore = create<DashboardStore>()(
         }
 
         try {
-          const updatedUnit = await DispatchApi.updateUnitStatus(currentOfficer.id, newStatus);
-          setCurrentOfficer(updatedUnit);
+          await DispatchApi.updateUnitStatus(currentOfficer.id, newStatus);
+          // Обновляем статус локально, так как API не возвращает обновленный объект
+          setCurrentOfficer({ ...currentOfficer, status: newStatus });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Ошибка изменения статуса';
           setError(errorMessage);

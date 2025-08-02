@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
 import { Checkbox } from './Checkbox';
 
 const meta: Meta<typeof Checkbox> = {
@@ -149,7 +150,7 @@ export const CheckboxGroup: Story = {
 
 export const InteractiveCheckbox: Story = {
   render: () => {
-    const [checked, setChecked] = React.useState(false);
+    const [checked, setChecked] = useState(false);
     
     return (
       <div className="space-y-4">

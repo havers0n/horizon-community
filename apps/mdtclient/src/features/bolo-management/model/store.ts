@@ -2,21 +2,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { BoloApi, CreateBoloData, UpdateBoloData } from '../api/boloApi';
+import type { Bolo } from '../../../entities/dispatch/model/types';
 
-export interface BOLO {
-  id: number;
-  type: 'vehicle' | 'person' | 'general';
-  description: string;
-  vehicle?: string;
-  plate?: string;
-  reason: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  location?: string;
-  additionalInfo?: string;
-  issuedBy: string;
-  status: 'active' | 'inactive' | 'deleted';
-  timestamp: string;
-}
+// Используем единый тип Bolo
+export type BOLO = Bolo;
 
 interface BoloManagementState {
   bolos: BOLO[];
@@ -62,10 +51,12 @@ export const useBoloManagementStore = create<BoloManagementStore>()(
           const bolos = await BoloApi.getBolos();
           set({ bolos, isLoading: false });
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to fetch BOLOs';
           set({ 
-            error: error instanceof Error ? error.message : 'Failed to fetch BOLOs', 
+            error: errorMessage, 
             isLoading: false 
           });
+          throw error; // Пробрасываем ошибку дальше
         }
       },
 
@@ -78,10 +69,12 @@ export const useBoloManagementStore = create<BoloManagementStore>()(
             isLoading: false 
           }));
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to create BOLO';
           set({ 
-            error: error instanceof Error ? error.message : 'Failed to create BOLO', 
+            error: errorMessage, 
             isLoading: false 
           });
+          throw error; // Пробрасываем ошибку дальше
         }
       },
 
@@ -96,10 +89,12 @@ export const useBoloManagementStore = create<BoloManagementStore>()(
             isLoading: false 
           }));
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to update BOLO';
           set({ 
-            error: error instanceof Error ? error.message : 'Failed to update BOLO', 
+            error: errorMessage, 
             isLoading: false 
           });
+          throw error; // Пробрасываем ошибку дальше
         }
       },
 
@@ -112,10 +107,12 @@ export const useBoloManagementStore = create<BoloManagementStore>()(
             isLoading: false 
           }));
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete BOLO';
           set({ 
-            error: error instanceof Error ? error.message : 'Failed to delete BOLO', 
+            error: errorMessage, 
             isLoading: false 
           });
+          throw error; // Пробрасываем ошибку дальше
         }
       },
 

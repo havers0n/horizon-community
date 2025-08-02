@@ -19,7 +19,7 @@ export interface Notification {
   type: 'call_911' | 'unit_status' | 'bolo' | 'panic' | 'signal_100' | 'general';
   title: string;
   message: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: 'low' | 'medium' | 'high' | 'critical' | 'panic';
   timestamp: string;
   isRead: boolean;
   data?: any;
@@ -112,9 +112,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
   const sortedNotifications = [...filteredNotifications].sort((a, b) => {
     // Сортируем по приоритету, затем по времени
-    const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
-    const aPriority = priorityOrder[a.priority];
-    const bPriority = priorityOrder[b.priority];
+    const priorityOrder = { critical: 5, panic: 4, high: 3, medium: 2, low: 1 };
+    const aPriority = priorityOrder[a.priority] || 0;
+    const bPriority = priorityOrder[b.priority] || 0;
     
     if (aPriority !== bPriority) {
       return bPriority - aPriority;

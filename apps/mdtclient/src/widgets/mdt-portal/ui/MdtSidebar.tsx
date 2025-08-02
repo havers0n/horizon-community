@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/ui/atoms/Button';
 import { useMdtPortalStore } from '../model/store';
 import { 
@@ -91,7 +90,6 @@ interface MdtSidebarProps {
 
 export const MdtSidebar: React.FC<MdtSidebarProps> = ({ onBackToModules }) => {
   const { goToDashboard, goToModule, currentView, activeModule } = useMdtPortalStore();
-  const navigate = useNavigate();
 
   const groupedItems = navigationItems.reduce((acc, item) => {
     if (!acc[item.category]) {
@@ -107,8 +105,8 @@ export const MdtSidebar: React.FC<MdtSidebarProps> = ({ onBackToModules }) => {
       // Если передана функция обратного вызова, используем её
       onBackToModules();
     } else {
-      // Иначе используем React Router для навигации
-      navigate('/');
+      // TODO: Реализовать навигацию через Zustand store
+      console.log('Navigate to home');
     }
   };
 

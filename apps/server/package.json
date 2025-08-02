@@ -47,7 +47,8 @@
     "dev:schema:migrate": "node scripts/apply-dev-schema-migration.js",
     "dev:schema:check": "node scripts/check-dev-schema.js",
     "dev:schema:fix": "node scripts/fix-dev-schema-migration.js",
-    "migrate:active-units": "node scripts/apply_active_units_migration.js"
+    "migrate:active-units": "node scripts/apply_active_units_migration.js",
+    "test:api": "node test-api-connection.js"
   },
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.25",

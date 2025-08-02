@@ -16,25 +16,8 @@ export type CallPriority = 'low' | 'medium' | 'high' | 'critical';
 export type CallStatus = 'pending' | 'active' | 'resolved' | 'closed';
 export type CallType = 'emergency' | 'non-emergency' | 'traffic' | 'medical' | 'fire';
 
-export interface BOLO {
-  id: string;
-  type: BOLOType;
-  description: string;
-  priority: CallPriority;
-  status: 'active' | 'resolved';
-  createdAt: string;
-  expiresAt?: string;
-  author: string;
-  vehicle?: {
-    plate: string;
-    model: string;
-    color: string;
-  };
-  person?: {
-    name: string;
-    description: string;
-  };
-}
+// BOLO тип перенесен в @/entities/dispatch/model/types
+// Импортируйте его оттуда: import type { Bolo } from '@/entities/dispatch/model/types';
 
 export type BOLOType = 'person' | 'vehicle' | 'general';
 

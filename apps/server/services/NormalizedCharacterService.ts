@@ -1,4 +1,4 @@
-import { pool } from '../db/index';
+import { characterService } from './CharacterService.js';
 import {
   Character,
   LeoProfile,
@@ -28,967 +28,431 @@ import {
 // =================================================================
 // НОРМАЛИЗОВАННЫЙ CHARACTER SERVICE
 // Работает с новой структурой БД: common.characters + профили
+// Использует CharacterService с RPC-функциями
 // =================================================================
 
 export class NormalizedCharacterService {
-  private pool: any;
+  
+  // ===== АДАПТЕРЫ ТИПОВ =====
 
-  constructor() {
-    this.pool = pool;
-  }
-
-  // ===== АДАПТЕРЫ ТИПОВ (SNAKE_CASE -> CAMELCASE) =====
-
-  private adaptDbToCharacter(dbRow: any): Character {
+  private adaptCharacterServiceToNormalized(character: any): Character {
     return {
-      id: dbRow.id.toString(),
-      ownerId: dbRow.owner_id,
-      firstName: dbRow.name || dbRow.first_name,
-      lastName: dbRow.surname || dbRow.last_name,
-      dateOfBirth: dbRow.dateOfBirth || dbRow.dob,
-      gender: dbRow.gender,
-      address: dbRow.address,
-      phoneNumber: dbRow.phoneNumber || dbRow.phone_number,
-      occupation: dbRow.occupation,
-      photoUrl: dbRow.photoUrl || dbRow.mugshot_url,
-      ssn: dbRow.ssn || dbRow.insurance_number,
-      licenses: dbRow.licenses,
-      medicalInfo: dbRow.medical_info,
-      flags: dbRow.flags || [],
-      addressFlags: dbRow.addressFlags || dbRow.address_flags || [],
-      createdAt: dbRow.created_at,
-      updatedAt: dbRow.updated_at
+      id: character.id,
+      ownerId: character.ownerId,
+      firstName: character.firstName,
+      lastName: character.lastName,
+      dateOfBirth: character.dateOfBirth || undefined,
+      gender: character.gender || undefined,
+      phoneNumber: character.phoneNumber || undefined,
+      address: character.address || undefined,
+      occupation: character.occupation || undefined,
+      ssn: character.ssn || undefined,
+      licenses: character.licenses || undefined,
+      medicalInfo: character.medicalInfo || undefined,
+      photoUrl: character.mugshotUrl || undefined,
+      flags: character.flags || undefined,
+      createdAt: character.createdAt || undefined,
+      updatedAt: character.updatedAt || undefined
     };
   }
 
-  private adaptCharacterToDb(character: CreateCharacterRequest): any {
+  private adaptCreateRequestToCharacterService(request: CreateCharacterRequest): any {
     return {
-      name: character.firstName,
-      surname: character.lastName,
-      dateOfBirth: character.dateOfBirth,
-      gender: character.gender,
-      address: character.address,
-      phoneNumber: character.phoneNumber,
-      occupation: character.occupation,
-      photoUrl: character.photoUrl,
-      ssn: character.ssn,
-      licenses: character.licenses,
-      medical_info: character.medicalInfo,
-      flags: character.flags || [],
-      addressFlags: character.addressFlags || []
+      firstName: request.firstName,
+      lastName: request.lastName,
+      dateOfBirth: request.dateOfBirth,
+      gender: request.gender,
+      address: request.address,
+      phoneNumber: request.phoneNumber,
+      occupation: request.occupation,
+      mugshotUrl: request.photoUrl,
+      ssn: request.ssn,
+      licenses: request.licenses,
+      medicalInfo: request.medicalInfo,
+      flags: request.flags || []
     };
   }
 
-  private adaptDbToLeoProfile(dbRow: any): LeoProfile {
-    return {
-      id: dbRow.id.toString(),
-      characterId: dbRow.character_id.toString(),
-      badgeNumber: dbRow.badge_number,
-      rankId: dbRow.rank_id,
-      divisionId: dbRow.division_id,
-      departmentId: dbRow.department_id,
-      callsign: dbRow.callsign,
-      callsign2: dbRow.callsign2,
-      status: dbRow.status,
-      hireDate: dbRow.hire_date,
-      terminationDate: dbRow.termination_date,
-      isActive: dbRow.is_active,
-      suspended: dbRow.suspended,
-      whitelistStatus: dbRow.whitelist_status,
-      radioChannelId: dbRow.radio_channel_id,
-      createdAt: dbRow.created_at,
-      updatedAt: dbRow.updated_at
-    };
+  private adaptUpdateRequestToCharacterService(request: UpdateCharacterRequest): any {
+    const updates: any = {};
+    
+    if (request.firstName !== undefined) updates.firstName = request.firstName;
+    if (request.lastName !== undefined) updates.lastName = request.lastName;
+    if (request.dateOfBirth !== undefined) updates.dateOfBirth = request.dateOfBirth;
+    if (request.gender !== undefined) updates.gender = request.gender;
+    if (request.address !== undefined) updates.address = request.address;
+    if (request.phoneNumber !== undefined) updates.phoneNumber = request.phoneNumber;
+    if (request.occupation !== undefined) updates.occupation = request.occupation;
+    if (request.photoUrl !== undefined) updates.mugshotUrl = request.photoUrl;
+    if (request.ssn !== undefined) updates.ssn = request.ssn;
+    if (request.licenses !== undefined) updates.licenses = request.licenses;
+    if (request.medicalInfo !== undefined) updates.medicalInfo = request.medicalInfo;
+    if (request.flags !== undefined) updates.flags = request.flags;
+    
+    return updates;
   }
 
-  private adaptDbToEmsProfile(dbRow: any): EmsProfile {
-    return {
-      id: dbRow.id.toString(),
-      characterId: dbRow.character_id.toString(),
-      badgeNumber: dbRow.badge_number,
-      rankId: dbRow.rank_id,
-      divisionId: dbRow.division_id,
-      departmentId: dbRow.department_id,
-      callsign: dbRow.callsign,
-      callsign2: dbRow.callsign2,
-      status: dbRow.status,
-      hireDate: dbRow.hire_date,
-      terminationDate: dbRow.termination_date,
-      isActive: dbRow.is_active,
-      suspended: dbRow.suspended,
-      whitelistStatus: dbRow.whitelist_status,
-      radioChannelId: dbRow.radio_channel_id,
-      createdAt: dbRow.created_at,
-      updatedAt: dbRow.updated_at
-    };
-  }
-
-  private adaptDbToFireProfile(dbRow: any): FireProfile {
-    return {
-      id: dbRow.id.toString(),
-      characterId: dbRow.character_id.toString(),
-      badgeNumber: dbRow.badge_number,
-      rankId: dbRow.rank_id,
-      divisionId: dbRow.division_id,
-      departmentId: dbRow.department_id,
-      callsign: dbRow.callsign,
-      callsign2: dbRow.callsign2,
-      status: dbRow.status,
-      hireDate: dbRow.hire_date,
-      terminationDate: dbRow.termination_date,
-      isActive: dbRow.is_active,
-      suspended: dbRow.suspended,
-      whitelistStatus: dbRow.whitelist_status,
-      radioChannelId: dbRow.radio_channel_id,
-      createdAt: dbRow.created_at,
-      updatedAt: dbRow.updated_at
-    };
-  }
-
-  // ===== ОСНОВНЫЕ ОПЕРАЦИИ С ПЕРСОНАЖАМИ =====
+  // ===== ОСНОВНЫЕ МЕТОДЫ ДЛЯ ПЕРСОНАЖЕЙ =====
 
   async getCharacter(id: string): Promise<Character | undefined> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.characters WHERE id = $1
-      `, [id]);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToCharacter(result.rows[0]);
+      const character = await characterService.getCharacter(id);
+      if (!character) return undefined;
+      
+      return this.adaptCharacterServiceToNormalized(character);
     } catch (error) {
-      console.error('Error getting character:', error);
-      throw new Error('Failed to get character');
+      console.error('[NormalizedCharacterService] Error getting character:', error);
+      return undefined;
     }
   }
 
   async getFullCharacter(id: string): Promise<FullCharacter | undefined> {
     try {
-      // Получаем персонажа
-      const character = await this.getCharacter(id);
-      if (!character) {
-        return undefined;
-      }
-
-      // Получаем профили
-      const [leoProfile, emsProfile, fireProfile] = await Promise.all([
-        this.getLeoProfileByCharacterId(id),
-        this.getEmsProfileByCharacterId(id),
-        this.getFireProfileByCharacterId(id)
-      ]);
-
-      return {
-        ...character,
-        leoProfile,
-        emsProfile,
-        fireProfile
-      };
+      const character = await characterService.getCharacter(id);
+      if (!character) return undefined;
+      
+      const fullCharacter: FullCharacter = this.adaptCharacterServiceToNormalized(character);
+      
+      // TODO: Добавить получение профилей LEO, EMS, FIRE когда будут созданы соответствующие RPC-функции
+      // fullCharacter.leoProfile = await this.getLeoProfileByCharacterId(id);
+      // fullCharacter.emsProfile = await this.getEmsProfileByCharacterId(id);
+      // fullCharacter.fireProfile = await this.getFireProfileByCharacterId(id);
+      
+      return fullCharacter;
     } catch (error) {
-      console.error('Error getting full character:', error);
-      throw new Error('Failed to get full character');
+      console.error('[NormalizedCharacterService] Error getting full character:', error);
+      return undefined;
     }
   }
 
   async getCharactersByOwner(ownerId: string): Promise<Character[]> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.characters 
-        WHERE owner_id = $1
-        ORDER BY created_at DESC
-      `, [ownerId]);
-
-      return result.rows.map((char: any) => this.adaptDbToCharacter(char));
+      const characters = await characterService.getCharactersByOwner(ownerId);
+      return characters.map(char => this.adaptCharacterServiceToNormalized(char));
     } catch (error) {
-      console.error('Error getting characters by owner:', error);
-      throw new Error('Failed to get characters by owner');
+      console.error('[NormalizedCharacterService] Error getting characters by owner:', error);
+      return [];
     }
   }
 
   async createCharacter(ownerId: string, character: CreateCharacterRequest): Promise<Character> {
     try {
-      const dbData = this.adaptCharacterToDb(character);
+      console.log('[NormalizedCharacterService] createCharacter called with ownerId:', ownerId);
       
-      const result = await this.pool.query(`
-        INSERT INTO common.characters (
-          owner_id, name, surname, dateOfBirth, gender, address, phoneNumber,
-          occupation, photoUrl, ssn, licenses, medical_info, flags, addressFlags,
-          created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-        RETURNING *
-      `, [
-        ownerId,
-        dbData.name, dbData.surname, dbData.dateOfBirth, dbData.gender, dbData.address, dbData.phoneNumber,
-        dbData.occupation, dbData.photoUrl, dbData.ssn, dbData.licenses, dbData.medical_info, dbData.flags, dbData.addressFlags
-      ]);
-
-      return this.adaptDbToCharacter(result.rows[0]);
+      const characterData = this.adaptCreateRequestToCharacterService(character);
+      characterData.ownerId = ownerId;
+      
+      const newCharacter = await characterService.createCharacter(characterData);
+      console.log('[NormalizedCharacterService] Character created successfully');
+      
+      return this.adaptCharacterServiceToNormalized(newCharacter);
     } catch (error) {
-      console.error('Error creating character:', error);
-      throw new Error('Failed to create character');
+      console.error('[NormalizedCharacterService] Error creating character:', error);
+      throw error;
     }
   }
 
   async updateCharacter(id: string, ownerId: string, updates: UpdateCharacterRequest): Promise<Character | undefined> {
     try {
-      const updateFields: string[] = [];
-      const updateValues: any[] = [];
-      let paramIndex = 1;
-
-      // Динамически строим запрос обновления
-      if (updates.firstName !== undefined) {
-        updateFields.push(`name = $${paramIndex++}`);
-        updateValues.push(updates.firstName);
-      }
-      if (updates.lastName !== undefined) {
-        updateFields.push(`surname = $${paramIndex++}`);
-        updateValues.push(updates.lastName);
-      }
-      if (updates.dateOfBirth !== undefined) {
-        updateFields.push(`dateOfBirth = $${paramIndex++}`);
-        updateValues.push(updates.dateOfBirth);
-      }
-      if (updates.gender !== undefined) {
-        updateFields.push(`gender = $${paramIndex++}`);
-        updateValues.push(updates.gender);
-      }
-      if (updates.address !== undefined) {
-        updateFields.push(`address = $${paramIndex++}`);
-        updateValues.push(updates.address);
-      }
-      if (updates.phoneNumber !== undefined) {
-        updateFields.push(`phoneNumber = $${paramIndex++}`);
-        updateValues.push(updates.phoneNumber);
-      }
-      if (updates.occupation !== undefined) {
-        updateFields.push(`occupation = $${paramIndex++}`);
-        updateValues.push(updates.occupation);
-      }
-      if (updates.photoUrl !== undefined) {
-        updateFields.push(`photoUrl = $${paramIndex++}`);
-        updateValues.push(updates.photoUrl);
-      }
-      if (updates.ssn !== undefined) {
-        updateFields.push(`ssn = $${paramIndex++}`);
-        updateValues.push(updates.ssn);
-      }
-      if (updates.licenses !== undefined) {
-        updateFields.push(`licenses = $${paramIndex++}`);
-        updateValues.push(updates.licenses);
-      }
-      if (updates.medicalInfo !== undefined) {
-        updateFields.push(`medical_info = $${paramIndex++}`);
-        updateValues.push(updates.medicalInfo);
-      }
-      if (updates.flags !== undefined) {
-        updateFields.push(`flags = $${paramIndex++}`);
-        updateValues.push(updates.flags);
-      }
-      if (updates.addressFlags !== undefined) {
-        updateFields.push(`addressFlags = $${paramIndex++}`);
-        updateValues.push(updates.addressFlags);
-      }
-
-      if (updateFields.length === 0) {
-        throw new Error('No fields to update');
-      }
-
-      updateFields.push(`updated_at = NOW()`);
-      updateValues.push(id, ownerId);
-
-      const result = await this.pool.query(`
-        UPDATE common.characters 
-        SET ${updateFields.join(', ')}
-        WHERE id = $${paramIndex++} AND owner_id = $${paramIndex++}
-        RETURNING *
-      `, updateValues);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToCharacter(result.rows[0]);
+      const updateData = this.adaptUpdateRequestToCharacterService(updates);
+      const updatedCharacter = await characterService.updateCharacter(id, updateData, ownerId);
+      
+      if (!updatedCharacter) return undefined;
+      
+      return this.adaptCharacterServiceToNormalized(updatedCharacter);
     } catch (error) {
-      console.error('Error updating character:', error);
-      throw new Error('Failed to update character');
+      console.error('[NormalizedCharacterService] Error updating character:', error);
+      return undefined;
     }
   }
 
   async deleteCharacter(id: string, ownerId: string): Promise<boolean> {
     try {
-      const result = await this.pool.query(`
-        DELETE FROM common.characters 
-        WHERE id = $1 AND owner_id = $2
-      `, [id, ownerId]);
-
-      return result.rowCount > 0;
+      // Проверяем, что персонаж принадлежит пользователю
+      const character = await characterService.getCharacter(id);
+      if (!character || character.ownerId !== ownerId) {
+        return false;
+      }
+      
+      return await characterService.deleteCharacter(id);
     } catch (error) {
-      console.error('Error deleting character:', error);
-      throw new Error('Failed to delete character');
+      console.error('[NormalizedCharacterService] Error deleting character:', error);
+      return false;
     }
   }
 
   async getAllCharacters(): Promise<Character[]> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.characters 
-        ORDER BY created_at DESC
-      `);
-
-      return result.rows.map((char: any) => this.adaptDbToCharacter(char));
+      const characters = await characterService.getAllCharacters();
+      return characters.map(char => this.adaptCharacterServiceToNormalized(char));
     } catch (error) {
-      console.error('Error getting all characters:', error);
-      throw new Error('Failed to get all characters');
+      console.error('[NormalizedCharacterService] Error getting all characters:', error);
+      return [];
     }
   }
 
-  // ===== ОПЕРАЦИИ С ПРОФИЛЯМИ LEO =====
+  // ===== МЕТОДЫ ДЛЯ ПРОФИЛЕЙ LEO =====
 
   async getLeoProfileByCharacterId(characterId: string): Promise<LeoProfile | undefined> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.leo_profiles WHERE character_id = $1
-      `, [characterId]);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToLeoProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для получения LEO профиля
+      console.warn('[NormalizedCharacterService] getLeoProfileByCharacterId not implemented yet');
+      return undefined;
     } catch (error) {
-      console.error('Error getting LEO profile:', error);
-      throw new Error('Failed to get LEO profile');
+      console.error('[NormalizedCharacterService] Error getting LEO profile:', error);
+      return undefined;
     }
   }
 
   async createLeoProfile(profile: CreateLeoProfileRequest): Promise<LeoProfile> {
     try {
-      const result = await this.pool.query(`
-        INSERT INTO common.leo_profiles (
-          character_id, badge_number, rank_id, division_id, department_id,
-          callsign, callsign2, status, hire_date, termination_date,
-          is_active, suspended, whitelist_status, radio_channel_id,
-          created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-        RETURNING *
-      `, [
-        profile.characterId, profile.badgeNumber, profile.rankId, profile.divisionId, profile.departmentId,
-        profile.callsign, profile.callsign2, profile.status || 'active', profile.hireDate, profile.terminationDate,
-        profile.isActive !== false, profile.suspended || false, profile.whitelistStatus, profile.radioChannelId
-      ]);
-
-      return this.adaptDbToLeoProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для создания LEO профиля
+      console.warn('[NormalizedCharacterService] createLeoProfile not implemented yet');
+      throw new Error('LEO profile creation not implemented yet');
     } catch (error) {
-      console.error('Error creating LEO profile:', error);
-      throw new Error('Failed to create LEO profile');
+      console.error('[NormalizedCharacterService] Error creating LEO profile:', error);
+      throw error;
     }
   }
 
   async updateLeoProfile(characterId: string, updates: UpdateLeoProfileRequest): Promise<LeoProfile | undefined> {
     try {
-      const updateFields: string[] = [];
-      const updateValues: any[] = [];
-      let paramIndex = 1;
-
-      // Динамически строим запрос обновления
-      if (updates.badgeNumber !== undefined) {
-        updateFields.push(`badge_number = $${paramIndex++}`);
-        updateValues.push(updates.badgeNumber);
-      }
-      if (updates.rankId !== undefined) {
-        updateFields.push(`rank_id = $${paramIndex++}`);
-        updateValues.push(updates.rankId);
-      }
-      if (updates.divisionId !== undefined) {
-        updateFields.push(`division_id = $${paramIndex++}`);
-        updateValues.push(updates.divisionId);
-      }
-      if (updates.departmentId !== undefined) {
-        updateFields.push(`department_id = $${paramIndex++}`);
-        updateValues.push(updates.departmentId);
-      }
-      if (updates.callsign !== undefined) {
-        updateFields.push(`callsign = $${paramIndex++}`);
-        updateValues.push(updates.callsign);
-      }
-      if (updates.callsign2 !== undefined) {
-        updateFields.push(`callsign2 = $${paramIndex++}`);
-        updateValues.push(updates.callsign2);
-      }
-      if (updates.status !== undefined) {
-        updateFields.push(`status = $${paramIndex++}`);
-        updateValues.push(updates.status);
-      }
-      if (updates.hireDate !== undefined) {
-        updateFields.push(`hire_date = $${paramIndex++}`);
-        updateValues.push(updates.hireDate);
-      }
-      if (updates.terminationDate !== undefined) {
-        updateFields.push(`termination_date = $${paramIndex++}`);
-        updateValues.push(updates.terminationDate);
-      }
-      if (updates.isActive !== undefined) {
-        updateFields.push(`is_active = $${paramIndex++}`);
-        updateValues.push(updates.isActive);
-      }
-      if (updates.suspended !== undefined) {
-        updateFields.push(`suspended = $${paramIndex++}`);
-        updateValues.push(updates.suspended);
-      }
-      if (updates.whitelistStatus !== undefined) {
-        updateFields.push(`whitelist_status = $${paramIndex++}`);
-        updateValues.push(updates.whitelistStatus);
-      }
-      if (updates.radioChannelId !== undefined) {
-        updateFields.push(`radio_channel_id = $${paramIndex++}`);
-        updateValues.push(updates.radioChannelId);
-      }
-
-      if (updateFields.length === 0) {
-        throw new Error('No fields to update');
-      }
-
-      updateFields.push(`updated_at = NOW()`);
-      updateValues.push(characterId);
-
-      const result = await this.pool.query(`
-        UPDATE common.leo_profiles 
-        SET ${updateFields.join(', ')}
-        WHERE character_id = $${paramIndex++}
-        RETURNING *
-      `, updateValues);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToLeoProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для обновления LEO профиля
+      console.warn('[NormalizedCharacterService] updateLeoProfile not implemented yet');
+      return undefined;
     } catch (error) {
-      console.error('Error updating LEO profile:', error);
-      throw new Error('Failed to update LEO profile');
+      console.error('[NormalizedCharacterService] Error updating LEO profile:', error);
+      return undefined;
     }
   }
 
   async deleteLeoProfile(characterId: string): Promise<boolean> {
     try {
-      const result = await this.pool.query(`
-        DELETE FROM common.leo_profiles WHERE character_id = $1
-      `, [characterId]);
-
-      return result.rowCount > 0;
+      // TODO: Создать RPC-функцию для удаления LEO профиля
+      console.warn('[NormalizedCharacterService] deleteLeoProfile not implemented yet');
+      return false;
     } catch (error) {
-      console.error('Error deleting LEO profile:', error);
-      throw new Error('Failed to delete LEO profile');
+      console.error('[NormalizedCharacterService] Error deleting LEO profile:', error);
+      return false;
     }
   }
 
-  // ===== ОПЕРАЦИИ С ПРОФИЛЯМИ EMS =====
+  // ===== МЕТОДЫ ДЛЯ ПРОФИЛЕЙ EMS =====
 
   async getEmsProfileByCharacterId(characterId: string): Promise<EmsProfile | undefined> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.ems_profiles WHERE character_id = $1
-      `, [characterId]);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToEmsProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для получения EMS профиля
+      console.warn('[NormalizedCharacterService] getEmsProfileByCharacterId not implemented yet');
+      return undefined;
     } catch (error) {
-      console.error('Error getting EMS profile:', error);
-      throw new Error('Failed to get EMS profile');
+      console.error('[NormalizedCharacterService] Error getting EMS profile:', error);
+      return undefined;
     }
   }
 
   async createEmsProfile(profile: CreateEmsProfileRequest): Promise<EmsProfile> {
     try {
-      const result = await this.pool.query(`
-        INSERT INTO common.ems_profiles (
-          character_id, badge_number, rank_id, division_id, department_id,
-          callsign, callsign2, status, hire_date, termination_date,
-          is_active, suspended, whitelist_status, radio_channel_id,
-          created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-        RETURNING *
-      `, [
-        profile.characterId, profile.badgeNumber, profile.rankId, profile.divisionId, profile.departmentId,
-        profile.callsign, profile.callsign2, profile.status || 'active', profile.hireDate, profile.terminationDate,
-        profile.isActive !== false, profile.suspended || false, profile.whitelistStatus, profile.radioChannelId
-      ]);
-
-      return this.adaptDbToEmsProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для создания EMS профиля
+      console.warn('[NormalizedCharacterService] createEmsProfile not implemented yet');
+      throw new Error('EMS profile creation not implemented yet');
     } catch (error) {
-      console.error('Error creating EMS profile:', error);
-      throw new Error('Failed to create EMS profile');
+      console.error('[NormalizedCharacterService] Error creating EMS profile:', error);
+      throw error;
     }
   }
 
   async updateEmsProfile(characterId: string, updates: UpdateEmsProfileRequest): Promise<EmsProfile | undefined> {
     try {
-      const updateFields: string[] = [];
-      const updateValues: any[] = [];
-      let paramIndex = 1;
-
-      // Динамически строим запрос обновления (аналогично LEO)
-      if (updates.badgeNumber !== undefined) {
-        updateFields.push(`badge_number = $${paramIndex++}`);
-        updateValues.push(updates.badgeNumber);
-      }
-      if (updates.rankId !== undefined) {
-        updateFields.push(`rank_id = $${paramIndex++}`);
-        updateValues.push(updates.rankId);
-      }
-      if (updates.divisionId !== undefined) {
-        updateFields.push(`division_id = $${paramIndex++}`);
-        updateValues.push(updates.divisionId);
-      }
-      if (updates.departmentId !== undefined) {
-        updateFields.push(`department_id = $${paramIndex++}`);
-        updateValues.push(updates.departmentId);
-      }
-      if (updates.callsign !== undefined) {
-        updateFields.push(`callsign = $${paramIndex++}`);
-        updateValues.push(updates.callsign);
-      }
-      if (updates.callsign2 !== undefined) {
-        updateFields.push(`callsign2 = $${paramIndex++}`);
-        updateValues.push(updates.callsign2);
-      }
-      if (updates.status !== undefined) {
-        updateFields.push(`status = $${paramIndex++}`);
-        updateValues.push(updates.status);
-      }
-      if (updates.hireDate !== undefined) {
-        updateFields.push(`hire_date = $${paramIndex++}`);
-        updateValues.push(updates.hireDate);
-      }
-      if (updates.terminationDate !== undefined) {
-        updateFields.push(`termination_date = $${paramIndex++}`);
-        updateValues.push(updates.terminationDate);
-      }
-      if (updates.isActive !== undefined) {
-        updateFields.push(`is_active = $${paramIndex++}`);
-        updateValues.push(updates.isActive);
-      }
-      if (updates.suspended !== undefined) {
-        updateFields.push(`suspended = $${paramIndex++}`);
-        updateValues.push(updates.suspended);
-      }
-      if (updates.whitelistStatus !== undefined) {
-        updateFields.push(`whitelist_status = $${paramIndex++}`);
-        updateValues.push(updates.whitelistStatus);
-      }
-      if (updates.radioChannelId !== undefined) {
-        updateFields.push(`radio_channel_id = $${paramIndex++}`);
-        updateValues.push(updates.radioChannelId);
-      }
-
-      if (updateFields.length === 0) {
-        throw new Error('No fields to update');
-      }
-
-      updateFields.push(`updated_at = NOW()`);
-      updateValues.push(characterId);
-
-      const result = await this.pool.query(`
-        UPDATE common.ems_profiles 
-        SET ${updateFields.join(', ')}
-        WHERE character_id = $${paramIndex++}
-        RETURNING *
-      `, updateValues);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToEmsProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для обновления EMS профиля
+      console.warn('[NormalizedCharacterService] updateEmsProfile not implemented yet');
+      return undefined;
     } catch (error) {
-      console.error('Error updating EMS profile:', error);
-      throw new Error('Failed to update EMS profile');
+      console.error('[NormalizedCharacterService] Error updating EMS profile:', error);
+      return undefined;
     }
   }
 
   async deleteEmsProfile(characterId: string): Promise<boolean> {
     try {
-      const result = await this.pool.query(`
-        DELETE FROM common.ems_profiles WHERE character_id = $1
-      `, [characterId]);
-
-      return result.rowCount > 0;
+      // TODO: Создать RPC-функцию для удаления EMS профиля
+      console.warn('[NormalizedCharacterService] deleteEmsProfile not implemented yet');
+      return false;
     } catch (error) {
-      console.error('Error deleting EMS profile:', error);
-      throw new Error('Failed to delete EMS profile');
+      console.error('[NormalizedCharacterService] Error deleting EMS profile:', error);
+      return false;
     }
   }
 
-  // ===== ОПЕРАЦИИ С ПРОФИЛЯМИ FIRE =====
+  // ===== МЕТОДЫ ДЛЯ ПРОФИЛЕЙ FIRE =====
 
   async getFireProfileByCharacterId(characterId: string): Promise<FireProfile | undefined> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.fire_profiles WHERE character_id = $1
-      `, [characterId]);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToFireProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для получения FIRE профиля
+      console.warn('[NormalizedCharacterService] getFireProfileByCharacterId not implemented yet');
+      return undefined;
     } catch (error) {
-      console.error('Error getting FIRE profile:', error);
-      throw new Error('Failed to get FIRE profile');
+      console.error('[NormalizedCharacterService] Error getting FIRE profile:', error);
+      return undefined;
     }
   }
 
   async createFireProfile(profile: CreateFireProfileRequest): Promise<FireProfile> {
     try {
-      const result = await this.pool.query(`
-        INSERT INTO common.fire_profiles (
-          character_id, badge_number, rank_id, division_id, department_id,
-          callsign, callsign2, status, hire_date, termination_date,
-          is_active, suspended, whitelist_status, radio_channel_id,
-          created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-        RETURNING *
-      `, [
-        profile.characterId, profile.badgeNumber, profile.rankId, profile.divisionId, profile.departmentId,
-        profile.callsign, profile.callsign2, profile.status || 'active', profile.hireDate, profile.terminationDate,
-        profile.isActive !== false, profile.suspended || false, profile.whitelistStatus, profile.radioChannelId
-      ]);
-
-      return this.adaptDbToFireProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для создания FIRE профиля
+      console.warn('[NormalizedCharacterService] createFireProfile not implemented yet');
+      throw new Error('FIRE profile creation not implemented yet');
     } catch (error) {
-      console.error('Error creating FIRE profile:', error);
-      throw new Error('Failed to create FIRE profile');
+      console.error('[NormalizedCharacterService] Error creating FIRE profile:', error);
+      throw error;
     }
   }
 
   async updateFireProfile(characterId: string, updates: UpdateFireProfileRequest): Promise<FireProfile | undefined> {
     try {
-      const updateFields: string[] = [];
-      const updateValues: any[] = [];
-      let paramIndex = 1;
-
-      // Динамически строим запрос обновления (аналогично LEO/EMS)
-      if (updates.badgeNumber !== undefined) {
-        updateFields.push(`badge_number = $${paramIndex++}`);
-        updateValues.push(updates.badgeNumber);
-      }
-      if (updates.rankId !== undefined) {
-        updateFields.push(`rank_id = $${paramIndex++}`);
-        updateValues.push(updates.rankId);
-      }
-      if (updates.divisionId !== undefined) {
-        updateFields.push(`division_id = $${paramIndex++}`);
-        updateValues.push(updates.divisionId);
-      }
-      if (updates.departmentId !== undefined) {
-        updateFields.push(`department_id = $${paramIndex++}`);
-        updateValues.push(updates.departmentId);
-      }
-      if (updates.callsign !== undefined) {
-        updateFields.push(`callsign = $${paramIndex++}`);
-        updateValues.push(updates.callsign);
-      }
-      if (updates.callsign2 !== undefined) {
-        updateFields.push(`callsign2 = $${paramIndex++}`);
-        updateValues.push(updates.callsign2);
-      }
-      if (updates.status !== undefined) {
-        updateFields.push(`status = $${paramIndex++}`);
-        updateValues.push(updates.status);
-      }
-      if (updates.hireDate !== undefined) {
-        updateFields.push(`hire_date = $${paramIndex++}`);
-        updateValues.push(updates.hireDate);
-      }
-      if (updates.terminationDate !== undefined) {
-        updateFields.push(`termination_date = $${paramIndex++}`);
-        updateValues.push(updates.terminationDate);
-      }
-      if (updates.isActive !== undefined) {
-        updateFields.push(`is_active = $${paramIndex++}`);
-        updateValues.push(updates.isActive);
-      }
-      if (updates.suspended !== undefined) {
-        updateFields.push(`suspended = $${paramIndex++}`);
-        updateValues.push(updates.suspended);
-      }
-      if (updates.whitelistStatus !== undefined) {
-        updateFields.push(`whitelist_status = $${paramIndex++}`);
-        updateValues.push(updates.whitelistStatus);
-      }
-      if (updates.radioChannelId !== undefined) {
-        updateFields.push(`radio_channel_id = $${paramIndex++}`);
-        updateValues.push(updates.radioChannelId);
-      }
-
-      if (updateFields.length === 0) {
-        throw new Error('No fields to update');
-      }
-
-      updateFields.push(`updated_at = NOW()`);
-      updateValues.push(characterId);
-
-      const result = await this.pool.query(`
-        UPDATE common.fire_profiles 
-        SET ${updateFields.join(', ')}
-        WHERE character_id = $${paramIndex++}
-        RETURNING *
-      `, updateValues);
-
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      return this.adaptDbToFireProfile(result.rows[0]);
+      // TODO: Создать RPC-функцию для обновления FIRE профиля
+      console.warn('[NormalizedCharacterService] updateFireProfile not implemented yet');
+      return undefined;
     } catch (error) {
-      console.error('Error updating FIRE profile:', error);
-      throw new Error('Failed to update FIRE profile');
+      console.error('[NormalizedCharacterService] Error updating FIRE profile:', error);
+      return undefined;
     }
   }
 
   async deleteFireProfile(characterId: string): Promise<boolean> {
     try {
-      const result = await this.pool.query(`
-        DELETE FROM common.fire_profiles WHERE character_id = $1
-      `, [characterId]);
-
-      return result.rowCount > 0;
+      // TODO: Создать RPC-функцию для удаления FIRE профиля
+      console.warn('[NormalizedCharacterService] deleteFireProfile not implemented yet');
+      return false;
     } catch (error) {
-      console.error('Error deleting FIRE profile:', error);
-      throw new Error('Failed to delete FIRE profile');
+      console.error('[NormalizedCharacterService] Error deleting FIRE profile:', error);
+      return false;
     }
   }
 
-  // ===== ПОИСК И ФИЛЬТРАЦИЯ =====
+  // ===== МЕТОДЫ ПОИСКА И ФИЛЬТРАЦИИ =====
 
   async searchCharacters(query: string, limit: number = 10): Promise<Character[]> {
     try {
-      const result = await this.pool.query(`
-        SELECT * FROM common.characters 
-        WHERE 
-          name ILIKE $1 OR 
-          surname ILIKE $1 OR 
-          phoneNumber ILIKE $1 OR
-          ssn ILIKE $1
-        ORDER BY 
-          CASE 
-            WHEN name ILIKE $1 THEN 1
-            WHEN surname ILIKE $1 THEN 2
-            ELSE 3
-          END,
-          created_at DESC
-        LIMIT $2
-      `, [`%${query}%`, limit]);
-
-      return result.rows.map((char: any) => this.adaptDbToCharacter(char));
+      const characters = await characterService.searchCharacters(query, limit);
+      return characters.map(char => this.adaptCharacterServiceToNormalized(char));
     } catch (error) {
-      console.error('Error searching characters:', error);
-      throw new Error('Failed to search characters');
+      console.error('[NormalizedCharacterService] Error searching characters:', error);
+      return [];
     }
   }
 
   async getCharactersWithFilters(filters: CharacterFilters): Promise<Character[]> {
     try {
-      const whereConditions: string[] = [];
-      const queryParams: any[] = [];
-      let paramIndex = 1;
-
-      if (filters.ownerId) {
-        whereConditions.push(`owner_id = $${paramIndex++}`);
-        queryParams.push(filters.ownerId);
-      }
-
-      if (filters.gender) {
-        whereConditions.push(`gender = $${paramIndex++}`);
-        queryParams.push(filters.gender);
-      }
-
-      if (filters.occupation) {
-        whereConditions.push(`occupation ILIKE $${paramIndex++}`);
-        queryParams.push(`%${filters.occupation}%`);
-      }
-
-      const whereClause = whereConditions.length > 0 
-        ? `WHERE ${whereConditions.join(' AND ')}` 
-        : '';
-
-      const limitClause = filters.limit ? `LIMIT $${paramIndex++}` : '';
-      const offsetClause = filters.offset ? `OFFSET $${paramIndex++}` : '';
-
-      if (filters.limit) queryParams.push(filters.limit);
-      if (filters.offset) queryParams.push(filters.offset);
-
-      const result = await this.pool.query(`
-        SELECT * FROM common.characters 
-        ${whereClause}
-        ORDER BY created_at DESC
-        ${limitClause}
-        ${offsetClause}
-      `, queryParams);
-
-      return result.rows.map((char: any) => this.adaptDbToCharacter(char));
+      const characterFilters = {
+        ownerId: filters.ownerId,
+        gender: filters.gender,
+        occupation: filters.occupation,
+        limit: filters.limit,
+        offset: filters.offset
+      };
+      
+      const characters = await characterService.getCharactersWithFilters(characterFilters);
+      return characters.map(char => this.adaptCharacterServiceToNormalized(char));
     } catch (error) {
-      console.error('Error getting characters with filters:', error);
-      throw new Error('Failed to get characters with filters');
+      console.error('[NormalizedCharacterService] Error getting characters with filters:', error);
+      return [];
     }
   }
 
-  // ===== ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ =====
+  // ===== СТАТИСТИКА =====
 
   async getCharacterCount(): Promise<number> {
     try {
-      const result = await this.pool.query('SELECT COUNT(*) FROM common.characters');
-      return parseInt(result.rows[0].count);
+      return await characterService.getCharacterCount();
     } catch (error) {
-      console.error('Error getting character count:', error);
-      throw new Error('Failed to get character count');
+      console.error('[NormalizedCharacterService] Error getting character count:', error);
+      return 0;
     }
   }
 
   async getCharacterCountByOwner(ownerId: string): Promise<number> {
     try {
-      const result = await this.pool.query(
-        'SELECT COUNT(*) FROM common.characters WHERE owner_id = $1',
-        [ownerId]
-      );
-      return parseInt(result.rows[0].count);
+      return await characterService.getCharacterCountByOwner(ownerId);
     } catch (error) {
-      console.error('Error getting character count by owner:', error);
-      throw new Error('Failed to get character count by owner');
+      console.error('[NormalizedCharacterService] Error getting character count by owner:', error);
+      return 0;
     }
   }
 
+  // ===== БИЗНЕС-ЛОГИКА =====
+
   async getCharacterFullName(id: string): Promise<string | undefined> {
     try {
-      const result = await this.pool.query(
-        'SELECT name, surname FROM common.characters WHERE id = $1',
-        [id]
-      );
-      
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      const char = result.rows[0];
-      return `${char.name} ${char.surname}`;
+      const fullName = await characterService.getCharacterFullName(id);
+      return fullName === null ? undefined : fullName;
     } catch (error) {
-      console.error('Error getting character full name:', error);
-      throw new Error('Failed to get character full name');
+      console.error('[NormalizedCharacterService] Error getting character full name:', error);
+      return undefined;
     }
   }
 
   async getCharacterAge(id: string): Promise<number | undefined> {
     try {
-      const result = await this.pool.query(
-        'SELECT dateOfBirth FROM common.characters WHERE id = $1',
-        [id]
-      );
-      
-      if (result.rows.length === 0) {
-        return undefined;
-      }
-
-      const dateOfBirth = new Date(result.rows[0].dateOfBirth);
-      const today = new Date();
-      let age = today.getFullYear() - dateOfBirth.getFullYear();
-      const monthDiff = today.getMonth() - dateOfBirth.getMonth();
-      
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())) {
-        age--;
-      }
-
-      return age;
+      const age = await characterService.getCharacterAge(id);
+      return age === null ? undefined : age;
     } catch (error) {
-      console.error('Error getting character age:', error);
-      throw new Error('Failed to get character age');
+      console.error('[NormalizedCharacterService] Error getting character age:', error);
+      return undefined;
     }
   }
 
   async isCharacterAdult(id: string): Promise<boolean> {
-    const age = await this.getCharacterAge(id);
-    return age !== undefined && age >= 18;
+    try {
+      return await characterService.isCharacterAdult(id);
+    } catch (error) {
+      console.error('[NormalizedCharacterService] Error checking if character is adult:', error);
+      return false;
+    }
   }
 
   async validateCharacterData(character: CreateCharacterRequest): Promise<ValidationResult> {
-    const errors: string[] = [];
-
-    // Проверяем обязательные поля
-    if (!character.firstName || character.firstName.trim() === '') {
-      errors.push('firstName is required');
+    try {
+      const characterData = this.adaptCreateRequestToCharacterService(character);
+      const result = await characterService.validateCharacterData(characterData);
+      return result;
+    } catch (error) {
+      console.error('[NormalizedCharacterService] Error validating character data:', error);
+      return {
+        isValid: false,
+        errors: ['Validation error occurred']
+      };
     }
-
-    if (!character.lastName || character.lastName.trim() === '') {
-      errors.push('lastName is required');
-    }
-
-    if (!character.dateOfBirth) {
-      errors.push('dateOfBirth is required');
-    } else {
-      const dateOfBirth = new Date(character.dateOfBirth);
-      const today = new Date();
-      if (dateOfBirth > today) {
-        errors.push('dateOfBirth cannot be in the future');
-      }
-    }
-
-    if (character.gender && !['Male', 'Female', 'male', 'female'].includes(character.gender)) {
-      errors.push('gender must be Male, Female, male, or female');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
   }
-
-  // ===== МЕТОДЫ ДЛЯ ОБРАТНОЙ СОВМЕСТИМОСТИ =====
 
   async getCharacterLegacyFormat(id: string): Promise<LegacyCharacter | undefined> {
     try {
-      const fullCharacter = await this.getFullCharacter(id);
-      if (!fullCharacter) return undefined;
-
-      // Возвращаем в старом формате для обратной совместимости
-      return {
-        id: fullCharacter.id,
-        firstName: fullCharacter.firstName,
-        lastName: fullCharacter.lastName,
-        dateOfBirth: fullCharacter.dateOfBirth,
-        gender: fullCharacter.gender,
-        address: fullCharacter.address,
-        phoneNumber: fullCharacter.phoneNumber,
-        occupation: fullCharacter.occupation,
-        photoUrl: fullCharacter.photoUrl,
-        ssn: fullCharacter.ssn,
-        flags: fullCharacter.flags,
-        addressFlags: fullCharacter.addressFlags,
-        // Служебные поля из профилей
-        isUnit: !!(fullCharacter.leoProfile || fullCharacter.emsProfile || fullCharacter.fireProfile),
-        badgeNumber: fullCharacter.leoProfile?.badgeNumber || fullCharacter.emsProfile?.badgeNumber || fullCharacter.fireProfile?.badgeNumber,
-        callsign: fullCharacter.leoProfile?.callsign || fullCharacter.emsProfile?.callsign || fullCharacter.fireProfile?.callsign,
-        callsign2: fullCharacter.leoProfile?.callsign2 || fullCharacter.emsProfile?.callsign2 || fullCharacter.fireProfile?.callsign2,
-        departmentId: fullCharacter.leoProfile?.departmentId || fullCharacter.emsProfile?.departmentId || fullCharacter.fireProfile?.departmentId,
-        divisionId: fullCharacter.leoProfile?.divisionId || fullCharacter.emsProfile?.divisionId || fullCharacter.fireProfile?.divisionId,
-        rankId: fullCharacter.leoProfile?.rankId || fullCharacter.emsProfile?.rankId || fullCharacter.fireProfile?.rankId,
-        hireDate: fullCharacter.leoProfile?.hireDate || fullCharacter.emsProfile?.hireDate || fullCharacter.fireProfile?.hireDate,
-        terminationDate: fullCharacter.leoProfile?.terminationDate || fullCharacter.emsProfile?.terminationDate || fullCharacter.fireProfile?.terminationDate,
-        isActive: fullCharacter.leoProfile?.isActive || fullCharacter.emsProfile?.isActive || fullCharacter.fireProfile?.isActive,
-        suspended: fullCharacter.leoProfile?.suspended || fullCharacter.emsProfile?.suspended || fullCharacter.fireProfile?.suspended,
-        whitelistStatus: fullCharacter.leoProfile?.whitelistStatus || fullCharacter.emsProfile?.whitelistStatus || fullCharacter.fireProfile?.whitelistStatus,
-        radioChannelId: fullCharacter.leoProfile?.radioChannelId || fullCharacter.emsProfile?.radioChannelId || fullCharacter.fireProfile?.radioChannelId,
-        createdAt: fullCharacter.createdAt,
-        updatedAt: fullCharacter.updatedAt
+      const character = await characterService.getCharacter(id);
+      if (!character) return undefined;
+      
+      const legacyCharacter: LegacyCharacter = {
+        id: character.id,
+        firstName: character.firstName,
+        lastName: character.lastName,
+        dateOfBirth: character.dateOfBirth || '',
+        gender: character.gender || undefined,
+        address: character.address || undefined,
+        phoneNumber: character.phoneNumber || undefined,
+        occupation: character.occupation || undefined,
+        photoUrl: character.mugshotUrl || undefined,
+        ssn: character.ssn || undefined,
+        flags: character.flags || [],
+        addressFlags: [], // Пока не поддерживается
+        createdAt: character.createdAt || new Date().toISOString(),
+        updatedAt: character.updatedAt || new Date().toISOString()
       };
+      
+      return legacyCharacter;
     } catch (error) {
-      console.error('Error getting character in legacy format:', error);
-      throw new Error('Failed to get character in legacy format');
+      console.error('[NormalizedCharacterService] Error getting character in legacy format:', error);
+      return undefined;
     }
   }
 }
 
-// Экспортируем экземпляр сервиса
+// Экспортируем единственный экземпляр
 export const normalizedCharacterService = new NormalizedCharacterService(); 

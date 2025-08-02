@@ -42,7 +42,17 @@ async function testMDTApi() {
     if (bolosResponse.ok) {
       console.log(`✅ Успешно получено ${bolosData.data?.length || 0} BOLO`);
       if (bolosData.data && bolosData.data.length > 0) {
-        console.log(`   Пример BOLO: ${bolosData.data[0].type} - ${bolosData.data[0].priority}`);
+        const firstBolo = bolosData.data[0];
+        console.log(`   Пример BOLO:`);
+        console.log(`     ID: ${firstBolo.id}`);
+        console.log(`     Тип: ${firstBolo.type}`);
+        console.log(`     Приоритет: ${firstBolo.priority}`);
+        console.log(`     Статус: ${firstBolo.status}`);
+        console.log(`     Причина: ${firstBolo.reason}`);
+        console.log(`     Автор ID: ${firstBolo.author_character_id}`);
+        console.log(`     Автор полное имя: ${firstBolo.author_full_name || 'НЕ УКАЗАНО'}`);
+        console.log(`     Создан: ${firstBolo.created_at}`);
+        console.log(`     Все поля:`, Object.keys(firstBolo));
       }
     } else {
       console.log(`❌ Ошибка: ${bolosData.error || 'Неизвестная ошибка'}`);

@@ -1,6 +1,7 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import { useState, useEffect } from 'react';
-import type { Unit, Call911, BOLO } from '@/shared/types';
+import type { Unit, Call911 } from '@/shared/types';
+import type { Bolo } from '@/entities/dispatch/model/types';
 
 // Моковые данные для демонстрации
 const MOCK_UNITS: Unit[] = [
@@ -41,15 +42,23 @@ const MOCK_CALLS: Call911[] = [
   }
 ];
 
-const MOCK_BOLOS: BOLO[] = [
+const MOCK_BOLOS: Bolo[] = [
   {
     id: '1',
     type: 'vehicle',
-    description: 'Stolen vehicle',
+    reason: 'Stolen vehicle',
     priority: 'high',
     status: 'active',
-    createdAt: new Date().toISOString(),
-    author: 'Dispatch',
+    location: 'Downtown',
+    created_at: new Date().toISOString(),
+    subject_name: null,
+    subject_description: null,
+    vehicle_plate: 'ABC123',
+    vehicle_description: 'Toyota Camry',
+    author_character_id: '1',
+    author_full_name: 'Dispatch Officer',
+    title: 'Stolen vehicle',
+    description: 'Stolen vehicle',
     vehicle: {
       plate: 'ABC123',
       model: 'Toyota Camry',
@@ -95,14 +104,14 @@ export function useMDTCalls() {
 }
 
 export function useMDTBOLOs() {
-  const [bolos, setBolos] = useState<BOLO[]>(MOCK_BOLOS);
+  const [bolos, setBolos] = useState<Bolo[]>(MOCK_BOLOS);
   const [loading, setLoading] = useState(false);
 
-  const createBOLO = (bolo: Omit<BOLO, 'id' | 'createdAt'>) => {
-    const newBOLO: BOLO = {
+  const createBOLO = (bolo: Omit<Bolo, 'id' | 'created_at'>) => {
+    const newBOLO: Bolo = {
       ...bolo,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString()
     };
     setBolos(prev => [...prev, newBOLO]);
   };

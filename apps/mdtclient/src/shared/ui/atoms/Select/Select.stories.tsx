@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './Select';
 
 const meta: Meta<typeof Select> = {
@@ -149,7 +150,7 @@ export const MultipleSelects: Story = {
 
 export const InteractiveSelect: Story = {
   render: () => {
-    const [value, setValue] = React.useState('');
+    const [value, setValue] = useState('');
     
     return (
       <div className="space-y-4 w-80">

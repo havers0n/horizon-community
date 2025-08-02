@@ -368,6 +368,10 @@ class ApiService {
     return this.request<{ user: User; characters: Character[] }>('/auth/me');
   }
 
+  async getUserCharacters(): Promise<ApiResponse<Character[]>> {
+    return this.request<Character[]>('/characters/my');
+  }
+
   async logout(): Promise<ApiResponse> {
     return this.request('/auth/logout', { method: 'POST' });
   }

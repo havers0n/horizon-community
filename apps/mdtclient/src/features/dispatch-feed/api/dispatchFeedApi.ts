@@ -30,16 +30,8 @@ export interface ActiveUnit {
   createdAt: string;
 }
 
-export interface ActiveBolo {
-  id: number;
-  title: string;
-  description: string;
-  type: string;
-  priority: string;
-  isActive: boolean;
-  createdAt: string;
-  expiresAt?: string;
-}
+// Используем единый тип Bolo вместо дублирующего ActiveBolo
+export type ActiveBolo = Bolo;
 
 export class DispatchFeedApi {
   private static baseUrl = '/api/mdt';

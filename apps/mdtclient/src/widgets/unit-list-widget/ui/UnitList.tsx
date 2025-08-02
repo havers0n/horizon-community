@@ -69,17 +69,17 @@ const getUnitIcon = (unitType?: string) => {
   }
 };
 
-const getDepartmentColor = (departmentId: number) => {
+const getDepartmentColor = (departmentId: string) => {
   switch (departmentId) {
-    case 1: // LSPD
+    case '1': // LSPD
       return 'text-blue-600';
-    case 2: // BCSO
+    case '2': // BCSO
       return 'text-green-600';
-    case 3: // SAHP
+    case '3': // SAHP
       return 'text-yellow-600';
-    case 4: // LSFD
+    case '4': // LSFD
       return 'text-red-600';
-    case 5: // SAMS
+    case '5': // SAMS
       return 'text-purple-600';
     default:
       return 'text-gray-600';
@@ -125,7 +125,7 @@ export const UnitList: React.FC<UnitListProps> = ({
 
     // Фильтр по департаменту
     if (departmentFilter !== 'all') {
-      filtered = filtered.filter(unit => unit.departmentId === parseInt(departmentFilter));
+      filtered = filtered.filter(unit => unit.departmentId === departmentFilter);
     }
 
     setFilteredUnits(filtered);
