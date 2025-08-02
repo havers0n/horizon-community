@@ -6,6 +6,7 @@ import { CoreSwitcher } from '@/shared/ui/CoreSwitcher';
 import { RoleDebugPanel } from '@/shared/ui/RoleDebugPanel';
 import { CivilCorePortal } from '@/widgets/civil-core-portal';
 import { EmergencyCorePortal } from '@/widgets/emergency-core-portal';
+import { CitizenPortal } from '@/features/citizen-portal/ui/CitizenPortal';
 import { useRenderCounter, checkDependenciesStability } from '@/shared/utils/debugUtils';
 
 export const AuthenticatedApp: React.FC = () => {
@@ -82,6 +83,8 @@ export const AuthenticatedApp: React.FC = () => {
         return <CivilCorePortal />;
       case 'emergency':
         return <EmergencyCorePortal />;
+      case 'citizen-portal':
+        return <CitizenPortal />;
       default:
         return (
           <div className="h-full flex items-center justify-center">

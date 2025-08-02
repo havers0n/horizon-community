@@ -46,5 +46,8 @@ console.log('[Supabase Client] ✅ Создание Supabase клиента...')
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Экспортируем mdtClient как алиас для совместимости
+export const mdtClient = supabase
+
 console.log('[Supabase Client] ✅ Supabase клиент создан успешно!');
 console.log('[Supabase Client] === ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ==='); 

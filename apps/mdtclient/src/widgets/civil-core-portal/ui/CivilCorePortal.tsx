@@ -1,6 +1,7 @@
 import React from 'react';
-import { Users, UserPlus, Car, Shield, FileText, Building } from 'lucide-react';
+import { Users, UserPlus, Car, Shield, FileText, Building, User } from 'lucide-react';
 import { Button } from '@/shared/ui/atoms/Button';
+import { useCoreNavigationStore } from '@/shared/model/coreNavigationStore';
 
 interface CivilModule {
   id: string;
@@ -8,58 +9,75 @@ interface CivilModule {
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   color: string;
+  action?: () => void;
 }
 
-const civilModules: CivilModule[] = [
-  {
-    id: 'citizen-registration',
-    name: 'Регистрация граждан',
-    icon: UserPlus,
-    description: 'Создание и управление гражданскими профилями',
-    color: 'from-blue-600/20 to-blue-800/20 border-blue-500/30'
-  },
-  {
-    id: 'vehicle-registration',
-    name: 'Регистрация ТС',
-    icon: Car,
-    description: 'Регистрация и управление транспортными средствами',
-    color: 'from-green-600/20 to-green-800/20 border-green-500/30'
-  },
-  {
-    id: 'weapon-registration',
-    name: 'Регистрация оружия',
-    icon: Shield,
-    description: 'Регистрация и управление оружием',
-    color: 'from-red-600/20 to-red-800/20 border-red-500/30'
-  },
-  {
-    id: 'documents',
-    name: 'Документы',
-    icon: FileText,
-    description: 'Управление документами и лицензиями',
-    color: 'from-purple-600/20 to-purple-800/20 border-purple-500/30'
-  },
-  {
-    id: 'companies',
-    name: 'Компании',
-    icon: Building,
-    description: 'Регистрация и управление компаниями',
-    color: 'from-orange-600/20 to-orange-800/20 border-orange-500/30'
-  },
-  {
-    id: 'citizen-search',
-    name: 'Поиск граждан',
-    icon: Users,
-    description: 'Поиск и просмотр гражданских профилей',
-    color: 'from-cyan-600/20 to-cyan-800/20 border-cyan-500/30'
-  }
-];
-
 export const CivilCorePortal: React.FC = () => {
+  const { switchCore } = useCoreNavigationStore();
+
   const handleModuleClick = (moduleId: string) => {
     console.log(`Civil module clicked: ${moduleId}`);
-    // TODO: Реализовать навигацию к модулю
+    
+    // Специальная обработка для гражданского портала
+    if (moduleId === 'citizen-portal') {
+      // Переключаемся на гражданский портал
+      console.log('Switching to Citizen Portal');
+      switchCore('citizen-portal');
+    }
   };
+
+  const civilModules: CivilModule[] = [
+    {
+      id: 'citizen-portal',
+      name: 'Гражданский портал',
+      icon: User,
+      description: 'Управление персонажами и их биографией',
+      color: 'from-indigo-600/20 to-indigo-800/20 border-indigo-500/30',
+      action: () => handleModuleClick('citizen-portal')
+    },
+    {
+      id: 'citizen-registration',
+      name: 'Регистрация граждан',
+      icon: UserPlus,
+      description: 'Создание и управление гражданскими профилями',
+      color: 'from-blue-600/20 to-blue-800/20 border-blue-500/30'
+    },
+    {
+      id: 'vehicle-registration',
+      name: 'Регистрация ТС',
+      icon: Car,
+      description: 'Регистрация и управление транспортными средствами',
+      color: 'from-green-600/20 to-green-800/20 border-green-500/30'
+    },
+    {
+      id: 'weapon-registration',
+      name: 'Регистрация оружия',
+      icon: Shield,
+      description: 'Регистрация и управление оружием',
+      color: 'from-red-600/20 to-red-800/20 border-red-500/30'
+    },
+    {
+      id: 'documents',
+      name: 'Документы',
+      icon: FileText,
+      description: 'Управление документами и лицензиями',
+      color: 'from-purple-600/20 to-purple-800/20 border-purple-500/30'
+    },
+    {
+      id: 'companies',
+      name: 'Компании',
+      icon: Building,
+      description: 'Регистрация и управление компаниями',
+      color: 'from-orange-600/20 to-orange-800/20 border-orange-500/30'
+    },
+    {
+      id: 'citizen-search',
+      name: 'Поиск граждан',
+      icon: Users,
+      description: 'Поиск и просмотр гражданских профилей',
+      color: 'from-cyan-600/20 to-cyan-800/20 border-cyan-500/30'
+    }
+  ];
 
   return (
     <div className="h-full flex flex-col">
@@ -91,7 +109,7 @@ export const CivilCorePortal: React.FC = () => {
                   hover:scale-105 hover:shadow-lg
                   group
                 `}
-                onClick={() => handleModuleClick(module.id)}
+                onClick={() => module.action ? module.action() : handleModuleClick(module.id)}
               >
                 <div className="flex flex-col h-full justify-between">
                   <div className="flex items-start justify-between">
