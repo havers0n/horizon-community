@@ -67,18 +67,15 @@ jobs:
             echo "🔧 Устанавливаем зависимости..."
             npm install --production
 
-            # "ЯДЕРНЫЙ" СПОСОБ: СОЗДАЕМ КОНФИГ PM2 С "ВШИТЫМИ" ПЕРЕМЕННЫМИ
-            echo "🚀 Создаем временный ecosystem.json с переменными из .env..."
-            
-            # Эта команда читает .env, форматирует его в JSON и создает файл
-            # Теперь PM2 получит переменные напрямую, а не через окружение
-            cat .env | awk -F '=' '{print "\""$1"\":\""$2"\""}' | paste -sd, - | awk '{print "{\"apps\":[{\"name\":\"roleplayidentity\",\"script\":\"./dist/apps/server/main.js\",\"env_production\":{" $1 "}}]}"}' > temp_ecosystem.json
+            # ВОТ ФИНАЛЬНЫЙ КЛЮЧ: ВОССТАНАВЛИВАЕМ ССЫЛКУ ПОСЛЕ КОПИРОВАНИЯ
+            echo "🔗 Восстанавливаем символическую ссылку на .env файл..."
+            # Используем абсолютный путь для 100% надежности
+            # -f означает --force, он перезапишет ссылку, если она вдруг осталась
+            ln -sf /var/www/.env .env
 
-            echo "📄 Содержимое временного конфига:"
-            cat temp_ecosystem.json
-
-            # Запускаем/перезапускаем приложение, используя ЭТОТ временный конфиг
-            pm2 startOrGracefulReload temp_ecosystem.json --env production
+            # Теперь запускаем PM2, который найдет .env по этой ссылке
+            echo "🚀 Запускаем/перезапускаем приложение через ecosystem.config.js..."
+            pm2 startOrGracefulReload ecosystem.config.js --env production
             
             pm2 save
             echo "✅ Деплой завершен успешно!"
