@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --port 3001",
     "build": "vite build",
-    "build:fivem": "vite build --mode fivem",
+    "build:fivem": "vite build --config vite.config.fivem.ts",
     "build:watch": "vite build --watch",
     "preview": "vite preview --port 3001",
     "check": "tsc --noEmit",
@@ -15,7 +15,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --fix",
-    "clean": "rm -rf dist dist-nui",
+    "clean": "rm -rf ../../dist/apps/mdtclient dist-nui",
     "check-translations": "node scripts/check-translations.cjs"
   },
   "dependencies": {

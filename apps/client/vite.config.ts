@@ -36,7 +36,7 @@ export default defineConfig({
     preserveSymlinks: true,
   },
   build: {
-    outDir: path.resolve(__dirname, "../dist/client"),
+    outDir: path.resolve(__dirname, "../../dist/apps/client"),
     emptyOutDir: true,
     rollupOptions: {
       external: ['zod'],

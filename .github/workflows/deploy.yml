@@ -56,24 +56,20 @@ jobs:
           echo "MDT client build:"
           ls -la dist/apps/mdtclient/ 2>/dev/null || echo "dist/apps/mdtclient not found"
 
-      - name: Create deployment package
+      - name: Verify build artifacts
         run: |
-          # Используем умный скрипт для правильного архивирования
-          npm run build:archive:correct
+          echo "📋 Проверяем наличие билд-артефактов:"
           
-          # Проверяем, что архив создан
-          if [ ! -f deployment.tar.gz ]; then
-            echo "❌ Архив deployment.tar.gz не был создан"
-            echo "📋 Содержимое текущей директории:"
-            ls -la
-            echo "📋 Проверяем наличие билд-артефактов:"
-            ls -la dist/ 2>/dev/null || echo "dist/ не найден"
-            ls -la apps/*/dist/ 2>/dev/null || echo "apps/*/dist/ не найдены"
+          if [ ! -d "dist/apps/client" ] || [ ! -d "dist/apps/mdtclient" ] || [ ! -f "dist/apps/server/main.js" ]; then
+            echo "❌ Один или несколько билд-артефактов не найдены!"
+            echo "--- Структура директории dist: ---"
+            ls -R dist 2>/dev/null || echo "dist/ не найден"
             exit 1
           fi
           
-          echo "✅ Архив deployment.tar.gz создан успешно"
-          ls -lh deployment.tar.gz
+          echo "✅ Все билд-артефакты найдены."
+          echo "--- Размеры билдов: ---"
+          du -sh dist/apps/*
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -81,9 +77,10 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "deployment.tar.gz"
+          source: "dist/"
           target: "/var/www/app"
           strip_components: 0
+          overwrite: true
 
       - name: Setup and restart application
         uses: appleboy/ssh-action@v1.0.3
@@ -93,7 +90,10 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
             cd /var/www/app
-            tar -xzf deployment.tar.gz
+
+            echo "🔍 Проверяем структуру dist..."
+            ls -la dist/
+            ls -la dist/apps/
 
             echo "🔍 Проверяем .env файл..."
             if [ -f .env ]; then
@@ -110,7 +110,7 @@ jobs:
               pm2 reload roleplayidentity
             else
               echo "🚀 Первый старт приложения через pm2..."
-              NODE_ENV=production pm2 start dist/apps/server/index.js --name roleplayidentity
+              NODE_ENV=production pm2 start dist/apps/server/main.js --name roleplayidentity
             fi
 
             pm2 save
@@ -118,7 +118,6 @@ jobs:
             echo "📊 Статус приложения:"
             pm2 status
 
-            rm -f deployment.tar.gz
             echo "✅ Деплой завершен успешно!"
 
       - name: Health check
