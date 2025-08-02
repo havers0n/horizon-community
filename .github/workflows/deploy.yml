@@ -30,8 +30,8 @@ jobs:
           echo "📋 Проверяем наличие билд-артефактов..."
           
           # Проверяем, что главный файл сервера существует по реальному пути
-          if [ ! -f "dist/server.js" ]; then
-            echo "❌ КРИТИЧЕСКАЯ ОШИБКА: Файл сервера dist/server.js не найден!"
+          if [ ! -f "dist/apps/server/main.js" ]; then
+            echo "❌ КРИТИЧЕСКАЯ ОШИБКА: Файл сервера dist/apps/server/main.js не найден!"
             echo "--- Структура директории dist: ---"
             ls -R dist
             exit 1
@@ -75,7 +75,7 @@ jobs:
             # Запускаем/перезапускаем приложение через PM2
             echo "🚀 Запускаем/перезапускаем приложение через PM2..."
             # УКАЗЫВАЕМ ПРАВИЛЬНЫЙ ПУТЬ К СЕРВЕРУ
-            NODE_ENV=production pm2 startOrReload dist/server.js --name roleplayidentity
+            NODE_ENV=production pm2 startOrReload dist/apps/server/main.js --name roleplayidentity
             
             pm2 save
             echo "✅ Деплой завершен успешно!"
