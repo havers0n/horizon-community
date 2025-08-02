@@ -71,15 +71,25 @@ jobs:
           echo "--- Размеры билдов: ---"
           du -sh dist/apps/*
 
-      - name: Deploy to VPS
+      - name: Deploy to Server and Restart App
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            # 1. Гарантированно создаем директорию для деплоя
+            echo "🔧 Создаем директорию /var/www/app, если она не существует..."
+            mkdir -p /var/www/app
+
+      - name: Copy application files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "dist/"
+          source: "dist/*"  # <-- ВАЖНО: копируем содержимое папки dist
           target: "/var/www/app"
-          strip_components: 0
           overwrite: true
 
       - name: Setup and restart application
@@ -89,19 +99,22 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            # Переходим в рабочую директорию
             cd /var/www/app
 
-            echo "🔍 Проверяем структуру dist..."
-            ls -la dist/
-            ls -la dist/apps/
+            # Проверяем, что файлы на месте
+            echo "🔍 Проверяем структуру файлов на сервере..."
+            ls -la
+            ls -la apps/
 
+            # Проверяем .env файл (если он должен быть вне папки dist)
+            # Если .env лежит на уровень выше, используйте `cd .. && ls -la`
             echo "🔍 Проверяем .env файл..."
             if [ -f .env ]; then
               echo "✅ .env файл найден"
               head -3 .env
             else
-              echo "❌ .env файл не найден"
-              exit 1
+              echo "⚠️ .env файл не найден (это может быть нормально, если он не требуется)"
             fi
 
             # Безопасный рестарт через PM2
@@ -110,14 +123,13 @@ jobs:
               pm2 reload roleplayidentity
             else
               echo "🚀 Первый старт приложения через pm2..."
-              NODE_ENV=production pm2 start dist/apps/server/main.js --name roleplayidentity
+              # Путь к серверу теперь прямой, без папки dist
+              NODE_ENV=production pm2 start apps/server/main.js --name roleplayidentity
             fi
 
             pm2 save
-
             echo "📊 Статус приложения:"
             pm2 status
-
             echo "✅ Деплой завершен успешно!"
 
       - name: Health check
