@@ -60,11 +60,20 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            # Переходим в рабочую директорию
             cd /var/www/app
+
+            # Устанавливаем production-зависимости
+            echo "🔧 Устанавливаем зависимости..."
             npm install --production
+
+            # ВОТ ОНО, РЕШЕНИЕ:
+            echo "🚀 Запускаем/перезапускаем приложение через PM2, ПРИНУДИТЕЛЬНО используя .env..."
             
-            # Запускаем/перезагружаем через файл конфигурации
-            pm2 startOrGracefulReload ecosystem.config.js --env production
+            # Эта команда читает .env, экспортирует переменные и ЗАПУСКАЕТ PM2
+            # Теперь PM2 и ваше приложение 100% увидят все переменные
+            # --update-env гарантирует, что переменные применятся при перезапуске
+            export $(grep -v '^#' .env | xargs) && pm2 reload roleplayidentity --update-env || pm2 start ecosystem.config.js --env production
             
             pm2 save
             echo "✅ Деплой завершен успешно!"
