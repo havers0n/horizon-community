@@ -19,68 +19,37 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install all dependencies (workspace)
+      - name: Install all dependencies
         run: npm ci
-
-      - name: Install shared libraries dependencies
-        run: |
-          # Для npm workspace все зависимости уже установлены в корне
-          # Проверяем что workspace пакеты доступны
-          echo "Checking workspace packages..."
-          ls -la libs/shared-types/
-          ls -la libs/shared-utils/
-          ls -la libs/shared/schema/
 
       - name: Build application
         run: npm run build:production
 
-      - name: Verify workspace packages
-        run: |
-          echo "Verifying workspace packages are available..."
-          npm ls --workspaces --depth=0
-
-      - name: List workspace files
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Root directory contents:"
-          ls -la
-          echo "Nx dist structure:"
-          ls -la dist/ 2>/dev/null || echo "Root dist not found"
-          echo "Nx apps dist:"
-          ls -la dist/apps/ 2>/dev/null || echo "dist/apps not found"
-          echo "Server build:"
-          ls -la dist/apps/server/ 2>/dev/null || echo "dist/apps/server not found"
-          echo "Client build:"
-          ls -la dist/apps/client/ 2>/dev/null || echo "dist/apps/client not found"
-          echo "MDT client build:"
-          ls -la dist/apps/mdtclient/ 2>/dev/null || echo "dist/apps/mdtclient not found"
-
       - name: Verify build artifacts
         run: |
-          echo "📋 Проверяем наличие билд-артефактов:"
+          echo "📋 Проверяем наличие билд-артефактов..."
           
-          if [ ! -d "dist/apps/client" ] || [ ! -d "dist/apps/mdtclient" ] || [ ! -f "dist/apps/server/main.js" ]; then
-            echo "❌ Один или несколько билд-артефактов не найдены!"
+          # Проверяем, что главный файл сервера существует по реальному пути
+          if [ ! -f "dist/server.js" ]; then
+            echo "❌ КРИТИЧЕСКАЯ ОШИБКА: Файл сервера dist/server.js не найден!"
             echo "--- Структура директории dist: ---"
-            ls -R dist 2>/dev/null || echo "dist/ не найден"
+            ls -R dist
             exit 1
           fi
           
           echo "✅ Все билд-артефакты найдены."
-          echo "--- Размеры билдов: ---"
-          du -sh dist/apps/*
+          ls -R dist
 
-      - name: Deploy required files to VPS
+      - name: Clean up node_modules before deploy
+        run: rm -rf node_modules
+
+      - name: Deploy project files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
+          username: ${{ secrets.VPS_USER }} # Должен быть 'daniel'
           key: ${{ secrets.DEPLOY_KEY }}
-          source: |
-            dist/
-            package.json
-            package-lock.json
+          source: "." # Копируем всю текущую директорию (без node_modules)
           target: "/var/www/app"
           overwrite: true
 
@@ -94,23 +63,19 @@ jobs:
             # Переходим в рабочую директорию
             cd /var/www/app
 
-            # Устанавливаем только production-зависимости
+            # Устанавливаем production-зависимости
             echo "🔧 Устанавливаем зависимости..."
             npm install --production
 
-            # Проверяем .env файл
-            echo "🔍 Проверяем .env файл..."
-            if [ -f .env ]; then
-              echo "✅ .env файл найден"
-            else
-              echo "⚠️ ВНИМАНИЕ: .env файл не найден! Приложение может не запуститься."
-              echo "Создайте .env файл в /var/www/app/ на сервере, если он требуется."
+            # Проверяем .env файл (вы должны создать его на сервере вручную)
+            if [ ! -f .env ]; then
+              echo "⚠️ ВНИМАНИЕ: .env файл не найден в /var/www/app/. Приложение может не запуститься."
             fi
 
-            # Безопасный рестарт через PM2
+            # Запускаем/перезапускаем приложение через PM2
             echo "🚀 Запускаем/перезапускаем приложение через PM2..."
-            # Правильный путь к серверу!
-            pm2 startOrGracefulReload ecosystem.config.js
+            # УКАЗЫВАЕМ ПРАВИЛЬНЫЙ ПУТЬ К СЕРВЕРУ
+            NODE_ENV=production pm2 startOrReload dist/server.js --name roleplayidentity
             
             pm2 save
             echo "✅ Деплой завершен успешно!"
@@ -122,14 +87,17 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            sleep 5
+            sleep 5 # Даем приложению время на запуск
+            
+            echo "📊 Проверяем статус PM2..."
             pm2 status
 
+            echo "🩺 Проверяем Health Check endpoint..."
             if curl -f http://localhost:5000/api/health > /dev/null 2>&1; then
-              echo "✅ Приложение доступно на localhost:5000"
+              echo "✅ Приложение доступно и отвечает на health check!"
             else
-              echo "❌ Приложение недоступно на localhost:5000"
-              echo "📋 Последние 10 строк логов PM2:"
-              pm2 logs roleplayidentity --lines 10 --nostream
+              echo "❌ Приложение НЕ отвечает на health check."
+              echo "📋 Последние 20 строк логов PM2:"
+              pm2 logs roleplayidentity --lines 20 --nostream
               exit 1
             fi
