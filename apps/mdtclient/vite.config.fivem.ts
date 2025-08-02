@@ -4,18 +4,18 @@ import path from "path";
 import { fivemPlugin } from "./vite-plugin-fivem.js";
 
 export default defineConfig(({ mode, command }) => {
-  // ИСПРАВЛЕНИЕ: Загружаем переменные с правильным префиксом VITE_
+  // Загружаем переменные с правильным префиксом VITE_
   const env = loadEnv(mode, '.', 'VITE_');
   
-  console.log('🔧 Vite Config: Загруженные переменные окружения:', Object.keys(env));
-  console.log('🔧 Vite Config: VITE_SUPABASE_URL:', env.VITE_SUPABASE_URL ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
-  console.log('🔧 Vite Config: VITE_SUPABASE_ANON_KEY:', env.VITE_SUPABASE_ANON_KEY ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
+  console.log('🔧 Vite Config (FiveM): Загруженные переменные окружения:', Object.keys(env));
+  console.log('🔧 Vite Config (FiveM): VITE_SUPABASE_URL:', env.VITE_SUPABASE_URL ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
+  console.log('🔧 Vite Config (FiveM): VITE_SUPABASE_ANON_KEY:', env.VITE_SUPABASE_ANON_KEY ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
   
-  // Автоматическое определение режима сборки
-  const isNUI = process.env.NUI === 'true' || process.env.BUILD_TARGET === 'fivem';
+  // Принудительно устанавливаем режим FiveM
+  const isNUI = true;
   const isProduction = mode === 'production';
   
-  console.log(`🔧 Vite Config: ${isNUI ? 'FiveM NUI' : 'Browser'} mode`);
+  console.log(`🔧 Vite Config (FiveM): FiveM NUI mode`);
   
   return {
     plugins: [
@@ -26,7 +26,7 @@ export default defineConfig(({ mode, command }) => {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.IS_NUI': JSON.stringify(isNUI),
-      'process.env.BUILD_TARGET': JSON.stringify(isNUI ? 'fivem' : 'browser')
+      'process.env.BUILD_TARGET': JSON.stringify('fivem')
     },
     resolve: {
       alias: {
@@ -63,31 +63,25 @@ export default defineConfig(({ mode, command }) => {
       },
     },
     build: {
-      outDir: path.resolve(__dirname, "../../dist/apps/mdtclient"),
-      sourcemap: !isNUI, // Отключаем sourcemap для FiveM
+      outDir: "dist-nui",
+      sourcemap: false, // Отключаем sourcemap для FiveM
       emptyOutDir: true,
       
-      // Автоматические настройки для FiveM
-      base: isNUI ? './' : '/',
+      // Настройки для FiveM
+      base: './',
       
       rollupOptions: {
         output: {
           // Для FiveM: простые имена файлов без хешей
-          entryFileNames: isNUI ? '[name].js' : '[name]-[hash].js',
-          chunkFileNames: isNUI ? '[name].js' : '[name]-[hash].js',
-          assetFileNames: isNUI ? '[name].[ext]' : '[name]-[hash].[ext]',
-          
-          // Оптимизация для FiveM
-          manualChunks: isNUI ? undefined : {
-            'react-vendor': ['react', 'react-dom'],
-            'ui-vendor': ['lucide-react'],
-          }
+          entryFileNames: '[name].js',
+          chunkFileNames: '[name].js',
+          assetFileNames: '[name].[ext]',
         }
       },
       
-      // Оптимизация размера для FiveM
-      minify: isNUI ? 'esbuild' : 'terser',
-      target: isNUI ? 'es2015' : 'esnext',
+      // Оптимизация для FiveM
+      minify: 'esbuild',
+      target: 'es2015',
     },
   };
-});
+}); 
