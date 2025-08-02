@@ -172,13 +172,20 @@ async function main() {
       logInfo('Удален старый архив deployment.tar.gz');
     }
     
-    // Минимальный набор файлов для деплоя
+    // Полный набор файлов для деплоя
     const deploymentPaths = [
       // Актуальные билд-артефакты
       ...actualBuildPaths.map(bp => bp.path),
       // Конфигурационные файлы
       'package.json',
-      'package-lock.json'
+      'package-lock.json',
+      // Дополнительные файлы для деплоя
+      'scripts/',
+      'supabase/',
+      'migrations/',
+      'docs/',
+      'README.md',
+      'node_modules/'
     ];
     
     // Фильтрация только существующих путей
