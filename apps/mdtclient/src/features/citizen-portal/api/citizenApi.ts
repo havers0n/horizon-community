@@ -1,4 +1,4 @@
-import { mdtClient } from '@/lib/supabase';
+import { mdtClient, testCharactersTable, createTestCharacter } from '@/lib/supabase';
 import type { 
   Character, 
   CreateCharacterRequest, 
@@ -13,8 +13,20 @@ import type {
 import { DataGenerator } from '@/shared/utils/dataGeneration';
 
 export class CitizenApi {
+  // Расширенная тестовая функция для проверки таблицы
+  static async testTable() {
+    return await testCharactersTable();
+  }
+
+  // Функция для создания тестового персонажа
+  static async createTestCharacter() {
+    return await createTestCharacter();
+  }
+
   // Создание персонажа
   static async createCharacter(data: CreateCharacterRequest): Promise<Character> {
+    console.log('[CitizenApi] Создание персонажа:', data);
+    
     const { data: character, error } = await mdtClient
       .from('characters')
       .insert({
@@ -26,12 +38,19 @@ export class CitizenApi {
       .select()
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('[CitizenApi] Ошибка при создании персонажа:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('[CitizenApi] Персонаж создан успешно:', character);
     return character;
   }
 
   // Обновление персонажа
   static async updateCharacter(id: string, data: UpdateCharacterRequest): Promise<Character> {
+    console.log('[CitizenApi] Обновление персонажа:', id, data);
+    
     const { data: character, error } = await mdtClient
       .from('characters')
       .update({
@@ -42,31 +61,50 @@ export class CitizenApi {
       .select()
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('[CitizenApi] Ошибка при обновлении персонажа:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('[CitizenApi] Персонаж обновлен успешно:', character);
     return character;
   }
 
   // Получение персонажа по ID
   static async getCharacter(id: string): Promise<Character> {
+    console.log('[CitizenApi] Получение персонажа по ID:', id);
+    
     const { data: character, error } = await mdtClient
       .from('characters')
       .select('*')
       .eq('id', id)
       .single();
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('[CitizenApi] Ошибка при получении персонажа:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('[CitizenApi] Персонаж получен успешно:', character);
     return character;
   }
 
   // Получение персонажей пользователя
   static async getUserCharacters(ownerId: string): Promise<Character[]> {
+    console.log('[CitizenApi] Получение персонажей пользователя:', ownerId);
+    
     const { data: characters, error } = await mdtClient
       .from('characters')
       .select('*')
       .eq('ownerId', ownerId)
       .order('createdAt', { ascending: false });
       
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('[CitizenApi] Ошибка при получении персонажей пользователя:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('[CitizenApi] Персонажи пользователя получены успешно:', characters);
     return characters || [];
   }
 

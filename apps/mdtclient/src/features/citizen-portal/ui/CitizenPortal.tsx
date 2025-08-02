@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { CitizenApi } from '../api/citizenApi';
+import { ApiService } from '@/services/api';
 import { CharacterSelection } from './CharacterSelection';
 import { CitizenSidebar } from './CitizenSidebar';
 import { CitizenMainContent } from './CitizenMainContent';
@@ -11,11 +11,12 @@ import type { Character } from '@/shared/types';
 export const CitizenPortal: React.FC = () => {
   const { user } = useAuth();
   const { activeCharacter, setActiveCharacter } = useCitizenPortalStore();
+  const apiService = new ApiService();
 
-  // Загружаем персонажей пользователя
+  // Загружаем персонажей пользователя через бэкенд API
   const { data: characters, isLoading, error } = useQuery({
     queryKey: ['user-characters', user?.id],
-    queryFn: () => user?.id ? CitizenApi.getUserCharacters(user.id) : Promise.resolve([]),
+    queryFn: () => apiService.getUserCharacters(),
     enabled: !!user?.id,
   });
 

@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent } from '@/shared/ui/atoms';
 import { Button } from '@/shared/ui/atoms';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
-import { CitizenApi } from '../api/citizenApi';
+import { ApiService } from '@/services/api';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { BasicInfoStep } from './registration-steps/BasicInfoStep';
 import { AdditionalInfoStep } from './registration-steps/AdditionalInfoStep';
@@ -60,8 +60,10 @@ export const CitizenRegistrationWizard: React.FC<CitizenRegistrationWizardProps>
     arrested: false,
   });
 
+  const apiService = new ApiService();
+  
   const createCharacterMutation = useMutation({
-    mutationFn: (data: CreateCharacterRequest) => CitizenApi.createCharacter(data),
+    mutationFn: (data: CreateCharacterRequest) => apiService.createCitizen(data),
     onSuccess: (character) => {
       onComplete(character);
     },

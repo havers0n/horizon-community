@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/atoms';
 import { Shield, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Character, Weapon } from '@/shared/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CitizenApi } from '../../api/citizenApi';
+import { ApiService } from '@/services/api';
 
 interface WeaponsTabProps {
   character: Character;
@@ -25,18 +25,19 @@ export const WeaponsTab: React.FC<WeaponsTabProps> = ({ character }) => {
   const [editingWeapon, setEditingWeapon] = useState<Weapon | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
+  const apiService = new ApiService();
 
   // Загружаем оружие персонажа
   const { data: weapons = [], isLoading } = useQuery({
     queryKey: ['character-weapons', character.id],
-    queryFn: () => CitizenApi.getCharacterWeapons(character.id),
+    queryFn: () => apiService.getWeapons({ ownerId: character.id }),
     enabled: !!character.id,
   });
 
   // Мутация для добавления оружия
   const addWeaponMutation = useMutation({
     mutationFn: (data: WeaponFormData) => 
-      CitizenApi.registerWeapon({ ...data, ownerId: character.id }),
+      apiService.createWeapon({ ...data, ownerId: character.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['character-weapons', character.id] });
       setShowAddForm(false);

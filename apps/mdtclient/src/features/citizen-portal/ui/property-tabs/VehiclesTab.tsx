@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/atoms';
 import { Car, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Character, Vehicle } from '@/shared/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CitizenApi } from '../../api/citizenApi';
+import { ApiService } from '@/services/api';
 
 interface VehiclesTabProps {
   character: Character;
@@ -29,18 +29,19 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({ character }) => {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
+  const apiService = new ApiService();
 
   // Загружаем транспортные средства персонажа
   const { data: vehicles = [], isLoading } = useQuery({
     queryKey: ['character-vehicles', character.id],
-    queryFn: () => CitizenApi.getCharacterVehicles(character.id),
+    queryFn: () => apiService.getVehicles({ ownerId: character.id }),
     enabled: !!character.id,
   });
 
   // Мутация для добавления транспортного средства
   const addVehicleMutation = useMutation({
     mutationFn: (data: VehicleFormData) => 
-      CitizenApi.registerVehicle({ ...data, ownerId: character.id }),
+      apiService.createVehicle({ ...data, ownerId: character.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['character-vehicles', character.id] });
       setShowAddForm(false);
