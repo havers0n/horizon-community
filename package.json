@@ -17,6 +17,7 @@
     "build:archive": "node scripts/build-and-archive.js",
     "build:archive:ps": "powershell -ExecutionPolicy Bypass -File scripts/build-and-archive.ps1",
     "build:archive:simple": "node scripts/build-and-archive-simple.js",
+    "build:archive:correct": "node scripts/build-and-archive-correct.js",
     "install:all": "npm install",
     "install:all:production": "npm ci --production",
     "clean": "npm run clean:client && npm run clean:mdt && npm run clean:server",
