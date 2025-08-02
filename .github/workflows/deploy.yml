@@ -19,36 +19,25 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install root dependencies
+      - name: Install all dependencies (workspace)
         run: npm ci
-
-      - name: Install client dependencies
-        run: |
-          cd apps/client
-          npm ci
-
-      - name: Install mdtclient dependencies
-        run: |
-          cd apps/mdtclient
-          npm ci
-
-      - name: Install server dependencies
-        run: |
-          cd apps/server
-          npm ci
 
       - name: Install shared libraries dependencies
         run: |
-          cd libs/shared-types
-          npm ci
-          cd ../shared-utils
-          npm ci
+          # Для npm workspace все зависимости уже установлены в корне
+          # Проверяем что workspace пакеты доступны
+          echo "Checking workspace packages..."
+          ls -la libs/shared-types/
+          ls -la libs/shared-utils/
+          ls -la libs/shared/schema/
 
       - name: Build application
         run: npm run build:production
 
-      - name: Install production dependencies
-        run: npm ci --production
+      - name: Verify workspace packages
+        run: |
+          echo "Verifying workspace packages are available..."
+          npm ls --workspaces --depth=0
 
       - name: Create deployment package
         run: |
