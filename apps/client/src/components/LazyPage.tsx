@@ -13,16 +13,11 @@ const defaultFallback = (
 );
 
 export function LazyPage({ component, fallback = defaultFallback }: LazyPageProps) {
-  console.log('LazyPage: render', component);
   const LazyComponent = lazy(component);
-  // Обёртка для логирования монтирования ленивого компонента
-  const WrappedLazyComponent = (props: any) => {
-    console.log('LazyPage: LazyComponent mounted', component);
-    return <LazyComponent {...props} />;
-  };
+  
   return (
     <Suspense fallback={fallback}>
-      <WrappedLazyComponent />
+      <LazyComponent />
     </Suspense>
   );
 } 

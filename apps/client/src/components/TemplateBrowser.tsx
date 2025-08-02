@@ -81,7 +81,7 @@ const TemplateBrowser = ({
   const filteredTemplates = availableTemplates.filter(template => {
     const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          template.purpose?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         template.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                         template.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter;
     const matchesDifficulty = difficultyFilter === 'all' || template.difficulty === difficultyFilter;
     const matchesDepartment = !departmentFilter || template.departmentId === departmentFilter;
@@ -265,7 +265,7 @@ const TemplateBrowser = ({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">
-              {availableTemplates.reduce((sum, t) => sum + getVariablesCount(t), 0)}
+              {availableTemplates.reduce((sum, t) => sum + (Number(t.estimatedTime) || 0), 0)}
             </div>
             <div className="text-sm text-muted-foreground">Всего полей</div>
           </CardContent>
@@ -273,7 +273,7 @@ const TemplateBrowser = ({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">
-              {Math.round(availableTemplates.reduce((sum, t) => sum + (t.estimatedTime || 0), 0) / availableTemplates.length)} мин
+              {Math.round(availableTemplates.reduce((sum, t) => sum + (Number(t.estimatedTime) || 0), 0) / availableTemplates.length)} мин
             </div>
             <div className="text-sm text-muted-foreground">Среднее время</div>
           </CardContent>
@@ -353,7 +353,7 @@ const TemplateBrowser = ({
                 {/* Теги */}
                 {template.tags && template.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {template.tags.slice(0, 3).map(tag => (
+                    {template.tags.slice(0, 3).map((tag: string) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
                         {tag}
                       </Badge>

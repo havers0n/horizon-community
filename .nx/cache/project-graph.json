@@ -421,6 +421,13 @@
             },
             "configurations": {}
           },
+          "type-check": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "type-check"
+            },
+            "configurations": {}
+          },
           "serve": {
             "executor": "@nx/vite:dev-server",
             "defaultConfiguration": "development",
@@ -619,6 +626,41 @@
             "executor": "nx:run-script",
             "options": {
               "script": "test:all"
+            },
+            "configurations": {}
+          },
+          "test:analyze": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test:analyze"
+            },
+            "configurations": {}
+          },
+          "test:analyze:verbose": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test:analyze:verbose"
+            },
+            "configurations": {}
+          },
+          "test:analyze:quick": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test:analyze:quick"
+            },
+            "configurations": {}
+          },
+          "test:analyze:detailed": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test:analyze:detailed"
+            },
+            "configurations": {}
+          },
+          "test:report": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test:report"
             },
             "configurations": {}
           },

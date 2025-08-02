@@ -32,7 +32,14 @@ export {
 } from './Modal';
 export type { ModalProps } from './Modal';
 
-export { Select, selectVariants } from './Select';
+export { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue,
+  selectVariants 
+} from './Select';
 export type { SelectProps } from './Select';
 
 export { Textarea, textareaVariants } from './Textarea';

@@ -32,7 +32,7 @@ export default defineConfig(({ mode, command }) => {
       alias: {
         "@": path.resolve(__dirname, "src"),
         "@shared": path.resolve(__dirname, "src/shared"),
-        "@shared/schema": path.resolve(__dirname, "../../libs/shared-schema/src"),
+        "@shared/schema": path.resolve(__dirname, "../../libs/shared/schema/src"),
         "@roleplay-identity/shared-types": path.resolve(__dirname, "../../libs/shared-types/src"),
         "@roleplay-identity/shared-utils": path.resolve(__dirname, "../../libs/shared-utils/src"),
       },

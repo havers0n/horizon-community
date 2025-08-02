@@ -1,13 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+// import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
+    // runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -27,7 +27,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@shared/schema": path.resolve(__dirname, "../../libs/shared-schema/src/index.ts"),
+      "@shared/schema": path.resolve(__dirname, "../../libs/shared/schema/src/index.ts"),
+      "@shared/schema/*": path.resolve(__dirname, "../../libs/shared/schema/src/*"),
       "@roleplay-identity/shared-types": path.resolve(__dirname, "../../libs/shared-types/src"),
       "@roleplay-identity/shared-utils": path.resolve(__dirname, "../../libs/shared-utils/src"),
       "@assets": path.resolve(__dirname, "../attached_assets"),
@@ -114,6 +115,42 @@ export default defineConfig({
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('✅ Proxy response:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+      // Прокси для MDT интерфейса
+      '/mdt': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/mdt/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('🔴 MDT Proxy error:', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('🔄 MDT Proxying:', req.method, req.url, '→', proxyReq.path);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('✅ MDT Proxy response:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+      // Прокси для CAD интерфейса
+      '/cad': {
+        target: 'http://127.0.0.1:3002',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/cad/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('🔴 CAD Proxy error:', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('🔄 CAD Proxying:', req.method, req.url, '→', proxyReq.path);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('✅ CAD Proxy response:', proxyRes.statusCode, req.url);
           });
         },
       },

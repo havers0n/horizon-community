@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*", "../../libs/shared-types/src/**/*", "../../libs/shared-utils/src/**/*"],
+  "include": ["src/**/*", "../../libs/shared-types/src/**/*", "../../libs/shared-utils/src/**/*", "../../libs/shared/schema/src/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.tsx"],
   "compilerOptions": {
     "incremental": true,
@@ -26,7 +26,9 @@
       "@roleplay-identity/shared-types": ["../../libs/shared-types/src/index.ts"],
       "@roleplay-identity/shared-types/*": ["../../libs/shared-types/src/*"],
       "@roleplay-identity/shared-utils": ["../../libs/shared-utils/src/index.ts"],
-      "@roleplay-identity/shared-utils/*": ["../../libs/shared-utils/src/*"]
+      "@roleplay-identity/shared-utils/*": ["../../libs/shared-utils/src/*"],
+      "@shared/schema": ["../../libs/shared/schema/src/index.ts"],
+      "@shared/schema/*": ["../../libs/shared/schema/src/*"]
     }
   }
 }

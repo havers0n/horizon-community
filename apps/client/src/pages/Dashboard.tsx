@@ -72,7 +72,8 @@ export default function Dashboard() {
   const recentApplications = applications?.slice(0, 3) || [];
   const recentNotifications = notifications?.slice(0, 3) || [];
   
-  const getUserInitials = (username: string) => {
+  const getUserInitials = (username: string | null | undefined) => {
+    if (!username) return 'U';
     return username.substring(0, 2).toUpperCase();
   };
 
@@ -275,7 +276,7 @@ export default function Dashboard() {
                 <div className="text-center mb-6">
                   <Avatar className="w-20 h-20 mx-auto mb-4">
                     <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
-                      {user ? getUserInitials(user.username) : 'U'}
+                      {getUserInitials(user?.username)}
                     </AvatarFallback>
                   </Avatar>
                   <h4 className="text-lg font-semibold text-foreground">{user?.username}</h4>

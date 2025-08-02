@@ -24,13 +24,15 @@ import {
   MessageCircle,
   ExternalLink,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Monitor
 } from "lucide-react";
 import LanguageDropdown from "@/components/ui/LanguageDropdown";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DiscordIcon } from "@/components/ui/DiscordIcon";
 import { VKIcon } from "@/components/ui/VKIcon";
+import { InterfaceSwitcher } from "@/components/InterfaceSwitcher";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -72,6 +74,17 @@ export function Layout({ children }: LayoutProps) {
     { path: '/applications', label: 'Заявки', icon: FileText },
     { path: '/reports', label: 'Рапорты', icon: FileText },
     { path: '/tests', label: 'Тесты', icon: FileText },
+    { 
+      path: '#', 
+      label: 'MDT/CAD', 
+      icon: Monitor,
+      onClick: () => {
+        const mdtUrl = process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:3001' 
+          : 'https://mdt.your-domain.com';
+        window.location.href = mdtUrl;
+      }
+    },
     { path: '/forum', label: 'Форум', icon: MessageSquare },
     { path: '/support', label: 'Поддержка', icon: Headphones },
     { path: '/faq', label: 'FAQ', icon: HelpCircle },
@@ -84,12 +97,15 @@ export function Layout({ children }: LayoutProps) {
     // 'Управление отпусками' убираем из верхнего меню
   }
 
-  const getUserInitials = (email: string) => {
+  const getUserInitials = (email: string | null | undefined) => {
+    if (!email) return 'U';
     return email.substring(0, 2).toUpperCase();
   };
 
   const getUserDisplayName = () => {
-    return user?.email?.substring(0, user.email.indexOf('@')) || 'User';
+    if (!user?.email) return 'User';
+    const atIndex = user.email.indexOf('@');
+    return atIndex > 0 ? user.email.substring(0, atIndex) : 'User';
   };
 
   const getUserRoleDisplay = () => {
@@ -145,6 +161,25 @@ export function Layout({ children }: LayoutProps) {
                   }
                   // Остальные пункты
                   const isActive = location.startsWith(item.path);
+                  
+                  // Если есть onClick, используем Button вместо Link
+                  if (item.onClick) {
+                    return (
+                      <Button
+                        key={item.path}
+                        variant="ghost"
+                        onClick={item.onClick}
+                        className={`py-4 px-1 text-sm font-medium transition-colors duration-200 ${
+                          isActive 
+                            ? 'text-primary border-b-2 border-primary' 
+                            : 'text-muted-foreground hover:text-primary'
+                        }`}
+                      >
+                        {item.label}
+                      </Button>
+                    );
+                  }
+                  
                   return (
                     <Link
                       key={item.path}
@@ -163,6 +198,9 @@ export function Layout({ children }: LayoutProps) {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* Interface Switcher */}
+              <InterfaceSwitcher />
+              
               {/* Social Media Links */}
               <div className="hidden md:flex items-center space-x-2">
                 <Button 

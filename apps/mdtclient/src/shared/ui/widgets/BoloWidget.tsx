@@ -76,7 +76,7 @@ export const BoloWidget: React.FC<BoloWidgetProps> = ({
       return bPriority - aPriority;
     }
     
-    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    return new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime();
   });
 
   return (
@@ -142,7 +142,7 @@ export const BoloWidget: React.FC<BoloWidgetProps> = ({
                   </div>
                   <div className="flex items-center gap-1 text-xs text-gray-500">
                     <Clock className="h-3 w-3" />
-                    <span>{formatDate(bolo.createdAt)}</span>
+                    <span>{formatDate(bolo.createdAt || '')}</span>
                   </div>
                 </div>
 

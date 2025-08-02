@@ -6,13 +6,13 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
     "../../libs/shared-types/src/**/*.{js,jsx,ts,tsx}",
-    "../../libs/shared-schema/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared/schema/src/**/*.{js,jsx,ts,tsx}",
     "../../libs/shared-utils/src/**/*.{js,jsx,ts,tsx}",
     // Более специфичные пути для избежания сканирования node_modules
     "../../apps/mdtclient/src/**/*.{js,jsx,ts,tsx}",
     "../../apps/client/src/**/*.{js,jsx,ts,tsx}",
     "../../libs/shared-types/src/**/*.{js,jsx,ts,tsx}",
-    "../../libs/shared-schema/src/**/*.{js,jsx,ts,tsx}",
+    "../../libs/shared/schema/src/**/*.{js,jsx,ts,tsx}",
     "../../libs/shared-utils/src/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
