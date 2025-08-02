@@ -48,7 +48,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "..", "dist", "public");
+  const distPath = path.resolve(__dirname, "..", "..", "apps", "client");
   
   console.log(`🔍 Looking for static files in: ${distPath}`);
   console.log(`📁 Directory exists: ${fs.existsSync(distPath)}`);
