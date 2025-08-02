@@ -14,6 +14,8 @@
     "build:client": "cd apps/client && npm run build",
     "build:mdt": "cd apps/mdtclient && npm run build",
     "build:server": "cd apps/server && npm run build",
+    "build:archive": "node scripts/build-and-archive.js",
+    "build:archive:ps": "powershell -ExecutionPolicy Bypass -File scripts/build-and-archive.ps1",
     "install:all": "npm install",
     "install:all:production": "npm ci --production",
     "clean": "npm run clean:client && npm run clean:mdt && npm run clean:server",
