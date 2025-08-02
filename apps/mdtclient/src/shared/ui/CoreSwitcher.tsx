@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronUp, Users, Shield } from 'lucide-react';
+import { ChevronUp, Users, Shield, User } from 'lucide-react';
 import { useCoreNavigationStore, CoreType } from '@/shared/model/coreNavigationStore';
 import { useUserRoles } from '@/shared/hooks/useUserRoles';
 import { Button } from '@/shared/ui/atoms/Button';
@@ -30,6 +30,13 @@ export const CoreSwitcher: React.FC<CoreSwitcherProps> = ({ className = '' }) =>
       shortName: 'CS MDT',
       icon: Users,
       description: 'Портал для гражданских активностей'
+    },
+    {
+      id: 'citizen-portal',
+      name: 'Гражданский портал',
+      shortName: 'CP',
+      icon: User,
+      description: 'Управление персонажами и биографией'
     },
     {
       id: 'emergency',

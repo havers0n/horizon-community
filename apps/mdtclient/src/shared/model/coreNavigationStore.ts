@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type CoreType = 'civil' | 'emergency';
+export type CoreType = 'civil' | 'emergency' | 'citizen-portal';
 
 export interface CoreNavigationState {
   // Состояние
@@ -35,7 +35,7 @@ export const useCoreNavigationStore = create<CoreNavigationState>((set, get) => 
       return userRoles.some(role => ['leo', 'dispatch', 'ems', 'fire', 'admin'].includes(role));
     }
     
-    // Civil Core доступен всем
+    // Civil Core и Citizen Portal доступны всем
     return true;
   };
 
