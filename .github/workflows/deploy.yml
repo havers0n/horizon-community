@@ -60,34 +60,13 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            # Переходим в рабочую директорию
             cd /var/www/app
-
-            # Устанавливаем production-зависимости
-            echo "🔧 Устанавливаем зависимости..."
             npm install --production
-
-            # Проверяем .env файл (вы должны создать его на сервере вручную)
-            if [ ! -f .env ]; then
-              echo "⚠️ ВНИМАНИЕ: .env файл не найден в /var/www/app/. Приложение может не запуститься."
-            fi
-
-            # ПРАВИЛЬНАЯ ЛОГИКА "START OR RELOAD" ДЛЯ СКРИПТОВ
-            echo "🚀 Запускаем/перезапускаем приложение через PM2..."
-            # Сначала проверяем, запущен ли уже процесс
-            if pm2 list | grep -q "roleplayidentity"; then
-              # Если да, плавно перезагружаем его
-              echo "🔄 Перезагружаем существующий процесс..."
-              pm2 reload roleplayidentity
-            else
-              # Если нет, запускаем его в первый раз
-              echo "✨ Запускаем новый процесс..."
-              NODE_ENV=production pm2 start dist/apps/server/main.js --name roleplayidentity
-            fi
             
-            # Сохраняем список процессов, чтобы они восстановились после перезагрузки сервера
+            # Запускаем/перезагружаем через файл конфигурации
+            pm2 startOrGracefulReload ecosystem.config.js --env production
+            
             pm2 save
-            
             echo "✅ Деплой завершен успешно!"
 
       - name: Health check
