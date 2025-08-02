@@ -25,7 +25,10 @@ dist/
 │   │   ├── css/
 │   │   └── package.json
 │   ├── mdtclient/       # MDT интерфейс
-│   │   └── supabase-generated.d.ts
+│   │   ├── index.html
+│   │   ├── index-*.js
+│   │   ├── index-*.css
+│   │   └── [другие файлы]
 │   └── server/          # Backend сервер
 │       ├── index.js     # Основной файл сервера
 │       ├── index.js.map
