@@ -143,9 +143,7 @@ function Main {
         $buildPaths = @(
             @{ Name = "Client Build"; Path = "apps/client/dist"; Required = $true },
             @{ Name = "MDT Client Build"; Path = "apps/mdtclient/dist"; Required = $true },
-            @{ Name = "Server Build (apps/server/dist)"; Path = "apps/server/dist"; Required = $false },
-            @{ Name = "Server Build (dist/apps/server)"; Path = "dist/apps/server"; Required = $false },
-            @{ Name = "Server Build (dist)"; Path = "dist"; Required = $false }
+            @{ Name = "Server Build"; Path = "apps/server/dist"; Required = $false }
         )
         
         $existingPaths = @()
@@ -189,9 +187,43 @@ function Main {
             Write-Info "Удален старый архив deployment.tar.gz"
         }
         
-        # Создание команды для архивирования
-        $tarPaths = $existingPaths | ForEach-Object { $_.Path }
-        $tarCommand = "tar -czf $archiveName $($tarPaths -join ' ')"
+        # Создание списка путей для архивирования
+        $deploymentPaths = @(
+            # Билд-артефакты
+            ($existingPaths | ForEach-Object { $_.Path }),
+            # Конфигурационные файлы
+            "package.json",
+            "package-lock.json",
+            # Директории проекта
+            "scripts/",
+            "supabase/",
+            "migrations/",
+            "docs/",
+            # Документация
+            "README.md",
+            "ARCHITECTURE.md",
+            "QUICK_START_GUIDE.md"
+        ) | Where-Object { $_ -ne $null }
+        
+        # Фильтрация только существующих путей
+        $existingDeploymentPaths = @()
+        foreach ($path in $deploymentPaths) {
+            if (Test-PathExists -PathToCheck $path) {
+                $existingDeploymentPaths += $path
+                Write-Info "Добавлен в архив: $path"
+            }
+            else {
+                Write-Warning "Пропущен (не существует): $path"
+            }
+        }
+        
+        if ($existingDeploymentPaths.Count -eq 0) {
+            Write-Error "Не найдено ни одного файла для архивирования"
+            exit 1
+        }
+        
+        $tarPaths = $existingDeploymentPaths -join ' '
+        $tarCommand = "tar -czf $archiveName $tarPaths"
         
         try {
             Write-Info "Выполняется команда: $tarCommand"
