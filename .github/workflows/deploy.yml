@@ -39,18 +39,30 @@ jobs:
           echo "Verifying workspace packages are available..."
           npm ls --workspaces --depth=0
 
+      - name: List workspace files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Root directory contents:"
+          ls -la
+          echo "Nx dist structure:"
+          ls -la dist/ 2>/dev/null || echo "Root dist not found"
+          echo "Nx apps dist:"
+          ls -la dist/apps/ 2>/dev/null || echo "dist/apps not found"
+          echo "Server build:"
+          ls -la dist/apps/server/ 2>/dev/null || echo "dist/apps/server not found"
+          echo "Client build:"
+          ls -la dist/apps/client/ 2>/dev/null || echo "dist/apps/client not found"
+          echo "MDT client build:"
+          ls -la dist/apps/mdtclient/ 2>/dev/null || echo "dist/apps/mdtclient not found"
+
       - name: Create deployment package
         run: |
           tar -czf deployment.tar.gz \
             dist/ \
-            client/ \
-            shared/ \
-            vite.config.ts \
-            tailwind.config.ts \
             package.json \
             package-lock.json \
             scripts/ \
-            public/ \
             supabase/ \
             migrations/ \
             docs/ \
@@ -92,7 +104,7 @@ jobs:
               pm2 reload roleplayidentity
             else
               echo "🚀 Первый старт приложения через pm2..."
-              NODE_ENV=production pm2 start dist/server.js --name roleplayidentity
+              NODE_ENV=production pm2 start dist/apps/server/index.js --name roleplayidentity
             fi
 
             pm2 save
