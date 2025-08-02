@@ -71,28 +71,20 @@ jobs:
           echo "--- Размеры билдов: ---"
           du -sh dist/apps/*
 
-      - name: Deploy to Server and Restart App
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          script: |
-            # 1. Гарантированно создаем директорию для деплоя
-            echo "🔧 Создаем директорию /var/www/app, если она не существует..."
-            mkdir -p /var/www/app
-
-      - name: Copy application files
+      - name: Deploy required files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "dist/*"  # <-- ВАЖНО: копируем содержимое папки dist
+          source: |
+            dist/
+            package.json
+            package-lock.json
           target: "/var/www/app"
           overwrite: true
 
-      - name: Setup and restart application
+      - name: Install dependencies and restart application on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -102,34 +94,25 @@ jobs:
             # Переходим в рабочую директорию
             cd /var/www/app
 
-            # Проверяем, что файлы на месте
-            echo "🔍 Проверяем структуру файлов на сервере..."
-            ls -la
-            ls -la apps/
+            # Устанавливаем только production-зависимости
+            echo "🔧 Устанавливаем зависимости..."
+            npm install --production
 
-            # Проверяем .env файл (если он должен быть вне папки dist)
-            # Если .env лежит на уровень выше, используйте `cd .. && ls -la`
+            # Проверяем .env файл
             echo "🔍 Проверяем .env файл..."
             if [ -f .env ]; then
               echo "✅ .env файл найден"
-              head -3 .env
             else
-              echo "⚠️ .env файл не найден (это может быть нормально, если он не требуется)"
+              echo "⚠️ ВНИМАНИЕ: .env файл не найден! Приложение может не запуститься."
+              echo "Создайте .env файл в /var/www/app/ на сервере, если он требуется."
             fi
 
             # Безопасный рестарт через PM2
-            if pm2 list | grep -q "roleplayidentity"; then
-              echo "🔄 Релоадим приложение через pm2..."
-              pm2 reload roleplayidentity
-            else
-              echo "🚀 Первый старт приложения через pm2..."
-              # Путь к серверу теперь прямой, без папки dist
-              NODE_ENV=production pm2 start apps/server/main.js --name roleplayidentity
-            fi
-
+            echo "🚀 Запускаем/перезапускаем приложение через PM2..."
+            # Правильный путь к серверу!
+            pm2 startOrGracefulReload ecosystem.config.js
+            
             pm2 save
-            echo "📊 Статус приложения:"
-            pm2 status
             echo "✅ Деплой завершен успешно!"
 
       - name: Health check
