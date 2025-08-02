@@ -5,4 +5,5 @@ export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputE
   error?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg';
+  onCheckedChange?: (checked: boolean) => void;
 }

@@ -12,7 +12,7 @@ export const EmergencyCorePortal: React.FC = () => {
   const { selectedDepartmentId, selectDepartment } = useCoreNavigationStore();
 
   const handleBackToDepartments = () => {
-    selectDepartment(null);
+    selectDepartment('');
   };
 
   // Если департамент не выбран, показываем селектор
@@ -26,7 +26,7 @@ export const EmergencyCorePortal: React.FC = () => {
       case 'law-enforcement':
         return <MdtPortal />;
       case 'dispatch':
-        return <DispatchPortal />;
+        return <DispatchPortal onBackToModules={handleBackToDepartments} />;
       case 'ems':
         return <EmsPortal />;
       case 'fire':

@@ -126,7 +126,8 @@ export default function AdminPanel() {
     }
   };
 
-  const getUserInitials = (username: string) => {
+  const getUserInitials = (username: string | null | undefined) => {
+    if (!username) return 'U';
     return username.substring(0, 2).toUpperCase();
   };
 

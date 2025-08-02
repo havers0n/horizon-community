@@ -28,6 +28,7 @@ interface UnitManagementActions {
   setUnits: (units: Unit[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  loadUnits: () => Promise<void>;
   getUnitsByDepartment: (department: string) => Unit[];
   getUnitsByStatus: (status: Unit['status']) => Unit[];
 }
@@ -102,6 +103,21 @@ export const useUnitManagementStore = create<UnitManagementStore>()(
       setLoading: (isLoading) => set({ isLoading }),
 
       setError: (error) => set({ error }),
+
+      loadUnits: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          // В реальном приложении здесь был бы API вызов
+          // Пока используем моковые данные
+          await new Promise(resolve => setTimeout(resolve, 500)); // Имитация загрузки
+          set({ isLoading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Ошибка загрузки юнитов', 
+            isLoading: false 
+          });
+        }
+      },
 
       getUnitsByDepartment: (department) => {
         const { units } = get();

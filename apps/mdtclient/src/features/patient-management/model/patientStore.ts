@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Patient, PatientSearchFilters, PatientStatistics } from '../../../entities/patient';
+import { Patient as PatientEntity, PatientSearchFilters, PatientStatistics } from '../../../entities/patient';
+import { Patient } from '../../../shared/types';
 import { PatientApi } from '../../../entities/patient/api';
 
 interface PatientState {
   // Состояние
-  patients: Patient[];
-  selectedPatient: Patient | null;
+  patients: PatientEntity[];
+  selectedPatient: PatientEntity | null;
   isLoading: boolean;
   error: string | null;
   statistics: PatientStatistics | null;
@@ -15,11 +16,11 @@ interface PatientState {
   // Действия
   fetchPatients: (filters?: PatientSearchFilters) => Promise<void>;
   fetchPatientById: (id: string) => Promise<void>;
-  createPatient: (patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updatePatient: (id: string, updates: Partial<Patient>) => Promise<void>;
+  createPatient: (patient: Omit<PatientEntity, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updatePatient: (id: string, updates: Partial<PatientEntity>) => Promise<void>;
   deletePatient: (id: string) => Promise<void>;
   fetchStatistics: () => Promise<void>;
-  setSelectedPatient: (patient: Patient | null) => void;
+  setSelectedPatient: (patient: PatientEntity | null) => void;
   setSearchFilters: (filters: PatientSearchFilters) => void;
   clearError: () => void;
 }
@@ -41,7 +42,7 @@ export const usePatientStore = create<PatientState>()(
         try {
           const filtersToUse = filters || get().searchFilters;
           const patients = await PatientApi.getPatients(filtersToUse);
-          set({ patients, isLoading: false });
+          set({ patients: patients as unknown as PatientEntity[], isLoading: false });
         } catch (error) {
           set({ 
             error: error instanceof Error ? error.message : 'Ошибка при загрузке пациентов',
@@ -55,7 +56,7 @@ export const usePatientStore = create<PatientState>()(
         set({ isLoading: true, error: null });
         try {
           const patient = await PatientApi.getPatientById(id);
-          set({ selectedPatient: patient, isLoading: false });
+          set({ selectedPatient: patient as unknown as PatientEntity, isLoading: false });
         } catch (error) {
           set({ 
             error: error instanceof Error ? error.message : 'Ошибка при загрузке пациента',
@@ -70,7 +71,7 @@ export const usePatientStore = create<PatientState>()(
         try {
           const newPatient = await PatientApi.createPatient(patientData);
           set(state => ({
-            patients: [...state.patients, newPatient],
+            patients: [...state.patients, newPatient as unknown as PatientEntity],
             isLoading: false
           }));
         } catch (error) {
@@ -87,8 +88,8 @@ export const usePatientStore = create<PatientState>()(
         try {
           const updatedPatient = await PatientApi.updatePatient(id, updates);
           set(state => ({
-            patients: state.patients.map(p => p.id === id ? updatedPatient : p),
-            selectedPatient: state.selectedPatient?.id === id ? updatedPatient : state.selectedPatient,
+            patients: state.patients.map(p => p.id === id ? updatedPatient as unknown as PatientEntity : p),
+            selectedPatient: state.selectedPatient?.id === id ? updatedPatient as unknown as PatientEntity : state.selectedPatient,
             isLoading: false
           }));
         } catch (error) {

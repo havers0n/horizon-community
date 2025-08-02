@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Badge } from '@/shared/ui/atoms/Badge';
-import { EmsUnit, UnitStatus, UnitStatuses } from '@/shared/types';
+import { EmsUnit, UnitStatus } from '@/entities/ems/model/types';
 import { Ambulance, Users, MapPin, Radio } from 'lucide-react';
 
 interface EmsUnitCardProps {
@@ -22,24 +22,24 @@ export const EmsUnitCard: React.FC<EmsUnitCardProps> = ({
 }) => {
   const getStatusColor = (status: UnitStatus) => {
     switch (status) {
-      case UnitStatuses.AVAILABLE: return 'bg-green-600';
-      case UnitStatuses.EN_ROUTE: return 'bg-blue-600';
-      case UnitStatuses.ON_SCENE: return 'bg-orange-600';
-      case UnitStatuses.TRANSPORTING: return 'bg-purple-600';
-      case UnitStatuses.OUT_OF_SERVICE: return 'bg-red-600';
-      case UnitStatuses.TRAINING: return 'bg-yellow-600';
+      case UnitStatus.AVAILABLE: return 'bg-green-600';
+      case UnitStatus.EN_ROUTE: return 'bg-blue-600';
+      case UnitStatus.ON_SCENE: return 'bg-orange-600';
+      case UnitStatus.TRANSPORTING: return 'bg-purple-600';
+      case UnitStatus.OUT_OF_SERVICE: return 'bg-red-600';
+      case UnitStatus.TRAINING: return 'bg-yellow-600';
       default: return 'bg-gray-600';
     }
   };
 
   const getStatusLabel = (status: UnitStatus) => {
     switch (status) {
-      case UnitStatuses.AVAILABLE: return 'Доступен';
-      case UnitStatuses.EN_ROUTE: return 'В пути';
-      case UnitStatuses.ON_SCENE: return 'На месте';
-      case UnitStatuses.TRANSPORTING: return 'Транспортировка';
-      case UnitStatuses.OUT_OF_SERVICE: return 'Недоступен';
-      case UnitStatuses.TRAINING: return 'Обучение';
+      case UnitStatus.AVAILABLE: return 'Доступен';
+      case UnitStatus.EN_ROUTE: return 'В пути';
+      case UnitStatus.ON_SCENE: return 'На месте';
+      case UnitStatus.TRANSPORTING: return 'Транспортировка';
+      case UnitStatus.OUT_OF_SERVICE: return 'Недоступен';
+      case UnitStatus.TRAINING: return 'Обучение';
       default: return status;
     }
   };
@@ -99,19 +99,19 @@ export const EmsUnitCard: React.FC<EmsUnitCardProps> = ({
         {showActions && (
           <div className="flex flex-col gap-1">
             <button
-              onClick={(e) => handleStatusChange(e, UnitStatuses.AVAILABLE)}
+              onClick={(e) => handleStatusChange(e, UnitStatus.AVAILABLE)}
               className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
             >
               Доступен
             </button>
             <button
-              onClick={(e) => handleStatusChange(e, UnitStatuses.EN_ROUTE)}
+              onClick={(e) => handleStatusChange(e, UnitStatus.EN_ROUTE)}
               className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors"
             >
               В пути
             </button>
             <button
-              onClick={(e) => handleStatusChange(e, UnitStatuses.OUT_OF_SERVICE)}
+              onClick={(e) => handleStatusChange(e, UnitStatus.OUT_OF_SERVICE)}
               className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors"
             >
               Недоступен

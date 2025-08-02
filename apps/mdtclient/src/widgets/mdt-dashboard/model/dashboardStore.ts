@@ -5,7 +5,7 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import type { Call911, Unit, UnitStatus } from '@/shared/types';
 import type { Bolo } from '@/entities/dispatch/model/types';
 import { useRealTime } from '../../../../hooks/useRealTime';
-import { authUtils } from '@/lib/auth';
+import { authUtils } from '../../../lib/auth';
 import { DispatchApi } from '@/shared/api/dispatch';
 
 // Временные константы для WebSocket событий (пока не подключена схема)

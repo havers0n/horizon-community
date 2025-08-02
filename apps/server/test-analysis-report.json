@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-08-02T12:05:53.721Z",
+  "report": {
+    "summary": {
+      "totalTests": 0,
+      "passedTests": 0,
+      "failedTests": 0,
+      "successRate": "NaN%",
+      "totalTime": "0.00s",
+      "averageTime": "0.00s"
+    },
+    "details": {
+      "suites": [],
+      "errors": []
+    },
+    "recommendations": [],
+    "performance": {
+      "totalTime": "0.00s",
+      "averageTime": "0.00s",
+      "slowestTests": []
+    }
+  }
+}

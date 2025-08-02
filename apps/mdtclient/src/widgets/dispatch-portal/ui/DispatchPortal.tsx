@@ -108,7 +108,7 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
   // Преобразуем данные для карты
   const mapUnits = activeUnits.map(unit => ({
     id: unit.id,
-    name: unit.name || unit.unit_number || 'Неизвестный юнит',
+    name: unit.name || unit.unitNumber || 'Неизвестный юнит',
     status: unit.status,
     location: { x: 50, y: 50 }, // Временные координаты, нужно заменить на реальные
     type: 'leo' as const // Временный тип, нужно определить по департаменту
@@ -373,7 +373,7 @@ export const DispatchPortal: React.FC<DispatchPortalProps> = ({ onBackToModules 
                         
                         {/* Critical Alerts */}
                         <div className="space-y-3">
-                          {activeCalls.filter(call => call.priority === 'emergency').map(call => (
+                          {activeCalls.filter(call => call.priority === 'critical').map(call => (
                             <div key={call.id} className="bg-red-500/20 border border-red-500/30 rounded-lg p-3">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">

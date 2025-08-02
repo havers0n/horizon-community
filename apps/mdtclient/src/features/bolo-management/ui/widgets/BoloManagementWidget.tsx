@@ -5,7 +5,7 @@ import { Badge } from '@/shared/ui/atoms/Badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/atoms/Tabs';
 import { CreateBoloModal } from '../organisms/CreateBoloModal';
 import { useBoloManagementStore } from '../../model/store';
-import { BOLO } from '../../model/store';
+import { BOLO } from '@/shared/types';
 import { Plus, AlertTriangle, Car, User, Info, Clock, MapPin, Edit, Trash2, Eye } from 'lucide-react';
 
 const priorityConfig = {
@@ -55,7 +55,7 @@ const BoloCard: React.FC<{ bolo: BOLO }> = ({ bolo }) => {
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-400">
                 <Clock className="h-3 w-3" />
-                <span>{new Date(bolo.timestamp).toLocaleString('ru-RU', { 
+                <span>{new Date(bolo.timestamp || bolo.createdAt || '').toLocaleString('ru-RU', { 
                   day: '2-digit', 
                   month: '2-digit', 
                   hour: '2-digit', 

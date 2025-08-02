@@ -1,7 +1,13 @@
 // Утилита для отладки ролей пользователя
 // В продакшене этот файл должен быть удален
 
-export const RoleDebugger = {
+export const RoleDebugger: {
+  testRoles: Record<string, string[]>;
+  setTestRole: (roleType: string) => void;
+  getTestRole: () => string[];
+  clearTestRole: () => void;
+  isTestRoleActive: () => boolean;
+} = {
   // Временные роли для тестирования
   testRoles: {
     civilian: ['citizen'],
@@ -14,10 +20,10 @@ export const RoleDebugger = {
   },
 
   // Установить тестовую роль
-  setTestRole: (roleType: keyof typeof RoleDebugger.testRoles) => {
+  setTestRole: (roleType: string) => {
     const roles = RoleDebugger.testRoles[roleType];
     localStorage.setItem('mdt-test-role', JSON.stringify(roles));
-    console.log(`[RoleDebugger] Set test role: ${roleType}`, roles);
+    console.log(`[RoleDebugger] Set test role: ${String(roleType)}`, roles);
     
     // Перезагружаем страницу для применения изменений
     window.location.reload();

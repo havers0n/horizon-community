@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader } from '@/shared/ui/atoms/Card';
 import { Button } from '@/shared/ui/atoms/Button';
-import { Shield, Radio, Users, Phone, MapPin, Clock, AlertTriangle, XCircle, Activity } from 'lucide-react';
+import { Shield, Radio, Users, Phone, MapPin, Clock, AlertTriangle, XCircle, Activity, ArrowLeft } from 'lucide-react';
 import { useDashboardSelectors, useDashboardActions, useDashboardRealTime } from '../model';
 import { UnitStatus } from '@/shared/types';
 
@@ -15,6 +16,8 @@ const statusOptions = [
 ];
 
 export const MdtDashboardWidget: React.FC = () => {
+  const [, setLocation] = useLocation();
+  
   // Подключаем Real-Time обновления
   useDashboardRealTime();
 
@@ -117,8 +120,26 @@ export const MdtDashboardWidget: React.FC = () => {
 
   return (
     <div className="h-full p-6">
+      {/* Кнопка возврата в основной интерфейс */}
+      <div className="mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const mainUrl = process.env.NODE_ENV === 'development' 
+              ? 'http://localhost:3000' 
+              : 'https://your-domain.com';
+            window.location.href = mainUrl;
+          }}
+          className="flex items-center gap-2 text-secondary-300 hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Вернуться в основной интерфейс
+        </Button>
+      </div>
+
       {/* Основная сетка дашборда */}
-      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-120px)]">
+      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-160px)]">
         
         {/* Левая колонка - Статус и быстрые действия */}
         <div className="col-span-3 space-y-4">

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { useUnitManagementStore } from '../model/store';
 import { Ambulance, AlertTriangle, RefreshCw } from 'lucide-react';
+import { UnitCard } from './UnitCard';
 
 interface UnitListProps {
   className?: string;
@@ -84,7 +85,7 @@ export const UnitList: React.FC<UnitListProps> = ({
       {displayedUnits.length > 0 ? (
         <div className="space-y-3">
           {displayedUnits.map(unit => (
-            <EmsUnitCard
+            <UnitCard
               key={unit.id}
               unit={unit}
               onStatusChange={updateUnitStatus}

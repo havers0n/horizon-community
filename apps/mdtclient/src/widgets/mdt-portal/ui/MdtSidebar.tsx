@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/shared/ui/atoms/Button';
 import { useMdtPortalStore } from '../model/store';
 import { 
@@ -13,7 +14,8 @@ import {
   Phone,
   AlertTriangle,
   ArrowLeft,
-  Building
+  Building,
+  Radio
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -89,7 +91,8 @@ interface MdtSidebarProps {
 }
 
 export const MdtSidebar: React.FC<MdtSidebarProps> = ({ onBackToModules }) => {
-  const { goToDashboard, goToModule, currentView, activeModule } = useMdtPortalStore();
+  const [, setLocation] = useLocation();
+  const { currentView, activeModule, goToDashboard, goToModule } = useMdtPortalStore();
 
   const groupedItems = navigationItems.reduce((acc, item) => {
     if (!acc[item.category]) {
@@ -179,6 +182,20 @@ export const MdtSidebar: React.FC<MdtSidebarProps> = ({ onBackToModules }) => {
           Быстрые действия
         </h3>
         <div className="space-y-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full justify-start h-8 text-sm"
+            onClick={() => {
+              const cadUrl = process.env.NODE_ENV === 'development' 
+                ? 'http://localhost:3002' 
+                : 'https://cad.your-domain.com';
+              window.location.href = cadUrl;
+            }}
+          >
+            <Radio className="h-4 w-4 mr-2" />
+            CAD System
+          </Button>
           <Button variant="ghost" size="sm" className="w-full justify-start h-8 text-sm">
             <Phone className="h-4 w-4 mr-2" />
             Вызов 911

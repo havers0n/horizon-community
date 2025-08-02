@@ -263,7 +263,7 @@ function AdminLeaveManagement() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium">
-                              {application.author?.username.substring(0, 2).toUpperCase()}
+                              {application.author?.username ? application.author.username.substring(0, 2).toUpperCase() : 'U'}
                             </div>
                             <div>
                               <div className="font-medium">{application.author?.username}</div>

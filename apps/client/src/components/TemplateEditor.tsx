@@ -74,16 +74,15 @@ const TemplateEditor = ({
     }
 
     const templateData: Partial<ReportTemplate> = {
-      title: title.trim(),
-      body: body.trim(),
-      departmentId: departmentId || undefined,
+      title,
+      body,
       category,
       subcategory: subcategory || undefined,
       purpose: purpose || undefined,
       whoFills: whoFills || undefined,
       whenUsed: whenUsed || undefined,
-      difficulty,
-      estimatedTime,
+      difficulty: difficulty as 'easy' | 'medium' | 'hard',
+      estimatedTime: estimatedTime || undefined,
       status,
       tags: tags.length > 0 ? tags : undefined,
       isActive: true

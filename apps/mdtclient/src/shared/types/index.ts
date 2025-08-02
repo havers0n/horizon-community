@@ -240,6 +240,17 @@ export interface Weapon {
   // ... все остальные поля оружия
 }
 
+export interface CreateWeaponRequest {
+  ownerId: string;
+  serialNumber: string;
+  model: string;
+  type: string;
+  caliber: string;
+  status?: string;
+  registrationDate?: string;
+  notes?: string;
+}
+
 export type CallPriority = 'low' | 'medium' | 'high' | 'critical' | 'panic';
 export type CallStatus = 'pending' | 'assigned' | 'resolved' | 'closed' | 'active'; // Добавлен 'active'
 
@@ -304,8 +315,35 @@ export interface UnitAssignment {
 // 4. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ
 // =================================================================
 
-// BOLO тип перенесен в @/entities/dispatch/model/types
-// Импортируйте его оттуда: import type { Bolo } from '@/entities/dispatch/model/types';
+export interface BOLO {
+  id: string;
+  title: string;
+  description: string;
+  type: 'vehicle' | 'person' | 'item';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'active' | 'resolved' | 'expired';
+  authorId: string;
+  authorName?: string;
+  createdAt: string;
+  updatedAt?: string;
+  expiresAt?: string;
+  location?: string;
+  plateNumber?: string; // для транспортных средств
+  vehicleModel?: string;
+  vehicleColor?: string;
+  personName?: string; // для лиц
+  personDescription?: string;
+  itemDescription?: string; // для предметов
+  notes?: string;
+  attachments?: string[]; // URLs к изображениям
+  // Дополнительные поля для совместимости
+  timestamp?: string; // алиас для createdAt
+  issuedBy?: string; // алиас для authorName
+  vehicle?: string; // алиас для vehicleModel
+  plate?: string; // алиас для plateNumber
+  reason?: string; // алиас для description
+  additionalInfo?: string; // алиас для notes
+}
 
 export interface CharacterSearchResult {
   id: string;
@@ -587,6 +625,7 @@ export const LabTestCategory = {
 
 export type LabTestCategory = typeof LabTestCategory[keyof typeof LabTestCategory];
 
+// Базовый интерфейс Patient для совместимости
 export interface Patient {
   id: string;
   firstName: string;
@@ -609,6 +648,9 @@ export interface Patient {
   createdAt: string;
   updatedAt: string;
 }
+
+// Алиас для совместимости с entities/patient
+export type PatientEntity = import('@/entities/patient/model/types').Patient;
 
 // =================================================================
 // 9. EMS ТИПЫ
