@@ -7,7 +7,8 @@ import { SearchInput } from '../../../shared/ui/molecules';
 import { Search, User } from 'lucide-react';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { MOCK_CITIZENS_EXTENDED } from '@/shared';
-import type { Citizen, CitizenSearchResult } from '@/shared/types';
+import type { Citizen } from '@/shared/types';
+import type { CitizenSearchResult } from '../model/types';
 import { PersonDetails } from './PersonDetails';
 
 export const PersonSearch: React.FC = () => {

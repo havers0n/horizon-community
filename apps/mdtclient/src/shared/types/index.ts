@@ -334,11 +334,7 @@ export interface MDTModule {
   permissions?: string[];
 }
 
-export interface EmsUnit extends Unit {
-  unitType: 'medic';
-  crew: User[];
-  equipment: string[];
-}
+// EmsUnit теперь определен ниже в EMS типах
 
 // =================================================================
 // 5. ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ CHARACTER
@@ -503,3 +499,188 @@ export interface UnitFilters {
 
 // Пере-экспорты из departments.ts
 // export * from './departments';
+
+// =================================================================
+// 8. ПАЦИЕНТ ТИПЫ
+// =================================================================
+
+export const PatientGender = {
+  MALE: 'male' as const,
+  FEMALE: 'female' as const,
+  OTHER: 'other' as const,
+  UNKNOWN: 'unknown' as const,
+} as const;
+
+export type PatientGender = typeof PatientGender[keyof typeof PatientGender];
+
+export const BloodType = {
+  A_POSITIVE: 'A+' as const,
+  A_NEGATIVE: 'A-' as const,
+  B_POSITIVE: 'B+' as const,
+  B_NEGATIVE: 'B-' as const,
+  AB_POSITIVE: 'AB+' as const,
+  AB_NEGATIVE: 'AB-' as const,
+  O_POSITIVE: 'O+' as const,
+  O_NEGATIVE: 'O-' as const,
+  UNKNOWN: 'unknown' as const,
+} as const;
+
+export type BloodType = typeof BloodType[keyof typeof BloodType];
+
+export const VisitType = {
+  EMERGENCY: 'emergency' as const,
+  ROUTINE: 'routine' as const,
+  FOLLOW_UP: 'follow_up' as const,
+  CONSULTATION: 'consultation' as const,
+  SURGERY: 'surgery' as const,
+} as const;
+
+export type VisitType = typeof VisitType[keyof typeof VisitType];
+
+export const DiagnosisSeverity = {
+  MILD: 'mild' as const,
+  MODERATE: 'moderate' as const,
+  SEVERE: 'severe' as const,
+  CRITICAL: 'critical' as const,
+} as const;
+
+export type DiagnosisSeverity = typeof DiagnosisSeverity[keyof typeof DiagnosisSeverity];
+
+export const TreatmentType = {
+  MEDICATION: 'medication' as const,
+  SURGERY: 'surgery' as const,
+  THERAPY: 'therapy' as const,
+  MONITORING: 'monitoring' as const,
+  REFERRAL: 'referral' as const,
+} as const;
+
+export type TreatmentType = typeof TreatmentType[keyof typeof TreatmentType];
+
+export const AllergySeverity = {
+  MILD: 'mild' as const,
+  MODERATE: 'moderate' as const,
+  SEVERE: 'severe' as const,
+  LIFE_THREATENING: 'life_threatening' as const,
+} as const;
+
+export type AllergySeverity = typeof AllergySeverity[keyof typeof AllergySeverity];
+
+export const MedicationRoute = {
+  ORAL: 'oral' as const,
+  INTRAVENOUS: 'intravenous' as const,
+  INTRAMUSCULAR: 'intramuscular' as const,
+  SUBCUTANEOUS: 'subcutaneous' as const,
+  TOPICAL: 'topical' as const,
+  INHALATION: 'inhalation' as const,
+} as const;
+
+export type MedicationRoute = typeof MedicationRoute[keyof typeof MedicationRoute];
+
+export const LabTestCategory = {
+  BLOOD: 'blood' as const,
+  URINE: 'urine' as const,
+  IMAGING: 'imaging' as const,
+  CARDIOVASCULAR: 'cardiovascular' as const,
+  NEUROLOGICAL: 'neurological' as const,
+  RESPIRATORY: 'respiratory' as const,
+} as const;
+
+export type LabTestCategory = typeof LabTestCategory[keyof typeof LabTestCategory];
+
+export interface Patient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: PatientGender;
+  bloodType: BloodType;
+  height?: string;
+  weight?: string;
+  allergies?: string[];
+  medicalConditions?: string[];
+  medications?: string[];
+  emergencyContacts?: EmergencyContact[];
+  insuranceInfo?: {
+    provider: string;
+    policyNumber: string;
+    groupNumber?: string;
+  };
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =================================================================
+// 9. EMS ТИПЫ
+// =================================================================
+
+export interface EmsUnit {
+  id: string;
+  name: string;
+  unitType: 'ambulance' | 'fire_engine' | 'medic';
+  status: UnitStatus;
+  crew: EmsCrewMember[];
+  equipment: string[];
+  location: string;
+}
+
+export interface EmsCrewMember {
+  id: string;
+  name: string;
+  rank: string;
+  qualifications: string[];
+  isDriver: boolean;
+  isCommander: boolean;
+}
+
+export interface EmsCall {
+  id: string;
+  type: string;
+  priority: string;
+  caller: string;
+  location: string;
+  description: string;
+  timestamp: string;
+  assignedUnits: string[];
+  status: string;
+  patientInfo?: {
+    name: string;
+    age: number;
+    condition: string;
+    vitalSigns: {
+      heartRate: number;
+      bloodPressure: string;
+      temperature: number;
+      oxygenSaturation: number;
+    };
+  };
+}
+
+export interface EmsReport {
+  id: string;
+  callId: string;
+  authorId: string;
+  patientName: string;
+  diagnosis: string;
+  treatment: string;
+  outcome: string;
+  timestamp: string;
+}
+
+export interface EmsShiftLog {
+  id: string;
+  unitId: string;
+  crewMemberId: string;
+  startTime: string;
+  endTime?: string;
+  callsHandled: number;
+  notes: string;
+}
+
+// =================================================================
+// 10. ЭКСПОРТЫ API КЛАССОВ
+// =================================================================
+
+// УДАЛЕНО: export { EmsApi } from '@/entities/ems/api';
+// Этот экспорт создавал циклическую зависимость
+// EmsApi должен импортироваться напрямую из @/entities/ems/api

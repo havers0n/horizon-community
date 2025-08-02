@@ -144,6 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   id: userData.id.toString(),
                   email: userData.email || '',
                   role: userData.roles?.[0] || 'citizen', // Берем первую роль из массива
+                  roles: userData.roles || ['citizen'], // Сохраняем весь массив ролей
                   name: userData.username || userData.email || ''
                 };
                 setUser(user);
@@ -225,6 +226,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             id: userData.id.toString(),
             email: userData.email || '',
             role: userData.roles?.[0] || 'citizen', // Берем первую роль из массива
+            roles: userData.roles || ['citizen'], // Сохраняем весь массив ролей
             name: userData.username || userData.email || ''
           };
           setUser(user);
@@ -295,6 +297,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               id: userData.id.toString(),
               email: userData.email || '',
               role: userData.roles?.[0] || 'citizen', // Берем первую роль из массива
+              roles: userData.roles || ['citizen'], // Сохраняем весь массив ролей
               name: userData.username || userData.email || ''
             };
             setUser(user);

@@ -12,7 +12,7 @@ export { ReportCreationWidget } from './features/report-creation';
 export * from './ui/PenalCodeSearch';
 
 // Types - используем алиасы для избежания конфликтов
-export type { LawReport, LawReportFormData } from '@/shared/types';
+export type { LawReport, LawReportFormData } from './model/types';
 export type { CitizenSearchResult as LawEnforcementCitizenSearchResult } from './features/citizen-search/model/types';
 
 // Store

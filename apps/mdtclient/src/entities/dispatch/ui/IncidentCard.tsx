@@ -1,6 +1,6 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
-import { Incident } from '@/shared/types';
+import type { Incident } from '@/entities/incident/model/types';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Badge } from '@/shared/ui/atoms/Badge';
 import { Shield, Clock, Users, AlertTriangle } from 'lucide-react';

@@ -10,4 +10,8 @@ export * from './fd-portal';
 export * from './citizen-portal';
 export * from './dispatch-portal';
 export * from './reports-portal';
-export * from './department-selector-grid'; 
+export * from './department-selector-grid';
+
+// Новые виджеты ядер
+export * from './civil-core-portal';
+export * from './emergency-core-portal'; 

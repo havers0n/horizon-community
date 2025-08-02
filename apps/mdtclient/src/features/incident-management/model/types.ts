@@ -1,5 +1,5 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
-import { Incident } from '@/shared/types';
+import type { Incident } from '@/entities/incident/model/types';
 
 export interface IncidentManagementState {
   incidents: Incident[];

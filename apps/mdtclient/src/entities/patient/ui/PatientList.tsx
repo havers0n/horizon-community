@@ -26,7 +26,8 @@ import {
   Heart,
   AlertTriangle
 } from 'lucide-react';
-import { Patient, PatientGender, BloodType, PatientSearchFilters } from '@/shared/types';
+import type { Patient, PatientGender, BloodType } from '@/shared/types';
+import type { PatientSearchFilters } from '../model/types';
 import { PatientCard } from './PatientCard';
 
 interface PatientListProps {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, Button } from '@/shared/ui/atoms';
 import { emergencyCallsStore } from '../model/store';
-import type { EmergencyCall } from '@/shared/types';
+import type { EmergencyCall } from '../model/types';
 
 export const EmergencyCallsWidget: React.FC = () => {
     const {

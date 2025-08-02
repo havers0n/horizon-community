@@ -1,6 +1,6 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState, useMemo } from 'react';
-import { Company, CompanySearchParams } from '@/shared/types';
+import type { Company, CompanySearchParams } from '../model/types';
 import { CompanyCard } from './CompanyCard';
 import { DataTable } from '@/shared/ui/organisms';
 import { SearchBar, StatusBadge } from '@/shared/ui/molecules';

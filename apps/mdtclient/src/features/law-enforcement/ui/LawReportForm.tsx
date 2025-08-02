@@ -6,7 +6,7 @@ import { useLocale } from '@/shared/contexts/LocaleContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { MOCK_PENAL_CODES, INCIDENT_TYPES } from '../model/constants';
 import { useLawEnforcementStore } from '../model/store';
-import type { LawReportFormData, LawReport } from '@/shared/types';
+import type { LawReportFormData, LawReport } from '../model/types';
 
 interface LawReportFormProps {
   onSubmit: (report: LawReport) => void;

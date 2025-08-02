@@ -4,7 +4,7 @@ export * from './ui';
 export * from './model';
 
 // Types
-export type { AddressSearchResult } from '@/shared/types';
+export type { AddressSearchResult } from './model/types';
 
 // Store
 export { useAddressSearchStore } from './model/store';

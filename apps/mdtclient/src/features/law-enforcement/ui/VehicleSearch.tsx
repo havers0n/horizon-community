@@ -6,7 +6,8 @@ import { Search, Eye } from 'lucide-react';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { MOCK_VEHICLES } from '../model/constants';
 import { MOCK_CITIZENS_EXTENDED } from '@/shared';
-import type { VehicleSearchResult, Vehicle } from '@/shared/types';
+import type { Vehicle } from '@/shared/types';
+import type { VehicleSearchResult } from '../model/types';
 import { VehicleDetailsModal } from './VehicleDetailsModal';
 
 export const VehicleSearch: React.FC = () => {

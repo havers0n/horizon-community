@@ -296,20 +296,6 @@
             },
             "configurations": {}
           },
-          "storybook": {
-            "executor": "nx:run-script",
-            "options": {
-              "script": "storybook"
-            },
-            "configurations": {}
-          },
-          "build-storybook": {
-            "executor": "nx:run-script",
-            "options": {
-              "script": "build-storybook"
-            },
-            "configurations": {}
-          },
           "serve": {
             "executor": "@nx/vite:dev-server",
             "defaultConfiguration": "development",
@@ -11916,11 +11902,6 @@
       {
         "source": "mdtclient",
         "target": "npm:postcss",
-        "type": "static"
-      },
-      {
-        "source": "mdtclient",
-        "target": "npm:storybook",
         "type": "static"
       },
       {

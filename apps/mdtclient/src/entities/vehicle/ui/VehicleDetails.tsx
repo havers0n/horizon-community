@@ -1,6 +1,7 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
-import { Vehicle, VehicleViolation, VehicleAccident, VehicleMaintenance } from '@/shared/types';
+import type { Vehicle } from '@/shared/types';
+import type { VehicleViolation, VehicleAccident, VehicleMaintenance } from '../model/types';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button } from '@/shared/ui/atoms';
 import { 
   Car, 

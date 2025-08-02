@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Badge } from '@/shared/ui/atoms/Badge';
-import { BOLO } from '@/shared/types';
+import type { Bolo as BOLO } from '@/entities/dispatch/model/types';
 import { FileText, AlertTriangle, Clock, User, Car } from 'lucide-react';
 
 interface BoloWidgetProps {

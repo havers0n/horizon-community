@@ -4,7 +4,8 @@ import { Button } from '@/shared/ui/atoms/Button';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Modal } from '@/shared/ui/atoms/Modal';
 import { FileText, PlusCircle, Stethoscope, Flame, Save, X, ArrowLeft } from 'lucide-react';
-import { EmsReport, MedicalReportData, FireReportData } from '@/shared/types';
+import type { EmsReport } from '@/shared/types';
+import type { MedicalReportData, FireReportData } from '../model/types';
 import { useReportsStore } from '../model/store';
 
 interface EmsReportFormProps {

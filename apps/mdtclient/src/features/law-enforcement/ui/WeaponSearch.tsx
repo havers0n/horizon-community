@@ -6,7 +6,8 @@ import { Search, Eye } from 'lucide-react';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { MOCK_WEAPONS } from '../model/constants';
 import { MOCK_CITIZENS_EXTENDED } from '@/shared';
-import type { WeaponSearchResult, Weapon } from '@/shared/types';
+import type { Weapon } from '@/shared/types';
+import type { WeaponSearchResult } from '../model/types';
 import { WeaponDetailsModal } from './WeaponDetailsModal';
 
 export const WeaponSearch: React.FC = () => {

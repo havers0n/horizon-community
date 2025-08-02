@@ -1,7 +1,7 @@
 // @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
 import { Button } from '@/shared/ui/atoms';
-import type { LegalRecord } from '@/shared/types';
+import type { LegalRecord } from '../model/types';
 
 interface CreateWarningFormProps {
     onSubmit: (warning: LegalRecord) => void;

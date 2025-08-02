@@ -4,7 +4,7 @@ import { Card } from '@/shared/ui/atoms/Card';
 import { Button } from '@/shared/ui/atoms/Button';
 import { CitizenSearch } from '@/features/citizen-management';
 import { VehicleSearch } from '@/features/vehicle-registration';
-import { ReportsList } from '@/shared/types';
+import { ReportsList } from '@/features/reports-management/ui/ReportsList';
 import { UnitList } from '@/features/unit-management';
 import { ShiftManagement } from '@/features/shift-management';
 import { useMdtPortalStore } from '@/widgets/mdt-portal/model/store';
