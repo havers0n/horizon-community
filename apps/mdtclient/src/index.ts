@@ -2,9 +2,6 @@
 // Главный экспорт для FSD архитектуры
 // Этот файл экспортирует все публичные API из каждого слоя
 
-// Pages layer
-export * from './pages';
-
 // Widgets layer
 export * from './widgets';
 

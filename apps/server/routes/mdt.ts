@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { Request, Response } from 'express';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+import { Response } from 'express';
+import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.middleware.js';
 import { mdtService } from '../services/MDTService';
-import { NextFunction } from 'express';
 
 const router: import('express').Router = Router();
 
@@ -12,7 +11,7 @@ const router: import('express').Router = Router();
 /**
  * GET /api/mdt - Базовый endpoint для проверки подключения
  */
-router.get('/', authenticateToken, (req: Request, res: Response) => {
+router.get('/', authenticateToken as any, (req: AuthenticatedRequest, res: Response) => {
   res.json({ 
     success: true, 
     message: 'MDT API is working!',
@@ -26,21 +25,19 @@ router.get('/', authenticateToken, (req: Request, res: Response) => {
   });
 });
 
-// ===== АУТЕНТИФИКАЦИЯ ЧЕРЕЗ SUPABASE =====
-
 // ===== СХЕМЫ ВАЛИДАЦИИ =====
 
 const createUnitSchema = z.object({
-  characterId: z.number().min(1),
+  characterId: z.string().uuid(),
   unitNumber: z.string().min(1).max(10),
-  departmentId: z.number().min(1),
+  departmentId: z.string().uuid(),
   status: z.string().optional(),
   location: z.object({
     x: z.number(),
     y: z.number(),
     z: z.number()
   }).optional(),
-  vehicleId: z.number().optional()
+  currentCallId: z.string().uuid().optional()
 });
 
 const updateUnitStatusSchema = z.object({
@@ -61,7 +58,7 @@ const createCallSchema = z.object({
   location: z.string().min(1),
   description: z.string().min(1),
   type: z.enum(['police', 'fire', 'ems']),
-  priority: z.number().min(1).max(5).optional(),
+  priority: z.string().optional(),
   status: z.string().optional(),
   patientInfo: z.object({
     name: z.string().optional(),
@@ -83,7 +80,7 @@ const updateCallSchema = z.object({
   location: z.string().optional(),
   description: z.string().optional(),
   type: z.enum(['police', 'fire', 'ems']).optional(),
-  priority: z.number().min(1).max(5).optional(),
+  priority: z.string().optional(),
   status: z.string().optional(),
   patientInfo: z.object({
     name: z.string().optional(),
@@ -100,13 +97,13 @@ const updateCallSchema = z.object({
 });
 
 const assignUnitsSchema = z.object({
-  unitIds: z.array(z.number().min(1))
+  unitIds: z.array(z.string().uuid())
 });
 
 const createSignalSchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.string().min(1),
-  type: z.enum(['LEO', 'EMS_FD']),
+  description: z.string().min(1).optional(),
+  type: z.enum(['LEO', 'EMS_FD']).optional(),
   priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   location: z.string().optional(),
   coordinates: z.object({
@@ -137,27 +134,26 @@ const updateSignalSchema = z.object({
 
 const createBoloSchema = z.object({
   type: z.enum(['vehicle', 'person', 'general']),
-  description: z.string().min(1).max(500),
-  vehicle: z.string().optional(),
-  plate: z.string().optional(),
   reason: z.string().min(1).max(500),
-  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  subjectName: z.string().optional(),
+  subjectDescription: z.string().optional(),
+  vehicleDescription: z.string().optional(),
+  vehiclePlate: z.string().optional(),
   location: z.string().optional(),
-  additionalInfo: z.string().optional(),
-  expiresAt: z.string().optional()
+  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  authorCharacterId: z.string().uuid()
 });
 
 const updateBoloSchema = z.object({
   type: z.enum(['vehicle', 'person', 'general']).optional(),
-  description: z.string().min(1).max(500).optional(),
-  vehicle: z.string().optional(),
-  plate: z.string().optional(),
   reason: z.string().min(1).max(500).optional(),
-  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  subjectName: z.string().optional(),
+  subjectDescription: z.string().optional(),
+  vehicleDescription: z.string().optional(),
+  vehiclePlate: z.string().optional(),
   location: z.string().optional(),
-  additionalInfo: z.string().optional(),
-  status: z.enum(['active', 'resolved', 'expired']).optional(),
-  expiresAt: z.string().optional()
+  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  status: z.enum(['active', 'resolved', 'expired']).optional()
 });
 
 // ===== MDT UNITS API =====
@@ -165,7 +161,7 @@ const updateBoloSchema = z.object({
 /**
  * GET /api/mdt/units - Получить все активные юниты
  */
-router.get('/units', authenticateToken, async (req: Request, res: Response) => {
+router.get('/units', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const units = await mdtService.getActiveUnits();
     res.json({ success: true, data: units });
@@ -181,13 +177,13 @@ router.get('/units', authenticateToken, async (req: Request, res: Response) => {
 /**
  * POST /api/mdt/units - Создать новый юнит
  */
-router.post('/units', authenticateToken, async (req: Request, res: Response) => {
+router.post('/units', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createUnitSchema.parse(req.body);
     
     const unit = await mdtService.createUnit({
       ...validatedData,
-      authorId: req.user!.id
+      userId: req.user!.id
     });
 
     res.status(201).json({ success: true, data: unit });
@@ -210,10 +206,10 @@ router.post('/units', authenticateToken, async (req: Request, res: Response) => 
 /**
  * PUT /api/mdt/units/:id/status - Обновить статус юнита
  */
-router.put('/units/:id/status', authenticateToken, async (req: Request, res: Response) => {
+router.put('/units/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const unitId = parseInt(req.params.id);
-    if (isNaN(unitId)) {
+    const unitId = req.params.id;
+    if (!unitId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid unit ID' 
@@ -243,10 +239,10 @@ router.put('/units/:id/status', authenticateToken, async (req: Request, res: Res
 /**
  * PUT /api/mdt/units/:id/location - Обновить местоположение юнита
  */
-router.put('/units/:id/location', authenticateToken, async (req: Request, res: Response) => {
+router.put('/units/:id/location', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const unitId = parseInt(req.params.id);
-    if (isNaN(unitId)) {
+    const unitId = req.params.id;
+    if (!unitId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid unit ID' 
@@ -276,10 +272,10 @@ router.put('/units/:id/location', authenticateToken, async (req: Request, res: R
 /**
  * POST /api/mdt/units/:id/panic - Активировать панику для юнита
  */
-router.post('/units/:id/panic', authenticateToken, async (req: Request, res: Response) => {
+router.post('/units/:id/panic', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const unitId = parseInt(req.params.id);
-    if (isNaN(unitId)) {
+    const unitId = req.params.id;
+    if (!unitId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid unit ID' 
@@ -300,10 +296,10 @@ router.post('/units/:id/panic', authenticateToken, async (req: Request, res: Res
 /**
  * DELETE /api/mdt/units/:id/panic - Деактивировать панику для юнита
  */
-router.delete('/units/:id/panic', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/units/:id/panic', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const unitId = parseInt(req.params.id);
-    if (isNaN(unitId)) {
+    const unitId = req.params.id;
+    if (!unitId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid unit ID' 
@@ -326,7 +322,7 @@ router.delete('/units/:id/panic', authenticateToken, async (req: Request, res: R
 /**
  * GET /api/mdt/calls - Получить все вызовы 911
  */
-router.get('/calls', authenticateToken, async (req: Request, res: Response) => {
+router.get('/calls', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const calls = await mdtService.getCalls();
     res.json({ success: true, data: calls });
@@ -342,14 +338,11 @@ router.get('/calls', authenticateToken, async (req: Request, res: Response) => {
 /**
  * POST /api/mdt/calls - Создать новый вызов 911
  */
-router.post('/calls', authenticateToken, async (req: Request, res: Response) => {
+router.post('/calls', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createCallSchema.parse(req.body);
     
-    const call = await mdtService.createCall({
-      ...validatedData,
-      authorId: req.user!.id
-    });
+    const call = await mdtService.createCall(validatedData);
 
     res.status(201).json({ success: true, data: call });
   } catch (error) {
@@ -371,10 +364,10 @@ router.post('/calls', authenticateToken, async (req: Request, res: Response) => 
 /**
  * PUT /api/mdt/calls/:id - Обновить вызов 911
  */
-router.put('/calls/:id', authenticateToken, async (req: Request, res: Response) => {
+router.put('/calls/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const callId = parseInt(req.params.id);
-    if (isNaN(callId)) {
+    const callId = req.params.id;
+    if (!callId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid call ID' 
@@ -404,10 +397,10 @@ router.put('/calls/:id', authenticateToken, async (req: Request, res: Response) 
 /**
  * POST /api/mdt/calls/:id/assign - Назначить юниты на вызов
  */
-router.post('/calls/:id/assign', authenticateToken, async (req: Request, res: Response) => {
+router.post('/calls/:id/assign', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const callId = parseInt(req.params.id);
-    if (isNaN(callId)) {
+    const callId = req.params.id;
+    if (!callId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid call ID' 
@@ -437,10 +430,10 @@ router.post('/calls/:id/assign', authenticateToken, async (req: Request, res: Re
 /**
  * PUT /api/mdt/calls/:id/status - Обновить статус вызова
  */
-router.put('/calls/:id/status', authenticateToken, async (req: Request, res: Response) => {
+router.put('/calls/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const callId = parseInt(req.params.id);
-    if (isNaN(callId)) {
+    const callId = req.params.id;
+    if (!callId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid call ID' 
@@ -471,7 +464,7 @@ router.put('/calls/:id/status', authenticateToken, async (req: Request, res: Res
 /**
  * GET /api/mdt/signals - Получить активные сигналы
  */
-router.get('/signals', authenticateToken, async (req: Request, res: Response) => {
+router.get('/signals', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const signals = await mdtService.getActiveSignals();
     res.json({ success: true, data: signals });
@@ -487,13 +480,13 @@ router.get('/signals', authenticateToken, async (req: Request, res: Response) =>
 /**
  * POST /api/mdt/signals - Создать новый сигнал
  */
-router.post('/signals', authenticateToken, async (req: Request, res: Response) => {
+router.post('/signals', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createSignalSchema.parse(req.body);
     
     const signal = await mdtService.createSignal({
       ...validatedData,
-      authorId: req.user!.id
+      authorCharacterId: req.user!.id
     });
 
     res.status(201).json({ success: true, data: signal });
@@ -516,10 +509,10 @@ router.post('/signals', authenticateToken, async (req: Request, res: Response) =
 /**
  * PUT /api/mdt/signals/:id - Обновить сигнал
  */
-router.put('/signals/:id', authenticateToken, async (req: Request, res: Response) => {
+router.put('/signals/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const signalId = parseInt(req.params.id);
-    if (isNaN(signalId)) {
+    const signalId = req.params.id;
+    if (!signalId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid signal ID' 
@@ -549,10 +542,10 @@ router.put('/signals/:id', authenticateToken, async (req: Request, res: Response
 /**
  * DELETE /api/mdt/signals/:id - Отозвать сигнал
  */
-router.delete('/signals/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/signals/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const signalId = parseInt(req.params.id);
-    if (isNaN(signalId)) {
+    const signalId = req.params.id;
+    if (!signalId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid signal ID' 
@@ -573,10 +566,10 @@ router.delete('/signals/:id', authenticateToken, async (req: Request, res: Respo
 /**
  * POST /api/mdt/signals/:id/notify - Отправить уведомления о сигнале
  */
-router.post('/signals/:id/notify', authenticateToken, async (req: Request, res: Response) => {
+router.post('/signals/:id/notify', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const signalId = parseInt(req.params.id);
-    if (isNaN(signalId)) {
+    const signalId = req.params.id;
+    if (!signalId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid signal ID' 
@@ -599,7 +592,7 @@ router.post('/signals/:id/notify', authenticateToken, async (req: Request, res: 
 /**
  * GET /api/mdt/dashboard - Получить данные для дашборда MDT
  */
-router.get('/dashboard', authenticateToken, async (req: Request, res: Response) => {
+router.get('/dashboard', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const [units, calls, signals] = await Promise.all([
       mdtService.getActiveUnits(),
@@ -612,7 +605,6 @@ router.get('/dashboard', authenticateToken, async (req: Request, res: Response) 
       totalUnits: units.length,
       availableUnits: units.filter(u => u.status === 'available').length,
       busyUnits: units.filter(u => u.status !== 'available').length,
-      panicUnits: units.filter(u => u.isPanic).length,
       totalCalls: calls.length,
       activeCalls: calls.filter(c => c.status === 'active').length,
       pendingCalls: calls.filter(c => c.status === 'pending').length,
@@ -641,7 +633,7 @@ router.get('/dashboard', authenticateToken, async (req: Request, res: Response) 
 /**
  * GET /api/mdt/notifications - Получить уведомления пользователя
  */
-router.get('/notifications', authenticateToken, async (req: Request, res: Response) => {
+router.get('/notifications', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const notifications = await mdtService.getNotifications(req.user!.id);
     res.json({ success: true, data: notifications });
@@ -657,17 +649,17 @@ router.get('/notifications', authenticateToken, async (req: Request, res: Respon
 /**
  * PUT /api/mdt/notifications/:id/read - Отметить уведомление как прочитанное
  */
-router.put('/notifications/:id/read', authenticateToken, async (req: Request, res: Response) => {
+router.put('/notifications/:id/read', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const notificationId = parseInt(req.params.id);
-    if (isNaN(notificationId)) {
+    const notificationId = req.params.id;
+    if (!notificationId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid notification ID' 
       });
     }
 
-    await mdtService.markNotificationAsRead(notificationId, req.user!.id);
+    await mdtService.markNotificationAsRead(notificationId);
 
     res.json({ success: true, message: 'Notification marked as read' });
   } catch (error) {
@@ -684,18 +676,12 @@ router.put('/notifications/:id/read', authenticateToken, async (req: Request, re
 /**
  * GET /api/mdt/bolos - Получить все BOLO
  */
-router.get('/bolos', authenticateToken, async (req: Request, res: Response) => {
+router.get('/bolos', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    console.log('BOLO endpoint вызван');
-    console.log('mdtService:', mdtService);
-    
     const bolos = await mdtService.getBolos();
-    console.log('BOLO получены:', bolos);
-    
     res.json({ success: true, data: bolos });
   } catch (error) {
     console.error('Error fetching BOLOs:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch BOLOs',
@@ -707,20 +693,24 @@ router.get('/bolos', authenticateToken, async (req: Request, res: Response) => {
 /**
  * POST /api/mdt/bolos - Создать новый BOLO
  */
-router.post('/bolos', authenticateToken, async (req: Request, res: Response) => {
+router.post('/bolos', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createBoloSchema.parse(req.body);
     
-    const newBolo = await mdtService.createBolo({
-      ...validatedData,
-      issuedBy: req.user!.id
-    });
+    const newBolo = await mdtService.createBolo(validatedData);
 
     res.status(201).json({ 
       success: true, 
       data: newBolo
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Validation error', 
+        details: error.errors 
+      });
+    }
     console.error('Error creating BOLO:', error);
     res.status(500).json({ 
       success: false, 
@@ -732,10 +722,10 @@ router.post('/bolos', authenticateToken, async (req: Request, res: Response) => 
 /**
  * PUT /api/mdt/bolos/:id - Обновить BOLO
  */
-router.put('/bolos/:id', authenticateToken, async (req: Request, res: Response) => {
+router.put('/bolos/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const boloId = parseInt(req.params.id);
-    if (isNaN(boloId)) {
+    const boloId = req.params.id;
+    if (!boloId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid BOLO ID' 
@@ -747,6 +737,13 @@ router.put('/bolos/:id', authenticateToken, async (req: Request, res: Response) 
 
     res.json({ success: true, data: updatedBolo });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Validation error', 
+        details: error.errors 
+      });
+    }
     console.error('Error updating BOLO:', error);
     res.status(500).json({ 
       success: false, 
@@ -758,10 +755,10 @@ router.put('/bolos/:id', authenticateToken, async (req: Request, res: Response) 
 /**
  * DELETE /api/mdt/bolos/:id - Удалить BOLO (soft delete)
  */
-router.delete('/bolos/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/bolos/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const boloId = parseInt(req.params.id);
-    if (isNaN(boloId)) {
+    const boloId = req.params.id;
+    if (!boloId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid BOLO ID' 
@@ -785,7 +782,7 @@ router.delete('/bolos/:id', authenticateToken, async (req: Request, res: Respons
 /**
  * GET /api/mdt/calls/active - Получить только активные вызовы
  */
-router.get('/calls/active', authenticateToken, async (req: Request, res: Response) => {
+router.get('/calls/active', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const calls = await mdtService.getCalls();
     const activeCalls = calls.filter(call => 
@@ -804,7 +801,7 @@ router.get('/calls/active', authenticateToken, async (req: Request, res: Respons
 /**
  * GET /api/mdt/units/active - Получить только активные юниты
  */
-router.get('/units/active', authenticateToken, async (req: Request, res: Response) => {
+router.get('/units/active', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const units = await mdtService.getActiveUnits();
     res.json({ success: true, data: units });
@@ -820,7 +817,7 @@ router.get('/units/active', authenticateToken, async (req: Request, res: Respons
 /**
  * GET /api/mdt/bolos/active - Получить только активные BOLO
  */
-router.get('/bolos/active', authenticateToken, async (req: Request, res: Response) => {
+router.get('/bolos/active', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const bolos = await mdtService.getBolos();
     const activeBolos = bolos.filter(bolo => bolo.status === 'active');
@@ -837,10 +834,10 @@ router.get('/bolos/active', authenticateToken, async (req: Request, res: Respons
 /**
  * PATCH /api/mdt/units/:id/status - Обновить статус юнита (PATCH для совместимости с фронтендом)
  */
-router.patch('/units/:id/status', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/units/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const unitId = parseInt(req.params.id);
-    if (isNaN(unitId)) {
+    const unitId = req.params.id;
+    if (!unitId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid unit ID' 
@@ -869,10 +866,10 @@ router.patch('/units/:id/status', authenticateToken, async (req: Request, res: R
 /**
  * PATCH /api/mdt/calls/:id/status - Обновить статус вызова (PATCH для совместимости с фронтендом)
  */
-router.patch('/calls/:id/status', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/calls/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const callId = parseInt(req.params.id);
-    if (isNaN(callId)) {
+    const callId = req.params.id;
+    if (!callId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid call ID' 
@@ -901,10 +898,10 @@ router.patch('/calls/:id/status', authenticateToken, async (req: Request, res: R
 /**
  * POST /api/mdt/calls/:callId/assign - Назначить юнита на вызов (для совместимости с фронтендом)
  */
-router.post('/calls/:callId/assign', authenticateToken, async (req: Request, res: Response) => {
+router.post('/calls/:callId/assign', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const callId = parseInt(req.params.callId);
-    if (isNaN(callId)) {
+    const callId = req.params.callId;
+    if (!callId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Invalid call ID' 
@@ -919,7 +916,7 @@ router.post('/calls/:callId/assign', authenticateToken, async (req: Request, res
       });
     }
 
-    await mdtService.assignUnitsToCall(callId, [parseInt(unitId)]);
+    await mdtService.assignUnitsToCall(callId, [unitId]);
     res.json({ success: true, message: 'Unit assigned to call' });
   } catch (error) {
     console.error('Error assigning unit to call:', error);
@@ -933,20 +930,24 @@ router.post('/calls/:callId/assign', authenticateToken, async (req: Request, res
 /**
  * POST /api/mdt/notifications - Отправить уведомление
  */
-router.post('/notifications', authenticateToken, async (req: Request, res: Response) => {
+router.post('/notifications', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { type, message, targetDepartments } = req.body;
+    const { content, recipientUserId, link } = req.body;
     
-    if (!type || !message) {
+    if (!content || !recipientUserId) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Type and message are required' 
+        error: 'Content and recipientUserId are required' 
       });
     }
 
-    // Здесь можно добавить логику отправки уведомлений
-    // Пока просто возвращаем успех
-    res.json({ success: true, message: 'Notification sent' });
+    const notification = await mdtService.createNotification({
+      content,
+      recipientUserId,
+      link
+    });
+
+    res.json({ success: true, data: notification });
   } catch (error) {
     console.error('Error sending notification:', error);
     res.status(500).json({ 

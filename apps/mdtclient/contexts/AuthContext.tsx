@@ -5,12 +5,15 @@ import { setTokenGlobally, clearTokenGlobally } from '../src/lib/auth-init';
 interface AuthContextType {
   user: User | null;
   characters: Character[];
+  activeCharacter: Character | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  setActiveCharacter: (character: Character | null) => void;
+  refreshCharacters: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -30,11 +33,77 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [activeCharacter, setActiveCharacter] = useState<Character | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   console.log('[AuthProvider] Initializing with isLoading:', isLoading);
 
   const isAuthenticated = !!user;
+
+  // Функция для получения персонажей пользователя
+  const fetchUserCharacters = async (): Promise<Character[]> => {
+    try {
+      console.log('[AuthContext] Fetching user characters...');
+      const response = await apiService.getUserCharacters();
+      console.log('[AuthContext] Characters response:', response);
+      if (response.success && response.data) {
+        console.log('[AuthContext] Characters loaded:', response.data);
+        return response.data;
+      } else {
+        console.error('Failed to fetch characters:', response.error);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching characters:', error);
+      return [];
+    }
+  };
+
+  // Функция для установки активного персонажа
+  const setActiveCharacterHandler = (character: Character | null) => {
+    console.log('[AuthProvider] Setting active character:', character);
+    setActiveCharacter(character);
+    
+    // Сохраняем выбор в localStorage
+    if (character) {
+      localStorage.setItem('activeCharacterId', character.id.toString());
+    } else {
+      localStorage.removeItem('activeCharacterId');
+    }
+  };
+
+  // Функция для обновления списка персонажей
+  const refreshCharacters = async () => {
+    try {
+      console.log('[AuthContext] Refreshing characters...');
+      const fetchedCharacters = await fetchUserCharacters();
+      console.log('[AuthContext] Fetched characters:', fetchedCharacters);
+      setCharacters(fetchedCharacters);
+      
+      // Если нет активного персонажа, но есть персонажи, выбираем первого
+      if ((!activeCharacter || !fetchedCharacters.find(c => c.id === activeCharacter.id)) && fetchedCharacters.length > 0) {
+        console.log('[AuthContext] Setting active character from fetched characters');
+        const savedCharacterId = localStorage.getItem('activeCharacterId');
+        const tempCharacterId = localStorage.getItem('tempActiveCharacterId');
+        const characterId = tempCharacterId || savedCharacterId;
+        
+        const savedCharacter = characterId
+          ? fetchedCharacters.find(char => char.id.toString() === characterId)
+          : null;
+        
+        setActiveCharacterHandler(savedCharacter || fetchedCharacters[0]);
+        
+        // Очищаем временный ID после использования
+        if (tempCharacterId) {
+          localStorage.removeItem('tempActiveCharacterId');
+        }
+      } else {
+        console.log('[AuthContext] No need to set active character. Current:', activeCharacter, 'Fetched count:', fetchedCharacters.length);
+      }
+    } catch (error) {
+      console.error('Error refreshing characters:', error);
+    }
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -51,10 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(userData);
         
         // Получаем персонажей пользователя
-        const userResponse = await apiService.getCurrentUser();
-        if (userResponse.success && userResponse.data) {
-          setCharacters(userResponse.data.characters);
-        }
+        await refreshCharacters();
         
         return true;
       } else {
@@ -89,6 +155,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearTokenGlobally();
     setUser(null);
     setCharacters([]);
+    setActiveCharacter(null);
+    localStorage.removeItem('activeCharacterId');
   };
 
   const refreshUser = async () => {
@@ -98,6 +166,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         setUser(response.data.user);
         setCharacters(response.data.characters);
+        
+        // Восстанавливаем активного персонажа
+        if (response.data.characters.length > 0) {
+          const savedCharacterId = localStorage.getItem('activeCharacterId');
+          const savedCharacter = savedCharacterId 
+            ? response.data.characters.find(char => char.id.toString() === savedCharacterId)
+            : null;
+          
+          setActiveCharacterHandler(savedCharacter || response.data.characters[0]);
+        }
       } else {
         // Если не удалось получить пользователя, возможно токен истек
         console.log('Failed to get current user, logging out');
@@ -137,12 +215,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     characters,
+    activeCharacter,
     isLoading,
     isAuthenticated,
     login,
     register,
     logout,
     refreshUser,
+    setActiveCharacter: setActiveCharacterHandler,
+    refreshCharacters,
   };
 
   return (

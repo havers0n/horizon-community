@@ -3,16 +3,9 @@ import type { StorybookConfig } from '@storybook/react-vite';
 const config: StorybookConfig = {
   stories: [
     '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    '../src/**/*.mdx',
     '../src/stories.ts',
   ],
-  addons: [
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@storybook/addon-onboarding',
-    '@storybook/addon-interactions',
-    '@storybook/addon-themes',
-  ],
+  addons: [],
   framework: {
     name: '@storybook/react-vite',
     options: {},
@@ -28,7 +21,6 @@ const config: StorybookConfig = {
         '@': '/src',
         '@/shared': '/src/shared',
         '@/app': '/src/app',
-        '@/pages': '/src/pages',
         '@/widgets': '/src/widgets',
         '@/features': '/src/features',
         '@/entities': '/src/entities',

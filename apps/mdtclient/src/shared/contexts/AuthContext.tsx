@@ -1,22 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authUtils } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
+import { apiService } from '../../services/api';
+import type { Character, User } from '../types';
 
-interface User {
+// Локальный тип для AuthContext (совместимый с API)
+interface AuthUser {
   id: string;
   email: string;
   role: string;
+  roles?: string[]; // Добавлено для совместимости с существующим кодом
   name: string;
+  username?: string; // Добавлено для совместимости с существующим кодом
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
+  characters: Character[];
+  activeCharacter: Character | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  updateUser: (updates: Partial<User>) => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
   checkAuth: () => Promise<boolean>;
+  refreshCharacters: () => Promise<void>;
+  setActiveCharacter: (character: Character | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,8 +45,66 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [activeCharacter, setActiveCharacter] = useState<Character | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Функция для установки активного персонажа
+  const setActiveCharacterHandler = (character: Character | null) => {
+    console.log('[Auth] Setting active character:', character?.firstName, character?.lastName);
+    setActiveCharacter(character);
+    
+    if (character) {
+      localStorage.setItem('activeCharacterId', character.id.toString());
+    } else {
+      localStorage.removeItem('activeCharacterId');
+    }
+  };
+
+  // Функция для получения персонажей пользователя
+  const fetchCharacters = async (userId: string) => {
+    try {
+      console.log('[Auth] Fetching characters for user:', userId);
+      
+      // Используем централизованный API-сервис вместо прямого вызова Supabase
+      const charactersData = await apiService.getUserCharacters();
+      
+      console.log('[Auth] Characters fetched:', charactersData?.length || 0);
+      console.log('[Auth] Characters data:', charactersData);
+      
+      return charactersData || [];
+    } catch (error) {
+      console.error('[Auth] Error in characters fetch:', error);
+      return [];
+    }
+  };
+
+  const refreshCharacters = async () => {
+    if (user) {
+      const chars = await fetchCharacters(user.id);
+      setCharacters(chars);
+      
+      // Автоматически устанавливаем активного персонажа, если его нет
+      if ((!activeCharacter || !chars.find(c => c.id === activeCharacter.id)) && chars.length > 0) {
+        console.log('[Auth] Auto-setting active character from fetched characters');
+        
+        const savedCharacterId = localStorage.getItem('activeCharacterId');
+        const tempCharacterId = localStorage.getItem('tempActiveCharacterId');
+        
+        const savedCharacter = savedCharacterId ? chars.find(c => c.id.toString() === savedCharacterId) : null;
+        const tempCharacter = tempCharacterId ? chars.find(c => c.id.toString() === tempCharacterId) : null;
+        
+        setActiveCharacterHandler(savedCharacter || tempCharacter || chars[0]);
+        
+        if (tempCharacterId) {
+          localStorage.removeItem('tempActiveCharacterId');
+        }
+      } else {
+        console.log('[Auth] No need to set active character. Current:', activeCharacter, 'Fetched count:', chars.length);
+      }
+    }
+  };
 
   // Проверка аутентификации при загрузке
   useEffect(() => {
@@ -70,22 +137,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             // Получаем данные пользователя из базы данных
             try {
-              const { data: userData, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-                
-              if (error) {
-                console.error('[Auth] Error fetching user data:', error);
-              } else if (userData) {
-                const user: User = {
+              const userData = await apiService.getCurrentUser();
+              
+              if (userData) {
+                const user: AuthUser = {
                   id: userData.id.toString(),
-                  email: userData.email,
-                  role: userData.role,
-                  name: userData.username || userData.email
+                  email: userData.email || '',
+                  role: userData.roles?.[0] || 'citizen', // Берем первую роль из массива
+                  name: userData.username || userData.email || ''
                 };
                 setUser(user);
+                
+                // Получаем персонажей пользователя
+                const chars = await fetchCharacters(user.id);
+                setCharacters(chars);
+                
                 console.log('[Auth] User data loaded:', user);
               }
             } catch (error) {
@@ -97,6 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else if (event === 'SIGNED_OUT') {
           console.log('[Auth] User signed out');
           setUser(null);
+          setCharacters([]);
           authUtils.removeToken();
         }
       }
@@ -119,6 +186,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) {
         console.error('[Auth] Error getting session:', error);
         setUser(null);
+        setCharacters([]);
         authUtils.removeToken();
         return false;
       }
@@ -126,6 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!session) {
         console.log('[Auth] No active session found');
         setUser(null);
+        setCharacters([]);
         authUtils.removeToken();
         return false;
       }
@@ -136,6 +205,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!token) {
         console.error('[Auth] ERROR: No access token in session!');
         setUser(null);
+        setCharacters([]);
         authUtils.removeToken();
         return false;
       }
@@ -147,42 +217,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Получаем данные пользователя
       try {
         console.log('[Auth] Fetching user data for auth_id:', session.user.id);
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        console.log('[Auth] User data result:', { userData: !!userData, userError: !!userError });
+        const userData = await apiService.getCurrentUser();
+        console.log('[Auth] User data result:', { userData: !!userData });
           
-        if (userError) {
-          console.error('[Auth] Error fetching user data:', userError);
-          setUser(null);
-          return false;
-        }
-        
         if (userData) {
-          const user: User = {
+          const user: AuthUser = {
             id: userData.id.toString(),
-            email: userData.email,
-            role: userData.role,
-            name: userData.username || userData.email
+            email: userData.email || '',
+            role: userData.roles?.[0] || 'citizen', // Берем первую роль из массива
+            name: userData.username || userData.email || ''
           };
           setUser(user);
+          
+          // Получаем персонажей пользователя
+          const chars = await fetchCharacters(user.id);
+          setCharacters(chars);
+          
           console.log('[Auth] User authenticated:', user);
           return true;
         } else {
           console.error('[Auth] No user data found for auth_id:', session.user.id);
           setUser(null);
+          setCharacters([]);
           return false;
         }
       } catch (error) {
         console.error('[Auth] Error in user data fetch:', error);
         setUser(null);
+        setCharacters([]);
         return false;
       }
     } catch (error) {
       console.error('[Auth] Auth check error:', error);
       setUser(null);
+      setCharacters([]);
       authUtils.removeToken();
       return false;
     } finally {
@@ -220,25 +288,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Получаем данные пользователя
       if (data.user) {
         try {
-          const { data: userData, error: userError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
+          const userData = await apiService.getCurrentUser();
             
-          if (userError) {
-            console.error('[Auth] Error fetching user data:', userError);
-            throw userError;
-          }
-          
           if (userData) {
-            const user: User = {
+            const user: AuthUser = {
               id: userData.id.toString(),
-              email: userData.email,
-              role: userData.role,
-              name: userData.username || userData.email
+              email: userData.email || '',
+              role: userData.roles?.[0] || 'citizen', // Берем первую роль из массива
+              name: userData.username || userData.email || ''
             };
             setUser(user);
+            
+            // Получаем персонажей пользователя
+            const chars = await fetchCharacters(user.id);
+            setCharacters(chars);
+            
             console.log('[Auth] User logged in successfully:', user);
           }
         } catch (error) {
@@ -257,6 +321,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('[Auth] Logging out...');
       await supabase.auth.signOut();
       setUser(null);
+      setCharacters([]);
       authUtils.removeToken();
       console.log('[Auth] Logout successful');
     } catch (error) {
@@ -264,21 +329,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateUser = (updates: Partial<User>) => {
+  const updateUser = (updates: Partial<AuthUser>) => {
     if (user) {
       setUser({ ...user, ...updates });
     }
   };
 
+  // Отладочная информация
+  console.log('[AuthProvider] Current state:', {
+    user: user?.email,
+    charactersCount: characters.length,
+    isLoading,
+    isAuthenticated: !!user,
+    userObject: user
+  });
+
+  // Добавляем дополнительную отладочную информацию при изменении состояния
+  useEffect(() => {
+    console.log('[AuthProvider] State changed:', {
+      user: user?.email,
+      charactersCount: characters.length,
+      isLoading,
+      isAuthenticated: !!user
+    });
+  }, [user, characters, isLoading]);
+
   return (
     <AuthContext.Provider value={{
       user,
+      characters,
+      activeCharacter,
       isAuthenticated: !!user,
       isLoading,
       login,
       logout,
       updateUser,
-      checkAuth
+      checkAuth,
+      refreshCharacters,
+      setActiveCharacter: setActiveCharacterHandler
     }}>
       {children}
     </AuthContext.Provider>

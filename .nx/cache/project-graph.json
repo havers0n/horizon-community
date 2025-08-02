@@ -11890,11 +11890,6 @@
       },
       {
         "source": "mdtclient",
-        "target": "npm:react-router-dom",
-        "type": "static"
-      },
-      {
-        "source": "mdtclient",
         "target": "npm:@types/node",
         "type": "static"
       },

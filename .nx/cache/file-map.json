@@ -130,1331 +130,1028 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "apps/resources_fivem/mdt-system/README.md",
-        "hash": "438399247483089461"
+        "file": "apps/agentrules.md",
+        "hash": "11889500242200842371"
       },
       {
-        "file": "supabase/migrations/008_complete_character_system.sql",
-        "hash": "11827627643639358045"
-      },
-      {
-        "file": "docker-compose.yml",
-        "hash": "13006215882576324033"
-      },
-      {
-        "file": "REALTIME_SYSTEM_FIX_REPORT.md",
-        "hash": "17551503832310068841"
-      },
-      {
-        "file": "fix_env.ps1",
-        "hash": "5091799674704902664"
-      },
-      {
-        "file": "scripts/apply_migrations.js",
-        "hash": "13338554822932093783"
-      },
-      {
-        "file": "fix-database-schema.cjs",
-        "hash": "2553271865685293578"
-      },
-      {
-        "file": "SERVICES_MIGRATION_COMPLETE_REPORT.md",
-        "hash": "7035159846776088870"
-      },
-      {
-        "file": "scripts/create_test_application.js",
-        "hash": "2797124367758317945"
-      },
-      {
-        "file": "supabase/migrations/002_rls_policies.sql",
-        "hash": "11351603747400306426"
-      },
-      {
-        "file": "scripts/apply_mdt_simple.cjs",
-        "hash": "14505537967578921653"
-      },
-      {
-        "file": "docs/implementation-reports/STAGE_2_COMPLETION_REPORT.md",
-        "hash": "13238347365739132574"
-      },
-      {
-        "file": "docs/implementation-reports/DASHBOARD_WIDGET_INTEGRATION_REPORT.md",
-        "hash": "997323260920094297"
-      },
-      {
-        "file": "scripts/apply_templates_only.cjs",
-        "hash": "4381672356002752013"
-      },
-      {
-        "file": "docs/api-and-integrations/WEBSOCKET_USAGE_EXAMPLES.md",
-        "hash": "5882623343813702269"
-      },
-      {
-        "file": "docs/deployment/DEPLOYMENT_INSTRUCTIONS.md",
-        "hash": "2723209972353074814"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/client/realtime.lua",
-        "hash": "15271425717946882744"
-      },
-      {
-        "file": "docs/user-guides/MANUAL_MIGRATION_INSTRUCTIONS.md",
-        "hash": "2838996626608947829"
-      },
-      {
-        "file": "docs/implementation-reports/OFFICER_CREATION_SECTION_REPORT.md",
-        "hash": "13292953025439563593"
-      },
-      {
-        "file": "docs/implementation-reports/ENHANCED_TEMPLATES_COMPLETION_REPORT.md",
-        "hash": "17096488500797955386"
-      },
-      {
-        "file": "DEBUG_TOKEN.md",
-        "hash": "1357807545082423696"
-      },
-      {
-        "file": "docs/user-guides/LEAVE_ADVANCE_NOTICE_UPDATE.md",
-        "hash": "2372506088475247571"
-      },
-      {
-        "file": "docs/implementation-reports/CRITICAL_FIXES_REPORT.md",
-        "hash": "5654805428456543091"
-      },
-      {
-        "file": "scripts/apply_joint_migration.js",
-        "hash": "16618016149731688648"
-      },
-      {
-        "file": "scripts/add_admin_user.js",
-        "hash": "3767713231369670445"
-      },
-      {
-        "file": ".env.backup2",
-        "hash": "275879972560989494"
-      },
-      {
-        "file": "docs/technical-specs/SECURITY_IMPROVEMENTS.md",
-        "hash": "11599254968892976763"
-      },
-      {
-        "file": "docs/architecture/COLOR_PALETTE_IMPLEMENTATION_REPORT.md",
-        "hash": "279681680362426477"
-      },
-      {
-        "file": "BOLO_MANAGEMENT_SYSTEM_COMPLETION_REPORT.md",
-        "hash": "13315629978066031429"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/CLEANUP_REPORT.md",
-        "hash": "6403843863104262490"
-      },
-      {
-        "file": "scripts/test_api_endpoints.js",
-        "hash": "11201701680565517404"
-      },
-      {
-        "file": "scripts/apply_schema_direct.cjs",
-        "hash": "17294524549295112446"
-      },
-      {
-        "file": "docs/implementation-reports/EMS_MIGRATION_COMPLETION_REPORT.md",
-        "hash": "57666629897277539"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/ui/index.css",
-        "hash": "8455328446797833941"
-      },
-      {
-        "file": "supabase/migrations/005_disable_rls_temp.sql",
-        "hash": "2154231034241821946"
-      },
-      {
-        "file": "docs/implementation-reports/COMPANIES_SYSTEM_COMPLETION_REPORT.md",
-        "hash": "10231390676252975946"
-      },
-      {
-        "file": "scripts/deploy-to-cloud.js",
-        "hash": "6492726992347377561"
-      },
-      {
-        "file": "scripts/fix-vite-build.sh",
-        "hash": "16876703382964632969"
-      },
-      {
-        "file": "supabase/migrations/016_add_missing_user_fields.sql",
-        "hash": "13912481719858124841"
-      },
-      {
-        "file": "docs/implementation-reports/NORMALIZED_CHARACTER_SYSTEM_COMPLETION_REPORT.md",
-        "hash": "1594851899859102962"
-      },
-      {
-        "file": "docs/implementation-reports/REACT_MIGRATION_FINAL_SUMMARY.md",
-        "hash": "15668541896314301177"
-      },
-      {
-        "file": ".github/workflows/deploy.backup.md",
-        "hash": "15504765014758989594"
-      },
-      {
-        "file": "scripts/run_restore.cjs",
-        "hash": "1376934169997692581"
-      },
-      {
-        "file": "ACTION_PLAN_INTEGRATION_FIXES.md",
-        "hash": "1522816262519291295"
-      },
-      {
-        "file": "check-user.mjs",
-        "hash": "2157264692933312448"
-      },
-      {
-        "file": "scripts/quick-fix.sh",
-        "hash": "2225907583030368414"
-      },
-      {
-        "file": "scripts/reset_test_limits.js",
-        "hash": "5255467621192384216"
-      },
-      {
-        "file": "env.example",
-        "hash": "9738704925694065282"
-      },
-      {
-        "file": "docs/implementation-reports/COMPONENTS_CLEANUP_REPORT.md",
-        "hash": "5593038888220560090"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/shared/utils.lua",
-        "hash": "14544638809109192433"
-      },
-      {
-        "file": "scripts/apply_sql_direct.js",
-        "hash": "17012840326686358923"
-      },
-      {
-        "file": "docs/technical-specs/tzv2.md",
-        "hash": "9601320196706719856"
-      },
-      {
-        "file": ".eslintignore",
-        "hash": "7663861978715868291"
-      },
-      {
-        "file": "docs/architecture/ARCHITECTURE_SUMMARY.md",
-        "hash": "10358808525776508851"
-      },
-      {
-        "file": ".env.backup",
-        "hash": "17986806582386133803"
-      },
-      {
-        "file": "scripts/check_tables_simple.js",
-        "hash": "754836772660832313"
-      },
-      {
-        "file": "supabase/migrations/006_simple_rls_fix.sql",
-        "hash": "10819046811632533099"
-      },
-      {
-        "file": "supabase/migrations/005_cad_mdt_system.sql",
-        "hash": "1292452403301833810"
-      },
-      {
-        "file": "scripts/fix-production-deployment.sh",
-        "hash": "14939252647997614042"
-      },
-      {
-        "file": "FINAL_SECURITY_AUDIT_COMPLETE.md",
-        "hash": "4649866796163861582"
-      },
-      {
-        "file": "docs/implementation-reports/REPORTS_SYSTEM_COMPLETION_REPORT.md",
-        "hash": "8677565985246873464"
-      },
-      {
-        "file": ".prettierrc",
-        "hash": "16267754514737964994"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/FINAL_FIX_REPORT.md",
-        "hash": "4253535085292606080"
-      },
-      {
-        "file": ".env.new",
-        "hash": "17170012354141038240"
-      },
-      {
-        "file": "docs/implementation-reports/INTERACTIVE_A4_FORM_IMPLEMENTATION.md",
-        "hash": "1738723531724216101"
-      },
-      {
-        "file": "scripts/check_test_user.js",
-        "hash": "1054059519377908427"
-      },
-      {
-        "file": "docs/implementation-reports/LAW_ENFORCEMENT_FEATURE_MIGRATION_REPORT.md",
-        "hash": "10727730471832686663"
-      },
-      {
-        "file": "docs/implementation-reports/DARK_THEME_TEXT_FIX.md",
-        "hash": "18005585294088084925"
-      },
-      {
-        "file": "supabase/migrations/004_fix_users_table.sql",
-        "hash": "5175568549906223123"
-      },
-      {
-        "file": "scripts/create_tables_in_public.js",
-        "hash": "1603531054125398406"
-      },
-      {
-        "file": "scripts/quick-api-fix.sh",
-        "hash": "13262491214620191486"
-      },
-      {
-        "file": "check-db-structure.js",
-        "hash": "2631575002120556627"
-      },
-      {
-        "file": "scripts/apply_mdt_migration.js",
-        "hash": "17722128273132114571"
-      },
-      {
-        "file": "docs/implementation-reports/LAW_REPORT_SYSTEM_IMPLEMENTATION.md",
-        "hash": "16993573521201387100"
-      },
-      {
-        "file": "scripts/migrate-react-19.cjs",
-        "hash": "13109700678437191668"
-      },
-      {
-        "file": "SYNC_IMPLEMENTATION_PLAN.md",
-        "hash": "5281158765331873819"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/CRITICAL_FIX_REPORT.md",
-        "hash": "9529570993219191760"
-      },
-      {
-        "file": "docs/mdt-system/MDT_IMPLEMENTATION_SUMMARY.md",
-        "hash": "15982873614936381044"
-      },
-      {
-        "file": "docs/ORGANIZATION_REPORT.md",
-        "hash": "15269226365809179836"
-      },
-      {
-        "file": "scripts/build-fivem.js",
-        "hash": "5135381230475597728"
-      },
-      {
-        "file": "docs/deployment/DEPLOYMENT_OPTIMIZATIONS.md",
-        "hash": "3756476300733029323"
-      },
-      {
-        "file": "scripts/get_supabase_keys.js",
-        "hash": "15612277435335726742"
-      },
-      {
-        "file": "COMPREHENSIVE_AUDIT_REPORT.md",
-        "hash": "6508165053627951919"
-      },
-      {
-        "file": "supabase/migrations/018_sync_with_golden_types.sql",
-        "hash": "2142701708746968567"
-      },
-      {
-        "file": "supabase/seed.sql",
-        "hash": "13376950263575640000"
-      },
-      {
-        "file": "scripts/upload-seed-data.ps1",
-        "hash": "1131361460915154976"
-      },
-      {
-        "file": "docs/user-guides/newpagecreaterules.md",
-        "hash": "8931170849203345179"
-      },
-      {
-        "file": "scripts/create_tables_simple.js",
-        "hash": "1093997553145651579"
-      },
-      {
-        "file": "docs/technical-specs/AUDIT_REPORT.md",
-        "hash": "16934432368695375968"
-      },
-      {
-        "file": "scripts/apply_reports_migration_final.js",
-        "hash": "8058154457247697548"
-      },
-      {
-        "file": "scripts/apply_enhanced_templates_simple.cjs",
-        "hash": "16072946818214620649"
-      },
-      {
-        "file": "database_schema.sql",
-        "hash": "3244421341483603138"
-      },
-      {
-        "file": "supabase/config.toml",
-        "hash": "14899851295786961498"
-      },
-      {
-        "file": "AUDIT_SUMMARY.md",
-        "hash": "6036821905867050455"
-      },
-      {
-        "file": "docs/implementation-reports/REACT_UNIFICATION_REPORT.md",
-        "hash": "10264141758590428595"
-      },
-      {
-        "file": "supabase/migrations/007_update_departments.sql",
-        "hash": "11303292592642553509"
-      },
-      {
-        "file": "docs/api-and-integrations/AUTHENTICATION.md",
-        "hash": "15376061969720325599"
-      },
-      {
-        "file": "supabase/migrations/015_fix_common_characters_owner_id.sql",
-        "hash": "6531486004953974662"
-      },
-      {
-        "file": "docs/implementation-reports/COMPLETE_SYSTEM_UPDATE_REPORT.md",
-        "hash": "9827012407227145452"
-      },
-      {
-        "file": "docs/user-guides/CHARACTER_SYSTEM_DOCUMENTATION.md",
-        "hash": "1623273020678543642"
-      },
-      {
-        "file": "docs/user-guides/JOINT_POSITIONS_SYSTEM.md",
-        "hash": "13954784376239459728"
-      },
-      {
-        "file": "scripts/check_departments_public.js",
-        "hash": "16560937420492434521"
-      },
-      {
-        "file": "supabase/migrations/004_mdt_system.sql",
-        "hash": "18263571696876582494"
-      },
-      {
-        "file": "scripts/restore_database.cjs",
-        "hash": "11969742431016460329"
-      },
-      {
-        "file": "docs/implementation-reports/ETAP1_MIGRATION_COMPLETE_REPORT.md",
-        "hash": "3808830119160776438"
-      },
-      {
-        "file": "SUPABASE_JS_MIGRATION_COMPLETE_REPORT.md",
-        "hash": "2138280937204082868"
-      },
-      {
-        "file": "test-db-connection.js",
-        "hash": "8270684075114260752"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/REACT_INTEGRATION_REPORT.md",
-        "hash": "15549434015514687416"
-      },
-      {
-        "file": "scripts/create_test_users.sql",
-        "hash": "12312643752594090201"
-      },
-      {
-        "file": "docs/deployment/GITHUB_ACTIONS_SETUP.md",
-        "hash": "9942657353810451550"
-      },
-      {
-        "file": "scripts/create_simple_departments.js",
-        "hash": "16531229985603096328"
-      },
-      {
-        "file": "scripts/cleanup-dev-schema.sql",
-        "hash": "10751093084032662028"
-      },
-      {
-        "file": "scripts/create_forum_tables.sql",
-        "hash": "1911021168228953244"
-      },
-      {
-        "file": "STAGE_3_ARCHITECTURE_OPTIMIZATION_REPORT.md",
-        "hash": "13516088988127394134"
-      },
-      {
-        "file": "QUICK_MDT_MIGRATION.md",
-        "hash": "13736169925682108341"
-      },
-      {
-        "file": "scripts/apply_fixes_simple.ps1",
-        "hash": "4644603904233584719"
-      },
-      {
-        "file": "docs/user-guides/REPORTS_SYSTEM_GUIDE.md",
-        "hash": "11844726062499620685"
-      },
-      {
-        "file": "supabase/migrations/006_joint_positions_history.sql",
-        "hash": "10778399762334326066"
-      },
-      {
-        "file": "docs/implementation-reports/EMS_FD_REPORTS_IMPLEMENTATION_REPORT.md",
-        "hash": "17951042887923718490"
-      },
-      {
-        "file": "scripts/create_tables_via_api.js",
-        "hash": "6050031224321487629"
-      },
-      {
-        "file": "CRITICAL_AUDIT_REPORT.md",
-        "hash": "7243801545591354235"
-      },
-      {
-        "file": "scripts/diagnose-vite-issue.sh",
-        "hash": "8670671618458854242"
-      },
-      {
-        "file": "docs/technical-specs/rls-guest-policies.md",
-        "hash": "17124952439587079480"
-      },
-      {
-        "file": "docs/implementation-reports/CITIZEN_PORTAL_MIGRATION_COMPLETE_REPORT.md",
-        "hash": "6170167340352082705"
-      },
-      {
-        "file": "scripts/create_tables_direct.sql",
-        "hash": "2736828659551839810"
-      },
-      {
-        "file": "DEPARTMENT_SYSTEM_IMPROVEMENTS.md",
-        "hash": "17372081947583277578"
-      },
-      {
-        "file": "get-test-token.cjs",
-        "hash": "15930150106737221376"
-      },
-      {
-        "file": "docs/technical-specs/AS-IS_DOCUMENTATION.md",
-        "hash": "7392698689963496773"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "8465593252564287444"
-      },
-      {
-        "file": "scripts/check_user.js",
-        "hash": "6056135424961958539"
-      },
-      {
-        "file": "JWT_MIGRATION_GUIDE.md",
-        "hash": "13625976051937670339"
-      },
-      {
-        "file": "scripts/check_tables.js",
-        "hash": "7085291421373962850"
-      },
-      {
-        "file": "scripts/setup-vps.js",
-        "hash": "6421503279023085781"
-      },
-      {
-        "file": "docs/implementation-reports/ENTRY_APPLICATION_FIX.md",
-        "hash": "7760654503466975182"
-      },
-      {
-        "file": "scripts/debug_applications.js",
-        "hash": "14542362139591077056"
-      },
-      {
-        "file": "supabase/migrations/001_initial_schema.sql",
-        "hash": "13824463293405508163"
-      },
-      {
-        "file": "scripts/run_sql.js",
-        "hash": "3669990721862216656"
-      },
-      {
-        "file": "scripts/apply_all_migrations.js",
-        "hash": "4686984014046392983"
-      },
-      {
-        "file": "docs/testing/COMPREHENSIVE_TESTING_PLAN.md",
-        "hash": "4929880172224315749"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/server/main.lua",
-        "hash": "13848019409895324078"
-      },
-      {
-        "file": "supabase/migrations/012_add_template_status.sql",
-        "hash": "8734188197730373541"
-      },
-      {
-        "file": "ARCHITECTURE_BEST_PRACTICES.md",
-        "hash": "5866183314510703912"
-      },
-      {
-        "file": "docs/api-and-integrations/WEBSOCKET_ANALYSIS_REPORT.md",
-        "hash": "15827081428980391459"
-      },
-      {
-        "file": "scripts/check_existing_users.js",
-        "hash": "3500446764719466778"
-      },
-      {
-        "file": "docs/technical-specs/REPORTS_SYSTEM_AUDIT.md",
-        "hash": "7714969134545468214"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/FINAL_DIAGNOSTIC_INSTRUCTIONS.md",
-        "hash": "5224374961734499102"
-      },
-      {
-        "file": "docs/api-and-integrations/MAPPING_TABLE.md",
-        "hash": "17714497447799393028"
-      },
-      {
-        "file": "create-env.js",
-        "hash": "788520630118395703"
-      },
-      {
-        "file": "scripts/check_migration_readiness.js",
-        "hash": "12452928658565142891"
-      },
-      {
-        "file": "scripts/apply_cad_migration.js",
-        "hash": "8522940580778507683"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/fxmanifest.lua",
-        "hash": "8753623715305110752"
-      },
-      {
-        "file": "docs/user-guides/FORUM_SYSTEM.md",
-        "hash": "12827408935957151450"
-      },
-      {
-        "file": "scripts/create_schemas.sql",
-        "hash": "4477441148528413285"
-      },
-      {
-        "file": "docs/api-and-integrations/API_DETAILED_ANALYSIS.json",
-        "hash": "5069523616480805096"
-      },
-      {
-        "file": "docs/technical-specs/DATABASE_AUDIT_REPORT.md",
-        "hash": "2438376191807793033"
-      },
-      {
-        "file": "DATABASE_FIX_REPORT.md",
-        "hash": "17190896113887426829"
-      },
-      {
-        "file": "docs/user-guides/LEAVE_SYSTEM_DOCUMENTATION.md",
-        "hash": "5379412121502900164"
-      },
-      {
-        "file": "docs/implementation-reports/LAW_CONTROL_PANEL_IMPLEMENTATION_REPORT.md",
-        "hash": "13292091978323327663"
-      },
-      {
-        "file": "docs/testing/test-users.md",
-        "hash": "9418963146796927233"
-      },
-      {
-        "file": "scripts/check_departments.js",
-        "hash": "13544643956270683884"
-      },
-      {
-        "file": "BACKEND_AUDIT_REPORT.md",
-        "hash": "4108192085465584672"
-      },
-      {
-        "file": "scripts/apply_forum_migration.js",
-        "hash": "7684883382413663999"
-      },
-      {
-        "file": "docs/README.md",
-        "hash": "19043695673828292"
-      },
-      {
-        "file": "docs/implementation-reports/LEAVE_MODAL_FIX_REPORT.md",
-        "hash": "12227530486626902814"
-      },
-      {
-        "file": "docs/implementation-reports/ENHANCED_TEMPLATES_SETUP.md",
-        "hash": "14585925969792901373"
-      },
-      {
-        "file": "AUDIT_COMPLETION_SUMMARY.md",
-        "hash": "6734860838264612947"
-      },
-      {
-        "file": "docs/architecture/PROEKTNYI_ANALIZ_ARKHITEKTURY.md",
-        "hash": "1194702703084444561"
-      },
-      {
-        "file": "CRITICAL_AUTH_FIX_REPORT.md",
-        "hash": "14466114675161841783"
-      },
-      {
-        "file": "docs/technical-specs/PROJECT_STATUS_ANALYSIS.md",
-        "hash": "17937147488019237155"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/ui/index.html",
-        "hash": "14198765741417608449"
-      },
-      {
-        "file": ".nxignore",
-        "hash": "9492348307038149687"
-      },
-      {
-        "file": "scripts/apply_test_migration.js",
-        "hash": "13339676250401428561"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/DIAGNOSTIC_REPORT.md",
-        "hash": "7780742072349194846"
+        "file": "packages/db-types/src/index.ts",
+        "hash": "18072141508665988202"
       },
       {
         "file": "tsconfig.base.json",
         "hash": "11859558129296447736"
       },
       {
-        "file": "scripts/apply_cad_migration_final.js",
-        "hash": "11851596549515059051"
+        "file": "docs/technical-specs/PROJECT_STATUS_ANALYSIS.md",
+        "hash": "17937147488019237155"
       },
       {
         "file": "docs/testing/TESTING_GUIDE.md",
         "hash": "18103022868125101293"
       },
       {
-        "file": "docs/api-and-integrations/INCOMPATIBLE_FIELDS_ANALYSIS.md",
-        "hash": "13617840594656731642"
-      },
-      {
-        "file": "docs/implementation-reports/DEPARTMENTS_UPDATE_REPORT.md",
-        "hash": "17572963532199731243"
-      },
-      {
-        "file": "docs/api-and-integrations/API_ANALYSIS_REPORT.md",
-        "hash": "12662010486798506064"
-      },
-      {
-        "file": "tailwind.config.ts",
-        "hash": "14886741921035005360"
-      },
-      {
-        "file": "ARCHITECTURE_AUDIT_REPORT.md",
-        "hash": "2116642105002349552"
-      },
-      {
-        "file": "scripts/create_test_auth_users.js",
-        "hash": "15190606669752285093"
-      },
-      {
-        "file": "INDEPENDENT_AUDIT_REPORT.md",
-        "hash": "2221171344945320198"
-      },
-      {
-        "file": "ENV_FIX_REPORT.md",
-        "hash": "2372644950471811503"
-      },
-      {
-        "file": ".cursorignore",
-        "hash": "11349300793510315973"
-      },
-      {
-        "file": ".env.example",
-        "hash": "11463985077921953980"
-      },
-      {
-        "file": "create-user.mjs",
-        "hash": "4915662001136734"
-      },
-      {
-        "file": "docs/deployment/VITE_ISSUE_ANALYSIS.md",
-        "hash": "15529411384940229870"
-      },
-      {
-        "file": "docs/deployment/CRITICAL_DEPLOYMENT_FIX.md",
-        "hash": "13250238670169577524"
-      },
-      {
-        "file": "docs/implementation-reports/REACT_19_MIGRATION_GUIDE.md",
-        "hash": "3785524353096279276"
-      },
-      {
-        "file": "package-lock.json",
-        "hash": "12787748631644214699"
-      },
-      {
-        "file": "docs/architecture/COLOR_PALETTE_UPDATE.md",
-        "hash": "17948018011800356228"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/TEST_F6_FIX.md",
-        "hash": "4300879197652907058"
-      },
-      {
-        "file": "scripts/test_api_limits.js",
-        "hash": "13268288897197112101"
-      },
-      {
-        "file": "STAGE_4_TESTING_COMPLETION_REPORT.md",
-        "hash": "15410448969038090857"
-      },
-      {
-        "file": ".github/workflows/deploy.yml",
-        "hash": "4397924740290924665"
-      },
-      {
-        "file": "scripts/emergency-vps-fix.sh",
-        "hash": "822687134393279953"
-      },
-      {
-        "file": "QUICK_START_GUIDE.md",
-        "hash": "835139844167727256"
-      },
-      {
-        "file": "scripts/apply_schemas.js",
-        "hash": "16463217763946186811"
-      },
-      {
-        "file": "docs/mdt-system/MDT_FRAMEWORK_INDEPENDENCE_REPORT.md",
-        "hash": "12747493148244574514"
-      },
-      {
-        "file": "docs/implementation-reports/NOTEBOOK_IMPLEMENTATION_REPORT.md",
-        "hash": "2489395833805574974"
-      },
-      {
-        "file": "supabase/migrations/013_forum_system.sql",
-        "hash": "8385164403131443327"
-      },
-      {
-        "file": "docs/implementation-reports/OFFICERS_SECTION_IMPLEMENTATION_REPORT.md",
-        "hash": "2941136397236426270"
-      },
-      {
-        "file": "scripts/migrate-react-19.js",
-        "hash": "13109700678437191668"
-      },
-      {
-        "file": "fix_env_password.ps1",
-        "hash": "5069878574652792018"
-      },
-      {
-        "file": "SCHEMA_FIXES_COMPLETION_REPORT.md",
-        "hash": "11548502759578237571"
-      },
-      {
-        "file": "docs/technical-specs/COMPREHENSIVE_AUDIT_PLAN.md",
-        "hash": "15733409243760732860"
-      },
-      {
-        "file": "docs/deployment/CLOUD_MIGRATION_GUIDE.md",
-        "hash": "10729646885134352805"
-      },
-      {
-        "file": "scripts/create_tables_via_sql.js",
-        "hash": "6905205018398389437"
-      },
-      {
-        "file": "AUTHENTICATION_INTEGRATION_FIX_REPORT.md",
-        "hash": "10658167442751359977"
-      },
-      {
-        "file": "supabase/migrations/011_enhanced_report_templates.sql",
-        "hash": "4196000462399524730"
-      },
-      {
-        "file": "migrations/meta/_journal.json",
-        "hash": "14391169523397353783"
-      },
-      {
-        "file": "docs/deployment/UPROSHCHENNAYA_SBORKA_FIVEM.md",
-        "hash": "8677200351996860010"
-      },
-      {
-        "file": "APPLY_FIXES_WINDOWS.md",
-        "hash": "8479973522064566739"
-      },
-      {
-        "file": "scripts/check_departments.sql",
-        "hash": "11091435766970941083"
-      },
-      {
-        "file": "supabase/migrations/014_extend_users_and_characters.sql",
-        "hash": "7150925884150117502"
-      },
-      {
-        "file": "scripts/create_test_users.js",
-        "hash": "5694578994624709374"
-      },
-      {
-        "file": "docs/api-and-integrations/BACKEND_SNAILYCAD_INTEGRATION_REPORT.md",
-        "hash": "6615121233766349370"
-      },
-      {
-        "file": "scripts/simple_templates_setup.cjs",
-        "hash": "8321771888933886003"
-      },
-      {
-        "file": "scripts/apply_migrations_safe.js",
-        "hash": "1123160504604294504"
-      },
-      {
-        "file": "ROADMAP_MDTCLIENT.md",
-        "hash": "9959663215317899634"
-      },
-      {
-        "file": "docs/user-guides/DEPARTMENTS_DESIGN_UPDATE.md",
-        "hash": "13607754095961510152"
-      },
-      {
-        "file": "SECURITY_CLEANUP_REPORT.md",
-        "hash": "4245709967725462162"
-      },
-      {
-        "file": "supabase/migrations/009_setup_rls_policies.sql",
-        "hash": "15535352586940939591"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/config.lua",
-        "hash": "5372277954146625262"
-      },
-      {
-        "file": "check-db-structure.cjs",
-        "hash": "2631575002120556627"
-      },
-      {
-        "file": ".github/workflows/backup.md",
-        "hash": "2536150726825847360"
-      },
-      {
-        "file": "apps/aichangelog.md",
-        "hash": "10774785171615596812"
-      },
-      {
-        "file": "supabase/migrations/003_fix_rls_recursion.sql",
-        "hash": "13463593658468597455"
-      },
-      {
-        "file": "docs/deployment/QUICK_DEPLOY_SETUP.md",
-        "hash": "10322605218178698190"
-      },
-      {
-        "file": "docs/implementation-reports/NORMALIZED_CHARACTER_SYSTEM_REPORT.md",
-        "hash": "9374135625725578371"
-      },
-      {
-        "file": "FINAL_AUDIT_REPORT.md",
-        "hash": "4872485093650839254"
-      },
-      {
-        "file": ".prettierignore",
-        "hash": "16448050467312557263"
-      },
-      {
-        "file": "INTEGRATION_FIXES_IMPLEMENTATION_REPORT.md",
-        "hash": "4733666900739332681"
-      },
-      {
-        "file": "docs/implementation-reports/STAGE_3_COMPLETION_REPORT.md",
-        "hash": "2196478532617093537"
-      },
-      {
-        "file": "scripts/apply_forum_migration_final.js",
-        "hash": "4848959959807346726"
-      },
-      {
-        "file": "nx.json",
-        "hash": "3496215214210838429"
-      },
-      {
-        "file": "docs/technical-specs/тз.md",
-        "hash": "10122793774620201296"
-      },
-      {
-        "file": "supabase/migrations/010_report_templates_system.sql",
-        "hash": "13099961395515154698"
-      },
-      {
-        "file": "docs/architecture/DESIGN_SYSTEM_IMPLEMENTATION.md",
-        "hash": "17995283445150683987"
-      },
-      {
-        "file": "scripts/check_schemas_detailed.js",
-        "hash": "6661872404153921428"
-      },
-      {
-        "file": "supabase/migrations/019_normalize_character_schema.sql",
-        "hash": "11548817585128587503"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/FINAL_F6_FIX_REPORT.md",
-        "hash": "17583296129577475921"
-      },
-      {
-        "file": "docs/user-guides/roadmap.md",
-        "hash": "17691165133422218423"
-      },
-      {
-        "file": "scripts/test_snailycad_api.js",
-        "hash": "8503112778939388283"
-      },
-      {
-        "file": "docs/deployment/FIVEM_DEPLOYMENT_GUIDE.md",
-        "hash": "7308662711130364100"
-      },
-      {
-        "file": "supabase/migrations/017_verify_integrity.sql",
-        "hash": "16368327019541310302"
-      },
-      {
-        "file": "docs/architecture/BACKEND_ARCHITECTURE_ANALYSIS.md",
-        "hash": "8570473825255472999"
-      },
-      {
-        "file": "docs/testing/LOCAL_TESTING_GUIDE.md",
-        "hash": "2539318178809350468"
-      },
-      {
-        "file": "supabase/migrations/003_rls_candidate_guest_restrictions.sql",
-        "hash": "3737784980493724343"
-      },
-      {
-        "file": ".eslintrc.json",
-        "hash": "18315524891129148814"
-      },
-      {
-        "file": "scripts/create_test_user.js",
-        "hash": "16878692546895535162"
-      },
-      {
-        "file": "COMPREHENSIVE_SYSTEM_AUDIT_REPORT.md",
-        "hash": "13585487339687536169"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/ui/fivem-nui.js",
-        "hash": "4156231832886779237"
-      },
-      {
-        "file": "scripts/build-fivem-simple.js",
-        "hash": "17833267731171558558"
-      },
-      {
-        "file": "scripts/check_public_tables.js",
-        "hash": "16823074815314289033"
-      },
-      {
-        "file": "docs/architecture/DESIGN_SYSTEM.md",
-        "hash": "8672665519800438630"
-      },
-      {
-        "file": "supabase/migrations/002_create_missing_tables.sql",
-        "hash": "13170973324199626749"
-      },
-      {
-        "file": "docs/api-and-integrations/DATA_MODEL_MAPPING.md",
-        "hash": "17410203756758934700"
-      },
-      {
-        "file": "docs/user-guides/REPORTS_SYSTEM_DOCUMENTATION.md",
-        "hash": "12879477264236816902"
-      },
-      {
-        "file": "scripts/apply_active_units_migration.js",
-        "hash": "7584224282465655061"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/ui/index.js",
-        "hash": "4898839387504692719"
-      },
-      {
-        "file": "docs/mdt-system/MDT_BACKEND_AUDIT_REPORT.md",
-        "hash": "5668945791323316072"
-      },
-      {
-        "file": "docs/implementation-reports/COMPONENTS_MIGRATION_COMPLETION_REPORT.md",
-        "hash": "12099833562139917807"
-      },
-      {
-        "file": "docs/implementation-reports/SIGNALS_SYSTEM_IMPLEMENTATION_REPORT.md",
-        "hash": "16183889526404718257"
-      },
-      {
-        "file": "scripts/create_missing_tables.js",
-        "hash": "16947961842845596606"
-      },
-      {
-        "file": "docs/implementation-reports/REACT_MIGRATION_COMPLETION_REPORT.md",
-        "hash": "1460460104899146670"
-      },
-      {
-        "file": "scripts/apply_migration_simple.js",
-        "hash": "7754718864778586069"
-      },
-      {
-        "file": "scripts/check_supabase_connection.js",
-        "hash": "9085991694826142394"
-      },
-      {
-        "file": "scripts/test_supabase_connection.js",
-        "hash": "1958907455779461462"
-      },
-      {
-        "file": "scripts/debug_auth.js",
-        "hash": "3322904960108330723"
-      },
-      {
-        "file": "docs/mdt-system/MDT_MIGRATION_GUIDE.md",
-        "hash": "5698310696900387226"
-      },
-      {
-        "file": "scripts/apply_enhanced_templates.js",
-        "hash": "9388724677514501808"
-      },
-      {
-        "file": "docs/architecture/FEATURE_SCAFFOLDING.md",
-        "hash": "1382711523289886663"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/client/main.lua",
-        "hash": "8125279085516656768"
-      },
-      {
-        "file": "scripts/migrate-to-cloud.js",
-        "hash": "15412530269280727075"
-      },
-      {
-        "file": "scripts/apply_architecture_fixes.sh",
-        "hash": "10838278952019736339"
-      },
-      {
-        "file": "scripts/apply_fixes_windows.ps1",
-        "hash": "11251788277659469373"
-      },
-      {
-        "file": "package.json",
-        "hash": "10985585132532953256"
-      },
-      {
-        "file": "scripts/create_test_data.js",
-        "hash": "3253380897469782768"
-      },
-      {
-        "file": "ARCHITECTURE.md",
-        "hash": "1700214016594802943"
-      },
-      {
-        "file": "docs/implementation-reports/EMS_FD_PORTAL_IMPLEMENTATION_REPORT.md",
-        "hash": "3394457766389157351"
-      },
-      {
-        "file": "docs/deployment/DEPLOYMENT.md",
-        "hash": "1230295416080978918"
-      },
-      {
-        "file": "scripts/apply_forum_migration_simple.js",
-        "hash": "14374197698372773405"
-      },
-      {
-        "file": "supabase/migrations/004_add_updated_at_to_users.sql",
-        "hash": "827382602550107046"
-      },
-      {
         "file": "docs/user-guides/MIGRATION_INSTRUCTIONS.md",
         "hash": "7496825803201224232"
       },
       {
-        "file": "scripts/check_schemas.js",
-        "hash": "6452013604330967699"
+        "file": ".env.backup",
+        "hash": "17986806582386133803"
       },
       {
-        "file": "scripts/fix_cad_token.js",
-        "hash": "4009806721132679893"
-      },
-      {
-        "file": "docs/mdt-system/CAD_MDT_README.md",
-        "hash": "8443472604582982941"
-      },
-      {
-        "file": "create-user.js",
-        "hash": "4915662001136734"
-      },
-      {
-        "file": "scripts/check_localstorage.js",
-        "hash": "5147446733073609942"
-      },
-      {
-        "file": "README.md",
-        "hash": "3805444317805758455"
-      },
-      {
-        "file": "docs/deployment/IMMEDIATE_VPS_FIX.md",
-        "hash": "11661952496791987573"
-      },
-      {
-        "file": "docs/api-and-integrations/API_SNAILYCAD_INTEGRATION.md",
-        "hash": "7671897443956525570"
-      },
-      {
-        "file": "docs/implementation-reports/QUICK_ACTIONS_SYNC_REPORT.md",
-        "hash": "12509133776028564478"
-      },
-      {
-        "file": "scripts/test_curl_limits.js",
-        "hash": "17615058857988150608"
-      },
-      {
-        "file": "test-client-server-connection.ts",
-        "hash": "5645901162250213310"
-      },
-      {
-        "file": "scripts/check_user_limits.js",
-        "hash": "9573090104471900521"
-      },
-      {
-        "file": "docs/testing/TEST_TRANSLATION_REPORT.md",
-        "hash": "1341212189231485154"
-      },
-      {
-        "file": "scripts/clear_browser_cache.js",
-        "hash": "9445862633761983739"
-      },
-      {
-        "file": "docs/testing/ADMIN_TESTS_SYSTEM.md",
-        "hash": "15055421803720398870"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/INPUT_FIX_REPORT.md",
-        "hash": "4858770751265276819"
-      },
-      {
-        "file": "scripts/apply_forum_migration_direct.js",
-        "hash": "1740324465656466113"
-      },
-      {
-        "file": ".env.production",
-        "hash": "5261357101576304645"
-      },
-      {
-        "file": "supabase/.gitignore",
-        "hash": "10990855904653518110"
-      },
-      {
-        "file": "check-bolo-schema.cjs",
-        "hash": "18171084155971636559"
-      },
-      {
-        "file": "scripts/force-fix-vite.sh",
-        "hash": "11790046544400454430"
-      },
-      {
-        "file": "supabase/migrations/005_create_public_tables.sql",
-        "hash": "4983314419540826685"
-      },
-      {
-        "file": "supabase/migrations/004_test_system.sql",
-        "hash": "591454785969369916"
-      },
-      {
-        "file": "scripts/create_missing_public_tables.js",
-        "hash": "13591706924637188680"
-      },
-      {
-        "file": "docs/mdt-system/MDT_FRONTEND_BACKEND_INTEGRATION_REPORT.md",
-        "hash": "11870781760293303516"
-      },
-      {
-        "file": "VPS_DEPLOYMENT_GUIDE.md",
-        "hash": "8266441240692073091"
-      },
-      {
-        "file": "docs/implementation-reports/CITIZEN_PORTAL_MIGRATION_REPORT.md",
-        "hash": "4106715702531413039"
-      },
-      {
-        "file": "scripts/create_basic_templates.cjs",
-        "hash": "18311116849184970057"
-      },
-      {
-        "file": "tsconfig.json",
-        "hash": "13383150368136939813"
-      },
-      {
-        "file": "DISPATCH_MODULE_COMPLETION_REPORT.md",
-        "hash": "10122019934313768644"
-      },
-      {
-        "file": "INTEGRATION_ISSUES_ANALYSIS.md",
-        "hash": "9452248245423268875"
-      },
-      {
-        "file": "scripts/test_db_connection.js",
-        "hash": "9793170929262866559"
-      },
-      {
-        "file": "scripts/test_dynamic_limits.js",
-        "hash": "5007502910261507510"
-      },
-      {
-        "file": "EPIC_4_API_INTEGRATION_COMPLETION_REPORT.md",
-        "hash": "13733837150113342840"
-      },
-      {
-        "file": "apps/resources_fivem/mdt-system/VISUAL_FIX_REPORT.md",
-        "hash": "1951470659321301974"
-      },
-      {
-        "file": "scripts/build-nui-quick.js",
-        "hash": "13480207975284025036"
-      },
-      {
-        "file": "JWT_VALIDATION_REMOVAL_REPORT.md",
-        "hash": "3132456470608794543"
-      },
-      {
-        "file": "DISPATCH_DASHBOARD_IMPLEMENTATION_REPORT.md",
-        "hash": "14450451421186197873"
-      },
-      {
-        "file": "docs/implementation-reports/DASHBOARD_WIDGET_BUGFIX_REPORT.md",
-        "hash": "7606327312437661733"
-      },
-      {
-        "file": "fix_password.js",
-        "hash": "9496958127593798321"
-      },
-      {
-        "file": "docs/api-and-integrations/SOCKET_IO_INTEGRATION_PLAN.md",
-        "hash": "17411229850014064549"
+        "file": "SYNC_IMPLEMENTATION_PLAN.md",
+        "hash": "5281158765331873819"
       },
       {
         "file": "docs/implementation-reports/FAQ_DARK_THEME_FIX.md",
         "hash": "3351479384324478776"
       },
       {
+        "file": "docs/api-and-integrations/API_SNAILYCAD_INTEGRATION.md",
+        "hash": "7671897443956525570"
+      },
+      {
+        "file": "DISPATCH_MODULE_COMPLETION_REPORT.md",
+        "hash": "10122019934313768644"
+      },
+      {
+        "file": "fix_password.js",
+        "hash": "9496958127593798321"
+      },
+      {
+        "file": "supabase/migrations/020_create_trusted_rpc_functions.sql",
+        "hash": "16166911701310031139"
+      },
+      {
+        "file": "docs/user-guides/LEAVE_ADVANCE_NOTICE_UPDATE.md",
+        "hash": "2372506088475247571"
+      },
+      {
+        "file": "VPS_DEPLOYMENT_GUIDE.md",
+        "hash": "8266441240692073091"
+      },
+      {
+        "file": "docs/user-guides/CHARACTER_SYSTEM_DOCUMENTATION.md",
+        "hash": "1623273020678543642"
+      },
+      {
+        "file": "test-db-connection.js",
+        "hash": "8270684075114260752"
+      },
+      {
+        "file": "DATABASE_FIX_REPORT.md",
+        "hash": "17190896113887426829"
+      },
+      {
+        "file": "ARCHITECTURE.md",
+        "hash": "1700214016594802943"
+      },
+      {
+        "file": "supabase/migrations/004_add_updated_at_to_users.sql",
+        "hash": "827382602550107046"
+      },
+      {
+        "file": "docs/implementation-reports/CITIZEN_PORTAL_MIGRATION_COMPLETE_REPORT.md",
+        "hash": "6170167340352082705"
+      },
+      {
+        "file": "docs/implementation-reports/STAGE_2_COMPLETION_REPORT.md",
+        "hash": "13238347365739132574"
+      },
+      {
+        "file": "docs/deployment/FIVEM_DEPLOYMENT_GUIDE.md",
+        "hash": "7308662711130364100"
+      },
+      {
+        "file": "docs/api-and-integrations/MAPPING_TABLE.md",
+        "hash": "17714497447799393028"
+      },
+      {
+        "file": "ROADMAP_MDTCLIENT.md",
+        "hash": "4546324935160157657"
+      },
+      {
+        "file": "apps/aichangelog.md",
+        "hash": "10774785171615596812"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/TEST_F6_FIX.md",
+        "hash": "4300879197652907058"
+      },
+      {
+        "file": "FINAL_SECURITY_AUDIT_COMPLETE.md",
+        "hash": "4649866796163861582"
+      },
+      {
+        "file": "migrations/meta/_journal.json",
+        "hash": "14391169523397353783"
+      },
+      {
+        "file": "QUICK_MDT_MIGRATION.md",
+        "hash": "13736169925682108341"
+      },
+      {
+        "file": "docs/deployment/DEPLOYMENT.md",
+        "hash": "1230295416080978918"
+      },
+      {
+        "file": "check-user.mjs",
+        "hash": "2157264692933312448"
+      },
+      {
+        "file": "docs/implementation-reports/SIGNALS_SYSTEM_IMPLEMENTATION_REPORT.md",
+        "hash": "16183889526404718257"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/CLEANUP_REPORT.md",
+        "hash": "6403843863104262490"
+      },
+      {
+        "file": "docs/implementation-reports/EMS_MIGRATION_COMPLETION_REPORT.md",
+        "hash": "57666629897277539"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_MIGRATION_FINAL_SUMMARY.md",
+        "hash": "15668541896314301177"
+      },
+      {
+        "file": "README.md",
+        "hash": "3805444317805758455"
+      },
+      {
+        "file": "docs/api-and-integrations/INCOMPATIBLE_FIELDS_ANALYSIS.md",
+        "hash": "13617840594656731642"
+      },
+      {
         "file": "DISPATCH_DASHBOARD_DEVELOPMENT_PLAN.md",
         "hash": "1183901110033783381"
       },
       {
+        "file": "docs/mdt-system/MDT_FRONTEND_BACKEND_INTEGRATION_REPORT.md",
+        "hash": "11870781760293303516"
+      },
+      {
+        "file": "INDEPENDENT_AUDIT_REPORT.md",
+        "hash": "2221171344945320198"
+      },
+      {
+        "file": "supabase/seed.sql",
+        "hash": "13376950263575640000"
+      },
+      {
+        "file": "docs/implementation-reports/QUICK_ACTIONS_SYNC_REPORT.md",
+        "hash": "12509133776028564478"
+      },
+      {
+        "file": "docs/implementation-reports/INTERACTIVE_A4_FORM_IMPLEMENTATION.md",
+        "hash": "1738723531724216101"
+      },
+      {
+        "file": "supabase/migrations/004_fix_users_table.sql",
+        "hash": "5175568549906223123"
+      },
+      {
+        "file": "supabase/migrations/004_test_system.sql",
+        "hash": "591454785969369916"
+      },
+      {
+        "file": "docs/technical-specs/DATABASE_AUDIT_REPORT.md",
+        "hash": "2438376191807793033"
+      },
+      {
+        "file": "fix_env.ps1",
+        "hash": "5091799674704902664"
+      },
+      {
+        "file": ".github/workflows/deploy.backup.md",
+        "hash": "15504765014758989594"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/config.lua",
+        "hash": "5372277954146625262"
+      },
+      {
+        "file": "docs/architecture/DESIGN_SYSTEM_IMPLEMENTATION.md",
+        "hash": "17995283445150683987"
+      },
+      {
+        "file": "docs/architecture/BACKEND_ARCHITECTURE_ANALYSIS.md",
+        "hash": "8570473825255472999"
+      },
+      {
+        "file": "docs/technical-specs/SECURITY_IMPROVEMENTS.md",
+        "hash": "11599254968892976763"
+      },
+      {
+        "file": "ARCHITECTURE_AUDIT_REPORT.md",
+        "hash": "2116642105002349552"
+      },
+      {
+        "file": "docs/user-guides/REPORTS_SYSTEM_GUIDE.md",
+        "hash": "11844726062499620685"
+      },
+      {
+        "file": "DEBUG_TOKEN.md",
+        "hash": "1357807545082423696"
+      },
+      {
+        "file": "docs/user-guides/roadmap.md",
+        "hash": "17691165133422218423"
+      },
+      {
+        "file": "INTEGRATION_ISSUES_ANALYSIS.md",
+        "hash": "9452248245423268875"
+      },
+      {
+        "file": "docs/user-guides/REPORTS_SYSTEM_DOCUMENTATION.md",
+        "hash": "12879477264236816902"
+      },
+      {
+        "file": "supabase/migrations/002_rls_policies.sql",
+        "hash": "11351603747400306426"
+      },
+      {
+        "file": "docs/user-guides/FORUM_SYSTEM.md",
+        "hash": "12827408935957151450"
+      },
+      {
+        "file": "JWT_MIGRATION_GUIDE.md",
+        "hash": "13625976051937670339"
+      },
+      {
+        "file": "docs/technical-specs/tzv2.md",
+        "hash": "9601320196706719856"
+      },
+      {
+        "file": "EPIC_4_API_INTEGRATION_COMPLETION_REPORT.md",
+        "hash": "13733837150113342840"
+      },
+      {
+        "file": "docs/deployment/QUICK_DEPLOY_SETUP.md",
+        "hash": "10322605218178698190"
+      },
+      {
+        "file": "supabase/migrations/008_complete_character_system.sql",
+        "hash": "11827627643639358045"
+      },
+      {
+        "file": "docs/implementation-reports/COMPONENTS_CLEANUP_REPORT.md",
+        "hash": "5593038888220560090"
+      },
+      {
+        "file": "docs/deployment/UPROSHCHENNAYA_SBORKA_FIVEM.md",
+        "hash": "8677200351996860010"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/FINAL_DIAGNOSTIC_INSTRUCTIONS.md",
+        "hash": "5224374961734499102"
+      },
+      {
+        "file": "AUDIT_SUMMARY.md",
+        "hash": "6036821905867050455"
+      },
+      {
+        "file": "docs/implementation-reports/ETAP1_MIGRATION_COMPLETE_REPORT.md",
+        "hash": "3808830119160776438"
+      },
+      {
+        "file": "QUICK_START_GUIDE.md",
+        "hash": "835139844167727256"
+      },
+      {
+        "file": "docs/testing/COMPREHENSIVE_TESTING_PLAN.md",
+        "hash": "4929880172224315749"
+      },
+      {
+        "file": "docs/implementation-reports/COMPLETE_SYSTEM_UPDATE_REPORT.md",
+        "hash": "9827012407227145452"
+      },
+      {
+        "file": ".github/workflows/backup.md",
+        "hash": "2536150726825847360"
+      },
+      {
+        "file": "docs/implementation-reports/COMPANIES_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "10231390676252975946"
+      },
+      {
+        "file": "docs/implementation-reports/LEAVE_MODAL_FIX_REPORT.md",
+        "hash": "12227530486626902814"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/client/realtime.lua",
+        "hash": "15271425717946882744"
+      },
+      {
+        "file": "docs/implementation-reports/COMPONENTS_MIGRATION_COMPLETION_REPORT.md",
+        "hash": "12099833562139917807"
+      },
+      {
+        "file": "docs/api-and-integrations/SOCKET_IO_INTEGRATION_PLAN.md",
+        "hash": "17411229850014064549"
+      },
+      {
+        "file": "docs/architecture/DESIGN_SYSTEM.md",
+        "hash": "8672665519800438630"
+      },
+      {
+        "file": "supabase/migrations/006_joint_positions_history.sql",
+        "hash": "10778399762334326066"
+      },
+      {
+        "file": ".env.new",
+        "hash": "17170012354141038240"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/VISUAL_FIX_REPORT.md",
+        "hash": "1951470659321301974"
+      },
+      {
+        "file": "docs/api-and-integrations/WEBSOCKET_ANALYSIS_REPORT.md",
+        "hash": "15827081428980391459"
+      },
+      {
+        "file": "docs/implementation-reports/CRITICAL_FIXES_REPORT.md",
+        "hash": "5654805428456543091"
+      },
+      {
+        "file": "create-user.js",
+        "hash": "4915662001136734"
+      },
+      {
+        "file": "docs/architecture/FEATURE_SCAFFOLDING.md",
+        "hash": "1382711523289886663"
+      },
+      {
+        "file": "supabase/migrations/005_cad_mdt_system.sql",
+        "hash": "1292452403301833810"
+      },
+      {
+        "file": "docs/technical-specs/тз.md",
+        "hash": "10122793774620201296"
+      },
+      {
+        "file": "supabase/migrations/007_update_departments.sql",
+        "hash": "11303292592642553509"
+      },
+      {
+        "file": "SUPABASE_JS_MIGRATION_COMPLETE_REPORT.md",
+        "hash": "2138280937204082868"
+      },
+      {
+        "file": ".cursorignore",
+        "hash": "11349300793510315973"
+      },
+      {
+        "file": "docs/user-guides/JOINT_POSITIONS_SYSTEM.md",
+        "hash": "13954784376239459728"
+      },
+      {
+        "file": "docs/testing/TEST_TRANSLATION_REPORT.md",
+        "hash": "1341212189231485154"
+      },
+      {
+        "file": "check-bolo-schema.cjs",
+        "hash": "18171084155971636559"
+      },
+      {
+        "file": "COMPREHENSIVE_FSD_AUDIT_REPORT.md",
+        "hash": "1563829999319606043"
+      },
+      {
         "file": "supabase/migrations/004_create_schemas.sql",
         "hash": "4477441148528413285"
+      },
+      {
+        "file": "package.json",
+        "hash": "10985585132532953256"
+      },
+      {
+        "file": "fix_env_password.ps1",
+        "hash": "5069878574652792018"
+      },
+      {
+        "file": "docs/mdt-system/MDT_RPC_FIXES_REPORT.md",
+        "hash": "13953785431008957381"
+      },
+      {
+        "file": "docs/architecture/PROEKTNYI_ANALIZ_ARKHITEKTURY.md",
+        "hash": "1194702703084444561"
+      },
+      {
+        "file": "fix-database-schema.cjs",
+        "hash": "2553271865685293578"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/client/main.lua",
+        "hash": "8125279085516656768"
+      },
+      {
+        "file": "docs/implementation-reports/CITIZEN_PORTAL_MIGRATION_REPORT.md",
+        "hash": "4106715702531413039"
+      },
+      {
+        "file": "docs/ORGANIZATION_REPORT.md",
+        "hash": "15269226365809179836"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/index.js",
+        "hash": "4898839387504692719"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/fivem-nui.js",
+        "hash": "4156231832886779237"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/DIAGNOSTIC_REPORT.md",
+        "hash": "7780742072349194846"
+      },
+      {
+        "file": "supabase/migrations/019_normalize_character_schema.sql",
+        "hash": "11548817585128587503"
+      },
+      {
+        "file": "docs/user-guides/DEPARTMENTS_DESIGN_UPDATE.md",
+        "hash": "13607754095961510152"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "18315524891129148814"
+      },
+      {
+        "file": "create-user.mjs",
+        "hash": "4915662001136734"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/REACT_INTEGRATION_REPORT.md",
+        "hash": "15549434015514687416"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "12787748631644214699"
+      },
+      {
+        "file": "supabase/migrations/003_fix_rls_recursion.sql",
+        "hash": "13463593658468597455"
+      },
+      {
+        "file": "CRITICAL_AUTH_FIX_REPORT.md",
+        "hash": "14466114675161841783"
+      },
+      {
+        "file": "AUTHENTICATION_INTEGRATION_FIX_REPORT.md",
+        "hash": "10658167442751359977"
+      },
+      {
+        "file": "STAGE_4_TESTING_COMPLETION_REPORT.md",
+        "hash": "15410448969038090857"
+      },
+      {
+        "file": "docs/testing/ADMIN_TESTS_SYSTEM.md",
+        "hash": "15055421803720398870"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/fxmanifest.lua",
+        "hash": "8753623715305110752"
+      },
+      {
+        "file": "docs/implementation-reports/ENHANCED_TEMPLATES_SETUP.md",
+        "hash": "14585925969792901373"
+      },
+      {
+        "file": "gtavmap/GTAV-HD-MAP-satellite.jpg",
+        "hash": "15525925914760183518"
+      },
+      {
+        "file": "docs/mdt-system/MDT_IMPLEMENTATION_SUMMARY.md",
+        "hash": "15982873614936381044"
+      },
+      {
+        "file": "docs/deployment/IMMEDIATE_VPS_FIX.md",
+        "hash": "11661952496791987573"
+      },
+      {
+        "file": "COMPREHENSIVE_SYSTEM_AUDIT_REPORT.md",
+        "hash": "13585487339687536169"
+      },
+      {
+        "file": "AUDIT_COMPLETION_SUMMARY.md",
+        "hash": "6734860838264612947"
+      },
+      {
+        "file": "docs/mdt-system/MDT_MIGRATION_GUIDE.md",
+        "hash": "5698310696900387226"
+      },
+      {
+        "file": "supabase/migrations/001_initial_schema.sql",
+        "hash": "13824463293405508163"
+      },
+      {
+        "file": "INTEGRATION_FIXES_IMPLEMENTATION_REPORT.md",
+        "hash": "4733666900739332681"
+      },
+      {
+        "file": "docs/implementation-reports/EMS_FD_REPORTS_IMPLEMENTATION_REPORT.md",
+        "hash": "17951042887923718490"
+      },
+      {
+        "file": "docs/api-and-integrations/WEBSOCKET_USAGE_EXAMPLES.md",
+        "hash": "5882623343813702269"
+      },
+      {
+        "file": "docs/technical-specs/REPORTS_SYSTEM_AUDIT.md",
+        "hash": "7714969134545468214"
+      },
+      {
+        "file": "docs/deployment/DEPLOYMENT_INSTRUCTIONS.md",
+        "hash": "2723209972353074814"
+      },
+      {
+        "file": "DEPARTMENT_SYSTEM_IMPROVEMENTS.md",
+        "hash": "17372081947583277578"
+      },
+      {
+        "file": "COMPREHENSIVE_AUDIT_REPORT.md",
+        "hash": "6508165053627951919"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": "supabase/migrations/002_create_missing_tables.sql",
+        "hash": "13170973324199626749"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/CRITICAL_FIX_REPORT.md",
+        "hash": "9529570993219191760"
+      },
+      {
+        "file": "get-test-token.cjs",
+        "hash": "15930150106737221376"
+      },
+      {
+        "file": "docs/deployment/CRITICAL_DEPLOYMENT_FIX.md",
+        "hash": "13250238670169577524"
+      },
+      {
+        "file": "docs/api-and-integrations/DATA_MODEL_MAPPING.md",
+        "hash": "17410203756758934700"
+      },
+      {
+        "file": "ACTION_PLAN_INTEGRATION_FIXES.md",
+        "hash": "1522816262519291295"
+      },
+      {
+        "file": "docs/user-guides/MANUAL_MIGRATION_INSTRUCTIONS.md",
+        "hash": "2838996626608947829"
+      },
+      {
+        "file": "docs/implementation-reports/REPORTS_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "8677565985246873464"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/shared/utils.lua",
+        "hash": "14544638809109192433"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_UNIFICATION_REPORT.md",
+        "hash": "10264141758590428595"
+      },
+      {
+        "file": "docs/implementation-reports/USER_METADATA_FIX_ROUTE.md",
+        "hash": "1447359901015361876"
+      },
+      {
+        "file": "docs/implementation-reports/DASHBOARD_WIDGET_INTEGRATION_REPORT.md",
+        "hash": "997323260920094297"
+      },
+      {
+        "file": "docs/implementation-reports/DEPARTMENTS_UPDATE_REPORT.md",
+        "hash": "17572963532199731243"
+      },
+      {
+        "file": "database_schema.sql",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "docs/technical-specs/AUDIT_REPORT.md",
+        "hash": "16934432368695375968"
+      },
+      {
+        "file": "supabase/migrations/004_mdt_system.sql",
+        "hash": "18263571696876582494"
+      },
+      {
+        "file": "docs/testing/test-users.md",
+        "hash": "9418963146796927233"
+      },
+      {
+        "file": "CLEANUP_GUIDE.md",
+        "hash": "16782820499969056059"
+      },
+      {
+        "file": "supabase/migrations/018_sync_with_golden_types.sql",
+        "hash": "2142701708746968567"
+      },
+      {
+        "file": "supabase/migrations/015_fix_common_characters_owner_id.sql",
+        "hash": "6531486004953974662"
+      },
+      {
+        "file": "CRITICAL_AUDIT_REPORT.md",
+        "hash": "7243801545591354235"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/index.html",
+        "hash": "14198765741417608449"
+      },
+      {
+        "file": "supabase/migrations/014_extend_users_and_characters.sql",
+        "hash": "7150925884150117502"
+      },
+      {
+        "file": "docs/mdt-system/MDT_FRAMEWORK_INDEPENDENCE_REPORT.md",
+        "hash": "12747493148244574514"
+      },
+      {
+        "file": "docs/implementation-reports/NORMALIZED_CHARACTER_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "1594851899859102962"
+      },
+      {
+        "file": "docs/implementation-reports/LAW_REPORT_SYSTEM_IMPLEMENTATION.md",
+        "hash": "16993573521201387100"
+      },
+      {
+        "file": "docs/api-and-integrations/AUTHENTICATION.md",
+        "hash": "15376061969720325599"
+      },
+      {
+        "file": "supabase/migrations/010_report_templates_system.sql",
+        "hash": "13099961395515154698"
+      },
+      {
+        "file": "supabase/migrations/005_disable_rls_temp.sql",
+        "hash": "2154231034241821946"
+      },
+      {
+        "file": "check-db-structure.cjs",
+        "hash": "2631575002120556627"
+      },
+      {
+        "file": "supabase/migrations/017_verify_integrity.sql",
+        "hash": "16368327019541310302"
+      },
+      {
+        "file": "docs/implementation-reports/OFFICER_CREATION_SECTION_REPORT.md",
+        "hash": "13292953025439563593"
+      },
+      {
+        "file": "docs/implementation-reports/STAGE_3_COMPLETION_REPORT.md",
+        "hash": "2196478532617093537"
+      },
+      {
+        "file": "docs/deployment/DEPLOYMENT_OPTIMIZATIONS.md",
+        "hash": "3756476300733029323"
+      },
+      {
+        "file": "docs/implementation-reports/DARK_THEME_TEXT_FIX.md",
+        "hash": "18005585294088084925"
+      },
+      {
+        "file": "REALTIME_SYSTEM_FIX_REPORT.md",
+        "hash": "17551503832310068841"
+      },
+      {
+        "file": "SECURITY_CLEANUP_REPORT.md",
+        "hash": "4245709967725462162"
+      },
+      {
+        "file": "supabase/migrations/011_enhanced_report_templates.sql",
+        "hash": "4196000462399524730"
+      },
+      {
+        "file": "check-db-structure.js",
+        "hash": "2631575002120556627"
+      },
+      {
+        "file": "docs/implementation-reports/DASHBOARD_WIDGET_BUGFIX_REPORT.md",
+        "hash": "7606327312437661733"
+      },
+      {
+        "file": "ENV_FIX_REPORT.md",
+        "hash": "2372644950471811503"
+      },
+      {
+        "file": "docs/architecture/COLOR_PALETTE_IMPLEMENTATION_REPORT.md",
+        "hash": "279681680362426477"
+      },
+      {
+        "file": ".env.example",
+        "hash": "11463985077921953980"
+      },
+      {
+        "file": "docs/architecture/COLOR_PALETTE_UPDATE.md",
+        "hash": "17948018011800356228"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "8465593252564287444"
+      },
+      {
+        "file": "nx.json",
+        "hash": "3496215214210838429"
+      },
+      {
+        "file": "APPLY_FIXES_WINDOWS.md",
+        "hash": "8479973522064566739"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/INPUT_FIX_REPORT.md",
+        "hash": "4858770751265276819"
+      },
+      {
+        "file": "SCHEMA_FIXES_COMPLETION_REPORT.md",
+        "hash": "11548502759578237571"
+      },
+      {
+        "file": "docs/deployment/VITE_ISSUE_ANALYSIS.md",
+        "hash": "15529411384940229870"
+      },
+      {
+        "file": "docs/implementation-reports/NOTEBOOK_IMPLEMENTATION_REPORT.md",
+        "hash": "2489395833805574974"
+      },
+      {
+        "file": "docs/api-and-integrations/BACKEND_SNAILYCAD_INTEGRATION_REPORT.md",
+        "hash": "6615121233766349370"
+      },
+      {
+        "file": "docs/implementation-reports/LAW_ENFORCEMENT_FEATURE_MIGRATION_REPORT.md",
+        "hash": "10727730471832686663"
+      },
+      {
+        "file": "docs/deployment/CLOUD_MIGRATION_GUIDE.md",
+        "hash": "10729646885134352805"
+      },
+      {
+        "file": "FINAL_AUDIT_REPORT.md",
+        "hash": "4872485093650839254"
+      },
+      {
+        "file": "docs/architecture/ARCHITECTURE_SUMMARY.md",
+        "hash": "10358808525776508851"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/FINAL_FIX_REPORT.md",
+        "hash": "4253535085292606080"
+      },
+      {
+        "file": "supabase/.gitignore",
+        "hash": "10990855904653518110"
+      },
+      {
+        "file": "STAGE_3_ARCHITECTURE_OPTIMIZATION_REPORT.md",
+        "hash": "13516088988127394134"
+      },
+      {
+        "file": "SERVICES_MIGRATION_COMPLETE_REPORT.md",
+        "hash": "7035159846776088870"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/README.md",
+        "hash": "438399247483089461"
+      },
+      {
+        "file": "docs/user-guides/newpagecreaterules.md",
+        "hash": "8931170849203345179"
+      },
+      {
+        "file": "docs/mdt-system/CAD_MDT_README.md",
+        "hash": "8443472604582982941"
+      },
+      {
+        "file": "docs/mdt-system/MDT_BACKEND_AUDIT_REPORT.md",
+        "hash": "5668945791323316072"
+      },
+      {
+        "file": "supabase/migrations/012_add_template_status.sql",
+        "hash": "8734188197730373541"
+      },
+      {
+        "file": "docs/testing/LOCAL_TESTING_GUIDE.md",
+        "hash": "2539318178809350468"
+      },
+      {
+        "file": "supabase/migrations/006_simple_rls_fix.sql",
+        "hash": "10819046811632533099"
+      },
+      {
+        "file": "docs/user-guides/LEAVE_SYSTEM_DOCUMENTATION.md",
+        "hash": "5379412121502900164"
+      },
+      {
+        "file": "create-env.js",
+        "hash": "788520630118395703"
+      },
+      {
+        "file": "ARCHITECTURE_BEST_PRACTICES.md",
+        "hash": "5866183314510703912"
+      },
+      {
+        "file": ".nxignore",
+        "hash": "9492348307038149687"
+      },
+      {
+        "file": ".env.backup2",
+        "hash": "275879972560989494"
+      },
+      {
+        "file": "supabase/config.toml",
+        "hash": "29230790277377374"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/FINAL_F6_FIX_REPORT.md",
+        "hash": "17583296129577475921"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_MIGRATION_COMPLETION_REPORT.md",
+        "hash": "1460460104899146670"
+      },
+      {
+        "file": "supabase/migrations/016_add_missing_user_fields.sql",
+        "hash": "13912481719858124841"
+      },
+      {
+        "file": "docs/README.md",
+        "hash": "19043695673828292"
+      },
+      {
+        "file": "env.example",
+        "hash": "9738704925694065282"
+      },
+      {
+        "file": "docs/technical-specs/COMPREHENSIVE_AUDIT_PLAN.md",
+        "hash": "15733409243760732860"
+      },
+      {
+        "file": "docs/implementation-reports/ENHANCED_TEMPLATES_COMPLETION_REPORT.md",
+        "hash": "17096488500797955386"
+      },
+      {
+        "file": "supabase/migrations/009_setup_rls_policies.sql",
+        "hash": "15535352586940939591"
+      },
+      {
+        "file": ".github/workflows/deploy.yml",
+        "hash": "4397924740290924665"
+      },
+      {
+        "file": "supabase/migrations/003_rls_candidate_guest_restrictions.sql",
+        "hash": "3737784980493724343"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "16448050467312557263"
+      },
+      {
+        "file": "BOLO_MANAGEMENT_SYSTEM_COMPLETION_REPORT.md",
+        "hash": "13315629978066031429"
+      },
+      {
+        "file": "docs/implementation-reports/NORMALIZED_CHARACTER_SYSTEM_REPORT.md",
+        "hash": "9374135625725578371"
+      },
+      {
+        "file": "BACKEND_AUDIT_REPORT.md",
+        "hash": "4108192085465584672"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/ui/index.css",
+        "hash": "8455328446797833941"
+      },
+      {
+        "file": "test-client-server-connection.ts",
+        "hash": "5645901162250213310"
+      },
+      {
+        "file": "docs/implementation-reports/OFFICERS_SECTION_IMPLEMENTATION_REPORT.md",
+        "hash": "2941136397236426270"
+      },
+      {
+        "file": "apps/resources_fivem/mdt-system/server/main.lua",
+        "hash": "13848019409895324078"
+      },
+      {
+        "file": "docs/api-and-integrations/API_DETAILED_ANALYSIS.json",
+        "hash": "5069523616480805096"
+      },
+      {
+        "file": "ROUTING_CLEANUP_REPORT.md",
+        "hash": "18248206340602959261"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "13006215882576324033"
+      },
+      {
+        "file": "CLEANUP_FINAL_RECOMMENDATIONS.md",
+        "hash": "10392236725071578488"
+      },
+      {
+        "file": "docs/api-and-integrations/API_ANALYSIS_REPORT.md",
+        "hash": "12662010486798506064"
+      },
+      {
+        "file": "supabase/migrations/005_create_public_tables.sql",
+        "hash": "4983314419540826685"
+      },
+      {
+        "file": "tailwind.config.ts",
+        "hash": "14886741921035005360"
+      },
+      {
+        "file": "DISPATCH_DASHBOARD_IMPLEMENTATION_REPORT.md",
+        "hash": "14450451421186197873"
+      },
+      {
+        "file": ".env.production",
+        "hash": "5261357101576304645"
+      },
+      {
+        "file": "docs/deployment/GITHUB_ACTIONS_SETUP.md",
+        "hash": "9942657353810451550"
+      },
+      {
+        "file": "docs/technical-specs/rls-guest-policies.md",
+        "hash": "17124952439587079480"
+      },
+      {
+        "file": "docs/technical-specs/AS-IS_DOCUMENTATION.md",
+        "hash": "7392698689963496773"
+      },
+      {
+        "file": "docs/implementation-reports/EMS_FD_PORTAL_IMPLEMENTATION_REPORT.md",
+        "hash": "3394457766389157351"
+      },
+      {
+        "file": "docs/implementation-reports/ENTRY_APPLICATION_FIX.md",
+        "hash": "7760654503466975182"
+      },
+      {
+        "file": "JWT_VALIDATION_REMOVAL_REPORT.md",
+        "hash": "3132456470608794543"
+      },
+      {
+        "file": "docs/implementation-reports/LAW_CONTROL_PANEL_IMPLEMENTATION_REPORT.md",
+        "hash": "13292091978323327663"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "13383150368136939813"
+      },
+      {
+        "file": "supabase/migrations/013_forum_system.sql",
+        "hash": "8385164403131443327"
+      },
+      {
+        "file": "CLEANUP_AUDIT_REPORT.md",
+        "hash": "14206822385340791934"
+      },
+      {
+        "file": "docs/implementation-reports/REACT_19_MIGRATION_GUIDE.md",
+        "hash": "3785524353096279276"
       }
     ],
     "projectFileMap": {
-      "shared": [
+      "schema": [
         {
-          "file": "libs/shared/project.json",
-          "hash": "9573853802076345087"
+          "file": "libs/shared/schema/project.json",
+          "hash": "8774781299697112300"
+        }
+      ],
+      "shared-types": [
+        {
+          "file": "libs/shared-types/package.json",
+          "hash": "11793928261716304617",
+          "deps": [
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-types/project.json",
+          "hash": "14548515526776661667"
+        },
+        {
+          "file": "libs/shared-types/src/index.ts",
+          "hash": "13472898472178430468"
+        },
+        {
+          "file": "libs/shared-types/tsconfig.json",
+          "hash": "8639147696162716859"
         }
       ],
       "mdtclient": [
@@ -1464,7 +1161,7 @@
         },
         {
           "file": "apps/mdtclient/.storybook/main.ts",
-          "hash": "3555325305430988487"
+          "hash": "11487020561294282543"
         },
         {
           "file": "apps/mdtclient/.storybook/preview.ts",
@@ -1481,6 +1178,10 @@
         {
           "file": "apps/mdtclient/CACHE_CLEANUP_REBUILD_REPORT.md",
           "hash": "6282721018612392509"
+        },
+        {
+          "file": "apps/mdtclient/CHARACTER_REFACTORING_REPORT.md",
+          "hash": "18188332794744384654"
         },
         {
           "file": "apps/mdtclient/CITIZEN_PORTAL_UPDATE.md",
@@ -1680,7 +1381,7 @@
         },
         {
           "file": "apps/mdtclient/contexts/AuthContext.tsx",
-          "hash": "15898353875039882289"
+          "hash": "2867297941135157145"
         },
         {
           "file": "apps/mdtclient/contexts/DashboardContext.tsx",
@@ -3307,12 +3008,8 @@
           "hash": "4891983939639945273"
         },
         {
-          "file": "apps/mdtclient/package-lock.json",
-          "hash": "13780733313651108298"
-        },
-        {
           "file": "apps/mdtclient/package.json",
-          "hash": "9024403502516981087",
+          "hash": "10531470181733199017",
           "deps": [
             "npm:@google/genai",
             "npm:@tanstack/react-query",
@@ -3321,7 +3018,6 @@
             "npm:lucide-react",
             "npm:react",
             "npm:react-dom",
-            "npm:react-router-dom",
             "npm:@types/node",
             "npm:@vitejs/plugin-react",
             "npm:autoprefixer",
@@ -3350,7 +3046,7 @@
         },
         {
           "file": "apps/mdtclient/services/api.ts",
-          "hash": "11138829605015102366"
+          "hash": "18207746938460896648"
         },
         {
           "file": "apps/mdtclient/services/geminiService.ts",
@@ -3358,7 +3054,7 @@
         },
         {
           "file": "apps/mdtclient/src/App.tsx",
-          "hash": "5025153573006814292"
+          "hash": "11793392984748987776"
         },
         {
           "file": "apps/mdtclient/src/README.md",
@@ -3393,8 +3089,20 @@
           "hash": "9736085282631230417"
         },
         {
+          "file": "apps/mdtclient/src/components/AppHeader.tsx",
+          "hash": "7744669732552105694"
+        },
+        {
+          "file": "apps/mdtclient/src/components/AppSidebar.tsx",
+          "hash": "4109898738021514864"
+        },
+        {
           "file": "apps/mdtclient/src/components/AuthGuard.tsx",
           "hash": "518527996448999778"
+        },
+        {
+          "file": "apps/mdtclient/src/components/AuthenticatedApp.tsx",
+          "hash": "4172795143579846054"
         },
         {
           "file": "apps/mdtclient/src/components/Call911Handler.tsx",
@@ -3442,7 +3150,7 @@
         },
         {
           "file": "apps/mdtclient/src/entities/citizen/ui/CitizenCard.stories.tsx",
-          "hash": "11900059034312851976"
+          "hash": "17526198498082353910"
         },
         {
           "file": "apps/mdtclient/src/entities/citizen/ui/CitizenCard.tsx",
@@ -3494,7 +3202,7 @@
         },
         {
           "file": "apps/mdtclient/src/entities/dispatch/model/types.ts",
-          "hash": "7512111831820306472"
+          "hash": "15623452322174025445"
         },
         {
           "file": "apps/mdtclient/src/entities/dispatch/ui/Call911Card.tsx",
@@ -3670,7 +3378,7 @@
         },
         {
           "file": "apps/mdtclient/src/entities/vehicle/ui/VehicleCard.stories.tsx",
-          "hash": "12496558041255867245"
+          "hash": "4082659077544712673"
         },
         {
           "file": "apps/mdtclient/src/entities/vehicle/ui/VehicleCard.tsx",
@@ -3734,15 +3442,15 @@
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/api/boloApi.ts",
-          "hash": "13781752730327350899"
+          "hash": "18236013227101276110"
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/index.ts",
-          "hash": "13677966797561907922"
+          "hash": "4575704034005167125"
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/model/store.ts",
-          "hash": "4072451220074337031"
+          "hash": "8436715737493996742"
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/ui/atoms/BoloPrioritySelector.tsx",
@@ -3762,7 +3470,7 @@
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/ui/organisms/CreateBoloForm.tsx",
-          "hash": "6815438101259292925"
+          "hash": "4330922225661046837"
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/ui/organisms/CreateBoloModal.tsx",
@@ -3770,7 +3478,7 @@
         },
         {
           "file": "apps/mdtclient/src/features/bolo-management/ui/widgets/BoloManagementWidget.tsx",
-          "hash": "9373132718409315916"
+          "hash": "13865912871159460590"
         },
         {
           "file": "apps/mdtclient/src/features/call-management/index.ts",
@@ -3837,6 +3545,14 @@
           "hash": "17423593394706818326"
         },
         {
+          "file": "apps/mdtclient/src/features/character-management/ui/organisms/CharacterDetailsForm.tsx",
+          "hash": "6148396479296690872"
+        },
+        {
+          "file": "apps/mdtclient/src/features/character-management/ui/organisms/CreateCharacterForm.tsx",
+          "hash": "15761782425605373420"
+        },
+        {
           "file": "apps/mdtclient/src/features/citizen-management/index.tsx",
           "hash": "782596374284530208"
         },
@@ -3898,7 +3614,7 @@
         },
         {
           "file": "apps/mdtclient/src/features/dispatch-feed/api/dispatchFeedApi.ts",
-          "hash": "181145479518477289"
+          "hash": "10254115282752058521"
         },
         {
           "file": "apps/mdtclient/src/features/dispatch-feed/index.ts",
@@ -3906,7 +3622,7 @@
         },
         {
           "file": "apps/mdtclient/src/features/dispatch-feed/ui/ActiveBolosList.tsx",
-          "hash": "11781676424534480968"
+          "hash": "10420360240889319858"
         },
         {
           "file": "apps/mdtclient/src/features/dispatch-feed/ui/ActiveCallsList.tsx",
@@ -4010,7 +3726,7 @@
         },
         {
           "file": "apps/mdtclient/src/features/gta-map/ui/GTAMap.tsx",
-          "hash": "1276146009369666840"
+          "hash": "7731813354856841948"
         },
         {
           "file": "apps/mdtclient/src/features/gta-map/ui/LocationInfo.tsx",
@@ -4270,7 +3986,7 @@
         },
         {
           "file": "apps/mdtclient/src/features/notifications/ui/NotificationCenter.tsx",
-          "hash": "18157137134895952761"
+          "hash": "7240735340157601278"
         },
         {
           "file": "apps/mdtclient/src/features/officer-dashboard/index.ts",
@@ -4506,7 +4222,7 @@
         },
         {
           "file": "apps/mdtclient/src/hooks/useMDT.ts",
-          "hash": "14293545148408262216"
+          "hash": "4790875603995172200"
         },
         {
           "file": "apps/mdtclient/src/index.css",
@@ -4514,7 +4230,7 @@
         },
         {
           "file": "apps/mdtclient/src/index.ts",
-          "hash": "4890836916919167763"
+          "hash": "4122857582802438722"
         },
         {
           "file": "apps/mdtclient/src/lib/auth-init.ts",
@@ -4530,47 +4246,11 @@
         },
         {
           "file": "apps/mdtclient/src/main.tsx",
-          "hash": "18294482850041360707"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/DashboardPage.tsx",
-          "hash": "5803406348839457607"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/civil/CivilDepartmentPage.tsx",
-          "hash": "15734795703460701092"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/dispatch/DispatchDepartmentPage.tsx",
-          "hash": "16471156805420715307"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/ems/EMSDepartmentPage.tsx",
-          "hash": "12116495508708188511"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/ems/index.ts",
-          "hash": "9220471584309467653"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/fd/FDDepartmentPage.tsx",
-          "hash": "10242012046971105804"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/fd/index.ts",
-          "hash": "2635600042100174517"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/index.ts",
-          "hash": "9747200658243865419"
-        },
-        {
-          "file": "apps/mdtclient/src/pages/leo/PoliceDepartmentPage.tsx",
-          "hash": "2701505502873185689"
+          "hash": "5685487698748014697"
         },
         {
           "file": "apps/mdtclient/src/services/api.ts",
-          "hash": "8281953737667173558"
+          "hash": "10732988381313597436"
         },
         {
           "file": "apps/mdtclient/src/shared/api/auth.ts",
@@ -4578,7 +4258,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/api/bolos.ts",
-          "hash": "7077504169117497192"
+          "hash": "7919470992481009827"
         },
         {
           "file": "apps/mdtclient/src/shared/api/calls.ts",
@@ -4590,7 +4270,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/api/dispatch.ts",
-          "hash": "8186682453619824313"
+          "hash": "11361622381426794608"
         },
         {
           "file": "apps/mdtclient/src/shared/api/index.ts",
@@ -4626,7 +4306,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/contexts/AuthContext.tsx",
-          "hash": "14920615724600040264"
+          "hash": "2267017825158484077"
         },
         {
           "file": "apps/mdtclient/src/shared/contexts/LocaleContext.tsx",
@@ -4702,11 +4382,11 @@
         },
         {
           "file": "apps/mdtclient/src/shared/types/dispatch.ts",
-          "hash": "14181268060406609985"
+          "hash": "9518002948987776027"
         },
         {
           "file": "apps/mdtclient/src/shared/types/index.ts",
-          "hash": "3688904985926279127"
+          "hash": "10540992195824127446"
         },
         {
           "file": "apps/mdtclient/src/shared/types/units.ts",
@@ -4722,7 +4402,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/ui/Sidebar.tsx",
-          "hash": "3143672464695454756"
+          "hash": "7103844652196087528"
         },
         {
           "file": "apps/mdtclient/src/shared/ui/ThemeWrapper.tsx",
@@ -4766,7 +4446,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/ui/atoms/Checkbox/Checkbox.stories.tsx",
-          "hash": "15985958343677703341"
+          "hash": "17384974090235486581"
         },
         {
           "file": "apps/mdtclient/src/shared/ui/atoms/Checkbox/Checkbox.styles.ts",
@@ -4834,7 +4514,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.stories.tsx",
-          "hash": "6913158502005098593"
+          "hash": "10593964751037440817"
         },
         {
           "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.styles.ts",
@@ -4842,7 +4522,7 @@
         },
         {
           "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.tsx",
-          "hash": "15967862619485645822"
+          "hash": "2264987408429511318"
         },
         {
           "file": "apps/mdtclient/src/shared/ui/atoms/Select/Select.types.ts",
@@ -5061,6 +4741,10 @@
           "hash": "16330510683733334313"
         },
         {
+          "file": "apps/mdtclient/src/shared/ui/widgets/CharacterListWidget.tsx",
+          "hash": "12181565555818311193"
+        },
+        {
           "file": "apps/mdtclient/src/shared/ui/widgets/SearchWidget.tsx",
           "hash": "12587723682222938874"
         },
@@ -5086,7 +4770,7 @@
         },
         {
           "file": "apps/mdtclient/src/stories.ts",
-          "hash": "8397287819782737582"
+          "hash": "16953473915488503310"
         },
         {
           "file": "apps/mdtclient/src/widgets/RealTimeDemo.tsx",
@@ -5094,7 +4778,7 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/call-queue-widget/ui/CallQueue.tsx",
-          "hash": "4762155171734234548"
+          "hash": "1692428455722217411"
         },
         {
           "file": "apps/mdtclient/src/widgets/citizen-portal/CitizenPortalNew.tsx",
@@ -5122,7 +4806,7 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/dispatch-portal/ui/DispatchPortal.tsx",
-          "hash": "3408595837681304755"
+          "hash": "4416544681242335395"
         },
         {
           "file": "apps/mdtclient/src/widgets/dispatch-portal/ui/index.ts",
@@ -5158,7 +4842,7 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-dashboard/model/dashboardStore.ts",
-          "hash": "1457058796834115881"
+          "hash": "12291020458823492793"
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-dashboard/model/index.ts",
@@ -5174,7 +4858,7 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-dashboard/ui/MdtDashboardWidget.tsx",
-          "hash": "8124393476882596296"
+          "hash": "14164689482926899884"
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-dashboard/ui/index.ts",
@@ -5198,7 +4882,7 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-portal/ui/MdtSidebar.tsx",
-          "hash": "2343448528084772012"
+          "hash": "6490833088096499881"
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-portal/ui/ModuleRenderer.tsx",
@@ -5206,7 +4890,7 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-portal/ui/NavigationSidebar.tsx",
-          "hash": "3348850300173487982"
+          "hash": "3510919453856128567"
         },
         {
           "file": "apps/mdtclient/src/widgets/mdt-portal/ui/TopHeader.tsx",
@@ -5242,7 +4926,11 @@
         },
         {
           "file": "apps/mdtclient/src/widgets/unit-list-widget/ui/UnitList.tsx",
-          "hash": "10471883789301709703"
+          "hash": "9634857479848752412"
+        },
+        {
+          "file": "apps/mdtclient/supabase-generated.ts",
+          "hash": "17120445572674755311"
         },
         {
           "file": "apps/mdtclient/suppress-errors.cjs",
@@ -5286,10 +4974,48 @@
         },
         {
           "file": "apps/mdtclient/vite.config.ts",
-          "hash": "912008929345699801"
+          "hash": "1521847673907197311"
+        },
+        {
+          "file": "apps/mdtclient/src/assets/images/gta-map.jpg",
+          "hash": "15525925914760183518"
+        },
+        {
+          "file": "apps/mdtclient/playground.html",
+          "hash": "6167408367749523712"
+        },
+        {
+          "file": "apps/mdtclient/PLAYGROUND_GUIDE.md",
+          "hash": "7648243367425007231"
+        }
+      ],
+      "shared-utils": [
+        {
+          "file": "libs/shared-utils/package.json",
+          "hash": "3361493756295011767",
+          "deps": [
+            "shared-types",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "libs/shared-utils/project.json",
+          "hash": "4345799646826105250"
+        },
+        {
+          "file": "libs/shared-utils/src/index.ts",
+          "hash": "2785212028867442622"
+        },
+        {
+          "file": "libs/shared-utils/tsconfig.json",
+          "hash": "13227097114682296264"
         }
       ],
       "server": [
+        {
+          "file": "apps/server/AUTH_MIDDLEWARE_UPDATE_REPORT.md",
+          "hash": "2838066184745443513"
+        },
         {
           "file": "apps/server/JWT_AUTH_FIX_REPORT.md",
           "hash": "8836432523425525740"
@@ -5309,6 +5035,10 @@
         {
           "file": "apps/server/apply-migration.js",
           "hash": "8319905894844194974"
+        },
+        {
+          "file": "apps/server/apply-profiles-migration.cjs",
+          "hash": "9593330264872207037"
         },
         {
           "file": "apps/server/auth-server.cjs",
@@ -5359,6 +5089,10 @@
           "hash": "14016056023701127460"
         },
         {
+          "file": "apps/server/create-profiles-simple.cjs",
+          "hash": "11641409382765056214"
+        },
+        {
           "file": "apps/server/create-user-with-service-key.cjs",
           "hash": "10266362187722113301"
         },
@@ -5372,7 +5106,7 @@
         },
         {
           "file": "apps/server/development.ts",
-          "hash": "11360482141622311242"
+          "hash": "5471385214496377755"
         },
         {
           "file": "apps/server/fileUpload.ts",
@@ -5400,7 +5134,7 @@
         },
         {
           "file": "apps/server/index.ts",
-          "hash": "3904619305838450823"
+          "hash": "13352770814442558098"
         },
         {
           "file": "apps/server/jest.config.ts",
@@ -5408,7 +5142,7 @@
         },
         {
           "file": "apps/server/lib/supabase.ts",
-          "hash": "7843062814898023333"
+          "hash": "12618499331447522989"
         },
         {
           "file": "apps/server/login-and-get-token.cjs",
@@ -5424,7 +5158,7 @@
         },
         {
           "file": "apps/server/middleware/auth.middleware.ts",
-          "hash": "12438792100804011062"
+          "hash": "3733063246995959190"
         },
         {
           "file": "apps/server/middleware/logging.middleware.ts",
@@ -5448,7 +5182,7 @@
         },
         {
           "file": "apps/server/package.json",
-          "hash": "3054745574856012496",
+          "hash": "146844744726543889",
           "deps": [
             "npm:@jridgewell/trace-mapping",
             "npm:@supabase/supabase-js",
@@ -5483,7 +5217,7 @@
         },
         {
           "file": "apps/server/production.ts",
-          "hash": "6996106479920727805"
+          "hash": "1357233754053462287"
         },
         {
           "file": "apps/server/project.json",
@@ -5499,15 +5233,15 @@
         },
         {
           "file": "apps/server/routes.ts",
-          "hash": "5585408532932062502"
+          "hash": "7957474175295635756"
         },
         {
           "file": "apps/server/routes/admin/index.ts",
-          "hash": "9043121157431332634"
+          "hash": "17540636725845564507"
         },
         {
           "file": "apps/server/routes/admin/support.routes.ts",
-          "hash": "12489997125986667743"
+          "hash": "13895903201359899594"
         },
         {
           "file": "apps/server/routes/admin/support.tickets.list.ts",
@@ -5547,11 +5281,11 @@
         },
         {
           "file": "apps/server/routes/mdt.ts",
-          "hash": "1380953372232490238"
+          "hash": "18416524435518250645"
         },
         {
           "file": "apps/server/routes/normalized-character.routes.ts",
-          "hash": "15635846786883047773"
+          "hash": "3120127078383312852"
         },
         {
           "file": "apps/server/routes/realtime-simple.ts",
@@ -5595,7 +5329,7 @@
         },
         {
           "file": "apps/server/services/AuthService.ts",
-          "hash": "9156025835702271541"
+          "hash": "4536696196997692533"
         },
         {
           "file": "apps/server/services/CacheService.ts",
@@ -5607,7 +5341,7 @@
         },
         {
           "file": "apps/server/services/CharacterService.ts",
-          "hash": "11980340166098746873"
+          "hash": "16598799422519303410"
         },
         {
           "file": "apps/server/services/CharacterServiceUpdated.ts",
@@ -5623,11 +5357,11 @@
         },
         {
           "file": "apps/server/services/MDTService.ts",
-          "hash": "7298471516477323095"
+          "hash": "6553554380884492792"
         },
         {
           "file": "apps/server/services/NormalizedCharacterService.ts",
-          "hash": "11667492770394170403"
+          "hash": "14908990678438872704"
         },
         {
           "file": "apps/server/services/NotificationService.ts",
@@ -5651,7 +5385,7 @@
         },
         {
           "file": "apps/server/services/UserService.ts",
-          "hash": "2540742681926381370"
+          "hash": "12085173338922613569"
         },
         {
           "file": "apps/server/services/VehicleService.ts",
@@ -5691,7 +5425,7 @@
         },
         {
           "file": "apps/server/storage.ts",
-          "hash": "18149827592764487640"
+          "hash": "17579679518153800235"
         },
         {
           "file": "apps/server/test-api.cjs",
@@ -5750,12 +5484,16 @@
           "hash": "13554753086562772534"
         },
         {
+          "file": "apps/server/test-full-integration.cjs",
+          "hash": "5048701520255248786"
+        },
+        {
           "file": "apps/server/test-mdt-api-simple.cjs",
           "hash": "1546013605282999841"
         },
         {
           "file": "apps/server/test-mdt-api.cjs",
-          "hash": "6052883545969149029"
+          "hash": "6615925288662280902"
         },
         {
           "file": "apps/server/test-mdt-endpoints.cjs",
@@ -5802,6 +5540,10 @@
           "hash": "5254526333624697036"
         },
         {
+          "file": "apps/server/types/supabase.ts",
+          "hash": "11112950687602776671"
+        },
+        {
           "file": "apps/server/utils/auth.ts",
           "hash": "18219175058137235050"
         },
@@ -5818,47 +5560,22 @@
           "hash": "9014728820129751207"
         },
         {
-          "file": "apps/server/apply-profiles-migration.cjs",
-          "hash": "9593330264872207037"
+          "file": "apps/server/routes/admin/user-metadata.ts",
+          "hash": "1018823567392721998"
         },
         {
-          "file": "apps/server/create-profiles-simple.cjs",
-          "hash": "11641409382765056214"
+          "file": "apps/server/test-api-connection.js",
+          "hash": "10351295817877803182"
         },
         {
-          "file": "apps/server/test-full-integration.cjs",
-          "hash": "5048701520255248786"
-        },
-        {
-          "file": "apps/server/AUTH_MIDDLEWARE_UPDATE_REPORT.md",
-          "hash": "2838066184745443513"
+          "file": "apps/server/API_PROXY_FIX.md",
+          "hash": "9970438527969007280"
         }
       ],
-      "shared-types": [
+      "shared": [
         {
-          "file": "libs/shared-types/package.json",
-          "hash": "11793928261716304617",
-          "deps": [
-            "npm:typescript"
-          ]
-        },
-        {
-          "file": "libs/shared-types/project.json",
-          "hash": "14548515526776661667"
-        },
-        {
-          "file": "libs/shared-types/src/index.ts",
-          "hash": "13472898472178430468"
-        },
-        {
-          "file": "libs/shared-types/tsconfig.json",
-          "hash": "8639147696162716859"
-        }
-      ],
-      "schema": [
-        {
-          "file": "libs/shared/schema/project.json",
-          "hash": "8774781299697112300"
+          "file": "libs/shared/project.json",
+          "hash": "9573853802076345087"
         }
       ],
       "client": [
@@ -6512,29 +6229,7 @@
         },
         {
           "file": "apps/client/vite.config.ts",
-          "hash": "6944405763244768754"
-        }
-      ],
-      "shared-utils": [
-        {
-          "file": "libs/shared-utils/package.json",
-          "hash": "3361493756295011767",
-          "deps": [
-            "shared-types",
-            "npm:typescript"
-          ]
-        },
-        {
-          "file": "libs/shared-utils/project.json",
-          "hash": "4345799646826105250"
-        },
-        {
-          "file": "libs/shared-utils/src/index.ts",
-          "hash": "2785212028867442622"
-        },
-        {
-          "file": "libs/shared-utils/tsconfig.json",
-          "hash": "13227097114682296264"
+          "hash": "391389869641819687"
         }
       ]
     }

@@ -130,11 +130,11 @@ export const LuxuryVehicle: Story = {
 export const WithActions: Story = {
   args: {
     vehicle: mockVehicle,
-    onViewDetails: (vehicle) => {
+    onViewDetails: (vehicle: Vehicle) => {
       console.log('View details:', vehicle);
       alert(`Просмотр деталей: ${vehicle.make} ${vehicle.model}`);
     },
-    onEdit: (vehicle) => {
+    onEdit: (vehicle: Vehicle) => {
       console.log('Edit vehicle:', vehicle);
       alert(`Редактирование: ${vehicle.make} ${vehicle.model}`);
     },
@@ -145,7 +145,7 @@ export const CompactWithActions: Story = {
   args: {
     vehicle: mockVehicle,
     variant: 'compact',
-    onViewDetails: (vehicle) => {
+    onViewDetails: (vehicle: Vehicle) => {
       console.log('View details:', vehicle);
       alert(`Просмотр деталей: ${vehicle.make} ${vehicle.model}`);
     },
@@ -177,7 +177,7 @@ export const CompactGrid: Story = {
 export const InteractiveCard: Story = {
   args: {
     vehicle: mockVehicle,
-    onViewDetails: (vehicle) => {
+    onViewDetails: (vehicle: Vehicle) => {
       console.log('Vehicle clicked:', vehicle);
       alert(`Выбрано транспортное средство: ${vehicle.make} ${vehicle.model} (${vehicle.plateNumber})`);
     },

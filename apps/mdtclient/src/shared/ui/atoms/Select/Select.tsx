@@ -189,7 +189,7 @@ export const SelectItem: React.FC<SelectItemProps> = ({
 
 // SelectValue компонент
 interface SelectValueProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   placeholder?: string;
 }
 

@@ -1,168 +1,29 @@
 // ===== ТИПЫ =====
 
-// Временные типы (заменят импорт из shared-schema)
-export interface Character {
-  id: number;
-  ownerId: number;
-  type: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
-  address: string;
-  insuranceNumber: string;
-  licenses: Record<string, any>;
-  medicalInfo: Record<string, any>;
-  mugshotUrl?: string;
-  isUnit: boolean;
-  unitInfo?: Record<string, any>;
-  departmentId?: number;
-  rankId?: number;
-  divisionId?: number;
-  unitId?: number;
-  badgeNumber?: string;
-  employeeId?: string;
-  hireDate?: string;
-  terminationDate?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  gender?: string;
-  ethnicity?: string;
-  height?: string;
-  weight?: string;
-  hairColor?: string;
-  eyeColor?: string;
-  phoneNumber?: string;
-  postal?: string;
-  occupation?: string;
-  dead: boolean;
-  dateOfDead?: string;
-  missing: boolean;
-  arrested: boolean;
-  callsign?: string;
-  callsign2?: string;
-  suspended: boolean;
-  whitelistStatus: string;
-  radioChannelId?: string;
-}
+// Импортируем все типы из shared/types для централизации
+import type { 
+  Character, 
+  CreateCharacterRequest, 
+  UpdateCharacterRequest,
+  User,
+  Vehicle,
+  Weapon,
+  Unit,
+  ActiveUnit,
+  Call911,
+  Department,
+  BOLO,
+  DispatchStats,
+  Report,
+  CitizenFilters,
+  VehicleFilters,
+  WeaponFilters,
+  ReportFilters,
+  CallFilters,
+  UnitFilters
+} from '../shared/types';
 
-export interface Vehicle {
-  id: number;
-  ownerId: number;
-  plate: string;
-  vin: string;
-  model: string;
-  color: string;
-  registration: string;
-  insurance: string;
-  createdAt: string;
-}
-
-export interface Weapon {
-  id: number;
-  ownerId: number;
-  serialNumber: string;
-  model: string;
-  registration: string;
-  createdAt: string;
-}
-
-export interface Report {
-  id: number;
-  authorId: number;
-  status: string;
-  fileUrl: string;
-  supervisorComment?: string;
-  createdAt: string;
-}
-
-export interface Call911 {
-  id: number;
-  location: string;
-  description: string;
-  status: string;
-  type: string;
-  priority: number;
-  callerInfo?: Record<string, any>;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ActiveUnit {
-  id: number;
-  characterId: number;
-  status: string;
-  callsign: string;
-  location: Record<string, any>;
-  partnerId?: number;
-  vehicleId?: number;
-  departmentId: number;
-  isPanic: boolean;
-  isActive: boolean;
-  lastUpdate: string;
-  createdAt: string;
-}
-
-export interface Department {
-  id: number;
-  name: string;
-  fullName: string;
-  logoUrl?: string;
-  description?: string;
-  gallery: string[];
-}
-
-// Фильтры
-export interface CitizenFilters {
-  type?: string;
-  departmentId?: number;
-  isActive?: boolean;
-}
-
-export interface VehicleFilters {
-  ownerId?: number;
-  registration?: string;
-  insurance?: string;
-}
-
-export interface WeaponFilters {
-  ownerId?: number;
-  registration?: string;
-}
-
-export interface ReportFilters {
-  authorId?: number;
-  status?: string;
-}
-
-export interface CallFilters {
-  status?: string;
-  type?: string;
-  priority?: number;
-}
-
-export interface UnitFilters {
-  characterId?: number;
-  status?: string;
-  departmentId?: number;
-  isActive?: boolean;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-  name?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ===== КОНФИГУРАЦИЯ =====
-
-const API_BASE_URL = '/api';
-
-// ===== ТИПЫ ОТВЕТОВ =====
+// ===== API RESPONSE TYPES =====
 
 interface ApiResponse<T> {
   success: boolean;
@@ -180,7 +41,7 @@ interface ApiListResponse<T> {
   code?: string;
 }
 
-// ===== УТИЛИТЫ =====
+// ===== ERROR HANDLING =====
 
 class ApiError extends Error {
   constructor(
@@ -193,28 +54,22 @@ class ApiError extends Error {
   }
 }
 
+// ===== REQUEST UTILITY =====
+
 async function makeRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const token = localStorage.getItem('auth_token');
   
-  console.log('[API] Making request to:', url);
-  
-  const defaultHeaders: Record<string, string> = {
+  const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
   };
-
-  // Добавляем токен аутентификации, если он есть
-  // ИСПРАВЛЕНО: Используем правильный ключ auth_token вместо authToken
-  const token = localStorage.getItem('auth_token');
+  
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
-    console.log('[API] Token found and added to headers');
-  } else {
-    console.log('[API] No token found');
   }
-
+  
   const config: RequestInit = {
     ...options,
     headers: {
@@ -222,20 +77,19 @@ async function makeRequest<T>(
       ...options.headers,
     },
   };
-
+  
   try {
-    console.log('[API] Sending request with config:', { url, method: config.method || 'GET' });
-    const response = await fetch(url, config);
+    const response = await fetch(endpoint, config);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new ApiError(
-        errorData.error || `HTTP ${response.status}`,
+        errorData.message || `HTTP error! status: ${response.status}`,
         response.status,
         errorData.code
       );
     }
-
+    
     const data = await response.json();
     return data;
   } catch (error) {
@@ -249,489 +103,426 @@ async function makeRequest<T>(
   }
 }
 
-// ===== API КЛАСС =====
+// ===== API SERVICE =====
 
 export class ApiService {
-  // ===== ГРАЖДАНЕ =====
+  private baseUrl = '/api';
+
+  // === CHARACTERS API ===
+  
+  // Добавляем метод для получения персонажей текущего пользователя
+  async getUserCharacters(): Promise<Character[]> {
+    const response = await makeRequest<ApiListResponse<Character>>(
+      `${this.baseUrl}/characters/my`
+    );
+    return response.data;
+  }
 
   async getCitizens(filters: CitizenFilters = {}): Promise<Character[]> {
     const params = new URLSearchParams();
-    
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(key, String(value));
+      if (value !== undefined) {
+        params.append(key, value.toString());
       }
     });
-
-    const response: ApiListResponse<Character> = await makeRequest(
-      `/database/citizens?${params.toString()}`
-    );
     
+    const response = await makeRequest<ApiListResponse<Character>>(
+      `${this.baseUrl}/characters?${params.toString()}`
+    );
     return response.data;
   }
 
-  async getCitizenById(id: number): Promise<Character> {
-    const response: ApiResponse<Character> = await makeRequest(
-      `/database/citizens/${id}`
+  async getCitizenById(id: string): Promise<Character> {
+    const response = await makeRequest<ApiResponse<Character>>(
+      `${this.baseUrl}/characters/${id}`
     );
-    
     return response.data;
   }
 
-  async createCitizen(data: any): Promise<Character> {
-    const response: ApiResponse<Character> = await makeRequest(
-      '/database/citizens',
+  async createCitizen(data: CreateCharacterRequest): Promise<Character> {
+    const response = await makeRequest<ApiResponse<Character>>(
+      `${this.baseUrl}/characters`,
       {
         method: 'POST',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async updateCitizen(id: number, data: any): Promise<Character> {
-    const response: ApiResponse<Character> = await makeRequest(
-      `/database/citizens/${id}`,
+  async updateCitizen(id: string, data: UpdateCharacterRequest): Promise<Character> {
+    const response = await makeRequest<ApiResponse<Character>>(
+      `${this.baseUrl}/characters/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async deleteCitizen(id: number): Promise<void> {
-    await makeRequest(`/database/citizens/${id}`, {
+  async deleteCitizen(id: string): Promise<void> {
+    await makeRequest(`${this.baseUrl}/characters/${id}`, {
       method: 'DELETE',
     });
   }
 
-  // ===== ТРАНСПОРТ =====
-
+  // === VEHICLES API ===
   async getVehicles(filters: VehicleFilters = {}): Promise<Vehicle[]> {
     const params = new URLSearchParams();
-    
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(key, String(value));
+      if (value !== undefined) {
+        params.append(key, value.toString());
       }
     });
-
-    const response: ApiListResponse<Vehicle> = await makeRequest(
-      `/database/vehicles?${params.toString()}`
-    );
     
+    const response = await makeRequest<ApiListResponse<Vehicle>>(
+      `${this.baseUrl}/vehicles?${params.toString()}`
+    );
     return response.data;
   }
 
-  async getVehicleById(id: number): Promise<Vehicle> {
-    const response: ApiResponse<Vehicle> = await makeRequest(
-      `/database/vehicles/${id}`
+  async getVehicleById(id: string): Promise<Vehicle> {
+    const response = await makeRequest<ApiResponse<Vehicle>>(
+      `${this.baseUrl}/vehicles/${id}`
     );
-    
     return response.data;
   }
 
   async createVehicle(data: any): Promise<Vehicle> {
-    const response: ApiResponse<Vehicle> = await makeRequest(
-      '/database/vehicles',
+    const response = await makeRequest<ApiResponse<Vehicle>>(
+      `${this.baseUrl}/vehicles`,
       {
         method: 'POST',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async updateVehicle(id: number, data: any): Promise<Vehicle> {
-    const response: ApiResponse<Vehicle> = await makeRequest(
-      `/database/vehicles/${id}`,
+  async updateVehicle(id: string, data: any): Promise<Vehicle> {
+    const response = await makeRequest<ApiResponse<Vehicle>>(
+      `${this.baseUrl}/vehicles/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  // ===== ОРУЖИЕ =====
-
+  // === WEAPONS API ===
   async getWeapons(filters: WeaponFilters = {}): Promise<Weapon[]> {
     const params = new URLSearchParams();
-    
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(key, String(value));
+      if (value !== undefined) {
+        params.append(key, value.toString());
       }
     });
-
-    const response: ApiListResponse<Weapon> = await makeRequest(
-      `/database/weapons?${params.toString()}`
-    );
     
+    const response = await makeRequest<ApiListResponse<Weapon>>(
+      `${this.baseUrl}/weapons?${params.toString()}`
+    );
     return response.data;
   }
 
-  async getWeaponById(id: number): Promise<Weapon> {
-    const response: ApiResponse<Weapon> = await makeRequest(
-      `/database/weapons/${id}`
+  async getWeaponById(id: string): Promise<Weapon> {
+    const response = await makeRequest<ApiResponse<Weapon>>(
+      `${this.baseUrl}/weapons/${id}`
     );
-    
     return response.data;
   }
 
   async createWeapon(data: any): Promise<Weapon> {
-    const response: ApiResponse<Weapon> = await makeRequest(
-      '/database/weapons',
+    const response = await makeRequest<ApiResponse<Weapon>>(
+      `${this.baseUrl}/weapons`,
       {
         method: 'POST',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async updateWeapon(id: number, data: any): Promise<Weapon> {
-    const response: ApiResponse<Weapon> = await makeRequest(
-      `/database/weapons/${id}`,
+  async updateWeapon(id: string, data: any): Promise<Weapon> {
+    const response = await makeRequest<ApiResponse<Weapon>>(
+      `${this.baseUrl}/weapons/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  // ===== ОТЧЕТЫ =====
-
+  // === REPORTS API ===
   async getReports(filters: ReportFilters = {}): Promise<Report[]> {
     const params = new URLSearchParams();
-    
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (value instanceof Date) {
-          params.append(key, value.toISOString());
-        } else {
-          params.append(key, String(value));
-        }
+      if (value !== undefined) {
+        params.append(key, value.toString());
       }
     });
-
-    const response: ApiListResponse<Report> = await makeRequest(
-      `/database/reports?${params.toString()}`
-    );
     
+    const response = await makeRequest<ApiListResponse<Report>>(
+      `${this.baseUrl}/reports?${params.toString()}`
+    );
     return response.data;
   }
 
-  async getReportById(id: number): Promise<Report> {
-    const response: ApiResponse<Report> = await makeRequest(
-      `/database/reports/${id}`
+  async getReportById(id: string): Promise<Report> {
+    const response = await makeRequest<ApiResponse<Report>>(
+      `${this.baseUrl}/reports/${id}`
     );
-    
     return response.data;
   }
 
   async createReport(data: any): Promise<Report> {
-    const response: ApiResponse<Report> = await makeRequest(
-      '/database/reports',
+    const response = await makeRequest<ApiResponse<Report>>(
+      `${this.baseUrl}/reports`,
       {
         method: 'POST',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async updateReport(id: number, data: any): Promise<Report> {
-    const response: ApiResponse<Report> = await makeRequest(
-      `/database/reports/${id}`,
+  async updateReport(id: string, data: any): Promise<Report> {
+    const response = await makeRequest<ApiResponse<Report>>(
+      `${this.baseUrl}/reports/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  // ===== ВЫЗОВЫ 911 =====
-
+  // === CALLS API ===
   async getCalls(filters: CallFilters = {}): Promise<Call911[]> {
     const params = new URLSearchParams();
-    
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (value instanceof Date) {
-          params.append(key, value.toISOString());
-        } else {
-          params.append(key, String(value));
-        }
+      if (value !== undefined) {
+        params.append(key, value.toString());
       }
     });
-
-    const response: ApiListResponse<Call911> = await makeRequest(
-      `/database/calls?${params.toString()}`
-    );
     
+    const response = await makeRequest<ApiListResponse<Call911>>(
+      `${this.baseUrl}/calls?${params.toString()}`
+    );
     return response.data;
   }
 
-  async getCallById(id: number): Promise<Call911> {
-    const response: ApiResponse<Call911> = await makeRequest(
-      `/database/calls/${id}`
+  async getCallById(id: string): Promise<Call911> {
+    const response = await makeRequest<ApiResponse<Call911>>(
+      `${this.baseUrl}/calls/${id}`
     );
-    
     return response.data;
   }
 
   async createCall(data: any): Promise<Call911> {
-    const response: ApiResponse<Call911> = await makeRequest(
-      '/database/calls',
+    const response = await makeRequest<ApiResponse<Call911>>(
+      `${this.baseUrl}/calls`,
       {
         method: 'POST',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async updateCall(id: number, data: any): Promise<Call911> {
-    const response: ApiResponse<Call911> = await makeRequest(
-      `/database/calls/${id}`,
+  async updateCall(id: string, data: any): Promise<Call911> {
+    const response = await makeRequest<ApiResponse<Call911>>(
+      `${this.baseUrl}/calls/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  // ===== ЮНИТЫ =====
-
-  async getUnits(filters: UnitFilters = {}): Promise<ActiveUnit[]> {
+  // === UNITS API ===
+  async getUnits(filters: UnitFilters = {}): Promise<Unit[]> {
     const params = new URLSearchParams();
-    
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(key, String(value));
+      if (value !== undefined) {
+        params.append(key, value.toString());
       }
     });
-
-    const response: ApiListResponse<ActiveUnit> = await makeRequest(
-      `/database/units?${params.toString()}`
-    );
     
+    const response = await makeRequest<ApiListResponse<Unit>>(
+      `${this.baseUrl}/units?${params.toString()}`
+    );
     return response.data;
   }
 
-  async getUnitById(id: number): Promise<ActiveUnit> {
-    const response: ApiResponse<ActiveUnit> = await makeRequest(
-      `/database/units/${id}`
+  async getUnitById(id: string): Promise<Unit> {
+    const response = await makeRequest<ApiResponse<Unit>>(
+      `${this.baseUrl}/units/${id}`
     );
-    
     return response.data;
   }
 
-  async createUnit(data: any): Promise<ActiveUnit> {
-    const response: ApiResponse<ActiveUnit> = await makeRequest(
-      '/database/units',
+  async createUnit(data: any): Promise<Unit> {
+    const response = await makeRequest<ApiResponse<Unit>>(
+      `${this.baseUrl}/units`,
       {
         method: 'POST',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  async updateUnit(id: number, data: any): Promise<ActiveUnit> {
-    const response: ApiResponse<ActiveUnit> = await makeRequest(
-      `/database/units/${id}`,
+  async updateUnit(id: string, data: any): Promise<Unit> {
+    const response = await makeRequest<ApiResponse<Unit>>(
+      `${this.baseUrl}/units/${id}`,
       {
         method: 'PUT',
         body: JSON.stringify(data),
       }
     );
-    
     return response.data;
   }
 
-  // ===== ДЕПАРТАМЕНТЫ =====
-
-  async getDepartments(): Promise<Department[]> {
-    const response: ApiListResponse<Department> = await makeRequest(
-      '/database/departments'
+  // === ACTIVE UNITS API ===
+  async getActiveUnits(): Promise<ActiveUnit[]> {
+    const response = await makeRequest<ApiListResponse<ActiveUnit>>(
+      `${this.baseUrl}/mdt/units/active`
     );
-    
     return response.data;
   }
 
-  async getDepartmentById(id: number): Promise<Department> {
-    const response: ApiResponse<Department> = await makeRequest(
-      `/database/departments/${id}`
-    );
-    
-    return response.data;
-  }
-
-  // ===== ПОИСК =====
-
-  async searchCitizens(query: string, limit: number = 10): Promise<Character[]> {
-    const params = new URLSearchParams({
-      query,
-      limit: String(limit),
-    });
-
-    const response: ApiListResponse<Character> = await makeRequest(
-      `/database/search/citizens?${params.toString()}`
-    );
-    
-    return response.data;
-  }
-
-  async searchVehicles(query: string, limit: number = 10): Promise<Vehicle[]> {
-    const params = new URLSearchParams({
-      query,
-      limit: String(limit),
-    });
-
-    const response: ApiListResponse<Vehicle> = await makeRequest(
-      `/database/search/vehicles?${params.toString()}`
-    );
-    
-    return response.data;
-  }
-
-  async searchWeapons(query: string, limit: number = 10): Promise<Weapon[]> {
-    const params = new URLSearchParams({
-      query,
-      limit: String(limit),
-    });
-
-    const response: ApiListResponse<Weapon> = await makeRequest(
-      `/database/search/weapons?${params.toString()}`
-    );
-    
-    return response.data;
-  }
-
-  // ===== СТАТИСТИКА =====
-
-  async getSystemStats(): Promise<any> {
-    const response: ApiResponse<any> = await makeRequest('/database/stats');
-    return response.data;
-  }
-
-  // ===== АУТЕНТИФИКАЦИЯ =====
-
-  async login(credentials: { email: string; password: string }): Promise<ApiResponse<any>> {
-    const response: ApiResponse<any> = await makeRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-    
-    return response;
-  }
-
-  async register(userData: { username: string; email: string; password: string }): Promise<ApiResponse<any>> {
-    const response: ApiResponse<any> = await makeRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
-    
-    return response;
-  }
-
-  async getCurrentUser(): Promise<ApiResponse<any>> {
-    const response: ApiResponse<any> = await makeRequest('/auth/me');
-    return response;
-  }
-
-  async authenticate(token: string): Promise<any> {
-    const response: ApiResponse<any> = await makeRequest('/auth/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    
-    return response.data;
-  }
-
-  async generateCadToken(): Promise<string> {
-    const response: ApiResponse<{ token: string }> = await makeRequest(
-      '/auth/cad-token',
+  async createMDTUnit(data: any): Promise<ActiveUnit> {
+    const response = await makeRequest<ApiResponse<ActiveUnit>>(
+      `${this.baseUrl}/mdt/units`,
       {
         method: 'POST',
+        body: JSON.stringify(data),
       }
     );
-    
-    return response.data.token;
-  }
-
-  // ===== MDT СПЕЦИФИЧНЫЕ API =====
-
-  async getActiveUnits(): Promise<any[]> {
-    const response: ApiListResponse<any> = await makeRequest('/mdt/units');
     return response.data;
   }
 
-  async createMDTUnit(data: any): Promise<any> {
-    const response: ApiResponse<any> = await makeRequest('/mdt/units', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    
-    return response.data;
-  }
-
-  async updateMDTUnitStatus(unitId: number, status: string): Promise<any> {
-    const response: ApiResponse<any> = await makeRequest(
-      `/mdt/units/${unitId}/status`,
+  async updateMDTUnitStatus(unitId: string, status: string): Promise<ActiveUnit> {
+    const response = await makeRequest<ApiResponse<ActiveUnit>>(
+      `${this.baseUrl}/mdt/units/${unitId}/status`,
       {
         method: 'PUT',
         body: JSON.stringify({ status }),
       }
     );
-    
     return response.data;
   }
 
-  async activatePanic(unitId: number): Promise<void> {
-    await makeRequest(`/mdt/units/${unitId}/panic`, {
+  async activatePanic(unitId: string): Promise<void> {
+    await makeRequest(`${this.baseUrl}/mdt/units/${unitId}/panic`, {
       method: 'POST',
     });
   }
 
-  async deactivatePanic(unitId: number): Promise<void> {
-    await makeRequest(`/mdt/units/${unitId}/panic`, {
+  async deactivatePanic(unitId: string): Promise<void> {
+    await makeRequest(`${this.baseUrl}/mdt/units/${unitId}/panic`, {
       method: 'DELETE',
     });
   }
 
-  // ===== УТИЛИТЫ =====
+  // === DEPARTMENTS API ===
+  async getDepartments(): Promise<Department[]> {
+    const response = await makeRequest<ApiListResponse<Department>>(
+      `${this.baseUrl}/departments`
+    );
+    return response.data;
+  }
 
+  async getDepartmentById(id: string): Promise<Department> {
+    const response = await makeRequest<ApiResponse<Department>>(
+      `${this.baseUrl}/departments/${id}`
+    );
+    return response.data;
+  }
+
+  // === SEARCH API ===
+  async searchCitizens(query: string, limit: number = 10): Promise<Character[]> {
+    const response = await makeRequest<ApiListResponse<Character>>(
+      `${this.baseUrl}/characters/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    return response.data;
+  }
+
+  async searchVehicles(query: string, limit: number = 10): Promise<Vehicle[]> {
+    const response = await makeRequest<ApiListResponse<Vehicle>>(
+      `${this.baseUrl}/vehicles/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    return response.data;
+  }
+
+  async searchWeapons(query: string, limit: number = 10): Promise<Weapon[]> {
+    const response = await makeRequest<ApiListResponse<Weapon>>(
+      `${this.baseUrl}/weapons/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    return response.data;
+  }
+
+  // === SYSTEM API ===
+  async getSystemStats(): Promise<DispatchStats> {
+    const response = await makeRequest<ApiResponse<DispatchStats>>(
+      `${this.baseUrl}/stats`
+    );
+    return response.data;
+  }
+
+  // === AUTH API ===
+  
+  // Добавляем метод для получения данных текущего пользователя
+  async getCurrentUser(): Promise<User> {
+    const response = await makeRequest<{ user: User; characters: any[] }>(`${this.baseUrl}/auth/me`);
+    return response.user; // Сервер возвращает { user, characters }, а не { success, data }
+  }
+
+  async login(credentials: { email: string; password: string }): Promise<ApiResponse<any>> {
+    return makeRequest<ApiResponse<any>>(`${this.baseUrl}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+  }
+
+  async register(userData: { username: string; email: string; password: string }): Promise<ApiResponse<any>> {
+    return makeRequest<ApiResponse<any>>(`${this.baseUrl}/auth/register`, {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async authenticate(token: string): Promise<any> {
+    return makeRequest<any>(`${this.baseUrl}/auth/authenticate`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  }
+
+  // === MDT SPECIFIC API ===
+  async generateCadToken(): Promise<string> {
+    const response = await makeRequest<ApiResponse<{ token: string }>>(
+      `${this.baseUrl}/mdt/token/generate`,
+      { method: 'POST' }
+    );
+    return response.data.token;
+  }
+
+  // === TOKEN MANAGEMENT ===
   setAuthToken(token: string): void {
-    // ИСПРАВЛЕНО: Используем правильный ключ auth_token
     localStorage.setItem('auth_token', token);
   }
 
   getAuthToken(): string | null {
-    // ИСПРАВЛЕНО: Используем правильный ключ auth_token
     return localStorage.getItem('auth_token');
   }
 
   removeAuthToken(): void {
-    // ИСПРАВЛЕНО: Используем правильный ключ auth_token
     localStorage.removeItem('auth_token');
   }
 
@@ -740,8 +531,5 @@ export class ApiService {
   }
 }
 
-// Экспорт экземпляра сервиса
-export const apiService = new ApiService();
-
-// Экспорт типов для использования в других модулях
-export type { ApiError }; 
+// Экспортируем экземпляр сервиса
+export const apiService = new ApiService(); 

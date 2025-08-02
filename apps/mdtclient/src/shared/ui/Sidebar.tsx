@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/atoms/Card
 import { Button } from '@/shared/ui/atoms/Button';
 import { useNavigationStore } from '@/shared/model/navigationStore';
 import { Department } from '@/shared/types';
+import { LogOut, Settings } from 'lucide-react';
+import { useAuth } from '@/shared/contexts/AuthContext';
 
 interface SidebarProps {
   department: Department;
@@ -14,16 +16,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
   department,
   activeModuleId
 }) => {
-  const { selectModule } = useNavigationStore();
+  const { selectModule, resetNavigation } = useNavigationStore();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const handleResetDepartment = () => {
+    resetNavigation();
+  };
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="p-4 space-y-4">
+    <div className="h-full overflow-y-auto flex flex-col">
+      <div className="p-4 space-y-4 flex-grow">
+        {/* Department Header */}
+        <Card variant="glassmorphism">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold text-slate-100">
+                {department.name}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetDepartment}
+                className="h-8 w-8 p-0"
+                title="Сменить департамент"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+
         {/* Department Modules */}
         <Card variant="glassmorphism">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-semibold text-slate-100">
-              Модули {department.name}
+              Модули
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -68,6 +99,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Logout Button */}
+      <div className="p-4 border-t border-slate-700">
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="w-full flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Выйти
+        </Button>
       </div>
     </div>
   );

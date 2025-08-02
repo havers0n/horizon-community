@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from '@/shared/contexts/ThemeContext';
-import { AuthProvider } from '@/shared/contexts/AuthContext';
 import { UIProvider } from '@/shared/contexts/UIContext';
 import { LocaleProvider } from '@/shared/contexts/LocaleContext';
 import { AuthGuard } from './components/AuthGuard';
 
-import { DashboardPage } from './pages/DashboardPage';
+import { AuthenticatedApp } from './components/AuthenticatedApp';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { initializeAuthSync } from './lib/auth-init';
 
@@ -39,12 +37,10 @@ function App() {
   // Проверяем доступность всех необходимых компонентов
   const componentsCheck = {
     ThemeProvider: !!ThemeProvider,
-    AuthProvider: !!AuthProvider,
     UIProvider: !!UIProvider,
     LocaleProvider: !!LocaleProvider,
     AuthGuard: !!AuthGuard,
-    DashboardPage: !!DashboardPage,
-    Router: !!Router,
+    AuthenticatedApp: !!AuthenticatedApp,
     QueryClientProvider: !!QueryClientProvider
   };
 
@@ -77,24 +73,19 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <LocaleProvider>
-            <UIProvider>
-              <Router>
-                <AuthGuard>
-                  <ErrorBoundary>
-                    <div className="min-h-screen text-white overflow-hidden relative">
-                      <div className="relative z-10">
-                        <DashboardPage />
-                      </div>
-                    </div>
-                  </ErrorBoundary>
-                </AuthGuard>
-
-              </Router>
-            </UIProvider>
-          </LocaleProvider>
-        </AuthProvider>
+        <LocaleProvider>
+          <UIProvider>
+            <AuthGuard>
+              <ErrorBoundary>
+                <div className="min-h-screen text-white overflow-hidden relative">
+                  <div className="relative z-10">
+                    <AuthenticatedApp />
+                  </div>
+                </div>
+              </ErrorBoundary>
+            </AuthGuard>
+          </UIProvider>
+        </LocaleProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

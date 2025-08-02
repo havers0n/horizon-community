@@ -1,408 +1,218 @@
 import { createClient } from '@supabase/supabase-js';
+import type {
+  Database,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+  Enums,
+  CompositeTypes
+} from '../../../packages/db-types/src/index';
 
-// Проверяем наличие необходимых переменных окружения
-const supabaseUrl = process.env.SUPABASE_URL;
+// ===== ПРОВЕРКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ =====
+
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Создаем клиент с правами администратора для всех операций
-export const supabase = createClient(
-  supabaseUrl || 'https://axgtvvcimqoyxbfvdrok.supabase.co', 
-  supabaseServiceKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4Z3R2dmNpbXFveXhiZnZkcm9rIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjAxMzcxNywiZXhwIjoyMDY3NTg5NzE3fQ.IkafB_52F99inBJiW7-g9rgmFdh-bTwpz2nBLcVCu7U',
+if (!supabaseUrl) {
+  throw new Error('SUPABASE_URL or VITE_SUPABASE_URL environment variable is required');
+}
+
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+}
+
+// ===== СОЗДАНИЕ SUPABASE КЛИЕНТА =====
+
+/**
+ * Основной Supabase клиент с правами администратора
+ * Используется для всех серверных операций
+ */
+export const supabase = createClient<Database>(
+  supabaseUrl,
+  supabaseServiceKey,
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
+      persistSession: false,
+      detectSessionInUrl: false
+    },
+    db: {
+      schema: 'public'
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'roleplay-identity-server'
+      }
     }
   }
 );
 
-// Типы для таблиц базы данных
-export interface Database {
-  public: {
-    Tables: {
-      users: {
-        Row: {
-          id: number;
-          username: string;
-          email: string;
-          password_hash: string;
-          role: string;
-          status: string;
-          department_id: number | null;
-          secondary_department_id: number | null;
-          rank: string | null;
-          division: string | null;
-          qualifications: string[];
-          game_warnings: number;
-          admin_warnings: number;
-          auth_id: string | null;
-          api_token: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          username: string;
-          email: string;
-          password_hash: string;
-          role: string;
-          status: string;
-          department_id?: number | null;
-          secondary_department_id?: number | null;
-          rank?: string | null;
-          division?: string | null;
-          qualifications?: string[];
-          game_warnings?: number;
-          admin_warnings?: number;
-          auth_id?: string | null;
-          api_token?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          username?: string;
-          email?: string;
-          password_hash?: string;
-          role?: string;
-          status?: string;
-          department_id?: number | null;
-          secondary_department_id?: number | null;
-          rank?: string | null;
-          division?: string | null;
-          qualifications?: string[];
-          game_warnings?: number;
-          admin_warnings?: number;
-          auth_id?: string | null;
-          api_token?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      departments: {
-        Row: {
-          id: number;
-          name: string;
-          description: string | null;
-        };
-        Insert: {
-          id?: number;
-          name: string;
-          description?: string | null;
-        };
-        Update: {
-          id?: number;
-          name?: string;
-          description?: string | null;
-        };
-      };
-      characters: {
-        Row: {
-          id: number;
-          owner_id: number;
-          first_name: string;
-          last_name: string;
-          date_of_birth: string;
-          gender: string;
-          nationality: string;
-          phone_number: string | null;
-          address: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          owner_id: number;
-          first_name: string;
-          last_name: string;
-          date_of_birth: string;
-          gender: string;
-          nationality: string;
-          phone_number?: string | null;
-          address?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          owner_id?: number;
-          first_name?: string;
-          last_name?: string;
-          date_of_birth?: string;
-          gender?: string;
-          nationality?: string;
-          phone_number?: string | null;
-          address?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      applications: {
-        Row: {
-          id: number;
-          user_id: number;
-          type: string;
-          status: string;
-          data: any;
-          reviewer_id: number | null;
-          review_comment: string | null;
-          character_id: number | null;
-          status_history: any | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          type: string;
-          status?: string;
-          data: any;
-          reviewer_id?: number | null;
-          review_comment?: string | null;
-          character_id?: number | null;
-          status_history?: any | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          type?: string;
-          status?: string;
-          data?: any;
-          reviewer_id?: number | null;
-          review_comment?: string | null;
-          character_id?: number | null;
-          status_history?: any | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      reports: {
-        Row: {
-          id: number;
-          user_id: number;
-          status: string;
-          file_url: string;
-          supervisor_comment: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          status?: string;
-          file_url: string;
-          supervisor_comment?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          status?: string;
-          file_url?: string;
-          supervisor_comment?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      support_tickets: {
-        Row: {
-          id: number;
-          user_id: number;
-          status: string;
-          messages: any[];
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          status?: string;
-          messages?: any[];
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          status?: string;
-          messages?: any[];
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      notifications: {
-        Row: {
-          id: number;
-          user_id: number;
-          message: string;
-          link: string | null;
-          is_read: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          message: string;
-          link?: string | null;
-          is_read?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          message?: string;
-          link?: string | null;
-          is_read?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      complaints: {
-        Row: {
-          id: number;
-          author_id: number;
-          subject: string;
-          content: string;
-          status: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          author_id: number;
-          subject: string;
-          content: string;
-          status?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          author_id?: number;
-          subject?: string;
-          content?: string;
-          status?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      tests: {
-        Row: {
-          id: number;
-          title: string;
-          description: string;
-          questions: any[];
-          time_limit: number;
-          passing_score: number;
-          department_id: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          title: string;
-          description: string;
-          questions: any[];
-          time_limit: number;
-          passing_score: number;
-          department_id: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          title?: string;
-          description?: string;
-          questions?: any[];
-          time_limit?: number;
-          passing_score?: number;
-          department_id?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      test_sessions: {
-        Row: {
-          id: number;
-          user_id: number;
-          test_id: number;
-          status: string;
-          start_time: string;
-          end_time: string | null;
-          answers: any[];
-          score: number | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          test_id: number;
-          status?: string;
-          start_time: string;
-          end_time?: string | null;
-          answers?: any[];
-          score?: number | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          test_id?: number;
-          status?: string;
-          start_time?: string;
-          end_time?: string | null;
-          answers?: any[];
-          score?: number | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      test_results: {
-        Row: {
-          id: number;
-          user_id: number;
-          test_id: number;
-          session_id: number;
-          score: number;
-          passed: boolean;
-          completed_at: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: number;
-          test_id: number;
-          session_id: number;
-          score: number;
-          passed: boolean;
-          completed_at: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: number;
-          test_id?: number;
-          session_id?: number;
-          score?: number;
-          passed?: boolean;
-          completed_at?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-    };
-  };
+// ===== УТИЛИТЫ ДЛЯ РАБОТЫ С БД =====
+
+/**
+ * Получение типизированного клиента для конкретной схемы
+ */
+export function getSchemaClient(schema: 'public' | 'common' | 'mdt') {
+  return createClient<Database>(
+    supabaseUrl,
+    supabaseServiceKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false
+      },
+      db: {
+        schema: schema as any
+      },
+      global: {
+        headers: {
+          'X-Client-Info': `roleplay-identity-server-${schema}`
+        }
+      }
+    }
+  );
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type Inserts<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type Updates<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']; 
+/**
+ * Клиент для работы с публичной схемой
+ */
+export const publicClient = getSchemaClient('public');
+
+/**
+ * Клиент для работы со схемой common
+ */
+export const commonClient = getSchemaClient('common');
+
+/**
+ * Клиент для работы со схемой mdt
+ */
+export const mdtClient = getSchemaClient('mdt');
+
+// ===== ТИПИЗИРОВАННЫЕ ТАБЛИЦЫ =====
+
+// Публичная схема
+export type Profiles = Tables<'profiles'>;
+export type Achievements = Tables<'achievements'>;
+export type Badges = Tables<'badges'>;
+export type UserAchievements = Tables<'user_achievements'>;
+export type UserBadges = Tables<'user_badges'>;
+export type UserStats = Tables<'user_stats'>;
+export type JointPositionsHistory = Tables<'joint_positions_history'>;
+
+// Схема common
+export type Characters = Tables<{ schema: 'common' }, 'characters'>;
+export type Companies = Tables<{ schema: 'common' }, 'companies'>;
+export type CompanyEmployees = Tables<{ schema: 'common' }, 'company_employees'>;
+export type Departments = Tables<{ schema: 'common' }, 'departments'>;
+export type Divisions = Tables<{ schema: 'common' }, 'divisions'>;
+export type LeoProfiles = Tables<{ schema: 'common' }, 'leo_profiles'>;
+export type EmsProfiles = Tables<{ schema: 'common' }, 'ems_profiles'>;
+export type Ranks = Tables<{ schema: 'common' }, 'ranks'>;
+export type Units = Tables<{ schema: 'common' }, 'units'>;
+export type Vehicles = Tables<{ schema: 'common' }, 'vehicles'>;
+export type Weapons = Tables<{ schema: 'common' }, 'weapons'>;
+export type CargoShipments = Tables<{ schema: 'common' }, 'cargo_shipments'>;
+export type CharacterCareerHistory = Tables<{ schema: 'common' }, 'character_career_history'>;
+export type CharacterQualifications = Tables<{ schema: 'common' }, 'character_qualifications'>;
+export type ImpoundLots = Tables<{ schema: 'common' }, 'impound_lots'>;
+export type ImpoundedVehicles = Tables<{ schema: 'common' }, 'impounded_vehicles'>;
+export type Pets = Tables<{ schema: 'common' }, 'pets'>;
+export type Qualifications = Tables<{ schema: 'common' }, 'qualifications'>;
+
+// Схема mdt
+export type Applications = Tables<{ schema: 'mdt' }, 'applications'>;
+export type Calls = Tables<{ schema: 'mdt' }, 'calls'>;
+export type Bolos = Tables<{ schema: 'mdt' }, 'bolos'>;
+export type Complaints = Tables<{ schema: 'mdt' }, 'complaints'>;
+export type EmsFdReports = Tables<{ schema: 'mdt' }, 'ems_fd_reports'>;
+export type LawReports = Tables<{ schema: 'mdt' }, 'law_reports'>;
+export type MdtSignals = Tables<{ schema: 'mdt' }, 'mdt_signals'>;
+export type MdtSignalNotifications = Tables<{ schema: 'mdt' }, 'mdt_signal_notifications'>;
+export type NotebookNotes = Tables<{ schema: 'mdt' }, 'notebook_notes'>;
+export type Notifications = Tables<{ schema: 'mdt' }, 'notifications'>;
+export type SupportTickets = Tables<{ schema: 'mdt' }, 'support_tickets'>;
+export type Tests = Tables<{ schema: 'mdt' }, 'tests'>;
+export type TestSessions = Tables<{ schema: 'mdt' }, 'test_sessions'>;
+export type TestResults = Tables<{ schema: 'mdt' }, 'test_results'>;
+export type UnitsOnDuty = Tables<{ schema: 'mdt' }, 'units_on_duty'>;
+
+// ===== ТИПЫ ДЛЯ INSERT И UPDATE =====
+
+// Публичная схема
+export type ProfilesInsert = TablesInsert<'profiles'>;
+export type ProfilesUpdate = TablesUpdate<'profiles'>;
+
+// Схема common
+export type CharactersInsert = TablesInsert<{ schema: 'common' }, 'characters'>;
+export type CharactersUpdate = TablesUpdate<{ schema: 'common' }, 'characters'>;
+
+export type DepartmentsInsert = TablesInsert<{ schema: 'common' }, 'departments'>;
+export type DepartmentsUpdate = TablesUpdate<{ schema: 'common' }, 'departments'>;
+
+export type VehiclesInsert = TablesInsert<{ schema: 'common' }, 'vehicles'>;
+export type VehiclesUpdate = TablesUpdate<{ schema: 'common' }, 'vehicles'>;
+
+export type WeaponsInsert = TablesInsert<{ schema: 'common' }, 'weapons'>;
+export type WeaponsUpdate = TablesUpdate<{ schema: 'common' }, 'weapons'>;
+
+// Схема mdt
+export type ApplicationsInsert = TablesInsert<{ schema: 'mdt' }, 'applications'>;
+export type ApplicationsUpdate = TablesUpdate<{ schema: 'mdt' }, 'applications'>;
+
+export type BolosInsert = TablesInsert<{ schema: 'mdt' }, 'bolos'>;
+export type BolosUpdate = TablesUpdate<{ schema: 'mdt' }, 'bolos'>;
+
+// ===== УТИЛИТЫ ДЛЯ ВАЛИДАЦИИ =====
+
+/**
+ * Проверка валидности UUID
+ */
+export function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
+/**
+ * Генерация UUID v4
+ */
+export function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * Проверка подключения к Supabase
+ */
+export async function testConnection(): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Supabase connection test failed:', error);
+      return false;
+    }
+    
+    console.log('✅ Supabase connection test successful');
+    return true;
+  } catch (error) {
+    console.error('❌ Supabase connection test error:', error);
+    return false;
+  }
+}
+
+// ===== ЭКСПОРТЫ ДЛЯ ОБРАТНОЙ СОВМЕСТИМОСТИ =====
+
+// Оставляем старые экспорты для обратной совместимости
+// TODO: Удалить после полного рефакторинга всех сервисов
+
+// Эти типы теперь конфликтуют с импортированными, поэтому переименовываем их
+export type LegacyTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+export type LegacyInserts<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
+export type LegacyUpdates<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']; 

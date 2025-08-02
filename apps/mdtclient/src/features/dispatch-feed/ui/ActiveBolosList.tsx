@@ -90,7 +90,7 @@ export const ActiveBolosList: React.FC = () => {
     );
   }
 
-  const activeBolos = bolos.filter(bolo => bolo.isActive);
+  const activeBolos = bolos.filter(bolo => bolo.status === 'active');
 
   return (
     <Card className="h-full">
@@ -126,23 +126,23 @@ export const ActiveBolosList: React.FC = () => {
                     </Badge>
                   </div>
                   <span className="text-xs text-secondary-400">
-                    #{bolo.id}
+                    {bolo.author_full_name || bolo.author_name || `#${bolo.id}`}
                   </span>
                 </div>
                 
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium text-white">
-                    {bolo.title}
+                    {bolo.title || bolo.reason}
                   </h4>
                   
                   <p className="text-sm text-secondary-300 line-clamp-2">
-                    {bolo.description}
+                    {bolo.description || bolo.reason}
                   </p>
                   
                   <div className="flex items-center gap-2 text-xs text-secondary-400">
                     <Clock className="h-3 w-3" />
                     <span>
-                      {new Date(bolo.createdAt).toLocaleTimeString()}
+                      {new Date(bolo.createdAt || bolo.created_at || '').toLocaleTimeString()}
                     </span>
                     {bolo.expiresAt && (
                       <>

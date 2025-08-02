@@ -1,11 +1,18 @@
 import 'dotenv/config'; // Убедись, что эта строка есть и она первая
 
 import express, { type Request, type Response, type NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { storage } from "./storage";
 import { BusinessLogic } from "./businessLogic";
 import { Scheduler } from "./scheduler";
 import { log, serveStatic } from "./production";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app: import('express').Express = express();
 
@@ -13,23 +20,14 @@ const app: import('express').Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS
-app.use((req, res, next) => {
-  // Разрешаем запросы от всех источников (включая FiveM)
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CAD-Token");
-  
-  // Специальные заголовки для FiveM
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Max-Age", "86400");
-  
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
+// CORS - стандартная реализация с помощью библиотеки cors
+app.use(cors({
+  origin: "*", // Разрешаем запросы от всех источников (включая FiveM)
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "X-CAD-Token"],
+  credentials: true, // Специальные заголовки для FiveM
+  maxAge: 86400 // Access-Control-Max-Age: 86400
+}));
 
 (async () => {
   const server = await registerRoutes(app);
@@ -80,6 +78,32 @@ app.use((req, res, next) => {
     console.log("📦 Setting up static file serving for production...");
     serveStatic(app);
   }
+
+  // Catch-all route для SPA - должен быть ПОСЛЕ всех API роутов
+  app.get('*', (req, res, next) => {
+    // Пропускаем API запросы
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    
+    // Для development
+    if (process.env.NODE_ENV === "development" || app.get("env") === "development") {
+      const clientTemplate = path.resolve(__dirname, "..", "client", "dist", "index.html");
+      if (fs.existsSync(clientTemplate)) {
+        return res.sendFile(clientTemplate);
+      }
+    }
+    
+    // Для production
+    const publicPath = path.resolve(__dirname, "public");
+    const indexPath = path.join(publicPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
+    
+    // Если файл не найден
+    res.status(404).json({ error: "Client not built or not found" });
+  });
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.

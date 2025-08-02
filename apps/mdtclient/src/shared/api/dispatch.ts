@@ -1,5 +1,6 @@
 import { authUtils } from '../../lib/auth';
-import type { Call911, Unit, BOLO, DispatchStats, UnitAssignment } from '../types';
+import type { Call911, Unit, DispatchStats, UnitAssignment } from '../types';
+import type { Bolo } from '../../entities/dispatch/model/types';
 
 export class DispatchApi {
   private static baseUrl = '/api/mdt';
@@ -120,7 +121,7 @@ export class DispatchApi {
   }
 
   // === BOLO API ===
-  static async getActiveBolos(): Promise<BOLO[]> {
+  static async getActiveBolos(): Promise<Bolo[]> {
     try {
       const response = await fetch(`${this.baseUrl}/bolos/active`, {
         headers: authUtils.getAuthHeaders()
@@ -137,7 +138,7 @@ export class DispatchApi {
     }
   }
 
-  static async createBolo(boloData: Partial<BOLO>): Promise<BOLO> {
+  static async createBolo(boloData: Partial<Bolo>): Promise<Bolo> {
     try {
       const response = await fetch(`${this.baseUrl}/bolos`, {
         method: 'POST',

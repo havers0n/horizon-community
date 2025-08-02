@@ -21,9 +21,4 @@ export function serveStatic(app: express.Application) {
   const publicPath = path.resolve(__dirname, "public");
   
   app.use(express.static(publicPath));
-  
-  // Serve index.html for all routes (SPA routing)
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(publicPath, 'index.html'));
-  });
 } 

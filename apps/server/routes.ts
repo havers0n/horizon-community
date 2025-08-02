@@ -20,6 +20,7 @@ import { authenticateToken, requireSupervisor, requireAdmin } from './middleware
 import { uploadMiddleware, handleUpload } from './fileUpload';
 import adminSupportRoutes from './routes/admin/support.routes.js';
 import adminTestsRoutes from './routes/adminTests.js';
+import adminRoutes from './routes/admin/index.js';
 // import forumRoutes from './routes/forum.js';
 import mdtRoutes from './routes/mdt.js';
 import realtimeRoutes from './routes/realtime-simple.js';
@@ -878,6 +879,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/files/upload/:category', authenticateToken, uploadMiddleware, handleUpload);
 
   // Admin routes
+  app.use('/api/admin', adminRoutes);
   app.use('/api/admin/support', adminSupportRoutes);
   app.use('/api/admin/tests', adminTestsRoutes);
 

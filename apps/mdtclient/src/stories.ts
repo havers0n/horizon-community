@@ -2,16 +2,16 @@
 // Он автоматически импортируется в .storybook/main.ts
 
 // Атомы
-export * from './shared/ui/atoms/Button/Button.stories';
-export * from './shared/ui/atoms/Input/Input.stories';
-export * from './shared/ui/atoms/Card/Card.stories';
-export * from './shared/ui/atoms/Select/Select.stories';
-export * from './shared/ui/atoms/Badge/Badge.stories';
-export * from './shared/ui/atoms/Checkbox/Checkbox.stories';
+export { default as ButtonStories } from './shared/ui/atoms/Button/Button.stories';
+export { default as InputStories } from './shared/ui/atoms/Input/Input.stories';
+export { default as CardStories } from './shared/ui/atoms/Card/Card.stories';
+export { default as SelectStories } from './shared/ui/atoms/Select/Select.stories';
+export { default as BadgeStories } from './shared/ui/atoms/Badge/Badge.stories';
+export { default as CheckboxStories } from './shared/ui/atoms/Checkbox/Checkbox.stories';
 
 // Сущности
-export * from './entities/citizen/ui/CitizenCard.stories';
-export * from './entities/vehicle/ui/VehicleCard.stories';
+export { default as CitizenCardStories } from './entities/citizen/ui/CitizenCard.stories';
+export { default as VehicleCardStories } from './entities/vehicle/ui/VehicleCard.stories';
 
 // Виджеты
-export * from './widgets/officer-dashboard/ui/OfficerDashboardWidget.stories'; 
+export { default as OfficerDashboardWidgetStories } from './widgets/officer-dashboard/ui/OfficerDashboardWidget.stories'; 
