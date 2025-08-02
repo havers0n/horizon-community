@@ -67,13 +67,18 @@ jobs:
             echo "🔧 Устанавливаем зависимости..."
             npm install --production
 
-            # ВОТ ОНО, РЕШЕНИЕ:
-            echo "🚀 Запускаем/перезапускаем приложение через PM2, ПРИНУДИТЕЛЬНО используя .env..."
+            # "ЯДЕРНЫЙ" СПОСОБ: СОЗДАЕМ КОНФИГ PM2 С "ВШИТЫМИ" ПЕРЕМЕННЫМИ
+            echo "🚀 Создаем временный ecosystem.json с переменными из .env..."
             
-            # Эта команда читает .env, экспортирует переменные и ЗАПУСКАЕТ PM2
-            # Теперь PM2 и ваше приложение 100% увидят все переменные
-            # --update-env гарантирует, что переменные применятся при перезапуске
-            export $(grep -v '^#' .env | xargs) && pm2 reload roleplayidentity --update-env || pm2 start ecosystem.config.js --env production
+            # Эта команда читает .env, форматирует его в JSON и создает файл
+            # Теперь PM2 получит переменные напрямую, а не через окружение
+            cat .env | awk -F '=' '{print "\""$1"\":\""$2"\""}' | paste -sd, - | awk '{print "{\"apps\":[{\"name\":\"roleplayidentity\",\"script\":\"./dist/apps/server/main.js\",\"env_production\":{" $1 "}}]}"}' > temp_ecosystem.json
+
+            echo "📄 Содержимое временного конфига:"
+            cat temp_ecosystem.json
+
+            # Запускаем/перезапускаем приложение, используя ЭТОТ временный конфиг
+            pm2 startOrGracefulReload temp_ecosystem.json --env production
             
             pm2 save
             echo "✅ Деплой завершен успешно!"
