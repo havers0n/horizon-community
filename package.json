@@ -14,8 +14,8 @@
     "build:client": "cd apps/client && npm run build",
     "build:mdt": "cd apps/mdtclient && npm run build",
     "build:server": "cd apps/server && npm run build",
-    "install:all": "npm install && cd apps/client && npm install && cd ../mdtclient && npm install && cd ../server && npm install && cd ../../libs/shared-types && npm install && cd ../shared-utils && npm install",
-    "install:all:production": "npm ci --production && cd apps/client && npm ci --production && cd ../mdtclient && npm ci --production && cd ../server && npm ci --production && cd ../../libs/shared-types && npm ci --production && cd ../shared-utils && npm ci --production",
+    "install:all": "npm install",
+    "install:all:production": "npm ci --production",
     "clean": "npm run clean:client && npm run clean:mdt && npm run clean:server",
     "clean:client": "cd apps/client && npm run clean",
     "clean:mdt": "cd apps/mdtclient && npm run clean",
@@ -30,6 +30,11 @@
     "test:server": "cd apps/server && npm run test",
     "check-ports": "node scripts/check-ports.js"
   },
+  "workspaces": [
+    "apps/*",
+    "libs/*",
+    "libs/*/*"
+  ],
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
