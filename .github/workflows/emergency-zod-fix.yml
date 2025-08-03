@@ -1,0 +1,198 @@
+name: Emergency Zod Module Fix
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Принудительная пересборка'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  emergency-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install all dependencies
+        run: npm ci
+
+      - name: Install dependencies in shared libraries
+        run: |
+          echo "🔧 Устанавливаем зависимости в shared библиотеках..."
+          cd libs/shared/schema && npm install
+          cd ../../..
+
+      - name: Create .env file for Vite build
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
+
+      - name: Run comprehensive module diagnostics
+        run: |
+          echo "🔍 Запускаем комплексную диагностику модулей..."
+          npm run check-modules
+          npm run check-production
+
+      - name: Force rebuild if requested
+        if: ${{ inputs.force_rebuild }}
+        run: |
+          echo "🚀 Запускаем принудительную пересборку..."
+          npm run force-rebuild
+
+      - name: Build application
+        run: npm run build:production
+
+      - name: Verify zod in build artifacts
+        run: |
+          echo "🔍 Проверяем наличие zod в собранных файлах..."
+          
+          # Проверяем наличие zod-vendor файла
+          ZOD_FILES=$(find dist -name "*zod*" -type f)
+          if [ -n "$ZOD_FILES" ]; then
+            echo "✅ zod файлы найдены:"
+            echo "$ZOD_FILES"
+          else
+            echo "❌ zod файлы НЕ найдены!"
+            exit 1
+          fi
+          
+          # Проверяем содержимое zod-vendor файла
+          ZOD_VENDOR=$(find dist -name "*zod-vendor*" -type f | head -1)
+          if [ -n "$ZOD_VENDOR" ]; then
+            echo "✅ zod-vendor файл найден: $ZOD_VENDOR"
+            echo "📏 Размер файла: $(ls -lh $ZOD_VENDOR | awk '{print $5}')"
+            
+            # Проверяем что файл содержит код zod
+            if grep -q "zod" "$ZOD_VENDOR"; then
+              echo "✅ zod-vendor файл содержит код zod"
+            else
+              echo "❌ zod-vendor файл НЕ содержит код zod!"
+              exit 1
+            fi
+          else
+            echo "❌ zod-vendor файл НЕ найден!"
+            exit 1
+          fi
+          
+          # Проверяем index.html файлы
+          echo "🔍 Проверяем index.html файлы..."
+          for html_file in dist/apps/client/index.html dist/apps/mdtclient/index.html; do
+            if [ -f "$html_file" ]; then
+              echo "✅ $html_file найден"
+              if grep -q "zod" "$html_file"; then
+                echo "✅ $html_file содержит ссылки на zod"
+              else
+                echo "⚠️  $html_file не содержит ссылок на zod"
+              fi
+            else
+              echo "❌ $html_file НЕ найден!"
+            fi
+          done
+
+      - name: Clean up node_modules before deploy
+        run: rm -rf node_modules
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "."
+          target: "/var/www/app"
+          overwrite: true
+
+      - name: Install dependencies and restart on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /var/www/app
+            
+            echo "🔧 Устанавливаем зависимости..."
+            npm install --production
+            
+            echo "🔧 Устанавливаем зависимости в shared/schema..."
+            cd libs/shared/schema && npm install && cd ../../../
+            
+            echo "🔗 Восстанавливаем символическую ссылку на .env..."
+            ln -sf /var/www/.env .env
+            
+            echo "🔍 Проверяем zod файлы на сервере..."
+            ZOD_FILES=$(find dist -name "*zod*" -type f)
+            if [ -n "$ZOD_FILES" ]; then
+              echo "✅ zod файлы найдены на сервере:"
+              echo "$ZOD_FILES"
+            else
+              echo "❌ zod файлы НЕ найдены на сервере!"
+              exit 1
+            fi
+            
+            echo "🚀 Перезапускаем приложение..."
+            pm2 startOrGracefulReload ecosystem.config.js --env production
+            pm2 save
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            sleep 10
+            
+            echo "📊 Статус PM2:"
+            pm2 status
+            
+            echo "🩺 Health check:"
+            if curl -f http://localhost:5000/api/health > /dev/null 2>&1; then
+              echo "✅ Backend работает"
+            else
+              echo "❌ Backend не работает"
+              pm2 logs roleplayidentity --lines 20 --nostream
+              exit 1
+            fi
+            
+            echo "🌐 Проверка клиента:"
+            if curl -f http://localhost:5000/ > /dev/null 2>&1; then
+              echo "✅ Клиент доступен"
+            else
+              echo "❌ Клиент недоступен"
+            fi
+            
+            echo "🔍 Проверка MDT:"
+            if curl -f http://localhost:5000/mdt/ > /dev/null 2>&1; then
+              echo "✅ MDT доступен"
+            else
+              echo "❌ MDT недоступен"
+            fi
+            
+            echo "📋 Финальная проверка zod файлов:"
+            find dist -name "*zod*" -type f -exec ls -lh {} \;
+            
+            echo "🎉 Экстренное исправление завершено!"
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Экстренное исправление модуля zod выполнено успешно!"
+          echo "🌐 Проверьте сайт: https://your-domain.com"
+          echo "🔍 Проверьте консоль браузера на наличие ошибок"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Экстренное исправление модуля zod завершилось с ошибкой!"
+          echo "🔍 Проверьте логи выше для диагностики"
+          echo "📞 Обратитесь к документации: docs/deployment/ZOD_MODULE_FIX.md" 
