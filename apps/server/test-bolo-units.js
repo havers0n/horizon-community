@@ -36,7 +36,7 @@ async function testBoloAndUnits() {
     // Тестируем BOLO
     console.log('\n📋 Тестирование BOLO:');
     try {
-      const boloResult = await pool.query('SELECT COUNT(*) FROM mdt.bolos');
+      const boloResult = await pool.query('SELECT COUNT(*) FROM public.get_active_bolos_with_author()');
       console.log(`   ✅ BOLO: ${boloResult.rows[0].count} записей`);
     } catch (error) {
       console.log(`   ❌ BOLO: ${error.message}`);
@@ -45,7 +45,7 @@ async function testBoloAndUnits() {
     // Тестируем Units
     console.log('\n📋 Тестирование Units:');
     try {
-      const unitsResult = await pool.query('SELECT COUNT(*) FROM mdt.mdt_units');
+      const unitsResult = await pool.query('SELECT COUNT(*) FROM public.get_all_mdt_units()');
       console.log(`   ✅ Units: ${unitsResult.rows[0].count} записей`);
     } catch (error) {
       console.log(`   ❌ Units: ${error.message}`);
@@ -54,7 +54,7 @@ async function testBoloAndUnits() {
     // Тестируем Calls
     console.log('\n📋 Тестирование Calls:');
     try {
-      const callsResult = await pool.query('SELECT COUNT(*) FROM mdt.mdt_calls_911');
+      const callsResult = await pool.query('SELECT COUNT(*) FROM public.get_all_mdt_calls()');
       console.log(`   ✅ Calls: ${callsResult.rows[0].count} записей`);
     } catch (error) {
       console.log(`   ❌ Calls: ${error.message}`);
@@ -63,7 +63,7 @@ async function testBoloAndUnits() {
     // Тестируем Departments
     console.log('\n📋 Тестирование Departments:');
     try {
-      const deptResult = await pool.query('SELECT COUNT(*) FROM common.departments');
+      const deptResult = await pool.query('SELECT COUNT(*) FROM public.get_all_departments()');
       console.log(`   ✅ Departments: ${deptResult.rows[0].count} записей`);
     } catch (error) {
       console.log(`   ❌ Departments: ${error.message}`);
@@ -72,7 +72,7 @@ async function testBoloAndUnits() {
     // Тестируем Characters
     console.log('\n📋 Тестирование Characters:');
     try {
-      const charResult = await pool.query('SELECT COUNT(*) FROM common.characters');
+      const charResult = await pool.query('SELECT COUNT(*) FROM public.get_all_characters()');
       console.log(`   ✅ Characters: ${charResult.rows[0].count} записей`);
     } catch (error) {
       console.log(`   ❌ Characters: ${error.message}`);

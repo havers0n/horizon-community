@@ -226,7 +226,7 @@ export class CharacterServiceUpdated {
   async getCharacter(id: string): Promise<Character | undefined> {
     try {
       const result = await this.pool.query(`
-        SELECT * FROM characters WHERE id = $1
+        SELECT * FROM public.get_character_by_id($1)
       `, [id]);
 
       if (result.rows.length === 0) {
@@ -243,9 +243,7 @@ export class CharacterServiceUpdated {
   async getCharactersByOwner(ownerId: string): Promise<Character[]> {
     try {
       const result = await this.pool.query(`
-        SELECT * FROM characters 
-        WHERE owner_id = $1
-        ORDER BY created_at DESC
+        SELECT * FROM public.get_characters_with_filters($1, NULL, NULL, 100, 0)
       `, [ownerId]);
 
       return result.rows.map((char: any) => this.adaptDbToCharacter(char));
@@ -474,8 +472,7 @@ export class CharacterServiceUpdated {
   async getAllCharacters(): Promise<Character[]> {
     try {
       const result = await this.pool.query(`
-        SELECT * FROM characters 
-        ORDER BY created_at DESC
+        SELECT * FROM public.get_all_characters()
       `);
 
       return result.rows.map((char: any) => this.adaptDbToCharacter(char));
@@ -581,8 +578,8 @@ export class CharacterServiceUpdated {
 
   async getCharacterCount(): Promise<number> {
     try {
-      const result = await this.pool.query('SELECT COUNT(*) FROM characters');
-      return parseInt(result.rows[0].count);
+      const result = await this.pool.query('SELECT public.get_character_count()');
+      return parseInt(result.rows[0].get_character_count);
     } catch (error) {
       console.error('Error getting character count:', error);
       throw new Error('Failed to get character count');
@@ -592,10 +589,10 @@ export class CharacterServiceUpdated {
   async getCharacterCountByOwner(ownerId: string): Promise<number> {
     try {
       const result = await this.pool.query(
-        'SELECT COUNT(*) FROM characters WHERE owner_id = $1',
+        'SELECT public.get_character_count_by_owner($1)',
         [ownerId]
       );
-      return parseInt(result.rows[0].count);
+      return parseInt(result.rows[0].get_character_count_by_owner);
     } catch (error) {
       console.error('Error getting character count by owner:', error);
       throw new Error('Failed to get character count by owner');
@@ -605,7 +602,7 @@ export class CharacterServiceUpdated {
   async getCharacterFullName(id: string): Promise<string | undefined> {
     try {
       const result = await this.pool.query(
-        'SELECT first_name, last_name FROM characters WHERE id = $1',
+        'SELECT first_name, last_name FROM public.get_character_by_id($1)',
         [id]
       );
       
@@ -624,7 +621,7 @@ export class CharacterServiceUpdated {
   async getCharacterAge(id: string): Promise<number | undefined> {
     try {
       const result = await this.pool.query(
-        'SELECT dob FROM characters WHERE id = $1',
+        'SELECT dob FROM public.get_character_by_id($1)',
         [id]
       );
       

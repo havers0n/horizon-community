@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { authenticateToken, requireAdmin } from '../middleware/auth.middleware.js';
 import { pool } from '../db/index.js';
+import { isValidUUID } from '../utils/uuid.js';
 
 const router: import('express').Router = Router();
 
@@ -102,7 +103,17 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
  */
 router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const testId = parseInt(req.params.id);
+    const testId = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(testId)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: testId
+      });
+    }
+    
     const validatedData = updateTestSchema.parse(req.body);
 
     const existingTest = await pool.query('SELECT * FROM tests WHERE id = $1', [testId]);
@@ -147,7 +158,16 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
  */
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const testId = parseInt(req.params.id);
+    const testId = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(testId)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: testId
+      });
+    }
 
     // Проверяем, есть ли активные сессии или результаты для этого теста
     const activeSessions = await pool.query('SELECT * FROM test_sessions WHERE test_id = $1 AND status = $2', [testId, 'in_progress']);
@@ -182,7 +202,15 @@ router.get('/results', authenticateToken, requireAdmin, async (req, res) => {
     }
     
     if (testId) {
-      const testIdCondition = `test_id = ${parseInt(testId as string)}`;
+      // UUID валидация для testId
+      if (!isValidUUID(testId as string)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'testId',
+          value: testId
+        });
+      }
+      const testIdCondition = `test_id = '${testId}'`;
       whereClause = whereClause ? `${whereClause} AND ${testIdCondition}` : testIdCondition;
     }
 
@@ -220,7 +248,17 @@ router.get('/results', authenticateToken, requireAdmin, async (req, res) => {
  */
 router.put('/results/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const resultId = parseInt(req.params.id);
+    const resultId = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(resultId)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: resultId
+      });
+    }
+    
     const { status, comment } = updateResultStatusSchema.parse(req.body);
 
     const result = await pool.query('SELECT * FROM test_results WHERE id = $1', [resultId]);

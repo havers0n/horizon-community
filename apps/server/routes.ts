@@ -27,6 +27,7 @@ import mdtRoutes from './routes/mdt.js';
 import realtimeRoutes from './routes/realtime-simple.js';
 import testRoutes from './routes/test.routes';
 import publicRoutes from './routes/public';
+import { isValidUUID } from './utils/uuid';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -223,7 +224,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/departments/:id', async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
     const department = await storage.getDepartment(id);
     
     if (!department) {
@@ -456,7 +467,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/notifications/:id/read', authenticateToken, async (req: any, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
     const notification = await storage.markNotificationAsRead(id);
     
     if (!notification) {
@@ -472,7 +493,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete('/api/notifications/:id', authenticateToken, async (req: any, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
     const notification = await storage.getNotification(id);
     
     if (!notification || notification.recipientId !== req.user.id) {
@@ -518,7 +549,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/tickets/:id', authenticateToken, async (req: any, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
     const ticket = await storage.getSupportTicket(id);
     
     if (!ticket || ticket.authorId !== req.user.id) {
@@ -545,7 +586,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/admin/applications/:id', authenticateToken, requireSupervisor, async (req: any, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
     const { status, reviewComment } = req.body;
 
     // Получаем заявку
@@ -714,7 +765,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/admin/users/:id', authenticateToken, requireSupervisor, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
     const updates = req.body;
     
     const user = await storage.updateUser(id, updates);
@@ -762,7 +823,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Обновление статуса рапорта (одобрение/отклонение)
   app.put('/api/admin/reports/:id', authenticateToken, requireSupervisor, async (req, res) => {
     try {
-      const reportId = parseInt(req.params.id);
+      const reportId = req.params.id;
+      
+      // UUID валидация
+      if (!isValidUUID(reportId)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'id',
+          value: reportId
+        });
+      }
+      
       const { status, supervisorComment } = req.body;
 
       if (!['approved', 'rejected'].includes(status)) {
@@ -848,7 +919,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/joint-positions/:userId', authenticateToken, async (req: any, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = req.params.userId;
+      
+      // UUID валидация
+      if (!isValidUUID(userId)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'userId',
+          value: userId
+        });
+      }
+      
       const { reason } = req.body;
 
       // Проверяем, что пользователь удаляет свое собственное совмещение
@@ -895,7 +976,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/joint-applications/:id', authenticateToken, requireSupervisor, async (req: any, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
+      
+      // UUID валидация
+      if (!isValidUUID(id)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'id',
+          value: id
+        });
+      }
       const { approved, comment } = req.body;
 
       await businessLogic.processJointApplication(id, approved, req.user.id, comment);

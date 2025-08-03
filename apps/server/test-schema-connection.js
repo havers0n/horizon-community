@@ -80,15 +80,15 @@ async function testSchemaConnection() {
         }
         
         if (schema === 'common') {
-          await testTable(pool, 'common.departments', 'SELECT COUNT(*) FROM common.departments');
-          await testTable(pool, 'common.characters', 'SELECT COUNT(*) FROM common.characters');
-          await testTable(pool, 'common.vehicles', 'SELECT COUNT(*) FROM common.vehicles');
+          await testTable(pool, 'common.departments', 'SELECT COUNT(*) FROM public.get_all_departments()');
+          await testTable(pool, 'common.characters', 'SELECT COUNT(*) FROM public.get_all_characters()');
+          await testTable(pool, 'common.vehicles', 'SELECT COUNT(*) FROM public.get_all_vehicles()');
         }
         
         if (schema === 'mdt') {
-          await testTable(pool, 'mdt.bolos', 'SELECT COUNT(*) FROM mdt.bolos');
-          await testTable(pool, 'mdt.mdt_units', 'SELECT COUNT(*) FROM mdt.mdt_units');
-          await testTable(pool, 'mdt.mdt_calls_911', 'SELECT COUNT(*) FROM mdt.mdt_calls_911');
+          await testTable(pool, 'mdt.bolos', 'SELECT COUNT(*) FROM public.get_active_bolos_with_author()');
+          await testTable(pool, 'mdt.mdt_units', 'SELECT COUNT(*) FROM public.get_all_mdt_units()');
+          await testTable(pool, 'mdt.mdt_calls_911', 'SELECT COUNT(*) FROM public.get_all_mdt_calls()');
         }
         
       } catch (error) {
