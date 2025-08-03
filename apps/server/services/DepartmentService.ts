@@ -34,7 +34,7 @@ export class DepartmentService {
   }
 
   async getAllDepartments(): Promise<Department[]> {
-    return this.storage.list('departments', { isActive: true });
+    return this.storage.list('departments', {});
   }
 
   async updateDepartment(id: string, data: UpdateDepartment): Promise<Department> {
@@ -46,7 +46,7 @@ export class DepartmentService {
   }
 
   async searchDepartments(query: string): Promise<Department[]> {
-    return this.storage.search('departments', query, ['name', 'description']);
+    return this.storage.search('departments', ['name', 'description'], query);
   }
 
   async getDepartmentStats(id: string): Promise<{
@@ -56,10 +56,10 @@ export class DepartmentService {
     totalUnits: number;
   }> {
     const [members, ranks, divisions, units] = await Promise.all([
-      this.storage.count('character_career_history', { departmentId: id, isActive: true }),
-      this.storage.count('ranks', { departmentId: id, isActive: true }),
-      this.storage.count('divisions', { departmentId: id, isActive: true }),
-      this.storage.count('units', { departmentId: id, isActive: true })
+      this.storage.count('character_career_history', { departmentId: id }),
+      this.storage.count('ranks', { departmentId: id }),
+      this.storage.count('divisions', { departmentId: id }),
+      this.storage.count('units', { departmentId: id })
     ]);
 
     return {
@@ -83,7 +83,7 @@ export class DepartmentService {
   }
 
   async getRanksByDepartment(departmentId: string): Promise<Rank[]> {
-    return this.storage.list('ranks', { departmentId, isActive: true });
+    return this.storage.list('ranks', { departmentId });
   }
 
   async updateRank(id: string, data: UpdateRank): Promise<Rank> {
@@ -112,7 +112,7 @@ export class DepartmentService {
   }
 
   async getDivisionsByDepartment(departmentId: string): Promise<Division[]> {
-    return this.storage.list('divisions', { departmentId, isActive: true });
+    return this.storage.list('divisions', { departmentId });
   }
 
   async updateDivision(id: string, data: UpdateDivision): Promise<Division> {
@@ -136,7 +136,7 @@ export class DepartmentService {
   }
 
   async getUnitsByDepartment(departmentId: string): Promise<Unit[]> {
-    return this.storage.list('units', { departmentId, isActive: true });
+    return this.storage.list('units', { departmentId });
   }
 
   async updateUnit(id: string, data: UpdateUnit): Promise<Unit> {
@@ -176,8 +176,7 @@ export class DepartmentService {
 
   async getDepartmentMembers(id: string): Promise<any[]> {
     return this.storage.list('character_career_history', { 
-      departmentId: id, 
-      isActive: true 
+      departmentId: id
     });
   }
 

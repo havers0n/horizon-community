@@ -1,5 +1,13 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { 
+  adaptBackendUsersToFrontend, 
+  adaptBackendApplicationsToFrontend, 
+  adaptBackendNotificationsToFrontend,
+  type FrontendUser,
+  type FrontendApplication,
+  type FrontendNotification
+} from "@/lib/adapters";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -58,7 +66,24 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const data = await res.json();
+    
+    // Применяем адаптеры для совместимости типов
+    const url = queryKey[0] as string;
+    
+    if (url.includes('/api/admin/users') || url.includes('/api/auth/me')) {
+      return adaptBackendUsersToFrontend(data.users || data) as T;
+    }
+    
+    if (url.includes('/api/applications') || url.includes('/api/admin/applications') || url.includes('/api/admin/leave-applications')) {
+      return adaptBackendApplicationsToFrontend(data) as T;
+    }
+    
+    if (url.includes('/api/notifications')) {
+      return adaptBackendNotificationsToFrontend(data) as T;
+    }
+    
+    return data;
   };
 
 export const queryClient = new QueryClient({

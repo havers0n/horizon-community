@@ -79,7 +79,7 @@ export function Layout({ children }: LayoutProps) {
       label: 'MDT/CAD', 
       icon: Monitor,
       onClick: () => {
-        const mdtUrl = process.env.NODE_ENV === 'development' 
+        const mdtUrl = import.meta.env.DEV 
           ? 'http://localhost:3001' 
           : 'https://mdt.your-domain.com';
         window.location.href = mdtUrl;

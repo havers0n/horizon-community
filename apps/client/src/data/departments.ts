@@ -112,17 +112,79 @@ export const lspdDepartment: DepartmentDetails = {
   }
 };
 
+// Импортируем новый сервис для работы с API
+import { departmentsService, Department } from '../services/departmentsService';
+
 // Массив всех департаментов (пока только LSPD)
 export const departmentsData: DepartmentDetails[] = [
   lspdDepartment
 ];
 
-// Функция для получения департамента по ID
-export const getDepartmentById = (id: string | number): DepartmentDetails | undefined => {
+// Функция для получения департамента по ID (использует новый API)
+export const getDepartmentById = async (id: string | number): Promise<DepartmentDetails | undefined> => {
+  try {
+    const apiDepartment = await departmentsService.getDepartmentById(id.toString());
+    if (apiDepartment) {
+      // Преобразуем API формат в локальный формат
+      return {
+        id: apiDepartment.id,
+        name: apiDepartment.name,
+        fullName: apiDepartment.full_name,
+        description: apiDepartment.description || '',
+        logoUrl: apiDepartment.logo_url,
+        gallery: apiDepartment.gallery || []
+      };
+    }
+  } catch (error) {
+    console.error('[getDepartmentById] Ошибка при получении департамента из API:', error);
+  }
+  
+  // Fallback на локальные данные
   return departmentsData.find(dept => dept.id === id);
 };
 
-// Функция для получения департамента по имени
-export const getDepartmentByName = (name: string): DepartmentDetails | undefined => {
+// Функция для получения департамента по имени (использует новый API)
+export const getDepartmentByName = async (name: string): Promise<DepartmentDetails | undefined> => {
+  try {
+    const allDepartments = await departmentsService.getAllDepartments();
+    const apiDepartment = allDepartments.find(dept => 
+      dept.name.toLowerCase() === name.toLowerCase()
+    );
+    
+    if (apiDepartment) {
+      // Преобразуем API формат в локальный формат
+      return {
+        id: apiDepartment.id,
+        name: apiDepartment.name,
+        fullName: apiDepartment.full_name,
+        description: apiDepartment.description || '',
+        logoUrl: apiDepartment.logo_url,
+        gallery: apiDepartment.gallery || []
+      };
+    }
+  } catch (error) {
+    console.error('[getDepartmentByName] Ошибка при получении департамента из API:', error);
+  }
+  
+  // Fallback на локальные данные
   return departmentsData.find(dept => dept.name.toLowerCase() === name.toLowerCase());
+};
+
+// Функция для получения всех департаментов (использует новый API)
+export const getAllDepartments = async (): Promise<DepartmentDetails[]> => {
+  try {
+    const apiDepartments = await departmentsService.getAllDepartments();
+    return apiDepartments.map(apiDept => ({
+      id: apiDept.id,
+      name: apiDept.name,
+      fullName: apiDept.full_name,
+      description: apiDept.description || '',
+      logoUrl: apiDept.logo_url,
+      gallery: apiDept.gallery || []
+    }));
+  } catch (error) {
+    console.error('[getAllDepartments] Ошибка при получении департаментов из API:', error);
+    // Fallback на локальные данные
+    return departmentsData;
+  }
 }; 
