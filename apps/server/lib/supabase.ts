@@ -131,19 +131,20 @@ export type MdtSignals = Tables<{ schema: 'mdt' }, 'mdt_signals'>;
 export type MdtSignalNotifications = Tables<{ schema: 'mdt' }, 'mdt_signal_notifications'>;
 export type NotebookNotes = Tables<{ schema: 'mdt' }, 'notebook_notes'>;
 export type Notifications = Tables<{ schema: 'mdt' }, 'notifications'>;
+export type ReportTemplates = Tables<{ schema: 'mdt' }, 'report_templates'>;
 export type SupportTickets = Tables<{ schema: 'mdt' }, 'support_tickets'>;
 export type Tests = Tables<{ schema: 'mdt' }, 'tests'>;
 export type TestSessions = Tables<{ schema: 'mdt' }, 'test_sessions'>;
 export type TestResults = Tables<{ schema: 'mdt' }, 'test_results'>;
 export type UnitsOnDuty = Tables<{ schema: 'mdt' }, 'units_on_duty'>;
 
-// ===== ТИПЫ ДЛЯ INSERT И UPDATE =====
+// ===== ТИПЫ ДЛЯ INSERT/UPDATE =====
 
 // Публичная схема
 export type ProfilesInsert = TablesInsert<'profiles'>;
 export type ProfilesUpdate = TablesUpdate<'profiles'>;
 
-// Схема common
+// Common схема
 export type CharactersInsert = TablesInsert<{ schema: 'common' }, 'characters'>;
 export type CharactersUpdate = TablesUpdate<{ schema: 'common' }, 'characters'>;
 
@@ -156,12 +157,21 @@ export type VehiclesUpdate = TablesUpdate<{ schema: 'common' }, 'vehicles'>;
 export type WeaponsInsert = TablesInsert<{ schema: 'common' }, 'weapons'>;
 export type WeaponsUpdate = TablesUpdate<{ schema: 'common' }, 'weapons'>;
 
-// Схема mdt
+// MDT схема
 export type ApplicationsInsert = TablesInsert<{ schema: 'mdt' }, 'applications'>;
 export type ApplicationsUpdate = TablesUpdate<{ schema: 'mdt' }, 'applications'>;
 
+export type CallsInsert = TablesInsert<{ schema: 'mdt' }, 'calls'>;
+export type CallsUpdate = TablesUpdate<{ schema: 'mdt' }, 'calls'>;
+
 export type BolosInsert = TablesInsert<{ schema: 'mdt' }, 'bolos'>;
 export type BolosUpdate = TablesUpdate<{ schema: 'mdt' }, 'bolos'>;
+
+export type ReportTemplatesInsert = TablesInsert<{ schema: 'mdt' }, 'report_templates'>;
+export type ReportTemplatesUpdate = TablesUpdate<{ schema: 'mdt' }, 'report_templates'>;
+
+export type UnitsOnDutyInsert = TablesInsert<{ schema: 'mdt' }, 'units_on_duty'>;
+export type UnitsOnDutyUpdate = TablesUpdate<{ schema: 'mdt' }, 'units_on_duty'>;
 
 // ===== УТИЛИТЫ ДЛЯ ВАЛИДАЦИИ =====
 

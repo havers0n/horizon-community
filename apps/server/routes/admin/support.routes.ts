@@ -1,47 +1,52 @@
 import { Router } from 'express';
-import { authenticateToken, requireAdmin } from '../../middleware/auth.middleware';
-import { pool } from '../../db/index.js';
+import { authenticateToken, requireRole } from '../../middleware/auth.middleware';
+import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
+import { SupportTicketService } from '../../services/SupportTicketService';
+import type { MDTSupportTickets } from 'db-types';
 
-const router: import('express').Router = Router();
+const router = Router();
+
+// Инициализация сервиса
+const supportTicketService = new SupportTicketService();
 
 // POST /api/admin/support/tickets/:ticketId/reply
-router.post('/tickets/:ticketId/reply', authenticateToken, requireAdmin, async (req, res) => {
+router.post('/tickets/:ticketId/reply', authenticateToken, requireRole('admin'), async (req: AuthenticatedRequest, res) => {
   try {
-    const { ticketId } = req.params;
+    const ticketId: string = req.params.ticketId; // ✅ UUID правило: ID как string
     const { content } = req.body;
-    const userId = req.user?.id;
+    const userId: string = req.user!.id; // ✅ Строгая типизация
 
     if (!content || typeof content !== 'string' || !content.trim()) {
-      return res.status(400).json({ error: 'Поле content обязательно' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Поле content обязательно' 
+      });
     }
 
-    // Найти тикет
-    const ticketResult = await pool.query('SELECT * FROM support_tickets WHERE id = $1', [parseInt(ticketId)]);
-    const ticket = ticketResult.rows[0];
-    if (!ticket) {
-      return res.status(404).json({ error: 'Тикет не найден' });
-    }
-
-    // Обновить тикет с новым сообщением
-    const message = {
+    // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const updatedTicket = await supportTicketService.replyToTicket(ticketId, {
       senderId: userId,
       content: content.trim(),
-      timestamp: new Date(),
       senderRole: 'admin'
-    };
+    });
 
-    const messages = Array.isArray(ticket.messages)
-      ? [...ticket.messages, message]
-      : [...(typeof ticket.messages === 'string' ? JSON.parse(ticket.messages) : []), message];
+    if (!updatedTicket) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Тикет не найден' 
+      });
+    }
 
-    const updatedTicketResult = await pool.query(
-      `UPDATE support_tickets SET status = $1, messages = $2 WHERE id = $3 RETURNING *`,
-      [ticket.status === 'closed' ? 'open' : ticket.status, JSON.stringify(messages), parseInt(ticketId)]
-    );
-
-    res.status(200).json(updatedTicketResult.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(200).json({
+      success: true,
+      data: updatedTicket
+    });
+  } catch (error) {
+    console.error('[SupportRoutes] Error replying to ticket:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Ошибка сервера' 
+    });
   }
 });
 

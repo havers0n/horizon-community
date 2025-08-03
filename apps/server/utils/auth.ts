@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { storage } from '../storage';
-import { User } from '../types';
+import type { Database } from '../../../packages/db-types/src/index';
+
+// Типы из packages/db-types
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 // Расширяем типы Express для совместимости
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: Profile;
     }
   }
 }
@@ -23,7 +25,7 @@ if (supabaseUrl && supabaseServiceKey) {
 
 export type AuthenticatedRequest = Request;
 
-export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<User | null> {
+export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<Profile | null> {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -34,11 +36,15 @@ export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<U
 
   // Mock token for testing
   if (token === 'mock-token') {
-    const mockUserId = 1;
-    console.log(`🔧 Mock user ID: ${mockUserId}`);
-    const dbUser = await storage.getUser(mockUserId);
-    console.log(`🔧 DB user found:`, dbUser ? `${dbUser.email} (ID: ${dbUser.id})` : 'null');      
-    return dbUser || null;
+    console.log(`🔧 Mock user authentication`);
+    // Возвращаем mock профиль для тестирования
+    return {
+      id: 'mock-user-id',
+      username: 'mock-user',
+      email: 'mock@example.com',
+      role: 'candidate',
+      created_at: new Date().toISOString()
+    };
   }
 
   console.log('🔧 Processing real JWT token');
@@ -57,9 +63,21 @@ export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<U
     }
 
     console.log(`🔧 JWT user ID: ${user.id}`);
-    const dbUser = await storage.getUserByAuthId(user.id);
-    console.log(`🔧 DB user found:`, dbUser ? `${dbUser.email} (ID: ${dbUser.id})` : 'null');        
-    return dbUser || null;
+    
+    // Получаем профиль из таблицы profiles
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (profileError || !profile) {
+      console.error('🔧 Profile not found for user:', user.id);
+      return null;
+    }
+    
+    console.log(`🔧 Profile found:`, profile.email);
+    return profile;
   } catch (error) {
     console.error('Error getting authenticated user:', error);
     return null;

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { setAuthState, clearAuthState, getAuthState, getAuthHeaders } from '@/lib/auth';
-import type { User } from '@shared/schema';
+import type { User } from '@shared/schema/types';
 
 interface AuthContextType {
   user: Omit<User, 'passwordHash'> | null;

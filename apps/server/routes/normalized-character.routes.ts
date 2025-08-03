@@ -2,6 +2,13 @@ import express from 'express';
 import { z } from 'zod';
 import { normalizedCharacterService } from '../services/NormalizedCharacterService.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import type { Characters, CharactersInsert, CharactersUpdate } from '@roleplay-identity/db-types';
+import type { 
+  CreateCharacterRequest, 
+  CreateLeoProfileRequest, 
+  CreateEmsProfileRequest, 
+  CreateFireProfileRequest 
+} from '../types/normalized-character.types.js';
 
 const router = express.Router();
 
@@ -67,9 +74,9 @@ const updateCharacterSchema = z.object({
 const createLeoProfileSchema = z.object({
   characterId: z.string().min(1, 'Character ID is required'),
   badgeNumber: z.string().optional(),
-  rankId: z.number().optional(),
-  divisionId: z.number().optional(),
-  departmentId: z.number().optional(),
+  rankId: z.string().optional(), // Изменено с number на string для UUID
+  divisionId: z.string().optional(), // Изменено с number на string для UUID
+  departmentId: z.string().optional(), // Изменено с number на string для UUID
   callsign: z.string().optional(),
   callsign2: z.string().optional(),
   status: z.string().optional(),
@@ -84,9 +91,9 @@ const createLeoProfileSchema = z.object({
 // Схема для обновления профиля LEO
 const updateLeoProfileSchema = z.object({
   badgeNumber: z.string().optional(),
-  rankId: z.number().optional(),
-  divisionId: z.number().optional(),
-  departmentId: z.number().optional(),
+  rankId: z.string().optional(), // Изменено с number на string для UUID
+  divisionId: z.string().optional(), // Изменено с number на string для UUID
+  departmentId: z.string().optional(), // Изменено с number на string для UUID
   callsign: z.string().optional(),
   callsign2: z.string().optional(),
   status: z.string().optional(),
@@ -102,9 +109,9 @@ const updateLeoProfileSchema = z.object({
 const createEmsProfileSchema = z.object({
   characterId: z.string().min(1, 'Character ID is required'),
   badgeNumber: z.string().optional(),
-  rankId: z.number().optional(),
-  divisionId: z.number().optional(),
-  departmentId: z.number().optional(),
+  rankId: z.string().optional(), // Изменено с number на string для UUID
+  divisionId: z.string().optional(), // Изменено с number на string для UUID
+  departmentId: z.string().optional(), // Изменено с number на string для UUID
   callsign: z.string().optional(),
   callsign2: z.string().optional(),
   status: z.string().optional(),
@@ -119,9 +126,9 @@ const createEmsProfileSchema = z.object({
 // Схема для обновления профиля EMS
 const updateEmsProfileSchema = z.object({
   badgeNumber: z.string().optional(),
-  rankId: z.number().optional(),
-  divisionId: z.number().optional(),
-  departmentId: z.number().optional(),
+  rankId: z.string().optional(), // Изменено с number на string для UUID
+  divisionId: z.string().optional(), // Изменено с number на string для UUID
+  departmentId: z.string().optional(), // Изменено с number на string для UUID
   callsign: z.string().optional(),
   callsign2: z.string().optional(),
   status: z.string().optional(),
@@ -137,9 +144,9 @@ const updateEmsProfileSchema = z.object({
 const createFireProfileSchema = z.object({
   characterId: z.string().min(1, 'Character ID is required'),
   badgeNumber: z.string().optional(),
-  rankId: z.number().optional(),
-  divisionId: z.number().optional(),
-  departmentId: z.number().optional(),
+  rankId: z.string().optional(), // Изменено с number на string для UUID
+  divisionId: z.string().optional(), // Изменено с number на string для UUID
+  departmentId: z.string().optional(), // Изменено с number на string для UUID
   callsign: z.string().optional(),
   callsign2: z.string().optional(),
   status: z.string().optional(),
@@ -154,9 +161,9 @@ const createFireProfileSchema = z.object({
 // Схема для обновления профиля FIRE
 const updateFireProfileSchema = z.object({
   badgeNumber: z.string().optional(),
-  rankId: z.number().optional(),
-  divisionId: z.number().optional(),
-  departmentId: z.number().optional(),
+  rankId: z.string().optional(), // Изменено с number на string для UUID
+  divisionId: z.string().optional(), // Изменено с number на string для UUID
+  departmentId: z.string().optional(), // Изменено с number на string для UUID
   callsign: z.string().optional(),
   callsign2: z.string().optional(),
   status: z.string().optional(),
@@ -268,8 +275,9 @@ router.post('/', authenticateToken, async (req: AuthenticatedRequest, res) => {
     const validatedData = validationResult.data;
     console.log('[CharacterRoutes] Validated character data:', JSON.stringify(validatedData, null, 2));
 
-    // Создаем персонажа через сервис
-    const newCharacter = await normalizedCharacterService.createCharacter(user.id, validatedData);
+    // Создаем персонажа через сервис (убираем owner_id из validatedData)
+    const { owner_id, ...characterData } = validatedData;
+    const newCharacter = await normalizedCharacterService.createCharacter(user.id, characterData as CreateCharacterRequest);
     
     console.log('[CharacterRoutes] Character created successfully:', newCharacter.id);
 
@@ -603,7 +611,8 @@ router.post('/:id/leo-profile', authenticateToken, async (req, res) => {
     }
 
     const profileData = validationResult.data;
-    const newProfile = await normalizedCharacterService.createLeoProfile(profileData);
+    // Убеждаемся, что characterId обязательный
+    const newProfile = await normalizedCharacterService.createLeoProfile(profileData as CreateLeoProfileRequest);
     
     res.status(201).json({
       success: true,
@@ -731,7 +740,8 @@ router.post('/:id/ems-profile', authenticateToken, async (req, res) => {
     }
 
     const profileData = validationResult.data;
-    const newProfile = await normalizedCharacterService.createEmsProfile(profileData);
+    // Убеждаемся, что characterId обязательный
+    const newProfile = await normalizedCharacterService.createEmsProfile(profileData as CreateEmsProfileRequest);
     
     res.status(201).json({
       success: true,
@@ -859,7 +869,8 @@ router.post('/:id/fire-profile', authenticateToken, async (req, res) => {
     }
 
     const profileData = validationResult.data;
-    const newProfile = await normalizedCharacterService.createFireProfile(profileData);
+    // Убеждаемся, что characterId обязательный
+    const newProfile = await normalizedCharacterService.createFireProfile(profileData as CreateFireProfileRequest);
     
     res.status(201).json({
       success: true,

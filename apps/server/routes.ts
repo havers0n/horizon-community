@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createClient } from '@supabase/supabase-js';
-import { loginSchema, registerSchema, insertApplicationSchema, insertComplaintSchema, User } from "./types";
+import { loginSchema, registerSchema, insertApplicationSchema, insertComplaintSchema } from "./types";
 import { getAuthenticatedUser, requireAuthentication } from "./utils/auth";
 import { createTestRoutes } from "./routes/tests";
 import { createSchedulerRoutes } from "./routes/scheduler";
@@ -28,6 +28,9 @@ import realtimeRoutes from './routes/realtime-simple.js';
 import testRoutes from './routes/test.routes';
 import publicRoutes from './routes/public';
 
+// ✅ НОВАЯ СТРУКТУРА API V1
+import v1Router from './routes/v1';
+
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -38,56 +41,18 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_ANON_KEY!
 );
 
-interface AuthenticatedRequest extends Request {
-  user: User;
-  authUser?: any;
-}
+// УДАЛЕН УСТАРЕВШИЙ ИНТЕРФЕЙС AuthenticatedRequest
+// Используется AuthenticatedRequest из middleware/auth.middleware.ts
 
-// Middleware to verify JWT token
-// const authenticateToken = async (req: any, res: any, next: any) => {
-//   console.log('🔍 authenticateToken middleware called');
-//   console.log('  URL:', req.url);
-//   console.log('  Method:', req.method);
-//   console.log('  Headers:', req.headers);
-  
-//   try {
-//     const user = await getAuthenticatedUser(req);
-//     console.log('  User result:', user ? `${user.email} (ID: ${user.id})` : 'null');
-    
-//     if (!user) {
-//       console.log('❌ No user found, returning 401');
-//       return res.status(401).json({ message: 'Access token required' });
-//     }
-    
-//     req.user = user;
-//     console.log('✅ User authenticated, proceeding to route');
-    
-//     // Также получаем Supabase auth user для backward compatibility
-//     const authHeader = req.headers['authorization'];
-//     const token = authHeader && authHeader.split(' ')[1];
-//     if (token) {
-//       const { data: { user: authUser } } = await supabase.auth.getUser(token);
-//       req.authUser = authUser;
-//     }
-    
-//     next();
-//   } catch (error) {
-//     console.error('❌ Authentication error:', error);
-//     return res.status(401).json({ message: 'Authentication failed' });
-//   }
-// };
-
-// Middleware to check if user has supervisor/admin role
-// const requireSupervisor = (req: any, res: any, next: any) => {
-//   if (!req.user || !['supervisor', 'admin'].includes(req.user.role)) {
-//     return res.status(403).json({ message: 'Supervisor access required' });
-//   }
-//   next();
-// };
+// УДАЛЕН ЗАКОММЕНТИРОВАННЫЙ КОД СТАРОЙ АУТЕНТИФИКАЦИИ
+// Используется современная аутентификация из middleware/auth.middleware.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Health check endpoint
+  // ✅ НОВАЯ СТРУКТУРА API V1 - СОВРЕМЕННАЯ АРХИТЕКТУРА
+  app.use('/api/v1', v1Router);
+  
+  // 🔄 ОБРАТНАЯ СОВМЕСТИМОСТЬ - СТАРЫЕ ЭНДПОИНТЫ (БУДУТ УДАЛЕНЫ ПОСЛЕ МИГРАЦИИ)
   app.get('/api/health', (req, res) => {
     res.json({ 
       status: 'ok', 
@@ -102,47 +67,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Публичные маршруты без аутентификации
   app.use('/api/public', publicRoutes);
   
-  // Authentication routes
+  // Authentication routes - ОБНОВЛЕНЫ ДЛЯ СОВРЕМЕННОЙ АУТЕНТИФИКАЦИИ
   app.post('/api/auth/register', async (req, res) => {
     try {
       const { username, email, password } = registerSchema.parse(req.body);
       
-      // Check if user already exists
-      const existingUserByEmail = await storage.getUserByEmail(email);
-      const existingUserByUsername = await storage.getUserByUsername(username);
+      // Проверяем существование пользователя через Supabase
+      const { data: existingUser, error: checkError } = await supabaseAdmin.auth.admin.listUsers();
       
-      if (existingUserByEmail) {
-        return res.status(400).json({ message: 'Email already registered' });
+      if (checkError) {
+        return res.status(500).json({ error: 'Failed to check existing users' });
       }
       
-      if (existingUserByUsername) {
-        return res.status(400).json({ message: 'Username already taken' });
+      const userExists = existingUser.users.some(user => 
+        user.email === email || user.user_metadata?.username === username
+      );
+      
+      if (userExists) {
+        return res.status(400).json({ message: 'User already exists' });
       }
       
       // Создать пользователя в Supabase Auth
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        email_confirm: true
+        email_confirm: true,
+        user_metadata: { username }
       });
       
       if (authError) return res.status(400).json({ error: authError.message });
       
-      // Создать запись в таблице users
-      const user = await storage.createUser({
-        username,
-        email,
-        passwordHash: '', // Больше не нужен
-        role: 'candidate',
-        status: 'active',
-        gameWarnings: 0,
-        adminWarnings: 0,
-        authId: authData.user.id
-      });
+      // Создать профиль в таблице profiles
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          username,
+          email,
+          role: 'candidate'
+        })
+        .select()
+        .single();
       
-      const { passwordHash: _, ...userWithoutPassword } = user;
+      if (profileError) {
+        // Удаляем созданного пользователя если не удалось создать профиль
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        return res.status(500).json({ error: 'Failed to create user profile' });
+      }
       
-      res.status(201).json({ user: userWithoutPassword, authUser: authData.user });
+      res.status(201).json({ user: profile, authUser: authData.user });
     } catch (error) {
       console.error('Registration error:', error);
       res.status(400).json({ message: 'Invalid request data' });
@@ -166,22 +139,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Auth successful, user ID:', authData.user.id);
-      console.log('Looking for user with auth_id:', authData.user.id);
       
-      // Get user from our database
-      const user = await storage.getUserByAuthId(authData.user.id);
+      // Get user profile from profiles table
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
       
-      if (!user) {
-        console.error('User not found in database with auth_id:', authData.user.id);
-        // Попробуем найти по email
-        const userByEmail = await storage.getUserByEmail(email);
-        console.log('User by email search result:', userByEmail);
-        return res.status(401).json({ message: 'User not found' });
+      if (profileError || !profile) {
+        console.error('Profile not found for user:', authData.user.id);
+        return res.status(401).json({ message: 'User profile not found' });
       }
       
-      const { passwordHash: _, ...userWithoutPassword } = user;
       res.json({ 
-        user: userWithoutPassword, 
+        user: profile, 
         authUser: authData.user,
         session: authData.session
       });
@@ -192,10 +164,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/auth/me', authenticateToken, async (req: any, res) => {
-    const { passwordHash: _, ...userWithoutPassword } = req.user;
     // Получаем всех персонажей пользователя
     const characters = await storage.getCharactersByOwner(req.user.id);
-    res.json({ user: userWithoutPassword, characters });
+    res.json({ user: req.user, characters });
   });
 
   app.post('/api/auth/logout', authenticateToken, async (req: any, res) => {

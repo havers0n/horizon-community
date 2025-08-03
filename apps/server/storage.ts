@@ -1,4 +1,31 @@
-import { IStorage } from './types';
+import type { 
+  Users,
+  Characters,
+  CharactersInsert,
+  Departments,
+  DepartmentsInsert,
+  Applications,
+  ApplicationsInsert,
+  Reports,
+  ReportsInsert,
+  Notifications,
+  NotificationsInsert,
+  SupportTickets,
+  SupportTicketsInsert,
+  Complaints,
+  ComplaintsInsert,
+  Tests,
+  TestsInsert,
+  TestSessions,
+  TestSessionsInsert,
+  TestResults,
+  TestResultsInsert,
+  Vehicles,
+  VehiclesInsert,
+  Weapons,
+  WeaponsInsert
+} from '../../../packages/db-types/src/index';
+
 import { userService } from './services/UserService.js';
 import { characterService } from './services/CharacterService.js';
 import { reportService } from './services/ReportService.js';
@@ -12,161 +39,161 @@ import { weaponService } from './services/WeaponService.js';
 
 // ===== АДАПТЕР ДЛЯ СОВМЕСТИМОСТИ С IStorage =====
 
-class StorageAdapter implements IStorage {
+class StorageAdapter {
   // ===== USER OPERATIONS =====
-  async getUser(id: number) {
+  async getUser(id: string): Promise<Users | null> {
     return await userService.getUser(id);
   }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<Users | null> {
     return await userService.getUserByEmail(email);
   }
 
-  async getUserByUsername(username: string) {
+  async getUserByUsername(username: string): Promise<Users | null> {
     return await userService.getUserByUsername(username);
   }
 
-  async getUserByAuthId(authId: string) {
+  async getUserByAuthId(authId: string): Promise<Users | null> {
     return await userService.getUserByAuthId(authId);
   }
 
-  async createUser(user: any) {
+  async createUser(user: Partial<Users>): Promise<Users> {
     return await userService.createUser(user);
   }
 
-  async updateUser(id: number, updates: any) {
+  async updateUser(id: string, updates: Partial<Users>): Promise<Users | null> {
     return await userService.updateUser(id, updates);
   }
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<Users[]> {
     return await userService.getAllUsers();
   }
 
   // ===== DEPARTMENT OPERATIONS =====
-  async getDepartment(id: number): Promise<any | undefined> {
-    return await departmentService.getDepartmentById(id.toString());
+  async getDepartment(id: string): Promise<Departments | null> {
+    return await departmentService.getDepartmentById(id);
   }
 
-  async getDepartments(): Promise<any[]> {
+  async getDepartments(): Promise<Departments[]> {
     return await departmentService.getAllDepartments();
   }
 
-  async getAllDepartments(): Promise<any[]> {
+  async getAllDepartments(): Promise<Departments[]> {
     return await departmentService.getAllDepartments();
   }
 
-  async createDepartment(department: any): Promise<any> {
+  async createDepartment(department: DepartmentsInsert): Promise<Departments> {
     return await departmentService.createDepartment(department);
   }
 
   // ===== CHARACTER OPERATIONS =====
-  async getCharactersByOwner(ownerId: number) {
+  async getCharactersByOwner(ownerId: string): Promise<Characters[]> {
     return await characterService.getCharactersByOwner(ownerId);
   }
 
-  async createCharacter(character: any) {
+  async createCharacter(character: CharactersInsert): Promise<Characters> {
     return await characterService.createCharacter(character);
   }
 
   // ===== APPLICATION OPERATIONS =====
-  async getApplication(id: number): Promise<any | undefined> {
-    return await applicationService.getApplicationById(id.toString());
+  async getApplication(id: string): Promise<Applications | null> {
+    return await applicationService.getApplicationById(id);
   }
 
-  async getApplicationsByUser(userId: number): Promise<any[]> {
-    return await applicationService.getApplicationsByUser(userId.toString());
+  async getApplicationsByUser(userId: string): Promise<Applications[]> {
+    return await applicationService.getApplicationsByUser(userId);
   }
 
-  async getAllApplications(): Promise<any[]> {
+  async getAllApplications(): Promise<Applications[]> {
     return await applicationService.getAllApplications();
   }
 
-  async createApplication(application: any): Promise<any> {
+  async createApplication(application: ApplicationsInsert): Promise<Applications> {
     return await applicationService.createApplication(application);
   }
 
-  async updateApplication(id: number, updates: any): Promise<any | undefined> {
-    return await applicationService.updateApplication(id.toString(), updates);
+  async updateApplication(id: string, updates: Partial<Applications>): Promise<Applications | null> {
+    return await applicationService.updateApplication(id, updates);
   }
 
-  async getApplicationsByType(type: string): Promise<any[]> {
+  async getApplicationsByType(type: string): Promise<Applications[]> {
     return await applicationService.getAllApplications();
   }
 
   // ===== REPORT OPERATIONS =====
-  async getReport(id: number) {
+  async getReport(id: string): Promise<Reports | null> {
     return await reportService.getReport(id);
   }
 
-  async getReportsByUser(userId: number) {
+  async getReportsByUser(userId: string): Promise<Reports[]> {
     return await reportService.getReportsByUser(userId);
   }
 
-  async getAllReports() {
+  async getAllReports(): Promise<Reports[]> {
     return await reportService.getAllReports();
   }
 
-  async createReport(report: any) {
+  async createReport(report: ReportsInsert): Promise<Reports> {
     return await reportService.createReport(report);
   }
 
-  async updateReport(id: number, updates: any) {
+  async updateReport(id: string, updates: Partial<Reports>): Promise<Reports | null> {
     return await reportService.updateReport(id, updates);
   }
 
   // ===== NOTIFICATION OPERATIONS =====
-  async getNotificationsByUser(userId: number): Promise<any[]> {
-    return await notificationService.getNotificationsByUser(userId.toString());
+  async getNotificationsByUser(userId: string): Promise<Notifications[]> {
+    return await notificationService.getNotificationsByUser(userId);
   }
 
-  async createNotification(notification: any): Promise<any> {
+  async createNotification(notification: NotificationsInsert): Promise<Notifications> {
     return await notificationService.createNotification(notification);
   }
 
-  async markNotificationAsRead(id: number): Promise<any | undefined> {
-    return await notificationService.updateNotification(id.toString(), { isRead: true });
+  async markNotificationAsRead(id: string): Promise<Notifications | null> {
+    return await notificationService.updateNotification(id, { isRead: true });
   }
 
-  async getNotification(id: number): Promise<any | undefined> {
-    return await notificationService.getNotificationById(id.toString());
+  async getNotification(id: string): Promise<Notifications | null> {
+    return await notificationService.getNotificationById(id);
   }
 
-  async markAllNotificationsAsRead(userId: number): Promise<any[]> {
+  async markAllNotificationsAsRead(userId: string): Promise<Notifications[]> {
     // Временно возвращаем пустой массив, так как метод не существует
     return [];
   }
 
-  async deleteNotification(id: number): Promise<void> {
-    await notificationService.deleteNotification(id.toString());
+  async deleteNotification(id: string): Promise<void> {
+    await notificationService.deleteNotification(id);
   }
 
   // ===== SUPPORT TICKET OPERATIONS =====
-  async getSupportTicket(id: number): Promise<any | undefined> {
-    return await supportTicketService.getTicketById(id.toString());
+  async getSupportTicket(id: string): Promise<SupportTickets | null> {
+    return await supportTicketService.getTicketById(id);
   }
 
-  async getSupportTicketsByUser(userId: number): Promise<any[]> {
-    return await supportTicketService.getTicketsByUser(userId.toString());
+  async getSupportTicketsByUser(userId: string): Promise<SupportTickets[]> {
+    return await supportTicketService.getTicketsByUser(userId);
   }
 
-  async getAllSupportTickets(): Promise<any[]> {
+  async getAllSupportTickets(): Promise<SupportTickets[]> {
     return await supportTicketService.getAllTickets();
   }
 
-  async createSupportTicket(ticket: any): Promise<any> {
+  async createSupportTicket(ticket: SupportTicketsInsert): Promise<SupportTickets> {
     return await supportTicketService.createTicket(ticket);
   }
 
-  async updateSupportTicket(id: number, updates: any): Promise<any | undefined> {
-    return await supportTicketService.updateTicket(id.toString(), updates);
+  async updateSupportTicket(id: string, updates: Partial<SupportTickets>): Promise<SupportTickets | null> {
+    return await supportTicketService.updateTicket(id, updates);
   }
 
   // ===== CALL 911 OPERATIONS =====
-  async getCall911(id: number): Promise<any | undefined> {
-    return await call911Service.getCallById(id.toString());
+  async getCall911(id: string): Promise<any | null> {
+    return await call911Service.getCallById(id);
   }
 
-  async getCalls911ByUser(userId: number): Promise<any[]> {
+  async getCalls911ByUser(userId: string): Promise<any[]> {
     return await call911Service.getAllCalls();
   }
 
@@ -178,135 +205,135 @@ class StorageAdapter implements IStorage {
     return await call911Service.createCall(call);
   }
 
-  async updateCall911(id: number, updates: any): Promise<any | undefined> {
-    return await call911Service.updateCall(id.toString(), updates);
+  async updateCall911(id: string, updates: any): Promise<any | null> {
+    return await call911Service.updateCall(id, updates);
   }
 
   // ===== VEHICLE OPERATIONS =====
-  async getVehicle(id: number): Promise<any | undefined> {
-    return await vehicleService.getVehicleById(id.toString());
+  async getVehicle(id: string): Promise<Vehicles | null> {
+    return await vehicleService.getVehicleById(id);
   }
 
-  async getVehiclesByOwner(ownerId: number): Promise<any[]> {
-    return await vehicleService.getVehiclesByOwnerName(ownerId.toString());
+  async getVehiclesByOwner(ownerId: string): Promise<Vehicles[]> {
+    return await vehicleService.getVehiclesByOwnerName(ownerId);
   }
 
-  async getAllVehicles(): Promise<any[]> {
+  async getAllVehicles(): Promise<Vehicles[]> {
     return await vehicleService.getAllVehicles();
   }
 
-  async createVehicle(vehicle: any): Promise<any> {
+  async createVehicle(vehicle: VehiclesInsert): Promise<Vehicles> {
     return await vehicleService.createVehicle(vehicle);
   }
 
-  async updateVehicle(id: number, updates: any): Promise<any | undefined> {
-    return await vehicleService.updateVehicle(id.toString(), updates);
+  async updateVehicle(id: string, updates: Partial<Vehicles>): Promise<Vehicles | null> {
+    return await vehicleService.updateVehicle(id, updates);
   }
 
   // ===== WEAPON OPERATIONS =====
-  async getWeapon(id: number): Promise<any | undefined> {
-    return await weaponService.getWeaponById(id.toString());
+  async getWeapon(id: string): Promise<Weapons | null> {
+    return await weaponService.getWeaponById(id);
   }
 
-  async getWeaponsByOwner(ownerId: number): Promise<any[]> {
-    return await weaponService.getWeaponsByOwnerName(ownerId.toString());
+  async getWeaponsByOwner(ownerId: string): Promise<Weapons[]> {
+    return await weaponService.getWeaponsByOwnerName(ownerId);
   }
 
-  async getAllWeapons(): Promise<any[]> {
+  async getAllWeapons(): Promise<Weapons[]> {
     return await weaponService.getAllWeapons();
   }
 
-  async createWeapon(weapon: any): Promise<any> {
+  async createWeapon(weapon: WeaponsInsert): Promise<Weapons> {
     return await weaponService.createWeapon(weapon);
   }
 
-  async updateWeapon(id: number, updates: any): Promise<any | undefined> {
-    return await weaponService.updateWeapon(id.toString(), updates);
+  async updateWeapon(id: string, updates: Partial<Weapons>): Promise<Weapons | null> {
+    return await weaponService.updateWeapon(id, updates);
   }
 
   // ===== COMPLAINT OPERATIONS =====
-  async getComplaint(id: number): Promise<any | undefined> {
+  async getComplaint(id: string): Promise<Complaints | null> {
     // TODO: Создать ComplaintService
     throw new Error('Complaint operations not implemented yet');
   }
 
-  async getComplaintsByUser(userId: number): Promise<any[]> {
+  async getComplaintsByUser(userId: string): Promise<Complaints[]> {
     // TODO: Создать ComplaintService
     throw new Error('Complaint operations not implemented yet');
   }
 
-  async getAllComplaints(): Promise<any[]> {
+  async getAllComplaints(): Promise<Complaints[]> {
     // TODO: Создать ComplaintService
     throw new Error('Complaint operations not implemented yet');
   }
 
-  async createComplaint(complaint: any): Promise<any> {
+  async createComplaint(complaint: ComplaintsInsert): Promise<Complaints> {
     // TODO: Создать ComplaintService
     throw new Error('Complaint operations not implemented yet');
   }
 
-  async updateComplaint(id: number, updates: any): Promise<any | undefined> {
+  async updateComplaint(id: string, updates: Partial<Complaints>): Promise<Complaints | null> {
     // TODO: Создать ComplaintService
     throw new Error('Complaint operations not implemented yet');
   }
 
   // ===== TEST OPERATIONS =====
-  async getTest(id: number): Promise<any | undefined> {
+  async getTest(id: string): Promise<Tests | null> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
-  async getAllTests(): Promise<any[]> {
+  async getAllTests(): Promise<Tests[]> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
-  async createTest(test: any): Promise<any> {
+  async createTest(test: TestsInsert): Promise<Tests> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
   // ===== TEST SESSION OPERATIONS =====
-  async createTestSession(session: any): Promise<any> {
+  async createTestSession(session: TestSessionsInsert): Promise<TestSessions> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
-  async getActiveTestSession(userId: number, testId: number): Promise<any | undefined> {
+  async getActiveTestSession(userId: string, testId: string): Promise<TestSessions | null> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
-  async updateTestSession(id: number, updates: any): Promise<any | undefined> {
+  async updateTestSession(id: string, updates: Partial<TestSessions>): Promise<TestSessions | null> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
   // ===== TEST RESULT OPERATIONS =====
-  async createTestResult(result: any): Promise<any> {
+  async createTestResult(result: TestResultsInsert): Promise<TestResults> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
-  async getTestAttempts(userId: number, testId: number): Promise<any[]> {
+  async getTestAttempts(userId: string, testId: string): Promise<TestResults[]> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
-  async getTestResults(userId: number, testId: number): Promise<any[]> {
+  async getTestResults(userId: string, testId: string): Promise<TestResults[]> {
     // TODO: Создать TestService
     throw new Error('Test operations not implemented yet');
   }
 
   // ===== AUTH OPERATIONS =====
-  async validatePassword(password: string, hash: string) {
+  async validatePassword(password: string, hash: string): Promise<boolean> {
     return await userService.validatePassword(password, hash);
   }
 
-  async hashPassword(password: string) {
+  async hashPassword(password: string): Promise<string> {
     return await userService.hashPassword(password);
   }
 }
 
 // Экспортируем адаптер для совместимости
-export const storage: IStorage = new StorageAdapter();
+export const storage: StorageAdapter = new StorageAdapter();

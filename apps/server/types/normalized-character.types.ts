@@ -31,9 +31,9 @@ export interface LeoProfile {
   id: string;
   characterId: string;
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -52,9 +52,9 @@ export interface EmsProfile {
   id: string;
   characterId: string;
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -73,9 +73,9 @@ export interface FireProfile {
   id: string;
   characterId: string;
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -101,7 +101,7 @@ export type FullCharacter = Character & {
 
 // ===== ТИПЫ ДЛЯ СОЗДАНИЯ И ОБНОВЛЕНИЯ =====
 
-// Создание персонажа
+// Тип для создания персонажа
 export interface CreateCharacterRequest {
   firstName: string;
   lastName: string;
@@ -118,7 +118,7 @@ export interface CreateCharacterRequest {
   addressFlags?: string[];
 }
 
-// Обновление персонажа
+// Тип для обновления персонажа
 export interface UpdateCharacterRequest {
   firstName?: string;
   lastName?: string;
@@ -135,13 +135,13 @@ export interface UpdateCharacterRequest {
   addressFlags?: string[];
 }
 
-// Создание профиля LEO
+// Тип для создания профиля LEO
 export interface CreateLeoProfileRequest {
   characterId: string;
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -153,12 +153,12 @@ export interface CreateLeoProfileRequest {
   radioChannelId?: string;
 }
 
-// Обновление профиля LEO
+// Тип для обновления профиля LEO
 export interface UpdateLeoProfileRequest {
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -170,13 +170,13 @@ export interface UpdateLeoProfileRequest {
   radioChannelId?: string;
 }
 
-// Создание профиля EMS
+// Тип для создания профиля EMS
 export interface CreateEmsProfileRequest {
   characterId: string;
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -188,12 +188,12 @@ export interface CreateEmsProfileRequest {
   radioChannelId?: string;
 }
 
-// Обновление профиля EMS
+// Тип для обновления профиля EMS
 export interface UpdateEmsProfileRequest {
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -205,13 +205,13 @@ export interface UpdateEmsProfileRequest {
   radioChannelId?: string;
 }
 
-// Создание профиля FIRE
+// Тип для создания профиля FIRE
 export interface CreateFireProfileRequest {
   characterId: string;
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -223,12 +223,12 @@ export interface CreateFireProfileRequest {
   radioChannelId?: string;
 }
 
-// Обновление профиля FIRE
+// Тип для обновления профиля FIRE
 export interface UpdateFireProfileRequest {
   badgeNumber?: string;
-  rankId?: number;
-  divisionId?: number;
-  departmentId?: number;
+  rankId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  departmentId?: string; // Изменено с number на string для UUID
   callsign?: string;
   callsign2?: string;
   status?: string;
@@ -240,7 +240,7 @@ export interface UpdateFireProfileRequest {
   radioChannelId?: string;
 }
 
-// ===== ТИПЫ ДЛЯ ФИЛЬТРАЦИИ И ПОИСКА =====
+// ===== ТИПЫ ДЛЯ ФИЛЬТРАЦИИ =====
 
 // Фильтры для персонажей
 export interface CharacterFilters {
@@ -254,8 +254,8 @@ export interface CharacterFilters {
 // Фильтры для профилей LEO
 export interface LeoProfileFilters {
   characterId?: string;
-  departmentId?: number;
-  rankId?: number;
+  departmentId?: string; // Изменено с number на string для UUID
+  rankId?: string; // Изменено с number на string для UUID
   status?: string;
   isActive?: boolean;
   limit?: number;
@@ -265,8 +265,8 @@ export interface LeoProfileFilters {
 // Фильтры для профилей EMS
 export interface EmsProfileFilters {
   characterId?: string;
-  departmentId?: number;
-  rankId?: number;
+  departmentId?: string; // Изменено с number на string для UUID
+  rankId?: string; // Изменено с number на string для UUID
   status?: string;
   isActive?: boolean;
   limit?: number;
@@ -276,8 +276,8 @@ export interface EmsProfileFilters {
 // Фильтры для профилей FIRE
 export interface FireProfileFilters {
   characterId?: string;
-  departmentId?: number;
-  rankId?: number;
+  departmentId?: string; // Изменено с number на string для UUID
+  rankId?: string; // Изменено с number на string для UUID
   status?: string;
   isActive?: boolean;
   limit?: number;
@@ -286,7 +286,7 @@ export interface FireProfileFilters {
 
 // ===== ТИПЫ ДЛЯ СТАТИСТИКИ =====
 
-// Статистика персонажей
+// Статистика по персонажам
 export interface CharacterStats {
   totalCharacters: number;
   charactersByGender: Record<string, number>;
@@ -294,45 +294,43 @@ export interface CharacterStats {
   recentCharacters: number; // за последние 30 дней
 }
 
-// Статистика профилей LEO
+// Статистика по профилям LEO
 export interface LeoProfileStats {
   totalProfiles: number;
   activeProfiles: number;
   suspendedProfiles: number;
-  profilesByDepartment: Record<number, number>;
-  profilesByRank: Record<number, number>;
+  profilesByDepartment: Record<string, number>; // Изменено с number на string для UUID
+  profilesByRank: Record<string, number>; // Изменено с number на string для UUID
   recentHires: number; // за последние 30 дней
 }
 
-// Статистика профилей EMS
+// Статистика по профилям EMS
 export interface EmsProfileStats {
   totalProfiles: number;
   activeProfiles: number;
   suspendedProfiles: number;
-  profilesByDepartment: Record<number, number>;
-  profilesByRank: Record<number, number>;
+  profilesByDepartment: Record<string, number>; // Изменено с number на string для UUID
+  profilesByRank: Record<string, number>; // Изменено с number на string для UUID
   recentHires: number; // за последние 30 дней
 }
 
-// Статистика профилей FIRE
+// Статистика по профилям FIRE
 export interface FireProfileStats {
   totalProfiles: number;
   activeProfiles: number;
   suspendedProfiles: number;
-  profilesByDepartment: Record<number, number>;
-  profilesByRank: Record<number, number>;
+  profilesByDepartment: Record<string, number>; // Изменено с number на string для UUID
+  profilesByRank: Record<string, number>; // Изменено с number на string для UUID
   recentHires: number; // за последние 30 дней
 }
 
-// ===== ТИПЫ ДЛЯ ВАЛИДАЦИИ =====
+// ===== ВСПОМОГАТЕЛЬНЫЕ ТИПЫ =====
 
 // Результат валидации
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
 }
-
-// ===== ТИПЫ ДЛЯ ОБРАТНОЙ СОВМЕСТИМОСТИ =====
 
 // Легаси тип для обратной совместимости
 export interface LegacyCharacter {
@@ -353,9 +351,9 @@ export interface LegacyCharacter {
   badgeNumber?: string;
   callsign?: string;
   callsign2?: string;
-  departmentId?: number;
-  divisionId?: number;
-  rankId?: number;
+  departmentId?: string; // Изменено с number на string для UUID
+  divisionId?: string; // Изменено с number на string для UUID
+  rankId?: string; // Изменено с number на string для UUID
   hireDate?: string;
   terminationDate?: string;
   isActive?: boolean;

@@ -1,4 +1,4 @@
-import { User } from "@shared/schema";
+import type { User } from "@shared/schema/types";
 
 export interface AuthState {
   user: Omit<User, 'passwordHash'> | null;

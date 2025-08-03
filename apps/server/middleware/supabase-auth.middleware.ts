@@ -7,13 +7,11 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_ANON_KEY!
 );
 
-export interface AuthenticatedRequest extends Request {
-  user?: any;
-  authUser?: any;
-}
+// УДАЛЕН ДУБЛИРУЮЩИЙ ИНТЕРФЕЙС AuthenticatedRequest
+// Используется AuthenticatedRequest из middleware/auth.middleware.ts
 
 export const authenticateSupabaseToken = async (
-  req: AuthenticatedRequest, 
+  req: any, 
   res: Response, 
   next: NextFunction
 ) => {
@@ -54,7 +52,7 @@ export const authenticateSupabaseToken = async (
 };
 
 export const requireRole = (requiredRole: string) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: any, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Authentication required' });
     }
@@ -67,7 +65,7 @@ export const requireRole = (requiredRole: string) => {
   };
 };
 
-export const requireSupervisor = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const requireSupervisor = (req: any, res: Response, next: NextFunction) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Authentication required' });
   }
@@ -79,7 +77,7 @@ export const requireSupervisor = (req: AuthenticatedRequest, res: Response, next
   next();
 };
 
-export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const requireAdmin = (req: any, res: Response, next: NextFunction) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Authentication required' });
   }
