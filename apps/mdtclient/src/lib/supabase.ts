@@ -30,19 +30,23 @@ console.log('🔍 VITE_SUPABASE_URL type:', typeof import.meta.env.VITE_SUPABASE
 
 console.log('🔍 === ДИАГНОСТИКА ЗАВЕРШЕНА ===');
 
-// Get environment variables with fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://axgtvvcimqoyxbfvdrok.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4Z3R2dmNpbXFveXhiZnZkcm9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjAzMTE3MTcsImV4cCI6MjAzNTg4NzcxN30.RNqE8LJgLDqjhOjlJuWkQRcXPZP8VNxJ4YYJrfJNwwU'
+// СТРОГАЯ ПРОВЕРКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ДЛЯ БЕЗОПАСНОСТИ
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('[Supabase Client] Используемый URL:', supabaseUrl);
-console.log('[Supabase Client] Используемый ключ:', supabaseAnonKey ? 'ПРИСУТСТВУЕТ' : 'ОТСУТСТВУЕТ');
-
-if (!supabaseAnonKey) {
-  console.error('[Supabase Client] ❌ КРИТИЧЕСКАЯ ОШИБКА: VITE_SUPABASE_ANON_KEY отсутствует!');
-  throw new Error('VITE_SUPABASE_ANON_KEY is required')
+// КРИТИЧЕСКАЯ ПРОВЕРКА БЕЗОПАСНОСТИ
+if (!supabaseUrl) {
+  console.error('[SECURITY] ❌ КРИТИЧЕСКАЯ ОШИБКА: VITE_SUPABASE_URL отсутствует!')
+  throw new Error('VITE_SUPABASE_URL environment variable is required')
 }
 
-console.log('[Supabase Client] ✅ Создание Supabase клиента...');
+if (!supabaseAnonKey) {
+  console.error('[SECURITY] ❌ КРИТИЧЕСКАЯ ОШИБКА: VITE_SUPABASE_ANON_KEY отсутствует!')
+  throw new Error('VITE_SUPABASE_ANON_KEY environment variable is required')
+}
+
+console.log('[Supabase Client] ✅ Переменные окружения загружены корректно')
+console.log('[Supabase Client] ✅ Создание Supabase клиента...')
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 

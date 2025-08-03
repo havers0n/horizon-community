@@ -1,88 +1,99 @@
 import express from 'express';
-import cors from 'cors';
 import { Pool } from 'pg';
+import cors from 'cors';
+
+console.log("🚀 Запуск простого тестового сервера...");
+
+// БЕЗОПАСНАЯ ЗАГРУЗКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ
+const databaseUrl = process.env.DATABASE_URL;
+const port = process.env.PORT || 3001;
+
+if (!databaseUrl) {
+  console.error("❌ КРИТИЧЕСКАЯ ОШИБКА: DATABASE_URL не установлен!");
+  console.error("Установите переменную окружения DATABASE_URL");
+  process.exit(1);
+}
 
 const app = express();
-const port = 5001;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Подключение к базе данных
 const pool = new Pool({
-  connectionString: 'postgresql://postgres.axgtvvcimqoyxbfvdrok:TtaW3kLHu9xojVOt@aws-0-eu-north-1.pooler.supabase.com:5432/postgres',
+  connectionString: databaseUrl,
   ssl: { rejectUnauthorized: false }
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    message: 'Simple test server is running!'
-  });
+app.use(cors());
+app.use(express.json());
+
+// Тестовый эндпоинт
+app.get('/api/test', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT NOW() as current_time');
+    client.release();
+    
+    res.json({
+      success: true,
+      message: 'Сервер работает корректно',
+      timestamp: result.rows[0].current_time,
+      database: 'connected'
+    });
+  } catch (error) {
+    console.error('Ошибка базы данных:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Ошибка подключения к базе данных',
+      error: error.message
+    });
+  }
 });
 
-// Test departments endpoint
+// Эндпоинт для проверки департаментов
 app.get('/api/departments', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM departments');
+    const client = await pool.connect();
+    const result = await client.query('SELECT * FROM departments LIMIT 10');
+    client.release();
+    
     res.json({
       success: true,
-      count: result.rows.length,
-      departments: result.rows
+      data: result.rows,
+      count: result.rows.length
     });
   } catch (error) {
-    console.error('Error fetching departments:', error);
+    console.error('Ошибка при получении департаментов:', error);
     res.status(500).json({
       success: false,
+      message: 'Ошибка при получении департаментов',
       error: error.message
     });
   }
 });
 
-// Test users endpoint
+// Эндпоинт для проверки пользователей
 app.get('/api/users', async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, username, email, role, status FROM users LIMIT 10');
+    const client = await pool.connect();
+    const result = await client.query('SELECT id, username, email, role FROM users LIMIT 10');
+    client.release();
+    
     res.json({
       success: true,
-      count: result.rows.length,
-      users: result.rows
+      data: result.rows,
+      count: result.rows.length
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Ошибка при получении пользователей:', error);
     res.status(500).json({
       success: false,
+      message: 'Ошибка при получении пользователей',
       error: error.message
     });
   }
 });
 
-// Test characters endpoint
-app.get('/api/characters', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id, first_name, last_name, type, owner_id FROM characters LIMIT 10');
-    res.json({
-      success: true,
-      count: result.rows.length,
-      characters: result.rows
-    });
-  } catch (error) {
-    console.error('Error fetching characters:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-app.listen(port, '127.0.0.1', () => {
-  console.log(`🚀 Simple test server running on http://127.0.0.1:${port}`);
-  console.log(`📊 Health check: http://127.0.0.1:${port}/api/health`);
-  console.log(`🏢 Departments: http://127.0.0.1:${port}/api/departments`);
-  console.log(`👥 Users: http://127.0.0.1:${port}/api/users`);
-  console.log(`🎭 Characters: http://127.0.0.1:${port}/api/characters`);
+app.listen(port, () => {
+  console.log(`✅ Сервер запущен на порту ${port}`);
+  console.log(`🌐 Тестовые эндпоинты:`);
+  console.log(`   - GET /api/test`);
+  console.log(`   - GET /api/departments`);
+  console.log(`   - GET /api/users`);
 }); 
