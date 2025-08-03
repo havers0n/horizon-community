@@ -20,7 +20,7 @@ export interface TransferRequest {
   supervisorComment?: string;
 }
 
-export interface User {
+export interface LocalUser {
   id: number;
   name: string;
   department: string;
@@ -39,8 +39,8 @@ export enum Department {
 
 // Типы для контекста приложения
 export interface AppContextType {
-  currentUser: User | null;
-  users: User[];
+  currentUser: LocalUser | null;
+  users: LocalUser[];
   requests: TransferRequest[];
   createRequest: (request: Omit<TransferRequest, 'id' | 'status' | 'submissionDate'>) => void;
   decideOnRequest: (requestId: number, status: RequestStatus, reason?: string) => void;

@@ -1,10 +1,10 @@
 // Типы для отчетов
 export interface ReportTemplate {
-  id: number;
+  id: string;
   title: string;
   body: string;
   category: string;
-  departmentId: number | null;
+  departmentId: string | null;
   variables: string[];
   tags: string[];
   difficulty: 'easy' | 'medium' | 'hard';
@@ -21,8 +21,8 @@ export interface ReportTemplate {
 }
 
 export interface Report {
-  id: number;
-  authorId: number;
+  id: string;
+  authorId: string;
   status: string;
   fileUrl: string;
   supervisorComment: string | null;
@@ -34,11 +34,11 @@ export interface Report {
 }
 
 export interface FilledReport {
-  id: number;
-  templateId: number;
+  id: string;
+  templateId: string;
   title: string;
   content: string;
-  authorId: number;
+  authorId: string;
   status: string;
   createdAt: string;
   updatedAt?: string;
@@ -49,7 +49,7 @@ export interface FilledReport {
 
 // Типы для департаментов
 export interface Department {
-  id: number;
+  id: string;
   name: string;
   fullName: string;
   description: string;
@@ -59,14 +59,14 @@ export interface Department {
 
 // Типы для пользователей
 export interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   role: string;
   avatar?: string;
   rank?: string;
   department?: {
-    id: number;
+    id: string;
     name: string;
   };
   // Дополнительные поля для совместимости
@@ -76,9 +76,9 @@ export interface User {
 
 // Типы для жалоб
 export interface Complaint {
-  id: number;
-  authorId: number;
-  targetId: number;
+  id: string;
+  authorId: string;
+  targetId: string;
   type: string;
   description: string;
   status: string;
@@ -88,7 +88,7 @@ export interface Complaint {
 
 // Типы для заявок
 export interface Application {
-  id: number;
+  id: string;
   type: string;
   status: string;
   data: any;
@@ -96,11 +96,11 @@ export interface Application {
   updatedAt: string;
   reviewComment?: string;
   author?: {
-    id: number;
+    id: string;
     username: string;
     rank: string;
     department?: {
-      id: number;
+      id: string;
       name: string;
     };
   };
@@ -108,7 +108,7 @@ export interface Application {
 
 // Типы для отпусков
 export interface LeaveApplication {
-  id: number;
+  id: string;
   type: string;
   status: string;
   data: any;
@@ -116,11 +116,11 @@ export interface LeaveApplication {
   updatedAt: string;
   reviewComment?: string;
   author?: {
-    id: number;
+    id: string;
     username: string;
     rank: string;
     department?: {
-      id: number;
+      id: string;
       name: string;
     };
   };
@@ -128,23 +128,23 @@ export interface LeaveApplication {
 
 // Типы для переводов
 export interface TransferRequest {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   fromDepartment: string;
   toDepartment: string;
   reason: string;
   status: 'sent' | 'reviewing' | 'approved' | 'rejected';
   submissionDate: Date;
   reviewDate?: Date;
-  reviewerId?: number;
+  reviewerId?: string;
   rejectionReason?: string;
   supervisorComment?: string;
 }
 
 // Типы для уведомлений
 export interface Notification {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
   isRead: boolean;
@@ -153,7 +153,7 @@ export interface Notification {
 
 // Типы для тестов
 export interface Test {
-  id: number;
+  id: string;
   title: string;
   description: string;
   durationMinutes: number;
@@ -168,10 +168,10 @@ export interface Test {
 }
 
 export interface TestResult {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   username: string;
-  testId: number;
+  testId: string;
   testTitle: string;
   score: number;
   maxScore: number;
@@ -187,10 +187,10 @@ export interface TestResult {
 
 // Типы для форума
 export interface ForumCategory {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  departmentId: number | null;
+  departmentId: string | null;
   icon: string;
   color: string;
   orderIndex: number;
@@ -202,7 +202,7 @@ export interface ForumCategory {
 }
 
 export interface ForumTopic {
-  id: number;
+  id: string;
   title: string;
   content: string;
   status: string;
@@ -213,29 +213,29 @@ export interface ForumTopic {
   lastPostAt: string | null;
   tags: string[];
   createdAt: string;
-  authorId: number;
+  authorId: string;
   authorUsername: string;
-  lastPostAuthorId: number | null;
+  lastPostAuthorId: string | null;
   lastPostAuthorUsername: string | null;
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
 }
 
 export interface ForumPost {
-  id: number;
+  id: string;
   content: string;
   isEdited: boolean;
   editedAt: string | null;
   reactionsCount: number;
   createdAt: string;
-  authorId: number;
+  authorId: string;
   authorUsername: string;
-  parentId: number | null;
+  parentId: string | null;
 }
 
 // Типы для CAD
 export interface Call911 {
-  id: number;
+  id: string;
   caller: string;
   location: string;
   description: string;
@@ -248,13 +248,13 @@ export interface Call911 {
 }
 
 export interface Unit {
-  id: number;
+  id: string;
   name: string;
   department: string;
   status: string;
   isPanic: boolean;
   location: { x: number; y: number; z: number };
-  characterId: number;
+  characterId: string;
   callsign: string;
 }
 
@@ -274,7 +274,7 @@ export interface CommunityStats {
 }
 
 export interface GalleryItem {
-  id: number;
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -286,8 +286,8 @@ export interface GalleryItem {
 
 // Типы для FAQ
 export interface FAQItem {
-  id: number;
+  id: string;
   question: string;
   answer: string;
   category: 'general' | 'technical' | 'application' | 'gameplay';
-} 
+}

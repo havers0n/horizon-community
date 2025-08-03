@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { AppContextType, User, TransferRequest, RequestStatus } from '../types';
+import { AppContextType, LocalUser, TransferRequest, RequestStatus } from '../types';
 
 // Создаем контекст с дефолтными значениями
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 // Провайдер контекста
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<LocalUser | null>(null);
+  const [users, setUsers] = useState<LocalUser[]>([]);
   const [requests, setRequests] = useState<TransferRequest[]>([]);
 
   const createRequest = (request: Omit<TransferRequest, 'id' | 'status' | 'submissionDate'>) => {

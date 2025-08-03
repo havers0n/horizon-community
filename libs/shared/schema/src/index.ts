@@ -47,4 +47,7 @@ export type EntryApplicationData = z.infer<typeof entryApplicationSchema>;
 export * from './schemas';
 
 // Экспорт всех типов
-export * from './types'; 
+export * from './types';
+
+// Явный экспорт основных типов для обеспечения совместимости
+export type { User, Department, Application, ReportTemplate, Report, FilledReport } from './types'; 

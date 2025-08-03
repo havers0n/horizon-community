@@ -1,56 +1,13 @@
-// Backend Types
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  passwordHash: string;
-  role: string;
-  status: string;
-  departmentId: number | null;
-  secondaryDepartmentId: number | null;
-  rank: string | null;
-  division: string | null;
-  qualifications: string[];
-  gameWarnings: number;
-  adminWarnings: number;
-  authId: string | null;
-  apiToken: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface InsertUser {
-  username: string;
-  email: string;
-  passwordHash: string;
-  role: string;
-  status: string;
-  departmentId?: number | null;
-  secondaryDepartmentId?: number | null;
-  rank?: string | null;
-  division?: string | null;
-  qualifications?: string[];
-  gameWarnings?: number;
-  adminWarnings?: number;
-  cadToken?: string | null;
-  discordId?: string | null;
-  discordUsername?: string | null;
-  discordAccessToken?: string | null;
-  discordRefreshToken?: string | null;
-  authId: string;
-  has2FA?: boolean;
-  isDarkTheme?: boolean;
-  soundSettings?: any;
-  apiToken?: string | null;
-}
+// Backend Types - УДАЛЕНЫ УСТАРЕВШИЕ ТИПЫ С NUMBER ID
+// Все типы теперь используют UUID из packages/db-types
 
 export interface Department {
-  id: number;
+  id: string;
   name: string;
   fullName: string;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertDepartment {
@@ -60,8 +17,8 @@ export interface InsertDepartment {
 }
 
 export interface Character {
-  id: number;
-  ownerId: number;
+  id: string;
+  ownerId: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
@@ -69,12 +26,12 @@ export interface Character {
   nationality: string;
   phoneNumber?: string;
   address?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertCharacter {
-  ownerId: number;
+  ownerId: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
@@ -85,110 +42,110 @@ export interface InsertCharacter {
 }
 
 export interface Application {
-  id: number;
-  authorId: number;
+  id: string;
+  authorId: string;
   type: string;
   status: string;
   data: any;
-  createdAt: Date;
-  updatedAt: Date;
-  reviewerId?: number;
+  createdAt: string;
+  updatedAt: string;
+  reviewerId?: string;
   reviewComment?: string;
-  characterId?: number;
+  characterId?: string;
   statusHistory?: Array<{
     status: string;
     date: string;
     comment: string;
-    reviewerId: number;
+    reviewerId: string;
   }>;
 }
 
 export interface InsertApplication {
-  authorId: number;
+  authorId: string;
   type: string;
   status: string;
   data: any;
-  reviewerId?: number;
+  reviewerId?: string;
   reviewComment?: string;
-  characterId?: number;
+  characterId?: string;
 }
 
 export interface Report {
-  id: number;
-  authorId: number;
+  id: string;
+  authorId: string;
   status: string;
   fileUrl: string;
   supervisorComment?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertReport {
-  authorId: number;
+  authorId: string;
   status: string;
   fileUrl: string;
   supervisorComment?: string;
 }
 
 export interface Notification {
-  id: number;
-  recipientId: number;
+  id: string;
+  recipientId: string;
   content: string;
   link?: string;
   isRead: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertNotification {
-  recipientId: number;
+  recipientId: string;
   content: string;
   link?: string;
   isRead?: boolean;
 }
 
 export interface SupportTicket {
-  id: number;
-  authorId: number;
+  id: string;
+  authorId: string;
   status: string;
   messages: any[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertSupportTicket {
-  authorId: number;
+  authorId: string;
   status: string;
   messages?: any[];
 }
 
 export interface Complaint {
-  id: number;
-  authorId: number;
+  id: string;
+  authorId: string;
   subject: string;
   content: string;
   status: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertComplaint {
-  authorId: number;
+  authorId: string;
   subject: string;
   content: string;
   status: string;
 }
 
 export interface Test {
-  id: number;
+  id: string;
   title: string;
   description: string;
   questions: any[];
   timeLimit: number;
   passingScore: number;
-  departmentId: number;
-  createdAt: Date;
-  updatedAt: Date;
+  departmentId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertTest {
@@ -197,132 +154,122 @@ export interface InsertTest {
   questions: any[];
   timeLimit: number;
   passingScore: number;
-  departmentId: number;
+  departmentId: string;
 }
 
 export interface TestSession {
-  id: number;
-  userId: number;
-  testId: number;
+  id: string;
+  userId: string;
+  testId: string;
   status: string;
-  startTime: Date;
-  endTime?: Date;
+  startTime: string;
+  endTime?: string;
   answers: any[];
   score?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertTestSession {
-  userId: number;
-  testId: number;
+  userId: string;
+  testId: string;
   status: string;
-  startTime: Date;
-  endTime?: Date;
+  startTime: string;
+  endTime?: string;
   answers?: any[];
   score?: number;
 }
 
 export interface TestResult {
-  id: number;
-  userId: number;
-  testId: number;
-  sessionId: number;
+  id: string;
+  userId: string;
+  testId: string;
+  sessionId: string;
   score: number;
   passed: boolean;
-  completedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  completedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InsertTestResult {
-  userId: number;
-  testId: number;
-  sessionId: number;
+  userId: string;
+  testId: string;
+  sessionId: string;
   score: number;
   passed: boolean;
-  completedAt: Date;
+  completedAt: string;
 }
 
-// Storage Interface
+// Storage Interface - ОБНОВЛЕН ДЛЯ UUID
 export interface IStorage {
-  // User operations
-  getUser(id: number): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByAuthId(authId: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
-  getAllUsers(): Promise<User[]>;
-  
+  // User operations - УДАЛЕНЫ, используются типы из packages/db-types
   // Department operations
-  getDepartment(id: number): Promise<Department | undefined>;
+  getDepartment(id: string): Promise<Department | undefined>;
   getDepartments(): Promise<Department[]>;
   getAllDepartments(): Promise<Department[]>;
   createDepartment(department: InsertDepartment): Promise<Department>;
   
   // Character operations
-  getCharactersByOwner(ownerId: number): Promise<Character[]>;
+  getCharactersByOwner(ownerId: string): Promise<Character[]>;
   createCharacter(character: InsertCharacter): Promise<Character>;
   
   // Application operations
-  getApplication(id: number): Promise<Application | undefined>;
-  getApplicationsByUser(userId: number): Promise<Application[]>;
+  getApplication(id: string): Promise<Application | undefined>;
+  getApplicationsByUser(userId: string): Promise<Application[]>;
   getAllApplications(): Promise<Application[]>;
   createApplication(application: InsertApplication): Promise<Application>;
-  updateApplication(id: number, updates: Partial<Application>): Promise<Application | undefined>;
+  updateApplication(id: string, updates: Partial<Application>): Promise<Application | undefined>;
   
   // Report operations
-  getReport(id: number): Promise<Report | undefined>;
-  getReportsByUser(userId: number): Promise<Report[]>;
+  getReport(id: string): Promise<Report | undefined>;
+  getReportsByUser(userId: string): Promise<Report[]>;
   getAllReports(): Promise<Report[]>;
   createReport(report: InsertReport): Promise<Report>;
-  updateReport(id: number, updates: Partial<Report>): Promise<Report | undefined>;
+  updateReport(id: string, updates: Partial<Report>): Promise<Report | undefined>;
   
   // Notification operations
-  getNotificationsByUser(userId: number): Promise<Notification[]>;
+  getNotificationsByUser(userId: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
-  markNotificationAsRead(id: number): Promise<Notification | undefined>;
-  getNotification(id: number): Promise<Notification | undefined>;
-  markAllNotificationsAsRead(userId: number): Promise<Notification[]>;
-  deleteNotification(id: number): Promise<void>;
+  markNotificationAsRead(id: string): Promise<Notification | undefined>;
+  getNotification(id: string): Promise<Notification | undefined>;
+  markAllNotificationsAsRead(userId: string): Promise<Notification[]>;
+  deleteNotification(id: string): Promise<void>;
   
   // Support ticket operations
-  getSupportTicket(id: number): Promise<SupportTicket | undefined>;
-  getSupportTicketsByUser(userId: number): Promise<SupportTicket[]>;
+  getSupportTicket(id: string): Promise<SupportTicket | undefined>;
+  getSupportTicketsByUser(userId: string): Promise<SupportTicket[]>;
   getAllSupportTickets(): Promise<SupportTicket[]>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
-  updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined>;
+  updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined>;
   
   // Complaint operations
-  getComplaint(id: number): Promise<Complaint | undefined>;
-  getComplaintsByUser(userId: number): Promise<Complaint[]>;
+  getComplaint(id: string): Promise<Complaint | undefined>;
+  getComplaintsByUser(userId: string): Promise<Complaint[]>;
   getAllComplaints(): Promise<Complaint[]>;
   createComplaint(complaint: InsertComplaint): Promise<Complaint>;
-  updateComplaint(id: number, updates: Partial<Complaint>): Promise<Complaint | undefined>;
+  updateComplaint(id: string, updates: Partial<Complaint>): Promise<Complaint | undefined>;
   
   // Test operations
-  getTest(id: number): Promise<Test | undefined>;
+  getTest(id: string): Promise<Test | undefined>;
   getAllTests(): Promise<Test[]>;
   createTest(test: InsertTest): Promise<Test>;
   getApplicationsByType(type: string): Promise<Application[]>;
   
   // Test session operations
   createTestSession(session: InsertTestSession): Promise<TestSession>;
-  getActiveTestSession(userId: number, testId: number): Promise<TestSession | undefined>;
-  updateTestSession(id: number, updates: Partial<TestSession>): Promise<TestSession | undefined>;
+  getActiveTestSession(userId: string, testId: string): Promise<TestSession | undefined>;
+  updateTestSession(id: string, updates: Partial<TestSession>): Promise<TestSession | undefined>;
   
   // Test result operations
   createTestResult(result: InsertTestResult): Promise<TestResult>;
-  getTestAttempts(userId: number, testId: number): Promise<TestResult[]>;
-  getTestResults(userId: number, testId: number): Promise<TestResult[]>;
+  getTestAttempts(userId: string, testId: string): Promise<TestResult[]>;
+  getTestResults(userId: string, testId: string): Promise<TestResult[]>;
   
-  // Auth operations
-  validatePassword(password: string, hash: string): Promise<boolean>;
-  hashPassword(password: string): Promise<string>;
+  // Auth operations - УДАЛЕНЫ, используются современные методы аутентификации
 }
 
-// Zod Schemas
+// Zod Schemas - ОБНОВЛЕНЫ ДЛЯ UUID
 export const loginSchema = {
   parse: (data: any) => {
     if (!data.email || !data.password) {
@@ -359,8 +306,8 @@ export const insertComplaintSchema = {
   }
 };
 
-// Mock schemas for backward compatibility
-export const users = { name: 'users' };
+// Mock schemas for backward compatibility - ОБНОВЛЕНЫ ДЛЯ UUID
+export const users = { name: 'profiles' }; // Изменено на profiles
 export const characters = { name: 'characters' };
 export const departments = { name: 'departments' };
 export const applications = { name: 'applications' };

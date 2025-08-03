@@ -3,6 +3,16 @@ import { z } from 'zod';
 import { Response } from 'express';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.middleware.js';
 import { mdtService } from '../services/MDTService';
+import type { 
+  UnitsOnDuty, 
+  MDTCalls, 
+  MDTBolos, 
+  MDTSignals, 
+  MDTNotifications,
+  MDTApplications,
+  MDTLawReports,
+  MDTEmsFdReports
+} from '../../../packages/db-types/src/index';
 
 const router: import('express').Router = Router();
 
@@ -11,7 +21,7 @@ const router: import('express').Router = Router();
 /**
  * GET /api/mdt - Базовый endpoint для проверки подключения
  */
-router.get('/', authenticateToken as any, (req: AuthenticatedRequest, res: Response) => {
+router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response) => {
   res.json({ 
     success: true, 
     message: 'MDT API is working!',
@@ -161,9 +171,9 @@ const updateBoloSchema = z.object({
 /**
  * GET /api/mdt/units - Получить все активные юниты
  */
-router.get('/units', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/units', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const units = await mdtService.getActiveUnits();
+    const units: UnitsOnDuty[] = await mdtService.getActiveUnits();
     res.json({ success: true, data: units });
   } catch (error) {
     console.error('Error fetching units:', error);
@@ -177,12 +187,17 @@ router.get('/units', authenticateToken as any, async (req: AuthenticatedRequest,
 /**
  * POST /api/mdt/units - Создать новый юнит
  */
-router.post('/units', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/units', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createUnitSchema.parse(req.body);
     
-    const unit = await mdtService.createUnit({
-      ...validatedData,
+    const unit: UnitsOnDuty = await mdtService.createUnit({
+      characterId: validatedData.characterId,
+      unitNumber: validatedData.unitNumber,
+      departmentId: validatedData.departmentId,
+      status: validatedData.status,
+      location: validatedData.location,
+      currentCallId: validatedData.currentCallId,
       userId: req.user!.id
     });
 
@@ -206,7 +221,7 @@ router.post('/units', authenticateToken as any, async (req: AuthenticatedRequest
 /**
  * PUT /api/mdt/units/:id/status - Обновить статус юнита
  */
-router.put('/units/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/units/:id/status', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const unitId = req.params.id;
     if (!unitId) {
@@ -218,7 +233,7 @@ router.put('/units/:id/status', authenticateToken as any, async (req: Authentica
 
     const validatedData = updateUnitStatusSchema.parse(req.body);
     
-    const unit = await mdtService.updateUnitStatus(unitId, validatedData.status);
+    const unit: UnitsOnDuty = await mdtService.updateUnitStatus(unitId, validatedData.status);
     res.json({ success: true, data: unit });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -239,7 +254,7 @@ router.put('/units/:id/status', authenticateToken as any, async (req: Authentica
 /**
  * PUT /api/mdt/units/:id/location - Обновить местоположение юнита
  */
-router.put('/units/:id/location', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/units/:id/location', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const unitId = req.params.id;
     if (!unitId) {
@@ -251,7 +266,7 @@ router.put('/units/:id/location', authenticateToken as any, async (req: Authenti
 
     const validatedData = updateUnitLocationSchema.parse(req.body);
     
-    const unit = await mdtService.updateUnitLocation(unitId, validatedData.location);
+    const unit: UnitsOnDuty = await mdtService.updateUnitLocation(unitId, validatedData.location);
     res.json({ success: true, data: unit });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -272,7 +287,7 @@ router.put('/units/:id/location', authenticateToken as any, async (req: Authenti
 /**
  * POST /api/mdt/units/:id/panic - Активировать панику для юнита
  */
-router.post('/units/:id/panic', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/units/:id/panic', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const unitId = req.params.id;
     if (!unitId) {
@@ -296,7 +311,7 @@ router.post('/units/:id/panic', authenticateToken as any, async (req: Authentica
 /**
  * DELETE /api/mdt/units/:id/panic - Деактивировать панику для юнита
  */
-router.delete('/units/:id/panic', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/units/:id/panic', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const unitId = req.params.id;
     if (!unitId) {
@@ -322,9 +337,9 @@ router.delete('/units/:id/panic', authenticateToken as any, async (req: Authenti
 /**
  * GET /api/mdt/calls - Получить все вызовы 911
  */
-router.get('/calls', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/calls', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const calls = await mdtService.getCalls();
+    const calls: MDTCalls[] = await mdtService.getCalls();
     res.json({ success: true, data: calls });
   } catch (error) {
     console.error('Error fetching calls:', error);
@@ -338,11 +353,21 @@ router.get('/calls', authenticateToken as any, async (req: AuthenticatedRequest,
 /**
  * POST /api/mdt/calls - Создать новый вызов 911
  */
-router.post('/calls', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/calls', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createCallSchema.parse(req.body);
     
-    const call = await mdtService.createCall(validatedData);
+    const call: MDTCalls = await mdtService.createCall({
+      callerName: validatedData.callerName,
+      callerPhone: validatedData.callerPhone,
+      location: validatedData.location!,
+      description: validatedData.description!,
+      type: validatedData.type!,
+      priority: validatedData.priority,
+      status: validatedData.status,
+      patientInfo: validatedData.patientInfo,
+      fireInfo: validatedData.fireInfo
+    });
 
     res.status(201).json({ success: true, data: call });
   } catch (error) {
@@ -364,7 +389,7 @@ router.post('/calls', authenticateToken as any, async (req: AuthenticatedRequest
 /**
  * PUT /api/mdt/calls/:id - Обновить вызов 911
  */
-router.put('/calls/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/calls/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const callId = req.params.id;
     if (!callId) {
@@ -376,7 +401,7 @@ router.put('/calls/:id', authenticateToken as any, async (req: AuthenticatedRequ
 
     const validatedData = updateCallSchema.parse(req.body);
     
-    const call = await mdtService.updateCall(callId, validatedData);
+    const call: MDTCalls = await mdtService.updateCall(callId, validatedData);
     res.json({ success: true, data: call });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -397,7 +422,7 @@ router.put('/calls/:id', authenticateToken as any, async (req: AuthenticatedRequ
 /**
  * POST /api/mdt/calls/:id/assign - Назначить юниты на вызов
  */
-router.post('/calls/:id/assign', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/calls/:id/assign', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const callId = req.params.id;
     if (!callId) {
@@ -430,7 +455,7 @@ router.post('/calls/:id/assign', authenticateToken as any, async (req: Authentic
 /**
  * PUT /api/mdt/calls/:id/status - Обновить статус вызова
  */
-router.put('/calls/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/calls/:id/status', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const callId = req.params.id;
     if (!callId) {
@@ -448,7 +473,7 @@ router.put('/calls/:id/status', authenticateToken as any, async (req: Authentica
       });
     }
 
-    const call = await mdtService.updateCallStatus(callId, status);
+    const call: MDTCalls = await mdtService.updateCallStatus(callId, status);
     res.json({ success: true, data: call });
   } catch (error) {
     console.error('Error updating call status:', error);
@@ -464,9 +489,9 @@ router.put('/calls/:id/status', authenticateToken as any, async (req: Authentica
 /**
  * GET /api/mdt/signals - Получить активные сигналы
  */
-router.get('/signals', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/signals', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const signals = await mdtService.getActiveSignals();
+    const signals: MDTSignals[] = await mdtService.getActiveSignals();
     res.json({ success: true, data: signals });
   } catch (error) {
     console.error('Error fetching signals:', error);
@@ -480,13 +505,20 @@ router.get('/signals', authenticateToken as any, async (req: AuthenticatedReques
 /**
  * POST /api/mdt/signals - Создать новый сигнал
  */
-router.post('/signals', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/signals', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createSignalSchema.parse(req.body);
     
-    const signal = await mdtService.createSignal({
-      ...validatedData,
-      authorCharacterId: req.user!.id
+    const signal: MDTSignals = await mdtService.createSignal({
+      title: validatedData.title!,
+      description: validatedData.description,
+      type: validatedData.type,
+      authorCharacterId: req.user!.id,
+      priority: validatedData.priority,
+      location: validatedData.location,
+      coordinates: validatedData.coordinates,
+      isActive: validatedData.isActive,
+      expiresAt: validatedData.expiresAt
     });
 
     res.status(201).json({ success: true, data: signal });
@@ -509,7 +541,7 @@ router.post('/signals', authenticateToken as any, async (req: AuthenticatedReque
 /**
  * PUT /api/mdt/signals/:id - Обновить сигнал
  */
-router.put('/signals/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/signals/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const signalId = req.params.id;
     if (!signalId) {
@@ -521,7 +553,7 @@ router.put('/signals/:id', authenticateToken as any, async (req: AuthenticatedRe
 
     const validatedData = updateSignalSchema.parse(req.body);
     
-    const signal = await mdtService.updateSignal(signalId, validatedData);
+    const signal: MDTSignals = await mdtService.updateSignal(signalId, validatedData);
     res.json({ success: true, data: signal });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -542,7 +574,7 @@ router.put('/signals/:id', authenticateToken as any, async (req: AuthenticatedRe
 /**
  * DELETE /api/mdt/signals/:id - Отозвать сигнал
  */
-router.delete('/signals/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/signals/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const signalId = req.params.id;
     if (!signalId) {
@@ -566,7 +598,7 @@ router.delete('/signals/:id', authenticateToken as any, async (req: Authenticate
 /**
  * POST /api/mdt/signals/:id/notify - Отправить уведомления о сигнале
  */
-router.post('/signals/:id/notify', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/signals/:id/notify', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const signalId = req.params.id;
     if (!signalId) {
@@ -592,7 +624,7 @@ router.post('/signals/:id/notify', authenticateToken as any, async (req: Authent
 /**
  * GET /api/mdt/dashboard - Получить данные для дашборда MDT
  */
-router.get('/dashboard', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/dashboard', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const [units, calls, signals] = await Promise.all([
       mdtService.getActiveUnits(),
@@ -633,9 +665,9 @@ router.get('/dashboard', authenticateToken as any, async (req: AuthenticatedRequ
 /**
  * GET /api/mdt/notifications - Получить уведомления пользователя
  */
-router.get('/notifications', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/notifications', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const notifications = await mdtService.getNotifications(req.user!.id);
+    const notifications: MDTNotifications[] = await mdtService.getNotifications(req.user!.id);
     res.json({ success: true, data: notifications });
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -649,7 +681,7 @@ router.get('/notifications', authenticateToken as any, async (req: Authenticated
 /**
  * PUT /api/mdt/notifications/:id/read - Отметить уведомление как прочитанное
  */
-router.put('/notifications/:id/read', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/notifications/:id/read', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const notificationId = req.params.id;
     if (!notificationId) {
@@ -676,9 +708,9 @@ router.put('/notifications/:id/read', authenticateToken as any, async (req: Auth
 /**
  * GET /api/mdt/bolos - Получить все BOLO
  */
-router.get('/bolos', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/bolos', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const bolos = await mdtService.getBolos();
+    const bolos: MDTBolos[] = await mdtService.getBolos();
     res.json({ success: true, data: bolos });
   } catch (error) {
     console.error('Error fetching BOLOs:', error);
@@ -693,11 +725,21 @@ router.get('/bolos', authenticateToken as any, async (req: AuthenticatedRequest,
 /**
  * POST /api/mdt/bolos - Создать новый BOLO
  */
-router.post('/bolos', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/bolos', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const validatedData = createBoloSchema.parse(req.body);
     
-    const newBolo = await mdtService.createBolo(validatedData);
+    const newBolo: MDTBolos = await mdtService.createBolo({
+      type: validatedData.type!,
+      reason: validatedData.reason!,
+      subjectName: validatedData.subjectName,
+      subjectDescription: validatedData.subjectDescription,
+      vehicleDescription: validatedData.vehicleDescription,
+      vehiclePlate: validatedData.vehiclePlate,
+      location: validatedData.location,
+      priority: validatedData.priority,
+      authorCharacterId: validatedData.authorCharacterId!
+    });
 
     res.status(201).json({ 
       success: true, 
@@ -722,7 +764,7 @@ router.post('/bolos', authenticateToken as any, async (req: AuthenticatedRequest
 /**
  * PUT /api/mdt/bolos/:id - Обновить BOLO
  */
-router.put('/bolos/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/bolos/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const boloId = req.params.id;
     if (!boloId) {
@@ -733,7 +775,7 @@ router.put('/bolos/:id', authenticateToken as any, async (req: AuthenticatedRequ
     }
 
     const validatedData = updateBoloSchema.parse(req.body);
-    const updatedBolo = await mdtService.updateBolo(boloId, validatedData);
+    const updatedBolo: MDTBolos = await mdtService.updateBolo(boloId, validatedData);
 
     res.json({ success: true, data: updatedBolo });
   } catch (error) {
@@ -755,7 +797,7 @@ router.put('/bolos/:id', authenticateToken as any, async (req: AuthenticatedRequ
 /**
  * DELETE /api/mdt/bolos/:id - Удалить BOLO (soft delete)
  */
-router.delete('/bolos/:id', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/bolos/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const boloId = req.params.id;
     if (!boloId) {
@@ -782,9 +824,9 @@ router.delete('/bolos/:id', authenticateToken as any, async (req: AuthenticatedR
 /**
  * GET /api/mdt/calls/active - Получить только активные вызовы
  */
-router.get('/calls/active', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/calls/active', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const calls = await mdtService.getCalls();
+    const calls: MDTCalls[] = await mdtService.getCalls();
     const activeCalls = calls.filter(call => 
       ['pending', 'assigned', 'en_route', 'on_scene'].includes(call.status)
     );
@@ -801,9 +843,9 @@ router.get('/calls/active', authenticateToken as any, async (req: AuthenticatedR
 /**
  * GET /api/mdt/units/active - Получить только активные юниты
  */
-router.get('/units/active', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/units/active', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const units = await mdtService.getActiveUnits();
+    const units: UnitsOnDuty[] = await mdtService.getActiveUnits();
     res.json({ success: true, data: units });
   } catch (error) {
     console.error('Error fetching active units:', error);
@@ -817,9 +859,9 @@ router.get('/units/active', authenticateToken as any, async (req: AuthenticatedR
 /**
  * GET /api/mdt/bolos/active - Получить только активные BOLO
  */
-router.get('/bolos/active', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/bolos/active', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const bolos = await mdtService.getBolos();
+    const bolos: MDTBolos[] = await mdtService.getBolos();
     const activeBolos = bolos.filter(bolo => bolo.status === 'active');
     res.json({ success: true, data: activeBolos });
   } catch (error) {
@@ -834,7 +876,7 @@ router.get('/bolos/active', authenticateToken as any, async (req: AuthenticatedR
 /**
  * PATCH /api/mdt/units/:id/status - Обновить статус юнита (PATCH для совместимости с фронтендом)
  */
-router.patch('/units/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/units/:id/status', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const unitId = req.params.id;
     if (!unitId) {
@@ -852,7 +894,7 @@ router.patch('/units/:id/status', authenticateToken as any, async (req: Authenti
       });
     }
 
-    const unit = await mdtService.updateUnitStatus(unitId, status);
+    const unit: UnitsOnDuty = await mdtService.updateUnitStatus(unitId, status);
     res.json({ success: true, data: unit });
   } catch (error) {
     console.error('Error updating unit status:', error);
@@ -866,7 +908,7 @@ router.patch('/units/:id/status', authenticateToken as any, async (req: Authenti
 /**
  * PATCH /api/mdt/calls/:id/status - Обновить статус вызова (PATCH для совместимости с фронтендом)
  */
-router.patch('/calls/:id/status', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/calls/:id/status', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const callId = req.params.id;
     if (!callId) {
@@ -884,7 +926,7 @@ router.patch('/calls/:id/status', authenticateToken as any, async (req: Authenti
       });
     }
 
-    const call = await mdtService.updateCallStatus(callId, status);
+    const call: MDTCalls = await mdtService.updateCallStatus(callId, status);
     res.json({ success: true, data: call });
   } catch (error) {
     console.error('Error updating call status:', error);
@@ -898,7 +940,7 @@ router.patch('/calls/:id/status', authenticateToken as any, async (req: Authenti
 /**
  * POST /api/mdt/calls/:callId/assign - Назначить юнита на вызов (для совместимости с фронтендом)
  */
-router.post('/calls/:callId/assign', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/calls/:callId/assign', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const callId = req.params.callId;
     if (!callId) {
@@ -930,7 +972,7 @@ router.post('/calls/:callId/assign', authenticateToken as any, async (req: Authe
 /**
  * POST /api/mdt/notifications - Отправить уведомление
  */
-router.post('/notifications', authenticateToken as any, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/notifications', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { content, recipientUserId, link } = req.body;
     
@@ -941,7 +983,7 @@ router.post('/notifications', authenticateToken as any, async (req: Authenticate
       });
     }
 
-    const notification = await mdtService.createNotification({
+    const notification: MDTNotifications = await mdtService.createNotification({
       content,
       recipientUserId,
       link

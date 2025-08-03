@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
-import { TransferRequest, User, RequestStatus } from '../types';
+import { TransferRequest, LocalUser, RequestStatus } from '../types';
 import ArrowRightIcon from './icons/ArrowRightIcon';
 
 const SupervisorDashboard = () => {
@@ -17,7 +17,7 @@ const SupervisorDashboard = () => {
         (req) => req.fromDepartment === currentUser.department && (req.status === RequestStatus.SENT || req.status === RequestStatus.REVIEWING)
     );
 
-    const getUserById = (id: number): User | undefined => users.find(u => u.id === id);
+    const getUserById = (id: number): LocalUser | undefined => users.find(u => u.id === id);
 
     const handleApprove = (requestId: number) => {
         decideOnRequest(requestId, RequestStatus.APPROVED);

@@ -1,515 +1,312 @@
-import { SupabaseStorage } from './SupabaseStorage';
-import { 
-  SupportTicket, 
-  InsertSupportTicket, 
-  UpdateSupportTicket,
-  User
-} from '@roleplay-identity/shared-types';
+import { supabase } from '../lib/supabase.js';
+import type { Database } from '../../../packages/db-types/src/index';
 
+// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
+type SupportTicket = Database['mdt']['Tables']['support_tickets']['Row'];
+type SupportTicketInsert = Database['mdt']['Tables']['support_tickets']['Insert'];
+type SupportTicketUpdate = Database['mdt']['Tables']['support_tickets']['Update'];
+
+// ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
+export interface TicketMessage {
+  senderId: string;
+  content: string;
+  senderRole: string;
+  timestamp?: Date;
+}
+
+export interface TicketReplyData {
+  senderId: string;
+  content: string;
+  senderRole: string;
+}
+
+// ===== СОВРЕМЕННЫЙ SUPPORT TICKET SERVICE =====
 export class SupportTicketService {
-  private storage: SupabaseStorage;
+  
+  // ===== ПОЛУЧЕНИЕ ТИКЕТА ПО ID =====
+  async getTicketById(ticketId: string): Promise<SupportTicket | null> {
+    try {
+      const { data: ticket, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('id', ticketId) // ✅ UUID как string
+        .single();
 
-  constructor(storage: SupabaseStorage) {
-    this.storage = storage;
+      if (error || !ticket) {
+        return null;
+      }
+
+      return ticket;
+    } catch (error) {
+      console.error('[SupportTicketService] Error getting ticket:', error);
+      return null;
+    }
   }
 
-  // ===========================================
-  // ОСНОВНЫЕ ОПЕРАЦИИ
-  // ===========================================
+  // ===== ПОЛУЧЕНИЕ ТИКЕТОВ ПОЛЬЗОВАТЕЛЯ =====
+  async getUserTickets(userId: string): Promise<SupportTicket[]> {
+    try {
+      const { data: tickets, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('author_user_id', userId) // ✅ UUID как string
+        .order('created_at', { ascending: false });
 
-  async createTicket(data: InsertSupportTicket): Promise<SupportTicket> {
-    return this.storage.insert('support_tickets', data);
+      if (error) {
+        console.error('[SupportTicketService] Error getting user tickets:', error);
+        return [];
+      }
+
+      return tickets || [];
+    } catch (error) {
+      console.error('[SupportTicketService] Error getting user tickets:', error);
+      return [];
+    }
   }
 
-  async getTicketById(id: string): Promise<SupportTicket | null> {
-    return this.storage.getById('support_tickets', id);
-  }
-
+  // ===== ПОЛУЧЕНИЕ ВСЕХ ТИКЕТОВ (ДЛЯ АДМИНОВ) =====
   async getAllTickets(): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets');
-  }
+    try {
+      const { data: tickets, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  async getTicketsByUser(userId: string): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets', { userId });
-  }
+      if (error) {
+        console.error('[SupportTicketService] Error getting all tickets:', error);
+        return [];
+      }
 
-  async getTicketsByStatus(status: SupportTicket['status']): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets', { status });
-  }
-
-  async getTicketsByPriority(priority: SupportTicket['priority']): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets', { priority });
-  }
-
-  async getOpenTickets(): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets', { 
-      status: { in: ['open', 'in_progress'] }
-    });
-  }
-
-  async updateTicket(id: string, data: UpdateSupportTicket): Promise<SupportTicket> {
-    return this.storage.update('support_tickets', id, data);
-  }
-
-  async deleteTicket(id: string): Promise<void> {
-    await this.storage.delete('support_tickets', id);
-  }
-
-  // ===========================================
-  // БИЗНЕС-ЛОГИКА
-  // ===========================================
-
-  async submitTicket(data: InsertSupportTicket): Promise<SupportTicket> {
-    // Проверяем, что пользователь существует
-    const user = await this.storage.getById('users', data.userId);
-    if (!user || !user.isActive) {
-      throw new Error('Пользователь не найден или неактивен');
+      return tickets || [];
+    } catch (error) {
+      console.error('[SupportTicketService] Error getting all tickets:', error);
+      return [];
     }
+  }
 
-    // Проверяем, нет ли уже открытого тикета у пользователя с таким же заголовком
-    const existingTickets = await this.storage.list('support_tickets', {
-      userId: data.userId,
-      title: data.title,
-      status: { in: ['open', 'in_progress'] }
-    });
+  // ===== СОЗДАНИЕ НОВОГО ТИКЕТА =====
+  async createTicket(userId: string, title: string): Promise<SupportTicket | null> {
+    try {
+      const ticketData: SupportTicketInsert = {
+        author_user_id: userId, // ✅ UUID как string
+        title,
+        status: 'open',
+        messages: []
+      };
 
-    if (existingTickets.length > 0) {
-      throw new Error('У вас уже есть открытый тикет с таким заголовком');
+      const { data: ticket, error } = await supabase
+        .from('support_tickets')
+        .insert(ticketData)
+        .select()
+        .single();
+
+      if (error || !ticket) {
+        console.error('[SupportTicketService] Error creating ticket:', error);
+        return null;
+      }
+
+      return ticket;
+    } catch (error) {
+      console.error('[SupportTicketService] Error creating ticket:', error);
+      return null;
     }
-
-    return this.createTicket(data);
   }
 
-  async assignTicket(ticketId: string, assignedTo: string): Promise<SupportTicket> {
-    const ticket = await this.getTicketById(ticketId);
-    if (!ticket) {
-      throw new Error('Тикет не найден');
+  // ===== ОТВЕТ НА ТИКЕТ =====
+  async replyToTicket(ticketId: string, replyData: TicketReplyData): Promise<SupportTicket | null> {
+    try {
+      // Получаем текущий тикет
+      const currentTicket = await this.getTicketById(ticketId);
+      if (!currentTicket) {
+        return null;
+      }
+
+      // Создаем новое сообщение
+      const newMessage: TicketMessage = {
+        senderId: replyData.senderId,
+        content: replyData.content,
+        senderRole: replyData.senderRole,
+        timestamp: new Date()
+      };
+
+      // Обновляем сообщения тикета
+      const currentMessages = Array.isArray(currentTicket.messages) 
+        ? currentTicket.messages 
+        : [];
+
+      const updatedMessages = [...currentMessages, newMessage];
+
+      // Определяем новый статус
+      const newStatus = currentTicket.status === 'closed' ? 'open' : currentTicket.status;
+
+      // Обновляем тикет
+      const updateData: SupportTicketUpdate = {
+        status: newStatus,
+        messages: updatedMessages,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: updatedTicket, error } = await supabase
+        .from('support_tickets')
+        .update(updateData)
+        .eq('id', ticketId) // ✅ UUID как string
+        .select()
+        .single();
+
+      if (error || !updatedTicket) {
+        console.error('[SupportTicketService] Error updating ticket:', error);
+        return null;
+      }
+
+      return updatedTicket;
+    } catch (error) {
+      console.error('[SupportTicketService] Error replying to ticket:', error);
+      return null;
     }
+  }
 
-    // Проверяем, что назначенный пользователь существует и имеет права поддержки
-    const assignedUser = await this.storage.getById('users', assignedTo);
-    if (!assignedUser || !assignedUser.isActive) {
-      throw new Error('Назначенный пользователь не найден или неактивен');
+  // ===== ОБНОВЛЕНИЕ СТАТУСА ТИКЕТА =====
+  async updateTicketStatus(ticketId: string, status: string): Promise<SupportTicket | null> {
+    try {
+      const updateData: SupportTicketUpdate = {
+        status,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: updatedTicket, error } = await supabase
+        .from('support_tickets')
+        .update(updateData)
+        .eq('id', ticketId) // ✅ UUID как string
+        .select()
+        .single();
+
+      if (error || !updatedTicket) {
+        console.error('[SupportTicketService] Error updating ticket status:', error);
+        return null;
+      }
+
+      return updatedTicket;
+    } catch (error) {
+      console.error('[SupportTicketService] Error updating ticket status:', error);
+      return null;
     }
-
-    return this.updateTicket(ticketId, { 
-      assignedTo,
-      status: 'in_progress'
-    });
   }
 
-  async updateTicketStatus(
-    ticketId: string, 
-    status: SupportTicket['status'],
-    resolvedBy?: string
-  ): Promise<SupportTicket> {
-    const ticket = await this.getTicketById(ticketId);
-    if (!ticket) {
-      throw new Error('Тикет не найден');
+  // ===== НАЗНАЧЕНИЕ ОБРАБОТЧИКА ТИКЕТА =====
+  async assignTicketHandler(ticketId: string, handlerId: string): Promise<SupportTicket | null> {
+    try {
+      const updateData: SupportTicketUpdate = {
+        handler_user_id: handlerId, // ✅ UUID как string
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: updatedTicket, error } = await supabase
+        .from('support_tickets')
+        .update(updateData)
+        .eq('id', ticketId) // ✅ UUID как string
+        .select()
+        .single();
+
+      if (error || !updatedTicket) {
+        console.error('[SupportTicketService] Error assigning ticket handler:', error);
+        return null;
+      }
+
+      return updatedTicket;
+    } catch (error) {
+      console.error('[SupportTicketService] Error assigning ticket handler:', error);
+      return null;
     }
+  }
 
-    const updateData: UpdateSupportTicket = { status };
+  // ===== ПОЛУЧЕНИЕ ТИКЕТОВ ПО СТАТУСУ =====
+  async getTicketsByStatus(status: string): Promise<SupportTicket[]> {
+    try {
+      const { data: tickets, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('status', status)
+        .order('created_at', { ascending: false });
 
-    if (status === 'resolved' || status === 'closed') {
-      updateData.resolvedAt = new Date().toISOString();
+      if (error) {
+        console.error('[SupportTicketService] Error getting tickets by status:', error);
+        return [];
+      }
+
+      return tickets || [];
+    } catch (error) {
+      console.error('[SupportTicketService] Error getting tickets by status:', error);
+      return [];
     }
-
-    return this.updateTicket(ticketId, updateData);
   }
 
-  async resolveTicket(ticketId: string, resolvedBy: string): Promise<SupportTicket> {
-    return this.updateTicketStatus(ticketId, 'resolved', resolvedBy);
-  }
+  // ===== ПОЛУЧЕНИЕ ТИКЕТОВ ОБРАБОТЧИКА =====
+  async getHandlerTickets(handlerId: string): Promise<SupportTicket[]> {
+    try {
+      const { data: tickets, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('handler_user_id', handlerId) // ✅ UUID как string
+        .order('created_at', { ascending: false });
 
-  async closeTicket(ticketId: string): Promise<SupportTicket> {
-    return this.updateTicketStatus(ticketId, 'closed');
-  }
+      if (error) {
+        console.error('[SupportTicketService] Error getting handler tickets:', error);
+        return [];
+      }
 
-  async reopenTicket(ticketId: string): Promise<SupportTicket> {
-    const ticket = await this.getTicketById(ticketId);
-    if (!ticket) {
-      throw new Error('Тикет не найден');
+      return tickets || [];
+    } catch (error) {
+      console.error('[SupportTicketService] Error getting handler tickets:', error);
+      return [];
     }
+  }
 
-    if (ticket.status !== 'resolved' && ticket.status !== 'closed') {
-      throw new Error('Тикет не может быть повторно открыт');
+  // ===== УДАЛЕНИЕ ТИКЕТА =====
+  async deleteTicket(ticketId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .delete()
+        .eq('id', ticketId); // ✅ UUID как string
+
+      if (error) {
+        console.error('[SupportTicketService] Error deleting ticket:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('[SupportTicketService] Error deleting ticket:', error);
+      return false;
     }
-
-    return this.updateTicket(ticketId, { 
-      status: 'open',
-      resolvedAt: undefined
-    });
   }
 
-  async escalateTicket(ticketId: string, newPriority: SupportTicket['priority']): Promise<SupportTicket> {
-    const ticket = await this.getTicketById(ticketId);
-    if (!ticket) {
-      throw new Error('Тикет не найден');
-    }
-
-    if (newPriority === ticket.priority) {
-      throw new Error('Приоритет уже установлен на этот уровень');
-    }
-
-    return this.updateTicket(ticketId, { priority: newPriority });
-  }
-
-  // ===========================================
-  // ПОИСК И ФИЛЬТРАЦИЯ
-  // ===========================================
-
-  async searchTickets(query: string): Promise<SupportTicket[]> {
-    return this.storage.search('support_tickets', query, ['title', 'description']);
-  }
-
-  async getTicketsByAssignee(assignedTo: string): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets', { assignedTo });
-  }
-
-  async getTicketsByDateRange(startDate: string, endDate: string): Promise<SupportTicket[]> {
-    return this.storage.list('support_tickets', {
-      createdAt: { gte: startDate, lte: endDate }
-    });
-  }
-
-  async getTicketsWithDetails(): Promise<(SupportTicket & {
-    user: User;
-    assignee?: User;
-  })[]> {
-    const tickets = await this.getAllTickets();
-    
-    const ticketsWithDetails = await Promise.all(
-      tickets.map(async (ticket) => {
-        const [user, assignee] = await Promise.all([
-          this.storage.getById('users', ticket.userId),
-          ticket.assignedTo ? this.storage.getById('users', ticket.assignedTo) : null
-        ]);
-
-        return {
-          ...ticket,
-          user: user!,
-          assignee: assignee || undefined
-        };
-      })
-    );
-
-    return ticketsWithDetails;
-  }
-
-  async getTicketWithDetails(id: string): Promise<(SupportTicket & {
-    user: User;
-    assignee?: User;
-  }) | null> {
-    const ticket = await this.getTicketById(id);
-    if (!ticket) return null;
-
-    const [user, assignee] = await Promise.all([
-      this.storage.getById('users', ticket.userId),
-      ticket.assignedTo ? this.storage.getById('users', ticket.assignedTo) : null
-    ]);
-
-    return {
-      ...ticket,
-      user: user!,
-      assignee: assignee || undefined
-    };
-  }
-
-  // ===========================================
-  // СТАТИСТИКА
-  // ===========================================
-
+  // ===== ПОЛУЧЕНИЕ СТАТИСТИКИ ТИКЕТОВ =====
   async getTicketStats(): Promise<{
     total: number;
     open: number;
-    inProgress: number;
-    resolved: number;
     closed: number;
-    byPriority: Record<SupportTicket['priority'], number>;
-    byStatus: Record<SupportTicket['status'], number>;
+    assigned: number;
   }> {
-    const [total, open, inProgress, resolved, closed] = await Promise.all([
-      this.storage.count('support_tickets'),
-      this.storage.count('support_tickets', { status: 'open' }),
-      this.storage.count('support_tickets', { status: 'in_progress' }),
-      this.storage.count('support_tickets', { status: 'resolved' }),
-      this.storage.count('support_tickets', { status: 'closed' })
-    ]);
+    try {
+      const { data: tickets, error } = await supabase
+        .from('support_tickets')
+        .select('status, handler_user_id');
 
-    const [low, medium, high, urgent] = await Promise.all([
-      this.storage.count('support_tickets', { priority: 'low' }),
-      this.storage.count('support_tickets', { priority: 'medium' }),
-      this.storage.count('support_tickets', { priority: 'high' }),
-      this.storage.count('support_tickets', { priority: 'urgent' })
-    ]);
-
-    return {
-      total,
-      open,
-      inProgress,
-      resolved,
-      closed,
-      byPriority: {
-        low,
-        medium,
-        high,
-        urgent
-      },
-      byStatus: {
-        open,
-        in_progress: inProgress,
-        resolved,
-        closed
+      if (error) {
+        console.error('[SupportTicketService] Error getting ticket stats:', error);
+        return { total: 0, open: 0, closed: 0, assigned: 0 };
       }
-    };
-  }
 
-  async getUserTicketStats(userId: string): Promise<{
-    total: number;
-    open: number;
-    inProgress: number;
-    resolved: number;
-    closed: number;
-    byPriority: Record<SupportTicket['priority'], number>;
-  }> {
-    const [total, open, inProgress, resolved, closed] = await Promise.all([
-      this.storage.count('support_tickets', { userId }),
-      this.storage.count('support_tickets', { userId, status: 'open' }),
-      this.storage.count('support_tickets', { userId, status: 'in_progress' }),
-      this.storage.count('support_tickets', { userId, status: 'resolved' }),
-      this.storage.count('support_tickets', { userId, status: 'closed' })
-    ]);
+      const total = tickets?.length || 0;
+      const open = tickets?.filter(t => t.status === 'open').length || 0;
+      const closed = tickets?.filter(t => t.status === 'closed').length || 0;
+      const assigned = tickets?.filter(t => t.handler_user_id).length || 0;
 
-    const [low, medium, high, urgent] = await Promise.all([
-      this.storage.count('support_tickets', { userId, priority: 'low' }),
-      this.storage.count('support_tickets', { userId, priority: 'medium' }),
-      this.storage.count('support_tickets', { userId, priority: 'high' }),
-      this.storage.count('support_tickets', { userId, priority: 'urgent' })
-    ]);
-
-    return {
-      total,
-      open,
-      inProgress,
-      resolved,
-      closed,
-      byPriority: {
-        low,
-        medium,
-        high,
-        urgent
-      }
-    };
-  }
-
-  async getAssigneeTicketStats(assignedTo: string): Promise<{
-    total: number;
-    open: number;
-    inProgress: number;
-    resolved: number;
-    closed: number;
-    averageResolutionTime: number;
-  }> {
-    const [total, open, inProgress, resolved, closed] = await Promise.all([
-      this.storage.count('support_tickets', { assignedTo }),
-      this.storage.count('support_tickets', { assignedTo, status: 'open' }),
-      this.storage.count('support_tickets', { assignedTo, status: 'in_progress' }),
-      this.storage.count('support_tickets', { assignedTo, status: 'resolved' }),
-      this.storage.count('support_tickets', { assignedTo, status: 'closed' })
-    ]);
-
-    // Расчет среднего времени решения
-    const resolvedTickets = await this.storage.list('support_tickets', {
-      assignedTo,
-      status: 'resolved'
-    });
-
-    let totalResolutionTime = 0;
-    let resolvedCount = 0;
-
-    resolvedTickets.forEach(ticket => {
-      if (ticket.resolvedAt) {
-        const created = new Date(ticket.createdAt);
-        const resolved = new Date(ticket.resolvedAt);
-        totalResolutionTime += resolved.getTime() - created.getTime();
-        resolvedCount++;
-      }
-    });
-
-    const averageResolutionTime = resolvedCount > 0 ? totalResolutionTime / resolvedCount : 0;
-
-    return {
-      total,
-      open,
-      inProgress,
-      resolved,
-      closed,
-      averageResolutionTime
-    };
-  }
-
-  async getTicketActivity(days: number = 30): Promise<{
-    created: number;
-    resolved: number;
-    byPriority: Record<SupportTicket['priority'], number>;
-    averageResolutionTime: number;
-  }> {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-
-    const tickets = await this.getTicketsByDateRange(startDate.toISOString(), new Date().toISOString());
-
-    const byPriority = {
-      low: 0,
-      medium: 0,
-      high: 0,
-      urgent: 0
-    };
-
-    let totalResolutionTime = 0;
-    let resolvedCount = 0;
-
-    tickets.forEach(ticket => {
-      byPriority[ticket.priority]++;
-
-      if (ticket.status === 'resolved' && ticket.resolvedAt) {
-        const created = new Date(ticket.createdAt);
-        const resolved = new Date(ticket.resolvedAt);
-        totalResolutionTime += resolved.getTime() - created.getTime();
-        resolvedCount++;
-      }
-    });
-
-    const averageResolutionTime = resolvedCount > 0 ? totalResolutionTime / resolvedCount : 0;
-
-    return {
-      created: tickets.length,
-      resolved: resolvedCount,
-      byPriority,
-      averageResolutionTime
-    };
-  }
-
-  // ===========================================
-  // АВТОМАТИЗАЦИЯ
-  // ===========================================
-
-  async autoAssignTickets(): Promise<void> {
-    const unassignedTickets = await this.storage.list('support_tickets', {
-      assignedTo: null,
-      status: { in: ['open', 'in_progress'] }
-    });
-
-    // Получаем всех пользователей с правами поддержки
-    const supportUsers = await this.storage.list('users', {
-      role: { in: ['Admin', 'Dispatch'] },
-      isActive: true
-    });
-
-    if (supportUsers.length === 0) {
-      return; // Нет доступных пользователей поддержки
-    }
-
-    // Простое распределение по кругу
-    for (let i = 0; i < unassignedTickets.length; i++) {
-      const assignee = supportUsers[i % supportUsers.length];
-      await this.assignTicket(unassignedTickets[i].id, assignee.id);
+      return { total, open, closed, assigned };
+    } catch (error) {
+      console.error('[SupportTicketService] Error getting ticket stats:', error);
+      return { total: 0, open: 0, closed: 0, assigned: 0 };
     }
   }
-
-  async escalateOverdueTickets(hours: number = 24): Promise<void> {
-    const cutoffTime = new Date();
-    cutoffTime.setHours(cutoffTime.getHours() - hours);
-
-    const overdueTickets = await this.storage.list('support_tickets', {
-      status: { in: ['open', 'in_progress'] },
-      createdAt: { lt: cutoffTime.toISOString() }
-    });
-
-    for (const ticket of overdueTickets) {
-      if (ticket.priority !== 'urgent') {
-        const newPriority = ticket.priority === 'low' ? 'medium' : 
-                          ticket.priority === 'medium' ? 'high' : 'urgent';
-        await this.escalateTicket(ticket.id, newPriority);
-      }
-    }
-  }
-
-  // ===========================================
-  // УВЕДОМЛЕНИЯ
-  // ===========================================
-
-  async notifyTicketUpdate(ticketId: string, action: string): Promise<void> {
-    const ticket = await this.getTicketWithDetails(ticketId);
-    if (!ticket) return;
-
-    // Здесь можно добавить логику отправки уведомлений
-    // Например, через NotificationService
-    console.log(`Уведомление: Тикет ${ticket.id} - ${action}`);
-  }
-
-  // ===========================================
-  // ЭКСПОРТ И АНАЛИТИКА
-  // ===========================================
-
-  async exportTicketData(filters?: {
-    status?: SupportTicket['status'];
-    priority?: SupportTicket['priority'];
-    userId?: string;
-    assignedTo?: string;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<SupportTicket[]> {
-    let query: any = {};
-
-    if (filters?.status) query.status = filters.status;
-    if (filters?.priority) query.priority = filters.priority;
-    if (filters?.userId) query.userId = filters.userId;
-    if (filters?.assignedTo) query.assignedTo = filters.assignedTo;
-    if (filters?.startDate || filters?.endDate) {
-      query.createdAt = {};
-      if (filters.startDate) query.createdAt.gte = filters.startDate;
-      if (filters.endDate) query.createdAt.lte = filters.endDate;
-    }
-
-    return this.storage.list('support_tickets', query);
-  }
-
-  async getTicketTrends(days: number = 30): Promise<{
-    dailyCreated: Record<string, number>;
-    dailyResolved: Record<string, number>;
-    averageDailyCreated: number;
-    averageDailyResolved: number;
-  }> {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-
-    const tickets = await this.getTicketsByDateRange(startDate.toISOString(), new Date().toISOString());
-
-    const dailyCreated: Record<string, number> = {};
-    const dailyResolved: Record<string, number> = {};
-
-    tickets.forEach(ticket => {
-      const createdDate = new Date(ticket.createdAt).toISOString().split('T')[0];
-      dailyCreated[createdDate] = (dailyCreated[createdDate] || 0) + 1;
-
-      if (ticket.status === 'resolved' && ticket.resolvedAt) {
-        const resolvedDate = new Date(ticket.resolvedAt).toISOString().split('T')[0];
-        dailyResolved[resolvedDate] = (dailyResolved[resolvedDate] || 0) + 1;
-      }
-    });
-
-    const totalCreated = Object.values(dailyCreated).reduce((sum, count) => sum + count, 0);
-    const totalResolved = Object.values(dailyResolved).reduce((sum, count) => sum + count, 0);
-
-    return {
-      dailyCreated,
-      dailyResolved,
-      averageDailyCreated: totalCreated / days,
-      averageDailyResolved: totalResolved / days
-    };
-  }
-}
-
-// Экспортируем единственный экземпляр
-export const supportTicketService = new SupportTicketService(new SupabaseStorage()); 
+} 

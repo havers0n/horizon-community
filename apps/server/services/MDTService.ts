@@ -808,6 +808,34 @@ export class MDTService {
     }
   }
 
+  /**
+   * Отправить уведомления о сигнале
+   */
+  async notifySignal(signalId: string): Promise<void> {
+    try {
+      // Получаем информацию о сигнале
+      const signal = await this.getSignalById(signalId);
+      if (!signal) {
+        throw new Error('Signal not found');
+      }
+
+      // Получаем всех активных юнитов
+      const units = await this.getActiveUnits();
+
+      // Отправляем уведомления всем юнитам
+      for (const unit of units) {
+        await this.createNotification({
+          content: `Новый сигнал: ${signal.title}`,
+          recipientUserId: unit.user_id,
+          link: `/mdt/signals/${signalId}`
+        });
+      }
+    } catch (error) {
+      console.error('Error notifying signal:', error);
+      throw new Error('Failed to notify signal');
+    }
+  }
+
   // ===== УПРАВЛЕНИЕ УВЕДОМЛЕНИЯМИ =====
 
   /**

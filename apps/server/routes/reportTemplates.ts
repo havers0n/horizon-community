@@ -1,11 +1,14 @@
 import express from 'express';
-import { pool } from '../db/index.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+import { authenticateToken, requireAnyRole, AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import { reportTemplateService } from '../services/ReportTemplateService.js';
+import type { Database } from '../../../packages/db-types/src/index';
+
+type ReportTemplate = Database['mdt']['Tables']['report_templates']['Row'];
 
 const router: import('express').Router = express.Router();
 
 // Получить все шаблоны (с фильтрацией)
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { 
       category, 
@@ -18,59 +21,19 @@ router.get('/', authenticateToken, async (req, res) => {
       offset = 0
     } = req.query;
 
-    let whereConditions = ['is_active = true'];
-    let params: any[] = [];
-    let paramIndex = 1;
+    const filters = {
+      category: category as string,
+      subcategory: subcategory as string,
+      difficulty: difficulty as string,
+      departmentId: departmentId as string,
+      search: search as string,
+      tags: Array.isArray(tags) ? tags as string[] : undefined,
+      limit: parseInt(limit as string) || 50,
+      offset: parseInt(offset as string) || 0
+    };
 
-    // Фильтр по категории
-    if (category && category !== 'all') {
-      whereConditions.push(`category = $${paramIndex++}`);
-      params.push(category);
-    }
-
-    // Фильтр по подкатегории
-    if (subcategory) {
-      whereConditions.push(`subcategory = $${paramIndex++}`);
-      params.push(subcategory);
-    }
-
-    // Фильтр по сложности
-    if (difficulty && difficulty !== 'all') {
-      whereConditions.push(`difficulty = $${paramIndex++}`);
-      params.push(difficulty);
-    }
-
-    // Фильтр по департаменту
-    if (departmentId) {
-      whereConditions.push(`department_id = $${paramIndex++}`);
-      params.push(parseInt(departmentId as string));
-    }
-
-    // Поиск по тексту
-    if (search) {
-      whereConditions.push(`(title ILIKE $${paramIndex} OR body ILIKE $${paramIndex})`);
-      params.push(`%${search}%`);
-      paramIndex++;
-    }
-
-    // Фильтр по тегам
-    if (tags && Array.isArray(tags)) {
-      const tagConditions = tags.map(tag => {
-        whereConditions.push(`tags ILIKE $${paramIndex++}`);
-        params.push(`%${tag}%`);
-      });
-    }
-
-    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
-
-    const templates = await pool.query(`
-      SELECT * FROM report_templates 
-      ${whereClause}
-      ORDER BY created_at 
-      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
-    `, [...params, parseInt(limit as string), parseInt(offset as string)]);
-
-    res.json(templates.rows);
+    const templates = await reportTemplateService.getReportTemplates(filters);
+    res.json(templates);
   } catch (error) {
     console.error('Error fetching templates:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -78,19 +41,16 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // Получить шаблон по ID
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query(
-      'SELECT * FROM report_templates WHERE id = $1',
-      [parseInt(id)]
-    );
+    const template = await reportTemplateService.getReportTemplateById(id);
 
-    if (result.rows.length === 0) {
+    if (!template) {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    res.json(result.rows[0]);
+    res.json(template);
   } catch (error) {
     console.error('Error fetching template:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -98,11 +58,11 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // Создать новый шаблон (только для admin и supervisor)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, requireAnyRole(['admin', 'supervisor']), async (req: AuthenticatedRequest, res) => {
   try {
     const user = req.user;
-    if (!user || (user.role !== 'admin' && user.role !== 'supervisor')) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!user) {
+      return res.status(401).json({ error: 'Authentication required' });
     }
 
     const {
@@ -124,33 +84,27 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Title and body are required' });
     }
 
-    const result = await pool.query(
-      `
-        INSERT INTO report_templates (
-          title, body, department_id, category, subcategory, purpose, who_fills, when_used,
-          difficulty, estimated_time, required_fields, tags, created_by, is_active
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-        RETURNING *
-      `,
-      [
-        title,
-        body,
-        departmentId || null,
-        category,
-        subcategory || null,
-        purpose || null,
-        whoFills || null,
-        whenUsed || null,
-        difficulty,
-        estimatedTime,
-        requiredFields,
-        tags,
-        user.id,
-        true
-      ]
-    );
+    // Получаем character_id пользователя (пока используем user.id как fallback)
+    const createdByCharacterId = user.id; // TODO: Получить character_id из профиля пользователя
 
-    res.status(201).json(result.rows[0]);
+    const templateData = {
+      title,
+      body,
+      department_id: departmentId || null,
+      category,
+      subcategory: subcategory || null,
+      purpose: purpose || null,
+      who_fills: whoFills || null,
+      when_used: whenUsed || null,
+      difficulty,
+      estimated_time: estimatedTime,
+      required_fields: requiredFields,
+      tags,
+      instructions: null // Добавляем поле instructions если нужно
+    };
+
+    const template = await reportTemplateService.createReportTemplate(templateData, createdByCharacterId);
+    res.status(201).json(template);
   } catch (error) {
     console.error('Error creating template:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -158,13 +112,8 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Обновить шаблон (только для admin и supervisor)
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, requireAnyRole(['admin', 'supervisor']), async (req: AuthenticatedRequest, res) => {
   try {
-    const user = req.user;
-    if (!user || (user.role !== 'admin' && user.role !== 'supervisor')) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
     const { id } = req.params;
     const {
       title,
@@ -186,39 +135,30 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Title and body are required' });
     }
 
-    const result = await pool.query(
-      `
-        UPDATE report_templates
-        SET
-          title = $1, body = $2, department_id = $3, category = $4, subcategory = $5,
-          purpose = $6, who_fills = $7, when_used = $8, difficulty = $9, estimated_time = $10,
-          required_fields = $11, tags = $12, is_active = $13, updated_at = NOW()
-        WHERE id = $14
-        RETURNING *
-      `,
-      [
-        title,
-        body,
-        departmentId || null,
-        category,
-        subcategory || null,
-        purpose || null,
-        whoFills || null,
-        whenUsed || null,
-        difficulty,
-        estimatedTime,
-        requiredFields,
-        tags,
-        isActive,
-        parseInt(id)
-      ]
-    );
+    const updateData = {
+      title,
+      body,
+      department_id: departmentId || null,
+      category,
+      subcategory: subcategory || null,
+      purpose: purpose || null,
+      who_fills: whoFills || null,
+      when_used: whenUsed || null,
+      difficulty,
+      estimated_time: estimatedTime,
+      required_fields: requiredFields,
+      tags,
+      is_active: isActive,
+      instructions: null // Добавляем поле instructions если нужно
+    };
 
-    if (result.rows.length === 0) {
+    const template = await reportTemplateService.updateReportTemplate(id, updateData);
+
+    if (!template) {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    res.json(result.rows[0]);
+    res.json(template);
   } catch (error) {
     console.error('Error updating template:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -226,20 +166,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 // Удалить шаблон (только для admin)
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, requireAnyRole(['admin']), async (req: AuthenticatedRequest, res) => {
   try {
-    const user = req.user;
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
     const { id } = req.params;
-    const result = await pool.query(
-      'DELETE FROM report_templates WHERE id = $1 RETURNING *',
-      [parseInt(id)]
-    );
+    const success = await reportTemplateService.deleteReportTemplate(id);
 
-    if (result.rows.length === 0) {
+    if (!success) {
       return res.status(404).json({ error: 'Template not found' });
     }
 
@@ -251,44 +183,10 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 // Получить статистику шаблонов
-router.get('/stats/overview', authenticateToken, async (req, res) => {
+router.get('/stats/overview', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        COUNT(*) AS total,
-        COUNT(CASE WHEN is_active = true THEN 1 END) AS active,
-        COUNT(CASE WHEN is_active = false THEN 1 END) AS inactive
-      FROM report_templates
-    `);
-
-    const total = parseInt(result.rows[0].total);
-    const active = parseInt(result.rows[0].active);
-    const inactive = parseInt(result.rows[0].inactive);
-    
-    const categoryStats: Record<string, number> = {};
-    const difficultyStats: Record<string, number> = {};
-
-    const categoryResult = await pool.query(`
-      SELECT category, COUNT(*) FROM report_templates GROUP BY category
-    `);
-    categoryResult.rows.forEach(row => {
-      categoryStats[row.category] = parseInt(row.count);
-    });
-
-    const difficultyResult = await pool.query(`
-      SELECT difficulty, COUNT(*) FROM report_templates GROUP BY difficulty
-    `);
-    difficultyResult.rows.forEach(row => {
-      difficultyStats[row.difficulty] = parseInt(row.count);
-    });
-
-    res.json({
-      total,
-      active,
-      inactive,
-      byCategory: categoryStats,
-      byDifficulty: difficultyStats
-    });
+    const stats = await reportTemplateService.getReportTemplateStats();
+    res.json(stats);
   } catch (error) {
     console.error('Error fetching stats:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -296,28 +194,10 @@ router.get('/stats/overview', authenticateToken, async (req, res) => {
 });
 
 // Получить статистику по тегам
-router.get('/stats/tags', authenticateToken, async (req, res) => {
+router.get('/stats/tags', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const result = await pool.query(`
-      SELECT tags FROM report_templates WHERE is_active = true
-    `);
-
-    const tagCounts: Record<string, number> = {};
-    
-    result.rows.forEach(row => {
-      if (row.tags && Array.isArray(row.tags)) {
-        row.tags.forEach((tag: string) => {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-      }
-    });
-
-    const popularTags = Object.entries(tagCounts)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 20)
-      .map(([tag, count]) => ({ tag, count }));
-
-    res.json(popularTags);
+    const tagStats = await reportTemplateService.getReportTemplateTagStats();
+    res.json(tagStats);
   } catch (error) {
     console.error('Error fetching tag stats:', error);
     res.status(500).json({ error: 'Internal server error' });

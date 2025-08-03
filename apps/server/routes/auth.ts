@@ -1,39 +1,159 @@
-import { Express } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { users } from '@roleplay-identity/shared-schema';
-import { storage } from '../storage';
+import { Router } from 'express';
+import { authenticateToken } from '../middleware/auth.middleware';
+import type { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { AuthService } from '../services/AuthService';
+import { loginSchema, registerSchema } from '../types';
 
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const router = Router();
 
-export function authRoutes(app: Express) {
-  // POST /api/auth/register
-  app.post('/api/auth/register', async (req, res) => {
-    const { email, password, username } = req.body;
+// Инициализация сервиса
+const authService = new AuthService();
+
+// ===== РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ =====
+router.post('/register', async (req, res) => {
+  try {
+    // ✅ Валидация входных данных
+    const validatedData = registerSchema.parse(req.body);
     
-    // Создать пользователя в Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true
-    });
+    // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const result = await authService.registerUser(validatedData);
     
-    if (authError) return res.status(400).json({ error: authError.message });
-    
-    // Создать запись в таблице users
-    try {
-      await storage.createUser({
-        email,
-        username,
-        authId: authData.user.id,
-        passwordHash: '' // Больше не нужен
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error
       });
-    } catch (userError) {
-      return res.status(400).json({ error: (userError as Error).message });
     }
     
-    res.json({ user: authData.user });
-  });
-}
+    res.status(201).json({
+      success: true,
+      data: result.data
+    });
+  } catch (error) {
+    console.error('[AuthRoutes] Registration error:', error);
+    res.status(400).json({
+      success: false,
+      error: 'Invalid request data'
+    });
+  }
+});
+
+// ===== АВТОРИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ =====
+router.post('/login', async (req, res) => {
+  try {
+    // ✅ Валидация входных данных
+    const validatedData = loginSchema.parse(req.body);
+    
+    // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const result = await authService.loginUser(validatedData);
+    
+    if (!result.success) {
+      return res.status(401).json({
+        success: false,
+        error: result.error
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: result.data
+    });
+  } catch (error) {
+    console.error('[AuthRoutes] Login error:', error);
+    res.status(400).json({
+      success: false,
+      error: 'Invalid request data'
+    });
+  }
+});
+
+// ===== ПОЛУЧЕНИЕ ПРОФИЛЯ ПОЛЬЗОВАТЕЛЯ =====
+router.get('/me', authenticateToken, async (req: AuthenticatedRequest, res) => {
+  try {
+    const userId: string = req.user!.id; // ✅ UUID как string
+    
+    // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const profile = await authService.getUserProfile(userId);
+    
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        error: 'User profile not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: { user: profile }
+    });
+  } catch (error) {
+    console.error('[AuthRoutes] Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get user profile'
+    });
+  }
+});
+
+// ===== ВЫХОД ИЗ СИСТЕМЫ =====
+router.post('/logout', authenticateToken, async (req: AuthenticatedRequest, res) => {
+  try {
+    // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const result = await authService.logoutUser();
+    
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: result.error
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    console.error('[AuthRoutes] Logout error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Logout failed'
+    });
+  }
+});
+
+// ===== ВАЛИДАЦИЯ ТОКЕНА =====
+router.post('/validate', async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Token is required'
+      });
+    }
+    
+    // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const profile = await authService.validateToken(token);
+    
+    if (!profile) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired token'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: { user: profile }
+    });
+  } catch (error) {
+    console.error('[AuthRoutes] Token validation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Token validation failed'
+    });
+  }
+});
+
+export default router;
