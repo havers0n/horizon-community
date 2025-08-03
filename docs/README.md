@@ -28,7 +28,7 @@
 npx supabase login
 
 # Подключиться к проекту
-npx supabase link --project-ref axgtvvcimqoyxbfvdrok
+npx supabase link --project-ref YOUR_PROJECT_REF
 ```
 
 ### Шаг 2: Применение миграций
@@ -49,7 +49,7 @@ npx supabase db push
 #### Способ 2: Через psql напрямую
 ```bash
 # Замените [PASSWORD] на ваш пароль базы данных
-psql \"postgresql://postgres.axgtvvcimqoyxbfvdrok:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres\" < supabase/seed.sql
+psql \"postgresql://postgres.YOUR_PROJECT_REF:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres\" < supabase/seed.sql
 ```
 
 #### Способ 3: Автоматический скрипт
@@ -65,10 +65,10 @@ node scripts/deploy-to-cloud.js
 ```env
 # Базовые настройки
 NODE_ENV="production"
-DATABASE_URL="postgresql://postgres.axgtvvcimqoyxbfvdrok:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL="postgresql://postgres.YOUR_PROJECT_REF:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
 
 # Supabase
-SUPABASE_URL="https://axgtvvcimqoyxbfvdrok.supabase.co"
+SUPABASE_URL="https://YOUR_PROJECT_REF.supabase.co"
 SUPABASE_ANON_KEY="your-anon-key"
 SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 
@@ -79,7 +79,7 @@ JWT_SECRET="your-production-jwt-secret"
 
 ### Шаг 5: Настройка аутентификации
 
-1. Перейдите в [Supabase Dashboard](https://supabase.com/dashboard/project/axgtvvcimqoyxbfvdrok)
+1. Перейдите в [Supabase Dashboard](https://supabase.com/dashboard/project/YOUR_PROJECT_REF)
 2. Настройте **Settings > Authentication**:
    - Site URL: `https://your-domain.com`
    - Redirect URLs: `https://your-domain.com/auth/callback`
@@ -150,7 +150,7 @@ npx supabase db diff --schema public --file migration_name
 
 ```bash
 # Создать backup
-npx supabase db dump --project-ref axgtvvcimqoyxbfvdrok > backup.sql
+npx supabase db dump --project-ref YOUR_PROJECT_REF > backup.sql
 
 # Восстановить из backup
 psql "connection-string" < backup.sql

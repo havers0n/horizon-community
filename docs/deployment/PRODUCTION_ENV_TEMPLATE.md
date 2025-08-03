@@ -18,12 +18,12 @@ TZ=Europe/Moscow
 # ========================================
 # SUPABASE КОНФИГУРАЦИЯ
 # ========================================
-SUPABASE_URL=https://axgtvvcimqoyxbfvdrok.supabase.co
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 # База данных
-DATABASE_URL=postgresql://postgres.axgtvvcimqoyxbfvdrok:[YOUR-PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:[YOUR-PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres
 
 # ========================================
 # БЕЗОПАСНОСТЬ
@@ -33,7 +33,7 @@ JWT_SECRET=your-very-long-and-secure-jwt-secret-at-least-32-characters-long
 # ========================================
 # КЛИЕНТСКИЕ ПЕРЕМЕННЫЕ (для сборки)
 # ========================================
-VITE_SUPABASE_URL=https://axgtvvcimqoyxbfvdrok.supabase.co
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 VITE_API_URL=https://your-domain.com/api
 VITE_APP_URL=https://your-domain.com
@@ -111,11 +111,11 @@ nano .env
 APP_URL=https://your-domain.com
 
 # Получите из Supabase Dashboard -> Settings -> API
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_ANON_KEY=YOUR_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
 
 # Пароль от базы данных (установили при создании проекта)
-DATABASE_URL=postgresql://postgres.axgtvvcimqoyxbfvdrok:YOUR_ACTUAL_PASSWORD@aws-0-eu-north-1.pooler.supabase.com:5432/postgres
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_ACTUAL_PASSWORD@aws-0-eu-north-1.pooler.supabase.com:5432/postgres
 
 # Сгенерируйте безопасный JWT секрет
 JWT_SECRET=your-very-long-and-secure-jwt-secret-at-least-32-characters-long

@@ -20,8 +20,8 @@ failed to parse environment file: .env (unexpected character '\x00' in variable 
 
 ```powershell
 # Установите переменные окружения вручную
-$env:SUPABASE_URL = "https://axgtvvcimqoyxbfvdrok.supabase.co"
-$env:SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4Z3R2dmNpbXFveXhiZnZkcm9rIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjAxMzcxNywiZXhwIjoyMDY3NTg5NzE3fQ.IkafB_52F99inBJiW7-g9rgmFdh-bTwpz2nBLcVCu7U"
+$env:SUPABASE_URL = "YOUR_SUPABASE_URL"
+$env:SUPABASE_SERVICE_ROLE_KEY = "YOUR_SERVICE_ROLE_KEY"
 
 # Примените миграции по одной
 supabase db push --file supabase/migrations/015_fix_common_characters_owner_id.sql
@@ -38,8 +38,8 @@ Remove-Item .env
 # Создайте новый файл с правильной кодировкой
 @"
 NODE_ENV=production
-SUPABASE_URL=https://axgtvvcimqoyxbfvdrok.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4Z3R2dmNpbXFveXhiZnZkcm9rIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjAxMzcxNywiZXhwIjoyMDY3NTg5NzE3fQ.IkafB_52F99inBJiW7-g9rgmFdh-bTwpz2nBLcVCu7U
+SUPABASE_URL=YOUR_SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
 "@ | Out-File -FilePath .env -Encoding ASCII
 ```
 

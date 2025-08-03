@@ -2,8 +2,17 @@ import { Pool } from 'pg';
 
 console.log("🔍 Быстрый тест базы данных...");
 
+// БЕЗОПАСНАЯ ЗАГРУЗКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  console.error("❌ КРИТИЧЕСКАЯ ОШИБКА: DATABASE_URL не установлен!");
+  console.error("Установите переменную окружения DATABASE_URL");
+  process.exit(1);
+}
+
 const pool = new Pool({
-  connectionString: 'postgresql://postgres.axgtvvcimqoyxbfvdrok:TtaW3kLHu9xojVOt@aws-0-eu-north-1.pooler.supabase.com:5432/postgres',
+  connectionString: databaseUrl,
   ssl: { rejectUnauthorized: false }
 });
 
