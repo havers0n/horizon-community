@@ -39,11 +39,13 @@ export default defineConfig({
     outDir: path.resolve(__dirname, "../../dist/apps/client"),
     emptyOutDir: true,
     rollupOptions: {
-      external: ['zod'],
+      // external: ['zod'], // Убираем внешнюю зависимость zod
       output: {
         manualChunks: {
           // Выносим React и React DOM в самостоятельный чанк
           'react-vendor': ['react', 'react-dom'],
+          // Выносим zod в отдельный чанк для лучшего контроля
+          'zod-vendor': ['zod'],
           // Выносим UI библиотеки в самостоятельный чанк
           'ui-vendor': [
             '@radix-ui/react-dialog',
@@ -59,7 +61,7 @@ export default defineConfig({
           ],
           // Выносим графики и визуализацию
           'charts-vendor': ['recharts', 'html2canvas', 'jspdf'],
-          // Выносим формы и валидацию
+          // Выносим формы и валидацию (без zod, он в отдельном чанке)
           'forms-vendor': ['react-hook-form', '@hookform/resolvers'],
           // Выносим интернационализацию
           'i18n-vendor': ['i18next', 'react-i18next'],

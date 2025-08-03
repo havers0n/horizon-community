@@ -33,7 +33,9 @@
     "test:mdt": "cd apps/mdtclient && npm run test",
     "test:server": "cd apps/server && npm run test",
     "check-ports": "node scripts/check-ports.js",
-    "check-production": "node scripts/check-production-config.js"
+    "check-production": "node scripts/check-production-config.js",
+    "check-modules": "node scripts/fix-module-issues.js",
+    "force-rebuild": "node scripts/force-rebuild.js"
   },
   "workspaces": [
     "apps/*",
