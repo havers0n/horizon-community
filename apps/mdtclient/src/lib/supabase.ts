@@ -54,14 +54,21 @@ export async function testCharactersTable() {
   try {
     console.log('[Test] 🔍 Начинаем проверку таблицы characters...');
     
-    // Тест 1: Проверяем подключение к базе данных
-    console.log('[Test] 1️⃣ Проверяем подключение к базе данных...');
-    const { data: connectionTest, error: connectionError } = await supabase
-      .from('departments')
-      .select('count')
-      .limit(1);
-    
-    if (connectionError) {
+    // Тест 1: Проверяем подключение к базе данных через публичный API
+    console.log('[Test] 1️⃣ Проверяем подключение к базе данных через публичный API...');
+    try {
+      const response = await fetch('http://localhost:5000/api/public/departments');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'API returned error');
+      }
+      
+      console.log('[Test] ✅ Подключение к базе данных работает через публичный API');
+    } catch (connectionError) {
       console.error('[Test] ❌ Ошибка подключения к базе данных:', connectionError);
       return { success: false, error: 'Connection failed', details: connectionError };
     }

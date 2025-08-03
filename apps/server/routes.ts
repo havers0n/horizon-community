@@ -17,6 +17,7 @@ import { initializeCADWebSocket } from "./websocket";
 import fs from 'fs/promises';
 import path from 'path';
 import { authenticateToken, requireSupervisor, requireAdmin } from './middleware/auth.middleware';
+import { authenticateSupabaseToken, requireSupervisor as requireSupabaseSupervisor, requireAdmin as requireSupabaseAdmin } from './middleware/supabase-auth.middleware';
 import { uploadMiddleware, handleUpload } from './fileUpload';
 import adminSupportRoutes from './routes/admin/support.routes.js';
 import adminTestsRoutes from './routes/adminTests.js';
@@ -25,6 +26,7 @@ import adminRoutes from './routes/admin/index.js';
 import mdtRoutes from './routes/mdt.js';
 import realtimeRoutes from './routes/realtime-simple.js';
 import testRoutes from './routes/test.routes';
+import publicRoutes from './routes/public';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -96,6 +98,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Тестовые маршруты без аутентификации
   app.use('/api/test', testRoutes);
+  
+  // Публичные маршруты без аутентификации
+  app.use('/api/public', publicRoutes);
   
   // Authentication routes
   app.post('/api/auth/register', async (req, res) => {
@@ -206,8 +211,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Public routes
   app.get('/api/departments', async (req, res) => {
-    const departments = await storage.getAllDepartments();
-    res.json(departments);
+    try {
+      console.log('🔍 Fetching departments...');
+      const departments = await storage.getAllDepartments();
+      console.log('📋 Departments found:', departments.length, departments);
+      res.json(departments);
+    } catch (error) {
+      console.error('❌ Error fetching departments:', error);
+      res.status(500).json({ message: 'Failed to fetch departments', error: error.message });
+    }
   });
 
   app.get('/api/departments/:id', async (req, res) => {
@@ -379,6 +391,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error downloading template:', error);
       res.status(500).json({ message: 'Failed to download template' });
+    }
+  });
+
+  // Статистика
+  app.get('/api/stats', authenticateToken, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const applications = await storage.getAllApplications();
+      const reports = await storage.getAllReports();
+      
+      const stats = {
+        totalUsers: users.length,
+        totalApplications: applications.length,
+        totalReports: reports.length,
+        applicationsByStatus: {
+          pending: applications.filter(app => app.status === 'pending').length,
+          approved: applications.filter(app => app.status === 'approved').length,
+          rejected: applications.filter(app => app.status === 'rejected').length
+        },
+        reportsByStatus: {
+          pending: reports.filter(report => report.status === 'pending').length,
+          approved: reports.filter(report => report.status === 'approved').length,
+          rejected: reports.filter(report => report.status === 'rejected').length
+        }
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      res.status(500).json({ message: 'Failed to get statistics' });
     }
   });
 
@@ -564,6 +606,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const users = await storage.getAllUsers();
     const usersWithoutPasswords = users.map(({ passwordHash, ...user }) => user);
     res.json(usersWithoutPasswords);
+  });
+
+  // Админские endpoints для отпусков
+  app.get('/api/admin/leave-applications', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const applications = await storage.getAllApplications();
+      const leaveApplications = applications.filter(app => app.type === 'leave');
+      const users = await storage.getAllUsers();
+      
+      const applicationsWithUsers = leaveApplications.map(app => {
+        const author = users.find(u => u.id === app.authorId);
+        return {
+          ...app,
+          author: author ? { id: author.id, username: author.username, rank: author.rank } : null
+        };
+      });
+      
+      res.json(applicationsWithUsers);
+    } catch (error) {
+      console.error('Error getting leave applications:', error);
+      res.status(500).json({ message: 'Failed to get leave applications' });
+    }
+  });
+
+  app.get('/api/admin/leave-stats', authenticateToken, requireSupervisor, async (req, res) => {
+    try {
+      const applications = await storage.getAllApplications();
+      const leaveApplications = applications.filter(app => app.type === 'leave');
+      const users = await storage.getAllUsers();
+      const departments = await storage.getAllDepartments();
+      
+      // Статистика по департаментам
+      const departmentStats: Record<number, {
+        name: string;
+        totalLeaves: number;
+        approvedLeaves: number;
+        pendingLeaves: number;
+        totalDays: number;
+        leaveTypes: Record<string, number>;
+      }> = {};
+
+      for (const dept of departments) {
+        const deptUsers = users.filter(u => u.departmentId === dept.id);
+        const deptLeaves = leaveApplications.filter(app => 
+          deptUsers.some(u => u.id === app.authorId)
+        );
+
+        const approvedLeaves = deptLeaves.filter(app => app.status === 'approved');
+        const pendingLeaves = deptLeaves.filter(app => app.status === 'pending');
+
+        let totalDays = 0;
+        const leaveTypes: Record<string, number> = {};
+
+        for (const leave of approvedLeaves) {
+          const data = leave.data as any;
+          if (data && data.startDate && data.endDate) {
+            const startDate = new Date(data.startDate);
+            const endDate = new Date(data.endDate);
+            const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            
+            totalDays += days;
+            if (data.leaveType) {
+              leaveTypes[data.leaveType] = (leaveTypes[data.leaveType] || 0) + days;
+            }
+          }
+        }
+
+        departmentStats[dept.id] = {
+          name: dept.name,
+          totalLeaves: deptLeaves.length,
+          approvedLeaves: approvedLeaves.length,
+          pendingLeaves: pendingLeaves.length,
+          totalDays,
+          leaveTypes
+        };
+      }
+
+      // Общая статистика
+      const totalStats = {
+        totalApplications: leaveApplications.length,
+        approvedApplications: leaveApplications.filter(app => app.status === 'approved').length,
+        pendingApplications: leaveApplications.filter(app => app.status === 'pending').length,
+        rejectedApplications: leaveApplications.filter(app => app.status === 'rejected').length,
+        totalDays: leaveApplications
+          .filter(app => app.status === 'approved')
+          .reduce((total, app) => {
+            const data = app.data as any;
+            if (data && data.startDate && data.endDate) {
+              const startDate = new Date(data.startDate);
+              const endDate = new Date(data.endDate);
+              const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              return total + days;
+            }
+            return total;
+          }, 0)
+      };
+
+      res.json({
+        totalStats,
+        departmentStats
+      });
+    } catch (error) {
+      console.error('Error getting leave stats:', error);
+      res.status(500).json({ message: 'Failed to get leave statistics' });
+    }
   });
 
   app.put('/api/admin/users/:id', authenticateToken, requireSupervisor, async (req, res) => {
