@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../../../../../../libs/ui-components/src/components/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { DashboardStats as DashboardStatsType } from '../model'
 
 interface DashboardStatsProps {
@@ -6,65 +6,31 @@ interface DashboardStatsProps {
 }
 
 export function DashboardStats({ stats }: DashboardStatsProps) {
-  const defaultStats = [
-    {
-      title: 'Всего задач',
-      value: '24',
-      description: '+12% с прошлого месяца',
-      change: 'positive'
-    },
-    {
-      title: 'Выполнено',
-      value: '18',
-      description: '+8% с прошлого месяца',
-      change: 'positive'
-    },
-    {
-      title: 'В процессе',
-      value: '6',
-      description: '-2% с прошлого месяца',
-      change: 'negative'
-    }
-  ]
-
-  const displayStats = stats ? [
-    {
-      title: 'Активные сессии',
-      value: stats.activeSessions.toString(),
-      description: 'Текущие сессии',
-      change: 'positive'
-    },
-    {
-      title: 'Документы',
-      value: stats.documents.toString(),
-      description: 'Всего документов',
-      change: 'positive'
-    },
-    {
-      title: 'Время в системе',
-      value: stats.timeSpent,
-      description: 'За сегодня',
-      change: 'positive'
-    }
-  ] : defaultStats
-
   return (
-    <>
-      {displayStats.map((stat) => (
-        <Card key={stat.title}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {stat.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">
-              {stat.description}
-            </p>
-          </CardContent>
-        </Card>
-      ))}
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>Статистика</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Активные сессии</p>
+            <p className="text-2xl font-bold">{stats?.activeSessions || 0}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Документы</p>
+            <p className="text-2xl font-bold">{stats?.documents || 0}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Время работы</p>
+            <p className="text-2xl font-bold">{stats?.timeSpent || '0ч'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Продуктивность</p>
+            <p className="text-2xl font-bold">{stats?.productivity || 0}%</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 } 

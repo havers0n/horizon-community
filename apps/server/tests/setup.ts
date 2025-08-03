@@ -110,12 +110,16 @@ jest.mock('../storage', () => ({
   }
 }));
 
-// Мокаем BusinessLogic
-jest.mock('../businessLogic', () => ({
-  BusinessLogic: jest.fn().mockImplementation(() => ({
+// Мокаем ApplicationService
+jest.mock('../services/ApplicationService', () => ({
+  ApplicationService: jest.fn().mockImplementation(() => ({
     canSubmitApplication: jest.fn(),
     getUserApplicationStats: jest.fn(),
     advanceApplicationStatus: jest.fn(),
+    getActiveJointPositions: jest.fn(),
+    processJointApplication: jest.fn(),
+    removeJointPosition: jest.fn(),
+    resetMonthlyLimits: jest.fn()
   }))
 }));
 

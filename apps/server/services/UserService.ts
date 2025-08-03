@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase.js';
 import type { Database } from '../../../packages/db-types/src/index';
+import { SupabaseStorage } from './SupabaseStorage';
 
 // ===== ТИПЫ ИЗ НОВОЙ БД =====
 
@@ -48,6 +48,11 @@ export interface InsertUser {
 // ===== USER SERVICE - БИЗНЕС-ЛОГИКА ДЛЯ ПОЛЬЗОВАТЕЛЕЙ =====
 
 export class UserService {
+  private storage: SupabaseStorage;
+  
+  constructor(storage: SupabaseStorage) {
+    this.storage = storage;
+  }
   
   // ===== АДАПТЕРЫ ТИПОВ =====
   
@@ -85,17 +90,12 @@ export class UserService {
   
   async getUser(id: string): Promise<User | undefined> {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error || !data) {
+      const profile = await this.storage.getById('profiles', id);
+      if (!profile) {
         return undefined;
       }
 
-      return this.adaptSupabaseProfileToUser(data);
+      return this.adaptSupabaseProfileToUser(profile);
     } catch (error) {
       console.error('[UserService] Error getting user:', error);
       return undefined;
@@ -104,17 +104,12 @@ export class UserService {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (error || !data) {
+      const profile = await this.storage.getByField('profiles', 'email', email);
+      if (!profile) {
         return undefined;
       }
 
-      return this.adaptSupabaseProfileToUser(data);
+      return this.adaptSupabaseProfileToUser(profile);
     } catch (error) {
       console.error('[UserService] Error getting user by email:', error);
       return undefined;
@@ -123,17 +118,12 @@ export class UserService {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('username', username)
-        .single();
-
-      if (error || !data) {
+      const profile = await this.storage.getByField('profiles', 'username', username);
+      if (!profile) {
         return undefined;
       }
 
-      return this.adaptSupabaseProfileToUser(data);
+      return this.adaptSupabaseProfileToUser(profile);
     } catch (error) {
       console.error('[UserService] Error getting user by username:', error);
       return undefined;
@@ -141,25 +131,19 @@ export class UserService {
   }
 
   async getUserByAuthId(authId: string): Promise<User | undefined> {
-    // В новой схеме auth_id = id
-    return await this.getUser(authId);
+    return this.getUser(authId);
   }
 
   async createUser(user: InsertUser): Promise<User> {
     try {
-      const supabaseProfile = this.adaptUserToSupabaseProfile(user);
+      const profileData = this.adaptUserToSupabaseProfile(user);
+      const profile = await this.storage.insert('profiles', profileData);
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert(supabaseProfile)
-        .select()
-        .single();
-
-      if (error || !data) {
-        throw new Error(`Failed to create user: ${error?.message || 'Unknown error'}`);
+      if (!profile) {
+        throw new Error('Failed to create user profile');
       }
 
-      return this.adaptSupabaseProfileToUser(data);
+      return this.adaptSupabaseProfileToUser(profile);
     } catch (error) {
       console.error('[UserService] Error creating user:', error);
       throw error;
@@ -168,24 +152,19 @@ export class UserService {
 
   async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
     try {
-      const supabaseUpdates: ProfileUpdate = {};
+      const profileUpdates: ProfileUpdate = {};
       
-      if (updates.username !== undefined) supabaseUpdates.username = updates.username;
-      if (updates.email !== undefined) supabaseUpdates.email = updates.email;
-      if (updates.role !== undefined) supabaseUpdates.role = updates.role;
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(supabaseUpdates)
-        .eq('id', id)
-        .select()
-        .single();
+      if (updates.username !== undefined) profileUpdates.username = updates.username;
+      if (updates.email !== undefined) profileUpdates.email = updates.email;
+      if (updates.role !== undefined) profileUpdates.role = updates.role;
 
-      if (error || !data) {
+      const updatedProfile = await this.storage.update('profiles', id, profileUpdates);
+      
+      if (!updatedProfile) {
         return undefined;
       }
 
-      return this.adaptSupabaseProfileToUser(data);
+      return this.adaptSupabaseProfileToUser(updatedProfile);
     } catch (error) {
       console.error('[UserService] Error updating user:', error);
       return undefined;
@@ -194,15 +173,8 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*');
-
-      if (error || !data) {
-        return [];
-      }
-
-      return data.map(profile => this.adaptSupabaseProfileToUser(profile));
+      const profiles = await this.storage.list('profiles');
+      return profiles.map(profile => this.adaptSupabaseProfileToUser(profile));
     } catch (error) {
       console.error('[UserService] Error getting all users:', error);
       return [];
@@ -210,24 +182,16 @@ export class UserService {
   }
 
   async getUsersByDepartment(departmentId: string): Promise<User[]> {
-    // В новой схеме department_id не хранится в profiles
-    // Возвращаем пустой массив, так как эта информация не доступна
-    console.warn('[UserService] getUsersByDepartment: department information not available in profiles table');
+    // В новой схеме profiles не содержит departmentId
+    // Нужно использовать связи через characters или другие таблицы
+    console.warn('[UserService] getUsersByDepartment: department filtering not supported in new schema');
     return [];
   }
 
   async getUsersByRole(role: string): Promise<User[]> {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', role);
-
-      if (error || !data) {
-        return [];
-      }
-
-      return data.map(profile => this.adaptSupabaseProfileToUser(profile));
+      const profiles = await this.storage.list('profiles', { role });
+      return profiles.map(profile => this.adaptSupabaseProfileToUser(profile));
     } catch (error) {
       console.error('[UserService] Error getting users by role:', error);
       return [];
@@ -235,29 +199,15 @@ export class UserService {
   }
 
   async getUsersByStatus(status: string): Promise<User[]> {
-    // В новой схеме статус не хранится в profiles
-    // Возвращаем всех пользователей как активных
-    if (status === 'active') {
-      return await this.getAllUsers();
-    }
+    // В новой схеме profiles не содержит status
+    console.warn('[UserService] getUsersByStatus: status filtering not supported in new schema');
     return [];
   }
 
-  // ===== ПОИСК И ФИЛЬТРАЦИЯ =====
-  
   async searchUsers(query: string, limit: number = 10): Promise<User[]> {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .or(`username.ilike.%${query}%,email.ilike.%${query}%`)
-        .limit(limit);
-
-      if (error || !data) {
-        return [];
-      }
-
-      return data.map(profile => this.adaptSupabaseProfileToUser(profile));
+      const profiles = await this.storage.search('profiles', ['username', 'email'], query, limit);
+      return profiles.map(profile => this.adaptSupabaseProfileToUser(profile));
     } catch (error) {
       console.error('[UserService] Error searching users:', error);
       return [];
@@ -272,53 +222,27 @@ export class UserService {
     offset?: number;
   }): Promise<User[]> {
     try {
-      let query = supabase.from('profiles').select('*');
+      const queryFilters: Record<string, any> = {};
       
       if (filters.role) {
-        query = query.eq('role', filters.role);
-      }
-      
-      if (filters.limit) {
-        query = query.limit(filters.limit);
-      }
-      
-      if (filters.offset) {
-        query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-
-      if (error || !data) {
-        return [];
+        queryFilters.role = filters.role;
       }
 
-      let filteredData = data;
-      
-      // Фильтрация по статусу (все пользователи считаются активными)
-      if (filters.status && filters.status !== 'active') {
-        filteredData = [];
-      }
-      
-      return filteredData.map(profile => this.adaptSupabaseProfileToUser(profile));
+      const profiles = await this.storage.list('profiles', queryFilters, {
+        limit: filters.limit,
+        offset: filters.offset
+      });
+
+      return profiles.map(profile => this.adaptSupabaseProfileToUser(profile));
     } catch (error) {
       console.error('[UserService] Error getting users with filters:', error);
       return [];
     }
   }
 
-  // ===== СТАТИСТИКА =====
-  
   async getUserCount(): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      if (error) {
-        return 0;
-      }
-
-      return count || 0;
+      return await this.storage.count('profiles');
     } catch (error) {
       console.error('[UserService] Error getting user count:', error);
       return 0;
@@ -326,23 +250,14 @@ export class UserService {
   }
 
   async getUserCountByDepartment(departmentId: string): Promise<number> {
-    // В новой схеме department_id не хранится в profiles
-    console.warn('[UserService] getUserCountByDepartment: department information not available in profiles table');
+    // В новой схеме profiles не содержит departmentId
+    console.warn('[UserService] getUserCountByDepartment: department counting not supported in new schema');
     return 0;
   }
 
   async getUserCountByRole(role: string): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', role);
-
-      if (error) {
-        return 0;
-      }
-
-      return count || 0;
+      return await this.storage.count('profiles', { role });
     } catch (error) {
       console.error('[UserService] Error getting user count by role:', error);
       return 0;
@@ -350,74 +265,239 @@ export class UserService {
   }
 
   async getUserCountByStatus(status: string): Promise<number> {
-    // В новой схеме статус не хранится в profiles
-    if (status === 'active') {
-      return await this.getUserCount();
-    }
+    // В новой схеме profiles не содержит status
+    console.warn('[UserService] getUserCountByStatus: status counting not supported in new schema');
     return 0;
   }
 
-  // ===== ВАЛИДАЦИЯ =====
-  
   async validatePassword(password: string, hash: string): Promise<boolean> {
-    // Используем bcrypt для валидации паролей
-    const bcrypt = require('bcrypt');
-    return await bcrypt.compare(password, hash);
+    return this.storage.validatePassword(password, hash);
   }
 
   async hashPassword(password: string): Promise<string> {
-    // Используем bcrypt для хеширования паролей
-    const bcrypt = require('bcrypt');
-    return await bcrypt.hash(password, 10);
+    return this.storage.hashPassword(password);
   }
 
-  // ===== БИЗНЕС-ЛОГИКА =====
-  
   async isUsernameAvailable(username: string): Promise<boolean> {
-    const user = await this.getUserByUsername(username);
-    return !user;
+    const existingUser = await this.getUserByUsername(username);
+    return !existingUser;
   }
 
   async isEmailAvailable(email: string): Promise<boolean> {
-    const user = await this.getUserByEmail(email);
-    return !user;
+    const existingUser = await this.getUserByEmail(email);
+    return !existingUser;
   }
 
   async activateUser(id: string): Promise<User | undefined> {
-    // В новой схеме все пользователи считаются активными
+    // В новой схеме profiles не содержит status
+    console.warn('[UserService] activateUser: status management not supported in new schema');
     return await this.getUser(id);
   }
 
   async deactivateUser(id: string): Promise<User | undefined> {
-    // В новой схеме деактивация не поддерживается
-    console.warn('[UserService] deactivateUser: user deactivation not supported in new schema');
+    // В новой схеме profiles не содержит status
+    console.warn('[UserService] deactivateUser: status management not supported in new schema');
     return await this.getUser(id);
   }
 
   async suspendUser(id: string): Promise<User | undefined> {
-    // В новой схеме приостановка не поддерживается
-    console.warn('[UserService] suspendUser: user suspension not supported in new schema');
+    // В новой схеме profiles не содержит status
+    console.warn('[UserService] suspendUser: status management not supported in new schema');
     return await this.getUser(id);
   }
 
   async addGameWarning(id: string): Promise<User | undefined> {
-    // В новой схеме предупреждения не поддерживаются
+    // В новой схеме profiles не содержит gameWarnings
     console.warn('[UserService] addGameWarning: warnings not supported in new schema');
     return await this.getUser(id);
   }
 
   async addAdminWarning(id: string): Promise<User | undefined> {
-    // В новой схеме предупреждения не поддерживаются
+    // В новой схеме profiles не содержит adminWarnings
     console.warn('[UserService] addAdminWarning: warnings not supported in new schema');
     return await this.getUser(id);
   }
 
   async resetWarnings(id: string): Promise<User | undefined> {
-    // В новой схеме предупреждения не поддерживаются
+    // В новой схеме profiles не содержит warnings
     console.warn('[UserService] resetWarnings: warnings not supported in new schema');
     return await this.getUser(id);
+  }
+
+  // ===========================================
+  // СТАТИСТИКА ЗАЯВОК И ОТПУСКОВ
+  // ===========================================
+
+  /**
+   * Get application statistics for a user
+   */
+  async getUserApplicationStats(userId: string): Promise<{
+    thisMonth: {
+      entryApplications: number;
+      leaveApplications: number;
+      totalApplications: number;
+    };
+    limits: {
+      entryApplicationsPerMonth: number;
+      leaveApplicationsPerMonth: number;
+      promotionQualificationCooldownDays: number;
+    };
+    nextResetDate: Date;
+    lastPromotionQualificationDate?: Date;
+  }> {
+    const now = new Date();
+    // Исправляем расчет текущего месяца с учетом часового пояса
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
+    
+    // Получаем заявки пользователя из storage
+    const userApplications = await this.storage.list('applications', { author_user_id: userId });
+    
+    const thisMonthApps = userApplications.filter(app => 
+      new Date(app.created_at || '') >= currentMonth
+    );
+
+    const entryApplications = thisMonthApps.filter(app => app.type === 'entry').length;
+    const leaveApplications = thisMonthApps.filter(app => app.type === 'leave').length;
+
+    const lastPromotionQualification = userApplications
+      .filter(app => app.type === 'promotion' || app.type === 'qualification')
+      .sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
+      [0];
+
+    return {
+      thisMonth: {
+        entryApplications,
+        leaveApplications,
+        totalApplications: thisMonthApps.length
+      },
+      limits: {
+        entryApplicationsPerMonth: 3,
+        leaveApplicationsPerMonth: 2,
+        promotionQualificationCooldownDays: 7
+      },
+      nextResetDate: nextMonth,
+      lastPromotionQualificationDate: lastPromotionQualification ? 
+        new Date(lastPromotionQualification.created_at || '') : undefined
+    };
+  }
+
+  /**
+   * Get leave statistics for a user
+   */
+  async getUserLeaveStats(userId: string): Promise<{
+    currentYear: {
+      totalDays: number;
+      usedDays: number;
+      remainingDays: number;
+      leaveTypes: Record<string, number>;
+    };
+    activeLeave?: {
+      id: string;
+      type: string;
+      startDate: string;
+      endDate: string;
+      daysRemaining: number;
+    };
+    upcomingLeaves: Array<{
+      id: string;
+      type: string;
+      startDate: string;
+      endDate: string;
+      daysUntilStart: number;
+    }>;
+  }> {
+    const now = new Date();
+    const currentYear = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+    
+    // Получаем заявки пользователя из storage
+    const userApplications = await this.storage.list('applications', { author_user_id: userId });
+    const leaveApplications = userApplications.filter(app => app.type === 'leave');
+
+    // Статистика за текущий год
+    const thisYearLeaves = leaveApplications.filter(app => 
+      new Date(app.created_at || '') >= currentYear && app.status === 'approved'
+    );
+
+    let totalDays = 0;
+    let usedDays = 0;
+    const leaveTypes: Record<string, number> = {};
+
+    for (const leave of thisYearLeaves) {
+      const data = leave.data as any;
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
+      const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      
+      totalDays += days;
+      leaveTypes[data.leaveType] = (leaveTypes[data.leaveType] || 0) + days;
+
+      // Если отпуск уже завершен, считаем использованным
+      if (endDate < now) {
+        usedDays += days;
+      }
+    }
+
+    // Активный отпуск
+    const activeLeave = leaveApplications.find(app => {
+      if (app.status !== 'approved') return false;
+      const data = app.data as any;
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
+      return now >= startDate && now <= endDate;
+    });
+
+    let activeLeaveInfo = undefined;
+    if (activeLeave) {
+      const data = activeLeave.data as any;
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
+      const daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      
+      activeLeaveInfo = {
+        id: activeLeave.id,
+        type: data.leaveType,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        daysRemaining
+      };
+    }
+
+    // Предстоящие отпуска
+    const upcomingLeaves = leaveApplications
+      .filter(app => {
+        if (app.status !== 'approved') return false;
+        const data = app.data as any;
+        const startDate = new Date(data.startDate);
+        return startDate > now;
+      })
+      .map(app => {
+        const data = app.data as any;
+        const startDate = new Date(data.startDate);
+        const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        return {
+          id: app.id,
+          type: data.leaveType,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          daysUntilStart
+        };
+      })
+      .sort((a, b) => a.daysUntilStart - b.daysUntilStart);
+
+    return {
+      currentYear: {
+        totalDays: 30, // Стандартный лимит отпусков в год
+        usedDays,
+        remainingDays: 30 - usedDays,
+        leaveTypes
+      },
+      activeLeave: activeLeaveInfo,
+      upcomingLeaves
+    };
   }
 }
 
 // Экспортируем единственный экземпляр
-export const userService = new UserService(); 
+export const userService = new UserService(new SupabaseStorage()); 

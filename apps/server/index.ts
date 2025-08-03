@@ -4,7 +4,8 @@ import express, { type Request, type Response, type NextFunction } from "express
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { storage } from "./storage";
-import { BusinessLogic } from "./businessLogic";
+import { ApplicationService } from "./services/ApplicationService";
+import { NotificationService } from "./services/NotificationService";
 import { Scheduler } from "./scheduler";
 import { log, serveStatic } from "./production";
 import path from "path";
@@ -33,8 +34,9 @@ app.use(cors({
   const server = await registerRoutes(app);
 
   // Инициализация планировщика
-  const businessLogic = new BusinessLogic(storage);
-  const scheduler = new Scheduler(businessLogic, storage, {
+  const notificationService = new NotificationService(storage);
+  const applicationService = new ApplicationService(storage, notificationService);
+  const scheduler = new Scheduler(applicationService, storage, {
     resetLimitsCron: "0 0 1 * *", // 1 число каждого месяца в 00:00
     leaveProcessingCron: "0 9 * * *", // каждый день в 9:00
     timezone: "Europe/Moscow"

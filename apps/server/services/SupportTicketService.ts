@@ -1,312 +1,150 @@
-import { supabase } from '../lib/supabase.js';
-import type { Database } from '../../../packages/db-types/src/index';
+// apps/server/services/SupportTicketService.ts
 
-// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
-type SupportTicket = Database['mdt']['Tables']['support_tickets']['Row'];
-type SupportTicketInsert = Database['mdt']['Tables']['support_tickets']['Insert'];
-type SupportTicketUpdate = Database['mdt']['Tables']['support_tickets']['Update'];
+import { SupabaseClient } from '@supabase/supabase-js';
+// ПРАВИЛО 3: Импортируем ВСЕ типы напрямую из db-types
+import {
+  Database,
+  SupportTickets,
+  SupportTicketsInsert,
+  SupportTicketsUpdate
+} from 'db-types';
+import { createSupabaseClient } from '../lib/supabase';
+import { AppError } from '../utils/AppError';
 
-// ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
+// Локальный тип для сообщений, т.к. он относится к бизнес-логике, а не к схеме БД
 export interface TicketMessage {
   senderId: string;
   content: string;
   senderRole: string;
-  timestamp?: Date;
+  timestamp: string; // ISO String
 }
 
-export interface TicketReplyData {
-  senderId: string;
-  content: string;
-  senderRole: string;
-}
+class SupportTicketService {
+  private supabase: SupabaseClient<Database>;
 
-// ===== СОВРЕМЕННЫЙ SUPPORT TICKET SERVICE =====
-export class SupportTicketService {
-  
-  // ===== ПОЛУЧЕНИЕ ТИКЕТА ПО ID =====
-  async getTicketById(ticketId: string): Promise<SupportTicket | null> {
-    try {
-      const { data: ticket, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .eq('id', ticketId) // ✅ UUID как string
-        .single();
-
-      if (error || !ticket) {
-        return null;
-      }
-
-      return ticket;
-    } catch (error) {
-      console.error('[SupportTicketService] Error getting ticket:', error);
-      return null;
-    }
+  constructor() {
+    // ПРАВИЛО 2: Создаем независимый экземпляр клиента
+    this.supabase = createSupabaseClient();
   }
 
-  // ===== ПОЛУЧЕНИЕ ТИКЕТОВ ПОЛЬЗОВАТЕЛЯ =====
-  async getUserTickets(userId: string): Promise<SupportTicket[]> {
-    try {
-      const { data: tickets, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .eq('author_user_id', userId) // ✅ UUID как string
-        .order('created_at', { ascending: false });
+  public async getTicketById(ticketId: string): Promise<SupportTickets | null> {
+    const { data: ticket, error } = await this.supabase
+      .from('support_tickets')
+      .select('*')
+      .eq('id', ticketId)
+      .single();
 
-      if (error) {
-        console.error('[SupportTicketService] Error getting user tickets:', error);
-        return [];
-      }
-
-      return tickets || [];
-    } catch (error) {
-      console.error('[SupportTicketService] Error getting user tickets:', error);
-      return [];
+    if (error && error.code !== 'PGRST116') {
+      console.error(`[SupportTicketService] Error getting ticket ${ticketId}:`, error);
+      throw new AppError('Ошибка при получении тикета.', 500);
     }
+    return ticket;
   }
 
-  // ===== ПОЛУЧЕНИЕ ВСЕХ ТИКЕТОВ (ДЛЯ АДМИНОВ) =====
-  async getAllTickets(): Promise<SupportTicket[]> {
-    try {
-      const { data: tickets, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
+  public async getUserTickets(userId: string): Promise<SupportTickets[]> {
+    const { data, error } = await this.supabase
+      .from('support_tickets')
+      .select('*')
+      .eq('author_user_id', userId)
+      .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('[SupportTicketService] Error getting all tickets:', error);
-        return [];
-      }
+    if (error) {
+      console.error(`[SupportTicketService] Error getting user tickets for ${userId}:`, error);
+      throw new AppError('Ошибка при получении тикетов пользователя.', 500);
+    }
+    return data || [];
+  }
 
-      return tickets || [];
-    } catch (error) {
+  public async getAllTickets(): Promise<SupportTickets[]> {
+    const { data, error } = await this.supabase
+      .from('support_tickets')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
       console.error('[SupportTicketService] Error getting all tickets:', error);
-      return [];
+      throw new AppError('Ошибка при получении всех тикетов.', 500);
     }
+    return data || [];
   }
 
-  // ===== СОЗДАНИЕ НОВОГО ТИКЕТА =====
-  async createTicket(userId: string, title: string): Promise<SupportTicket | null> {
-    try {
-      const ticketData: SupportTicketInsert = {
-        author_user_id: userId, // ✅ UUID как string
-        title,
-        status: 'open',
-        messages: []
-      };
+  public async createTicket(userId: string, title: string): Promise<SupportTickets> {
+    const ticketData: SupportTicketsInsert = {
+      author_user_id: userId,
+      title,
+      status: 'open',
+      messages: [] // Инициализируем пустым массивом
+    };
 
-      const { data: ticket, error } = await supabase
-        .from('support_tickets')
-        .insert(ticketData)
-        .select()
-        .single();
+    const { data: ticket, error } = await this.supabase
+      .from('support_tickets')
+      .insert(ticketData)
+      .select()
+      .single();
 
-      if (error || !ticket) {
-        console.error('[SupportTicketService] Error creating ticket:', error);
-        return null;
-      }
-
-      return ticket;
-    } catch (error) {
+    if (error || !ticket) {
       console.error('[SupportTicketService] Error creating ticket:', error);
-      return null;
+      throw new AppError('Не удалось создать тикет.', 500);
     }
+    return ticket;
   }
 
-  // ===== ОТВЕТ НА ТИКЕТ =====
-  async replyToTicket(ticketId: string, replyData: TicketReplyData): Promise<SupportTicket | null> {
-    try {
-      // Получаем текущий тикет
-      const currentTicket = await this.getTicketById(ticketId);
-      if (!currentTicket) {
-        return null;
-      }
+  public async replyToTicket(
+    ticketId: string,
+    senderId: string,
+    content: string,
+    senderRole: string
+  ): Promise<SupportTickets> {
+    const currentTicket = await this.getTicketById(ticketId);
+    if (!currentTicket) {
+      throw new AppError('Тикет не найден.', 404);
+    }
 
-      // Создаем новое сообщение
-      const newMessage: TicketMessage = {
-        senderId: replyData.senderId,
-        content: replyData.content,
-        senderRole: replyData.senderRole,
-        timestamp: new Date()
-      };
+    const newMessage: TicketMessage = {
+      senderId,
+      content,
+      senderRole,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Безопасно добавляем новое сообщение
+    const currentMessages = Array.isArray(currentTicket.messages) ? currentTicket.messages : [];
+    const updatedMessages = [...currentMessages, newMessage as any]; // Приводим к any для обхода строгой типизации Supabase для JSONB
 
-      // Обновляем сообщения тикета
-      const currentMessages = Array.isArray(currentTicket.messages) 
-        ? currentTicket.messages 
-        : [];
-
-      const updatedMessages = [...currentMessages, newMessage];
-
-      // Определяем новый статус
-      const newStatus = currentTicket.status === 'closed' ? 'open' : currentTicket.status;
-
-      // Обновляем тикет
-      const updateData: SupportTicketUpdate = {
-        status: newStatus,
+    const { data: updatedTicket, error } = await this.supabase
+      .from('support_tickets')
+      .update({
         messages: updatedMessages,
+        status: 'open', // При ответе тикет всегда становится открытым
         updated_at: new Date().toISOString()
-      };
+      })
+      .eq('id', ticketId)
+      .select()
+      .single();
 
-      const { data: updatedTicket, error } = await supabase
-        .from('support_tickets')
-        .update(updateData)
-        .eq('id', ticketId) // ✅ UUID как string
-        .select()
-        .single();
-
-      if (error || !updatedTicket) {
-        console.error('[SupportTicketService] Error updating ticket:', error);
-        return null;
-      }
-
-      return updatedTicket;
-    } catch (error) {
-      console.error('[SupportTicketService] Error replying to ticket:', error);
-      return null;
+    if (error || !updatedTicket) {
+      console.error(`[SupportTicketService] Error replying to ticket ${ticketId}:`, error);
+      throw new AppError('Не удалось ответить на тикет.', 500);
     }
+    return updatedTicket;
   }
 
-  // ===== ОБНОВЛЕНИЕ СТАТУСА ТИКЕТА =====
-  async updateTicketStatus(ticketId: string, status: string): Promise<SupportTicket | null> {
-    try {
-      const updateData: SupportTicketUpdate = {
-        status,
-        updated_at: new Date().toISOString()
-      };
+  public async updateTicketStatus(ticketId: string, status: string): Promise<SupportTickets> {
+    const { data: updatedTicket, error } = await this.supabase
+      .from('support_tickets')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', ticketId)
+      .select()
+      .single();
 
-      const { data: updatedTicket, error } = await supabase
-        .from('support_tickets')
-        .update(updateData)
-        .eq('id', ticketId) // ✅ UUID как string
-        .select()
-        .single();
-
-      if (error || !updatedTicket) {
-        console.error('[SupportTicketService] Error updating ticket status:', error);
-        return null;
-      }
-
-      return updatedTicket;
-    } catch (error) {
-      console.error('[SupportTicketService] Error updating ticket status:', error);
-      return null;
+    if (error || !updatedTicket) {
+      console.error(`[SupportTicketService] Error updating status for ticket ${ticketId}:`, error);
+      throw new AppError('Не удалось обновить статус тикета.', 500);
     }
+    return updatedTicket;
   }
+}
 
-  // ===== НАЗНАЧЕНИЕ ОБРАБОТЧИКА ТИКЕТА =====
-  async assignTicketHandler(ticketId: string, handlerId: string): Promise<SupportTicket | null> {
-    try {
-      const updateData: SupportTicketUpdate = {
-        handler_user_id: handlerId, // ✅ UUID как string
-        updated_at: new Date().toISOString()
-      };
-
-      const { data: updatedTicket, error } = await supabase
-        .from('support_tickets')
-        .update(updateData)
-        .eq('id', ticketId) // ✅ UUID как string
-        .select()
-        .single();
-
-      if (error || !updatedTicket) {
-        console.error('[SupportTicketService] Error assigning ticket handler:', error);
-        return null;
-      }
-
-      return updatedTicket;
-    } catch (error) {
-      console.error('[SupportTicketService] Error assigning ticket handler:', error);
-      return null;
-    }
-  }
-
-  // ===== ПОЛУЧЕНИЕ ТИКЕТОВ ПО СТАТУСУ =====
-  async getTicketsByStatus(status: string): Promise<SupportTicket[]> {
-    try {
-      const { data: tickets, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .eq('status', status)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('[SupportTicketService] Error getting tickets by status:', error);
-        return [];
-      }
-
-      return tickets || [];
-    } catch (error) {
-      console.error('[SupportTicketService] Error getting tickets by status:', error);
-      return [];
-    }
-  }
-
-  // ===== ПОЛУЧЕНИЕ ТИКЕТОВ ОБРАБОТЧИКА =====
-  async getHandlerTickets(handlerId: string): Promise<SupportTicket[]> {
-    try {
-      const { data: tickets, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .eq('handler_user_id', handlerId) // ✅ UUID как string
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('[SupportTicketService] Error getting handler tickets:', error);
-        return [];
-      }
-
-      return tickets || [];
-    } catch (error) {
-      console.error('[SupportTicketService] Error getting handler tickets:', error);
-      return [];
-    }
-  }
-
-  // ===== УДАЛЕНИЕ ТИКЕТА =====
-  async deleteTicket(ticketId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('support_tickets')
-        .delete()
-        .eq('id', ticketId); // ✅ UUID как string
-
-      if (error) {
-        console.error('[SupportTicketService] Error deleting ticket:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('[SupportTicketService] Error deleting ticket:', error);
-      return false;
-    }
-  }
-
-  // ===== ПОЛУЧЕНИЕ СТАТИСТИКИ ТИКЕТОВ =====
-  async getTicketStats(): Promise<{
-    total: number;
-    open: number;
-    closed: number;
-    assigned: number;
-  }> {
-    try {
-      const { data: tickets, error } = await supabase
-        .from('support_tickets')
-        .select('status, handler_user_id');
-
-      if (error) {
-        console.error('[SupportTicketService] Error getting ticket stats:', error);
-        return { total: 0, open: 0, closed: 0, assigned: 0 };
-      }
-
-      const total = tickets?.length || 0;
-      const open = tickets?.filter(t => t.status === 'open').length || 0;
-      const closed = tickets?.filter(t => t.status === 'closed').length || 0;
-      const assigned = tickets?.filter(t => t.handler_user_id).length || 0;
-
-      return { total, open, closed, assigned };
-    } catch (error) {
-      console.error('[SupportTicketService] Error getting ticket stats:', error);
-      return { total: 0, open: 0, closed: 0, assigned: 0 };
-    }
-  }
-} 
+// Правильно инстанцируем и экспортируем сервис
+const supportTicketService = new SupportTicketService();
+export default supportTicketService;

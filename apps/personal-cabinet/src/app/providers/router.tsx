@@ -1,9 +1,30 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { DashboardPage } from '@pages/dashboard'
-import { ProfilePage } from '@pages/profile'
-import { SettingsPage } from '@pages/settings'
-import { LoginPage } from '@pages/auth/login'
-import { RegisterPage } from '@pages/auth/register'
+import { 
+  DashboardPage, 
+  ProfilePage, 
+  SettingsPage, 
+  LoginPage, 
+  RegisterPage,
+  HomepagePage,
+  FAQPage,
+  DepartmentsPage,
+  ApplicationsPage,
+  TestsPage,
+  ReportsPage,
+  SupportPage,
+  MDTPage,
+  AdminPanelPage,
+  LeaveManagementPage,
+  TransferDepartmentPage,
+  JointPositionsPage,
+  EntryApplicationPage,
+  TestExamPage,
+  NotificationsPage,
+  ForumPage,
+  AdminLeaveManagementPage,
+  AdminTestsPage,
+  AdminReportsPage
+} from '@pages'
 
 export function AppRouter() {
   return (

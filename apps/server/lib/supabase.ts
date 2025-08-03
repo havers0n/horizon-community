@@ -170,6 +170,12 @@ export type BolosUpdate = TablesUpdate<{ schema: 'mdt' }, 'bolos'>;
 export type ReportTemplatesInsert = TablesInsert<{ schema: 'mdt' }, 'report_templates'>;
 export type ReportTemplatesUpdate = TablesUpdate<{ schema: 'mdt' }, 'report_templates'>;
 
+export type EmsFdReportsInsert = TablesInsert<{ schema: 'mdt' }, 'ems_fd_reports'>;
+export type EmsFdReportsUpdate = TablesUpdate<{ schema: 'mdt' }, 'ems_fd_reports'>;
+
+export type LawReportsInsert = TablesInsert<{ schema: 'mdt' }, 'law_reports'>;
+export type LawReportsUpdate = TablesUpdate<{ schema: 'mdt' }, 'law_reports'>;
+
 export type UnitsOnDutyInsert = TablesInsert<{ schema: 'mdt' }, 'units_on_duty'>;
 export type UnitsOnDutyUpdate = TablesUpdate<{ schema: 'mdt' }, 'units_on_duty'>;
 

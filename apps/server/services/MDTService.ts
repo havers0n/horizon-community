@@ -1,60 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../../packages/db-types/src/index';
 
-// Типы из базы данных
-type MDTCall = Database['mdt']['Tables']['calls']['Row'];
-type MDTUnit = Database['mdt']['Tables']['units_on_duty']['Row'];
+// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
 type MDTBolo = Database['mdt']['Tables']['bolos']['Row'];
+type MDTBoloInsert = Database['mdt']['Tables']['bolos']['Insert'];
+type MDTBoloUpdate = Database['mdt']['Tables']['bolos']['Update'];
+
 type MDTSignal = Database['mdt']['Tables']['mdt_signals']['Row'];
+type MDTSignalInsert = Database['mdt']['Tables']['mdt_signals']['Insert'];
+type MDTSignalUpdate = Database['mdt']['Tables']['mdt_signals']['Update'];
+
 type MDTNotification = Database['mdt']['Tables']['notifications']['Row'];
+type MDTNotificationInsert = Database['mdt']['Tables']['notifications']['Insert'];
+type MDTNotificationUpdate = Database['mdt']['Tables']['notifications']['Update'];
+
 type MDTApplication = Database['mdt']['Tables']['applications']['Row'];
+type MDTApplicationInsert = Database['mdt']['Tables']['applications']['Insert'];
+type MDTApplicationUpdate = Database['mdt']['Tables']['applications']['Update'];
+
 type MDTLawReport = Database['mdt']['Tables']['law_reports']['Row'];
+type MDTLawReportInsert = Database['mdt']['Tables']['law_reports']['Insert'];
+type MDTLawReportUpdate = Database['mdt']['Tables']['law_reports']['Update'];
+
 type MDTEmsFdReport = Database['mdt']['Tables']['ems_fd_reports']['Row'];
+type MDTEmsFdReportInsert = Database['mdt']['Tables']['ems_fd_reports']['Insert'];
+type MDTEmsFdReportUpdate = Database['mdt']['Tables']['ems_fd_reports']['Update'];
 
-// Типы для создания/обновления
-type CreateCallData = {
-  callerName?: string | null;
-  callerPhone?: string | null;
-  location: string;
-  description: string;
-  type: string;
-  priority?: string | null;
-  status?: string;
-  patientInfo?: any;
-  fireInfo?: any;
-  attachments?: any;
-  assignedUnits?: any;
-};
+// ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
 
-type UpdateCallData = Partial<CreateCallData>;
-
-type CreateUnitData = {
-  characterId: string;
-  unitNumber: string;
-  departmentId: string;
-  status?: string;
-  location?: any;
-  currentCallId?: string | null;
-  userId: string;
-};
-
-type UpdateUnitData = Partial<CreateUnitData>;
-
-type CreateSignalData = {
-  title: string;
-  description?: string | null;
-  type?: string | null;
-  authorCharacterId?: string | null;
-  priority?: string | null;
-  location?: string | null;
-  coordinates?: any;
-  isActive?: boolean | null;
-  expiresAt?: string | null;
-};
-
-type UpdateSignalData = Partial<CreateSignalData>;
-
-type CreateBoloData = {
+export interface CreateBoloData {
   type: string;
   reason: string;
   subjectName?: string | null;
@@ -62,48 +36,62 @@ type CreateBoloData = {
   vehicleDescription?: string | null;
   vehiclePlate?: string | null;
   location?: string | null;
-  priority?: string | null;
-  authorCharacterId: string;
-  status?: string;
-};
+  priority?: 'low' | 'medium' | 'high' | 'emergency';
+  authorCharacterId: string; // ✅ UUID как string
+  status?: 'active' | 'resolved' | 'expired';
+}
 
-type UpdateBoloData = Partial<CreateBoloData>;
+export interface UpdateBoloData extends Partial<CreateBoloData> {}
 
-type CreateNotificationData = {
+export interface CreateSignalData {
+  title: string;
+  description?: string | null;
+  type?: string | null;
+  authorCharacterId?: string | null; // ✅ UUID как string
+  priority?: 'low' | 'medium' | 'high' | 'emergency';
+  location?: string | null;
+  coordinates?: any;
+  isActive?: boolean | null;
+  expiresAt?: string | null;
+}
+
+export interface UpdateSignalData extends Partial<CreateSignalData> {}
+
+export interface CreateNotificationData {
   content: string;
-  recipientUserId: string;
+  recipientUserId: string; // ✅ UUID как string
   isRead?: boolean;
   link?: string | null;
-};
+}
 
-type CreateApplicationData = {
+export interface CreateApplicationData {
   type: string;
-  authorUserId: string;
-  authorCharacterId: string;
+  authorUserId: string; // ✅ UUID как string
+  authorCharacterId: string; // ✅ UUID как string
   data?: any;
-  status?: string;
+  status?: 'pending' | 'approved' | 'rejected';
   statusHistory?: any[];
-};
+}
 
-type UpdateApplicationData = Partial<CreateApplicationData>;
+export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 
-type CreateLawReportData = {
+export interface CreateLawReportData {
   title: string;
   description: string;
-  authorCharacterId: string;
+  authorCharacterId: string; // ✅ UUID как string
   incidentLocation: string;
   incidentTime: string;
   incidentType: string;
   participants?: any;
   penalCodes?: any;
   seizedItems?: any;
-  callId?: string | null;
-};
+  callId?: string | null; // ✅ UUID как string
+}
 
-type CreateEmsFdReportData = {
+export interface CreateEmsFdReportData {
   title: string;
   description: string;
-  authorCharacterId: string;
+  authorCharacterId: string; // ✅ UUID как string
   incidentLocation: string;
   incidentTime: string;
   incidentType: string;
@@ -113,421 +101,42 @@ type CreateEmsFdReportData = {
   treatmentProvided?: string | null;
   outcome?: string | null;
   fireDetails?: any;
-  callId?: string | null;
-};
+  callId?: string | null; // ✅ UUID как string
+}
 
+// ===== СОВРЕМЕННЫЙ MDT SERVICE =====
 export class MDTService {
-  private supabase: ReturnType<typeof createClient<Database>>;
+  private supabase;
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    this.supabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
+    this.supabase = createClient(
+      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
   }
 
-  // ===== УПРАВЛЕНИЕ ЮНИТАМИ =====
+  // ===== ОПЕРАЦИИ С BOLO (BE ON THE LOOKOUT) =====
 
   /**
-   * Получить все активные юниты
-   */
-  async getActiveUnits(): Promise<MDTUnit[]> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_active_units');
-      
-      if (error) {
-        console.error('Error getting active units:', error);
-        throw new Error('Failed to get active units');
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error getting active units:', error);
-      throw new Error('Failed to get active units');
-    }
-  }
-
-  /**
-   * Получить юнит по ID
-   */
-  async getUnitById(unitId: string): Promise<MDTUnit | null> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_unit_by_id', {
-        p_unit_id: unitId
-      });
-      
-      if (error) {
-        console.error('Error getting unit by id:', error);
-        throw new Error('Failed to get unit by id');
-      }
-
-      return data?.[0] || null;
-    } catch (error) {
-      console.error('Error getting unit by id:', error);
-      throw new Error('Failed to get unit by id');
-    }
-  }
-
-  /**
-   * Получить юниты по департаменту
-   */
-  async getUnitsByDepartment(departmentId: string): Promise<MDTUnit[]> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_units_by_department', {
-        p_department_id: departmentId
-      });
-      
-      if (error) {
-        console.error('Error getting units by department:', error);
-        throw new Error('Failed to get units by department');
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error getting units by department:', error);
-      throw new Error('Failed to get units by department');
-    }
-  }
-
-  /**
-   * Получить юниты по статусу
-   */
-  async getUnitsByStatus(status: string): Promise<MDTUnit[]> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_units_by_status', {
-        p_status: status
-      });
-      
-      if (error) {
-        console.error('Error getting units by status:', error);
-        throw new Error('Failed to get units by status');
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error getting units by status:', error);
-      throw new Error('Failed to get units by status');
-    }
-  }
-
-  /**
-   * Создать новый юнит
-   */
-  async createUnit(data: CreateUnitData): Promise<MDTUnit> {
-    try {
-      const { data: unit, error } = await this.supabase.rpc('create_new_unit_on_duty', {
-        p_data: {
-          character_id: data.characterId,
-          unit_number: data.unitNumber,
-          department_id: data.departmentId,
-          status: data.status || 'available',
-          location: data.location || null,
-          current_call_id: data.currentCallId || null,
-          user_id: data.userId
-        }
-      });
-
-      if (error) {
-        console.error('Error creating unit:', error);
-        throw new Error('Failed to create unit');
-      }
-
-      return unit as MDTUnit;
-    } catch (error) {
-      console.error('Error creating unit:', error);
-      throw new Error('Failed to create unit');
-    }
-  }
-
-  /**
-   * Обновить юнит
-   */
-  async updateUnit(unitId: string, data: UpdateUnitData): Promise<MDTUnit> {
-    try {
-      const updateData: any = {};
-      
-      if (data.unitNumber !== undefined) updateData.unit_number = data.unitNumber;
-      if (data.status !== undefined) updateData.status = data.status;
-      if (data.location !== undefined) updateData.location = data.location;
-      if (data.currentCallId !== undefined) updateData.current_call_id = data.currentCallId;
-
-      const { data: unit, error } = await this.supabase.rpc('update_unit_on_duty', {
-        p_unit_id: unitId,
-        p_data: updateData
-      });
-
-      if (error) {
-        console.error('Error updating unit:', error);
-        throw new Error('Failed to update unit');
-      }
-
-      return unit as MDTUnit;
-    } catch (error) {
-      console.error('Error updating unit:', error);
-      throw new Error('Failed to update unit');
-    }
-  }
-
-  /**
-   * Обновить статус юнита
-   */
-  async updateUnitStatus(unitId: string, status: string): Promise<MDTUnit> {
-    return this.updateUnit(unitId, { status });
-  }
-
-  /**
-   * Обновить местоположение юнита
-   */
-  async updateUnitLocation(unitId: string, location: any): Promise<MDTUnit> {
-    return this.updateUnit(unitId, { location });
-  }
-
-  /**
-   * Удалить юнит с дежурства
-   */
-  async deleteUnit(unitId: string): Promise<boolean> {
-    try {
-      const { data, error } = await this.supabase.rpc('delete_unit_on_duty', {
-        p_unit_id: unitId
-      });
-
-      if (error) {
-        console.error('Error deleting unit:', error);
-        throw new Error('Failed to delete unit');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error deleting unit:', error);
-      throw new Error('Failed to delete unit');
-    }
-  }
-
-  // ===== УПРАВЛЕНИЕ ВЫЗОВАМИ 911 =====
-
-  /**
-   * Получить все активные вызовы
-   */
-  async getCalls(): Promise<MDTCall[]> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_active_calls');
-      
-      if (error) {
-        console.error('Error getting calls:', error);
-        throw new Error('Failed to get calls');
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error getting calls:', error);
-      throw new Error('Failed to get calls');
-    }
-  }
-
-  /**
-   * Получить вызов по ID
-   */
-  async getCallById(callId: string): Promise<MDTCall | null> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_call_by_id', {
-        p_call_id: callId
-      });
-      
-      if (error) {
-        console.error('Error getting call by id:', error);
-        throw new Error('Failed to get call by id');
-      }
-
-      return data?.[0] || null;
-    } catch (error) {
-      console.error('Error getting call by id:', error);
-      throw new Error('Failed to get call by id');
-    }
-  }
-
-  /**
-   * Получить вызовы по статусу
-   */
-  async getCallsByStatus(status: string): Promise<MDTCall[]> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_calls_by_status', {
-        p_status: status
-      });
-      
-      if (error) {
-        console.error('Error getting calls by status:', error);
-        throw new Error('Failed to get calls by status');
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error getting calls by status:', error);
-      throw new Error('Failed to get calls by status');
-    }
-  }
-
-  /**
-   * Получить вызовы по типу
-   */
-  async getCallsByType(type: string): Promise<MDTCall[]> {
-    try {
-      const { data, error } = await this.supabase.rpc('get_calls_by_type', {
-        p_type: type
-      });
-      
-      if (error) {
-        console.error('Error getting calls by type:', error);
-        throw new Error('Failed to get calls by type');
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error getting calls by type:', error);
-      throw new Error('Failed to get calls by type');
-    }
-  }
-
-  /**
-   * Создать новый вызов 911
-   */
-  async createCall(data: CreateCallData): Promise<MDTCall> {
-    try {
-      const { data: call, error } = await this.supabase.rpc('create_new_call', {
-        p_data: {
-          caller_name: data.callerName || null,
-          caller_phone: data.callerPhone || null,
-          location: data.location,
-          description: data.description,
-          type: data.type,
-          priority: data.priority || null,
-          status: data.status || 'pending',
-          patient_info: data.patientInfo || null,
-          fire_info: data.fireInfo || null,
-          attachments: data.attachments || null,
-          assigned_units: data.assignedUnits || null
-        }
-      });
-
-      if (error) {
-        console.error('Error creating call:', error);
-        throw new Error('Failed to create call');
-      }
-
-      return call as MDTCall;
-    } catch (error) {
-      console.error('Error creating call:', error);
-      throw new Error('Failed to create call');
-    }
-  }
-
-  /**
-   * Обновить вызов 911
-   */
-  async updateCall(callId: string, data: UpdateCallData): Promise<MDTCall> {
-    try {
-      const updateData: any = {};
-
-      if (data.callerName !== undefined) updateData.caller_name = data.callerName;
-      if (data.callerPhone !== undefined) updateData.caller_phone = data.callerPhone;
-      if (data.location !== undefined) updateData.location = data.location;
-      if (data.description !== undefined) updateData.description = data.description;
-      if (data.type !== undefined) updateData.type = data.type;
-      if (data.priority !== undefined) updateData.priority = data.priority;
-      if (data.status !== undefined) updateData.status = data.status;
-      if (data.patientInfo !== undefined) updateData.patient_info = data.patientInfo;
-      if (data.fireInfo !== undefined) updateData.fire_info = data.fireInfo;
-      if (data.attachments !== undefined) updateData.attachments = data.attachments;
-      if (data.assignedUnits !== undefined) updateData.assigned_units = data.assignedUnits;
-
-      const { data: call, error } = await this.supabase.rpc('update_call', {
-        p_call_id: callId,
-        p_data: updateData
-      });
-
-      if (error) {
-        console.error('Error updating call:', error);
-        throw new Error('Failed to update call');
-      }
-
-      return call as MDTCall;
-    } catch (error) {
-      console.error('Error updating call:', error);
-      throw new Error('Failed to update call');
-    }
-  }
-
-  /**
-   * Назначить юниты на вызов
-   */
-  async assignUnitsToCall(callId: string, unitIds: string[]): Promise<void> {
-    try {
-      // Обновляем вызов
-      await this.updateCall(callId, { assignedUnits: unitIds });
-
-      // Обновляем статус юнитов
-      for (const unitId of unitIds) {
-        await this.updateUnit(unitId, {
-          status: 'en_route',
-          currentCallId: callId
-        });
-      }
-    } catch (error) {
-      console.error('Error assigning units to call:', error);
-      throw new Error('Failed to assign units to call');
-    }
-  }
-
-  /**
-   * Обновить статус вызова
-   */
-  async updateCallStatus(callId: string, status: string): Promise<MDTCall> {
-    return this.updateCall(callId, { status });
-  }
-
-  /**
-   * Удалить вызов (soft delete)
-   */
-  async deleteCall(callId: string): Promise<boolean> {
-    try {
-      const { data, error } = await this.supabase.rpc('delete_call', {
-        p_call_id: callId
-      });
-
-      if (error) {
-        console.error('Error deleting call:', error);
-        throw new Error('Failed to delete call');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error deleting call:', error);
-      throw new Error('Failed to delete call');
-    }
-  }
-
-  // ===== УПРАВЛЕНИЕ BOLO =====
-
-  /**
-   * Получить все активные BOLO с информацией об авторе
+   * Получить все активные BOLO
    */
   async getBolos(): Promise<MDTBolo[]> {
     try {
-      const { data, error } = await this.supabase.rpc('get_active_bolos_with_author');
-      
+      const { data, error } = await this.supabase
+        .from("bolos")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
       if (error) {
-        console.error('Error getting BOLOs:', error);
-        throw new Error('Failed to get BOLOs');
+        console.error("[MDTService] Error fetching bolos:", error);
+        throw new Error("Не удалось получить BOLO");
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting BOLOs:', error);
-      throw new Error('Failed to get BOLOs');
+      console.error("[MDTService] Error in getBolos:", error);
+      throw error;
     }
   }
 
@@ -536,19 +145,22 @@ export class MDTService {
    */
   async getBoloById(boloId: string): Promise<MDTBolo | null> {
     try {
-      const { data, error } = await this.supabase.rpc('get_bolo_by_id', {
-        p_bolo_id: boloId
-      });
-      
+      const { data, error } = await this.supabase
+        .from("bolos")
+        .select("*")
+        .eq("id", boloId) // ✅ UUID как string
+        .single();
+
       if (error) {
-        console.error('Error getting BOLO by id:', error);
-        throw new Error('Failed to get BOLO by id');
+        if (error.code === 'PGRST116') return null;
+        console.error(`[MDTService] Error fetching bolo with id ${boloId}:`, error);
+        throw new Error("Ошибка при поиске BOLO");
       }
 
-      return data?.[0] || null;
+      return data;
     } catch (error) {
-      console.error('Error getting BOLO by id:', error);
-      throw new Error('Failed to get BOLO by id');
+      console.error("[MDTService] Error in getBoloById:", error);
+      throw error;
     }
   }
 
@@ -557,19 +169,22 @@ export class MDTService {
    */
   async getBolosByType(type: string): Promise<MDTBolo[]> {
     try {
-      const { data, error } = await this.supabase.rpc('get_bolos_by_type', {
-        p_type: type
-      });
-      
+      const { data, error } = await this.supabase
+        .from("bolos")
+        .select("*")
+        .eq("type", type)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
       if (error) {
-        console.error('Error getting BOLOs by type:', error);
-        throw new Error('Failed to get BOLOs by type');
+        console.error("[MDTService] Error fetching bolos by type:", error);
+        throw new Error("Не удалось получить BOLO по типу");
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting BOLOs by type:', error);
-      throw new Error('Failed to get BOLOs by type');
+      console.error("[MDTService] Error in getBolosByType:", error);
+      throw error;
     }
   }
 
@@ -578,19 +193,22 @@ export class MDTService {
    */
   async getBolosByPriority(priority: string): Promise<MDTBolo[]> {
     try {
-      const { data, error } = await this.supabase.rpc('get_bolos_by_priority', {
-        p_priority: priority
-      });
-      
+      const { data, error } = await this.supabase
+        .from("bolos")
+        .select("*")
+        .eq("priority", priority)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
       if (error) {
-        console.error('Error getting BOLOs by priority:', error);
-        throw new Error('Failed to get BOLOs by priority');
+        console.error("[MDTService] Error fetching bolos by priority:", error);
+        throw new Error("Не удалось получить BOLO по приоритету");
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting BOLOs by priority:', error);
-      throw new Error('Failed to get BOLOs by priority');
+      console.error("[MDTService] Error in getBolosByPriority:", error);
+      throw error;
     }
   }
 
@@ -599,30 +217,34 @@ export class MDTService {
    */
   async createBolo(data: CreateBoloData): Promise<MDTBolo> {
     try {
-      const { data: bolo, error } = await this.supabase.rpc('create_new_bolo', {
-        p_data: {
-          type: data.type,
-          reason: data.reason,
-          subject_name: data.subjectName || null,
-          subject_description: data.subjectDescription || null,
-          vehicle_description: data.vehicleDescription || null,
-          vehicle_plate: data.vehiclePlate || null,
-          location: data.location || null,
-          priority: data.priority || null,
-          author_character_id: data.authorCharacterId,
-          status: data.status || 'active'
-        }
-      });
+      const insertData: MDTBoloInsert = {
+        type: data.type,
+        reason: data.reason,
+        subject_name: data.subjectName,
+        subject_description: data.subjectDescription,
+        vehicle_description: data.vehicleDescription,
+        vehicle_plate: data.vehiclePlate,
+        location: data.location,
+        priority: data.priority || 'medium',
+        author_character_id: data.authorCharacterId, // ✅ UUID как string
+        status: data.status || 'active'
+      };
+
+      const { data: bolo, error } = await this.supabase
+        .from("bolos")
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error creating BOLO:', error);
-        throw new Error('Failed to create BOLO');
+        console.error("[MDTService] Error creating bolo:", error);
+        throw new Error("Не удалось создать BOLO");
       }
 
-      return bolo as MDTBolo;
+      return bolo;
     } catch (error) {
-      console.error('Error creating BOLO:', error);
-      throw new Error('Failed to create BOLO');
+      console.error("[MDTService] Error in createBolo:", error);
+      throw error;
     }
   }
 
@@ -631,8 +253,8 @@ export class MDTService {
    */
   async updateBolo(boloId: string, data: UpdateBoloData): Promise<MDTBolo> {
     try {
-      const updateData: any = {};
-
+      const updateData: MDTBoloUpdate = {};
+      
       if (data.type !== undefined) updateData.type = data.type;
       if (data.reason !== undefined) updateData.reason = data.reason;
       if (data.subjectName !== undefined) updateData.subject_name = data.subjectName;
@@ -641,64 +263,72 @@ export class MDTService {
       if (data.vehiclePlate !== undefined) updateData.vehicle_plate = data.vehiclePlate;
       if (data.location !== undefined) updateData.location = data.location;
       if (data.priority !== undefined) updateData.priority = data.priority;
+      if (data.authorCharacterId !== undefined) updateData.author_character_id = data.authorCharacterId;
       if (data.status !== undefined) updateData.status = data.status;
 
-      const { data: bolo, error } = await this.supabase.rpc('update_bolo', {
-        p_bolo_id: boloId,
-        p_data: updateData
-      });
+      const { data: bolo, error } = await this.supabase
+        .from("bolos")
+        .update(updateData)
+        .eq("id", boloId) // ✅ UUID как string
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error updating BOLO:', error);
-        throw new Error('Failed to update BOLO');
+        console.error("[MDTService] Error updating bolo:", error);
+        throw new Error("Не удалось обновить BOLO");
       }
 
-      return bolo as MDTBolo;
+      return bolo;
     } catch (error) {
-      console.error('Error updating BOLO:', error);
-      throw new Error('Failed to update BOLO');
+      console.error("[MDTService] Error in updateBolo:", error);
+      throw error;
     }
   }
 
   /**
-   * Удалить BOLO (soft delete)
+   * Удалить BOLO
    */
   async deleteBolo(boloId: string): Promise<boolean> {
     try {
-      const { data, error } = await this.supabase.rpc('delete_bolo', {
-        p_bolo_id: boloId
-      });
+      const { error } = await this.supabase
+        .from("bolos")
+        .delete()
+        .eq("id", boloId); // ✅ UUID как string
 
       if (error) {
-        console.error('Error deleting BOLO:', error);
-        throw new Error('Failed to delete BOLO');
+        console.error("[MDTService] Error deleting bolo:", error);
+        throw new Error("Не удалось удалить BOLO");
       }
 
-      return data;
+      return true;
     } catch (error) {
-      console.error('Error deleting BOLO:', error);
-      throw new Error('Failed to delete BOLO');
+      console.error("[MDTService] Error in deleteBolo:", error);
+      throw error;
     }
   }
 
-  // ===== УПРАВЛЕНИЕ СИГНАЛАМИ =====
+  // ===== ОПЕРАЦИИ С СИГНАЛАМИ =====
 
   /**
-   * Получить активные сигналы
+   * Получить все активные сигналы
    */
   async getActiveSignals(): Promise<MDTSignal[]> {
     try {
-      const { data, error } = await this.supabase.rpc('get_active_signals');
-      
+      const { data, error } = await this.supabase
+        .from("mdt_signals")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
       if (error) {
-        console.error('Error getting active signals:', error);
-        throw new Error('Failed to get active signals');
+        console.error("[MDTService] Error fetching signals:", error);
+        throw new Error("Не удалось получить сигналы");
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting active signals:', error);
-      throw new Error('Failed to get active signals');
+      console.error("[MDTService] Error in getActiveSignals:", error);
+      throw error;
     }
   }
 
@@ -707,19 +337,22 @@ export class MDTService {
    */
   async getSignalById(signalId: string): Promise<MDTSignal | null> {
     try {
-      const { data, error } = await this.supabase.rpc('get_signal_by_id', {
-        p_signal_id: signalId
-      });
-      
+      const { data, error } = await this.supabase
+        .from("mdt_signals")
+        .select("*")
+        .eq("id", signalId) // ✅ UUID как string
+        .single();
+
       if (error) {
-        console.error('Error getting signal by id:', error);
-        throw new Error('Failed to get signal by id');
+        if (error.code === 'PGRST116') return null;
+        console.error(`[MDTService] Error fetching signal with id ${signalId}:`, error);
+        throw new Error("Ошибка при поиске сигнала");
       }
 
-      return data?.[0] || null;
+      return data;
     } catch (error) {
-      console.error('Error getting signal by id:', error);
-      throw new Error('Failed to get signal by id');
+      console.error("[MDTService] Error in getSignalById:", error);
+      throw error;
     }
   }
 
@@ -728,29 +361,33 @@ export class MDTService {
    */
   async createSignal(data: CreateSignalData): Promise<MDTSignal> {
     try {
-      const { data: signal, error } = await this.supabase.rpc('create_new_signal', {
-        p_data: {
-          title: data.title,
-          description: data.description || null,
-          type: data.type || null,
-          author_character_id: data.authorCharacterId || null,
-          priority: data.priority || null,
-          location: data.location || null,
-          coordinates: data.coordinates || null,
-          is_active: data.isActive !== false,
-          expires_at: data.expiresAt || null
-        }
-      });
+      const insertData: MDTSignalInsert = {
+        title: data.title,
+        description: data.description,
+        type: data.type,
+        author_character_id: data.authorCharacterId, // ✅ UUID как string
+        priority: data.priority || 'medium',
+        location: data.location,
+        coordinates: data.coordinates,
+        is_active: data.isActive ?? true,
+        expires_at: data.expiresAt
+      };
+
+      const { data: signal, error } = await this.supabase
+        .from("mdt_signals")
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error creating signal:', error);
-        throw new Error('Failed to create signal');
+        console.error("[MDTService] Error creating signal:", error);
+        throw new Error("Не удалось создать сигнал");
       }
 
-      return signal as MDTSignal;
+      return signal;
     } catch (error) {
-      console.error('Error creating signal:', error);
-      throw new Error('Failed to create signal');
+      console.error("[MDTService] Error in createSignal:", error);
+      throw error;
     }
   }
 
@@ -759,31 +396,34 @@ export class MDTService {
    */
   async updateSignal(signalId: string, data: UpdateSignalData): Promise<MDTSignal> {
     try {
-      const updateData: any = {};
-
+      const updateData: MDTSignalUpdate = {};
+      
       if (data.title !== undefined) updateData.title = data.title;
       if (data.description !== undefined) updateData.description = data.description;
       if (data.type !== undefined) updateData.type = data.type;
+      if (data.authorCharacterId !== undefined) updateData.author_character_id = data.authorCharacterId;
       if (data.priority !== undefined) updateData.priority = data.priority;
       if (data.location !== undefined) updateData.location = data.location;
       if (data.coordinates !== undefined) updateData.coordinates = data.coordinates;
       if (data.isActive !== undefined) updateData.is_active = data.isActive;
       if (data.expiresAt !== undefined) updateData.expires_at = data.expiresAt;
 
-      const { data: signal, error } = await this.supabase.rpc('update_signal', {
-        p_signal_id: signalId,
-        p_data: updateData
-      });
+      const { data: signal, error } = await this.supabase
+        .from("mdt_signals")
+        .update(updateData)
+        .eq("id", signalId) // ✅ UUID как string
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error updating signal:', error);
-        throw new Error('Failed to update signal');
+        console.error("[MDTService] Error updating signal:", error);
+        throw new Error("Не удалось обновить сигнал");
       }
 
-      return signal as MDTSignal;
+      return signal;
     } catch (error) {
-      console.error('Error updating signal:', error);
-      throw new Error('Failed to update signal');
+      console.error("[MDTService] Error in updateSignal:", error);
+      throw error;
     }
   }
 
@@ -792,75 +432,97 @@ export class MDTService {
    */
   async revokeSignal(signalId: string): Promise<boolean> {
     try {
-      const { data, error } = await this.supabase.rpc('revoke_signal', {
-        p_signal_id: signalId
-      });
+      const { error } = await this.supabase
+        .from("mdt_signals")
+        .update({ is_active: false })
+        .eq("id", signalId); // ✅ UUID как string
 
       if (error) {
-        console.error('Error revoking signal:', error);
-        throw new Error('Failed to revoke signal');
+        console.error("[MDTService] Error revoking signal:", error);
+        throw new Error("Не удалось отозвать сигнал");
       }
 
-      return data;
+      return true;
     } catch (error) {
-      console.error('Error revoking signal:', error);
-      throw new Error('Failed to revoke signal');
+      console.error("[MDTService] Error in revokeSignal:", error);
+      throw error;
     }
   }
 
   /**
-   * Отправить уведомления о сигнале
+   * Уведомить о сигнале
    */
   async notifySignal(signalId: string): Promise<void> {
     try {
-      // Получаем информацию о сигнале
+      // Получаем сигнал
       const signal = await this.getSignalById(signalId);
       if (!signal) {
-        throw new Error('Signal not found');
+        throw new Error("Сигнал не найден");
       }
 
-      // Получаем всех активных юнитов
-      const units = await this.getActiveUnits();
+      // Создаем уведомление для всех активных юнитов
+      const { data: units, error: unitsError } = await this.supabase
+        .from("units_on_duty")
+        .select("user_id")
+        .eq("status", "available");
 
-      // Отправляем уведомления всем юнитам
-      for (const unit of units) {
-        await this.createNotification({
-          content: `Новый сигнал: ${signal.title}`,
-          recipientUserId: unit.user_id,
-          link: `/mdt/signals/${signalId}`
-        });
+      if (unitsError) {
+        console.error("[MDTService] Error fetching units for notification:", unitsError);
+        throw new Error("Не удалось получить юниты для уведомления");
+      }
+
+      // Создаем уведомления
+      const notifications = units.map(unit => ({
+        content: `Новый сигнал: ${signal.title}`,
+        recipient_user_id: unit.user_id, // ✅ UUID как string
+        link: `/mdt/signals/${signalId}`
+      }));
+
+      if (notifications.length > 0) {
+        const { error: notifyError } = await this.supabase
+          .from("notifications")
+          .insert(notifications);
+
+        if (notifyError) {
+          console.error("[MDTService] Error creating notifications:", notifyError);
+          throw new Error("Не удалось создать уведомления");
+        }
       }
     } catch (error) {
-      console.error('Error notifying signal:', error);
-      throw new Error('Failed to notify signal');
+      console.error("[MDTService] Error in notifySignal:", error);
+      throw error;
     }
   }
 
-  // ===== УПРАВЛЕНИЕ УВЕДОМЛЕНИЯМИ =====
+  // ===== ОПЕРАЦИИ С УВЕДОМЛЕНИЯМИ =====
 
   /**
-   * Создать новое уведомление
+   * Создать уведомление
    */
   async createNotification(data: CreateNotificationData): Promise<MDTNotification> {
     try {
-      const { data: notification, error } = await this.supabase.rpc('create_new_notification', {
-        p_data: {
-          content: data.content,
-          recipient_user_id: data.recipientUserId,
-          is_read: data.isRead || false,
-          link: data.link || null
-        }
-      });
+      const insertData: MDTNotificationInsert = {
+        content: data.content,
+        recipient_user_id: data.recipientUserId, // ✅ UUID как string
+        is_read: data.isRead ?? false,
+        link: data.link
+      };
+
+      const { data: notification, error } = await this.supabase
+        .from("notifications")
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error creating notification:', error);
-        throw new Error('Failed to create notification');
+        console.error("[MDTService] Error creating notification:", error);
+        throw new Error("Не удалось создать уведомление");
       }
 
-      return notification as MDTNotification;
+      return notification;
     } catch (error) {
-      console.error('Error creating notification:', error);
-      throw new Error('Failed to create notification');
+      console.error("[MDTService] Error in createNotification:", error);
+      throw error;
     }
   }
 
@@ -869,40 +531,45 @@ export class MDTService {
    */
   async getNotifications(userId: string): Promise<MDTNotification[]> {
     try {
-      const { data, error } = await this.supabase.rpc('get_user_notifications', {
-        p_user_id: userId
-      });
-      
+      const { data, error } = await this.supabase
+        .from("notifications")
+        .select("*")
+        .eq("recipient_user_id", userId) // ✅ UUID как string
+        .order("created_at", { ascending: false });
+
       if (error) {
-        console.error('Error getting notifications:', error);
-        throw new Error('Failed to get notifications');
+        console.error("[MDTService] Error fetching notifications:", error);
+        throw new Error("Не удалось получить уведомления");
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting notifications:', error);
-      throw new Error('Failed to get notifications');
+      console.error("[MDTService] Error in getNotifications:", error);
+      throw error;
     }
   }
 
   /**
-   * Получить непрочитанные уведомления пользователя
+   * Получить непрочитанные уведомления
    */
   async getUnreadNotifications(userId: string): Promise<MDTNotification[]> {
     try {
-      const { data, error } = await this.supabase.rpc('get_unread_notifications', {
-        p_user_id: userId
-      });
-      
+      const { data, error } = await this.supabase
+        .from("notifications")
+        .select("*")
+        .eq("recipient_user_id", userId) // ✅ UUID как string
+        .eq("is_read", false)
+        .order("created_at", { ascending: false });
+
       if (error) {
-        console.error('Error getting unread notifications:', error);
-        throw new Error('Failed to get unread notifications');
+        console.error("[MDTService] Error fetching unread notifications:", error);
+        throw new Error("Не удалось получить непрочитанные уведомления");
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error getting unread notifications:', error);
-      throw new Error('Failed to get unread notifications');
+      console.error("[MDTService] Error in getUnreadNotifications:", error);
+      throw error;
     }
   }
 
@@ -911,49 +578,54 @@ export class MDTService {
    */
   async markNotificationAsRead(notificationId: string): Promise<boolean> {
     try {
-      const { data, error } = await this.supabase.rpc('mark_notification_read', {
-        p_notification_id: notificationId
-      });
+      const { error } = await this.supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("id", notificationId); // ✅ UUID как string
 
       if (error) {
-        console.error('Error marking notification as read:', error);
-        throw new Error('Failed to mark notification as read');
+        console.error("[MDTService] Error marking notification as read:", error);
+        throw new Error("Не удалось отметить уведомление как прочитанное");
       }
 
-      return data;
+      return true;
     } catch (error) {
-      console.error('Error marking notification as read:', error);
-      throw new Error('Failed to mark notification as read');
+      console.error("[MDTService] Error in markNotificationAsRead:", error);
+      throw error;
     }
   }
 
-  // ===== УПРАВЛЕНИЕ ЗАЯВКАМИ =====
+  // ===== ОПЕРАЦИИ С ЗАЯВКАМИ =====
 
   /**
-   * Создать новую заявку
+   * Создать заявку
    */
   async createApplication(data: CreateApplicationData): Promise<MDTApplication> {
     try {
-      const { data: application, error } = await this.supabase.rpc('create_new_application', {
-        p_data: {
-          type: data.type,
-          author_user_id: data.authorUserId,
-          author_character_id: data.authorCharacterId,
-          data: data.data || null,
-          status: data.status || 'pending',
-          status_history: data.statusHistory || []
-        }
-      });
+      const insertData: MDTApplicationInsert = {
+        type: data.type,
+        author_user_id: data.authorUserId, // ✅ UUID как string
+        author_character_id: data.authorCharacterId, // ✅ UUID как string
+        data: data.data,
+        status: data.status || 'pending',
+        status_history: data.statusHistory
+      };
+
+      const { data: application, error } = await this.supabase
+        .from("applications")
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error creating application:', error);
-        throw new Error('Failed to create application');
+        console.error("[MDTService] Error creating application:", error);
+        throw new Error("Не удалось создать заявку");
       }
 
-      return application as MDTApplication;
+      return application;
     } catch (error) {
-      console.error('Error creating application:', error);
-      throw new Error('Failed to create application');
+      console.error("[MDTService] Error in createApplication:", error);
+      throw error;
     }
   }
 
@@ -962,138 +634,108 @@ export class MDTService {
    */
   async updateApplication(applicationId: string, data: UpdateApplicationData): Promise<MDTApplication> {
     try {
-      const updateData: any = {};
-
+      const updateData: MDTApplicationUpdate = {};
+      
+      if (data.type !== undefined) updateData.type = data.type;
+      if (data.authorUserId !== undefined) updateData.author_user_id = data.authorUserId;
+      if (data.authorCharacterId !== undefined) updateData.author_character_id = data.authorCharacterId;
       if (data.data !== undefined) updateData.data = data.data;
       if (data.status !== undefined) updateData.status = data.status;
       if (data.statusHistory !== undefined) updateData.status_history = data.statusHistory;
 
-      const { data: application, error } = await this.supabase.rpc('update_application', {
-        p_application_id: applicationId,
-        p_data: updateData
-      });
+      const { data: application, error } = await this.supabase
+        .from("applications")
+        .update(updateData)
+        .eq("id", applicationId) // ✅ UUID как string
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error updating application:', error);
-        throw new Error('Failed to update application');
+        console.error("[MDTService] Error updating application:", error);
+        throw new Error("Не удалось обновить заявку");
       }
 
-      return application as MDTApplication;
+      return application;
     } catch (error) {
-      console.error('Error updating application:', error);
-      throw new Error('Failed to update application');
+      console.error("[MDTService] Error in updateApplication:", error);
+      throw error;
     }
   }
 
-  // ===== УПРАВЛЕНИЕ ОТЧЕТАМИ =====
+  // ===== ОПЕРАЦИИ С РАПОРТАМИ =====
 
   /**
-   * Создать отчет правоохранительных органов
+   * Создать рапорт правоохранительных органов
    */
   async createLawReport(data: CreateLawReportData): Promise<MDTLawReport> {
     try {
-      const { data: report, error } = await this.supabase.rpc('create_new_law_report', {
-        p_data: {
-          title: data.title,
-          description: data.description,
-          author_character_id: data.authorCharacterId,
-          incident_location: data.incidentLocation,
-          incident_time: data.incidentTime,
-          incident_type: data.incidentType,
-          participants: data.participants || null,
-          penal_codes: data.penalCodes || null,
-          seized_items: data.seizedItems || null,
-          call_id: data.callId || null
-        }
-      });
+      const insertData: MDTLawReportInsert = {
+        title: data.title,
+        description: data.description,
+        author_character_id: data.authorCharacterId, // ✅ UUID как string
+        incident_location: data.incidentLocation,
+        incident_time: data.incidentTime,
+        incident_type: data.incidentType,
+        participants: data.participants,
+        penal_codes: data.penalCodes,
+        seized_items: data.seizedItems,
+        call_id: data.callId // ✅ UUID как string
+      };
+
+      const { data: report, error } = await this.supabase
+        .from("law_reports")
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error creating law report:', error);
-        throw new Error('Failed to create law report');
+        console.error("[MDTService] Error creating law report:", error);
+        throw new Error("Не удалось создать рапорт");
       }
 
-      return report as MDTLawReport;
+      return report;
     } catch (error) {
-      console.error('Error creating law report:', error);
-      throw new Error('Failed to create law report');
+      console.error("[MDTService] Error in createLawReport:", error);
+      throw error;
     }
   }
 
   /**
-   * Создать отчет EMS/FD
+   * Создать рапорт EMS/FD
    */
   async createEmsFdReport(data: CreateEmsFdReportData): Promise<MDTEmsFdReport> {
     try {
-      const { data: report, error } = await this.supabase.rpc('create_new_ems_fd_report', {
-        p_data: {
-          title: data.title,
-          description: data.description,
-          author_character_id: data.authorCharacterId,
-          incident_location: data.incidentLocation,
-          incident_time: data.incidentTime,
-          incident_type: data.incidentType,
-          patients: data.patients || null,
-          vital_signs: data.vitalSigns || null,
-          medications_administered: data.medicationsAdministered || null,
-          treatment_provided: data.treatmentProvided || null,
-          outcome: data.outcome || null,
-          fire_details: data.fireDetails || null,
-          call_id: data.callId || null
-        }
-      });
+      const insertData: MDTEmsFdReportInsert = {
+        title: data.title,
+        description: data.description,
+        author_character_id: data.authorCharacterId, // ✅ UUID как string
+        incident_location: data.incidentLocation,
+        incident_time: data.incidentTime,
+        incident_type: data.incidentType,
+        patients: data.patients,
+        vital_signs: data.vitalSigns,
+        medications_administered: data.medicationsAdministered,
+        treatment_provided: data.treatmentProvided,
+        outcome: data.outcome,
+        fire_details: data.fireDetails,
+        call_id: data.callId // ✅ UUID как string
+      };
+
+      const { data: report, error } = await this.supabase
+        .from("ems_fd_reports")
+        .insert(insertData)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Error creating EMS/FD report:', error);
-        throw new Error('Failed to create EMS/FD report');
+        console.error("[MDTService] Error creating EMS/FD report:", error);
+        throw new Error("Не удалось создать рапорт");
       }
 
-      return report as MDTEmsFdReport;
+      return report;
     } catch (error) {
-      console.error('Error creating EMS/FD report:', error);
-      throw new Error('Failed to create EMS/FD report');
+      console.error("[MDTService] Error in createEmsFdReport:", error);
+      throw error;
     }
   }
-
-  // ===== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
-
-  /**
-   * Активировать панику для юнита
-   */
-  async activatePanic(unitId: string): Promise<void> {
-    try {
-      // Получаем информацию о юните
-      const unit = await this.getUnitById(unitId);
-      if (!unit) {
-        throw new Error('Unit not found');
-      }
-
-      // Создаем сигнал о панике
-      await this.createSignal({
-        title: `ПАНИКА: ${unit.unit_number}`,
-        description: `Офицер активировал панику`,
-        type: 'LEO',
-        priority: 'critical',
-        isActive: true
-      });
-    } catch (error) {
-      console.error('Error activating panic:', error);
-      throw new Error('Failed to activate panic');
-    }
-  }
-
-  /**
-   * Деактивировать панику для юнита
-   */
-  async deactivatePanic(unitId: string): Promise<void> {
-    try {
-      // В данной реализации просто логируем деактивацию
-      console.log(`Panic deactivated for unit ${unitId}`);
-    } catch (error) {
-      console.error('Error deactivating panic:', error);
-      throw new Error('Failed to deactivate panic');
-    }
-  }
-}
-
-// Экспортируем экземпляр сервиса
-export const mdtService = new MDTService(); 
+} 
