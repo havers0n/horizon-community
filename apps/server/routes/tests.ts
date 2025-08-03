@@ -5,6 +5,7 @@ import { authenticateToken } from '../middleware/auth.middleware';
 import { IStorage } from '../storage';
 import { BusinessLogic } from '../businessLogic';
 import { Test, Application } from '@roleplay-identity/shared-schema';
+import { isValidUUID } from '../utils/uuid';
 
 const router = Router();
 
@@ -65,7 +66,17 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
    */
   router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
-      const testId = parseInt(req.params.id);
+      const testId = req.params.id;
+      
+      // UUID валидация
+      if (!isValidUUID(testId)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'id',
+          value: testId
+        });
+      }
+      
       const test = await storage.getTest(testId);
       
       if (!test) {
@@ -122,7 +133,17 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
    */
   router.post('/:id/start', authenticateToken, async (req: Request, res: Response) => {
     try {
-      const testId = parseInt(req.params.id);
+      const testId = req.params.id;
+      
+      // UUID валидация
+      if (!isValidUUID(testId)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'id',
+          value: testId
+        });
+      }
+      
       const { applicationId } = testSessionSchema.parse(req.body);
       
       const test = await storage.getTest(testId);
@@ -180,7 +201,17 @@ export function createTestRoutes(storage: IStorage, businessLogic: BusinessLogic
    */
   router.post('/:id/submit', authenticateToken, async (req: Request, res: Response) => {
     try {
-      const testId = parseInt(req.params.id);
+      const testId = req.params.id;
+      
+      // UUID валидация
+      if (!isValidUUID(testId)) {
+        return res.status(400).json({ 
+          message: 'Invalid UUID format', 
+          field: 'id',
+          value: testId
+        });
+      }
+      
       const validatedData = submitTestSchema.parse(req.body);
       
       const test = await storage.getTest(testId);

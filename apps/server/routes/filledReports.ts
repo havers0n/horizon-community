@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../db/index.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
+import { isValidUUID } from '../utils/uuid.js';
 
 const router: import('express').Router = Router();
 
@@ -55,7 +56,16 @@ router.get('/:id', authenticateToken, async (req, res) => {
       WHERE fr.id = $1
       LIMIT 1
     `;
-    const result = await pool.query(query, [parseInt(id)]);
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+    
+    const result = await pool.query(query, [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Report not found' });
     }
@@ -115,8 +125,17 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+
     // Проверяем существование рапорта
-    const existingReportResult = await pool.query('SELECT id, author_id, status FROM filled_reports WHERE id = $1', [parseInt(id)]);
+    const existingReportResult = await pool.query('SELECT id, author_id, status FROM filled_reports WHERE id = $1', [id]);
     if (existingReportResult.rows.length === 0) {
       return res.status(404).json({ error: 'Report not found' });
     }
@@ -154,7 +173,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       SET ${Object.keys(updateData).map(key => `${key} = $${Object.keys(updateData).indexOf(key) + 1}`).join(', ')}
       WHERE id = $${Object.keys(updateData).length + 1}
       RETURNING id, template_id AS "templateId", author_id AS "authorId", title, content, status, supervisor_comment AS "supervisorComment", submitted_at AS "submittedAt", created_at AS "createdAt", updated_at AS "updatedAt"
-    `, [...Object.values(updateData), parseInt(id)]);
+    `, [...Object.values(updateData), id]);
 
     res.json(updatedReport.rows[0]);
   } catch (error) {
@@ -173,8 +192,17 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+
     // Проверяем существование рапорта
-    const existingReportResult = await pool.query('SELECT id, author_id, status FROM filled_reports WHERE id = $1', [parseInt(id)]);
+    const existingReportResult = await pool.query('SELECT id, author_id, status FROM filled_reports WHERE id = $1', [id]);
     if (existingReportResult.rows.length === 0) {
       return res.status(404).json({ error: 'Report not found' });
     }
@@ -195,7 +223,7 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
       SET status = 'submitted', submitted_at = $1, updated_at = $2
       WHERE id = $3
       RETURNING id, template_id AS "templateId", author_id AS "authorId", title, content, status, supervisor_comment AS "supervisorComment", submitted_at AS "submittedAt", created_at AS "createdAt", updated_at AS "updatedAt"
-    `, [new Date(), new Date(), parseInt(id)]);
+    `, [new Date(), new Date(), id]);
 
     res.json(updatedReport.rows[0]);
   } catch (error) {
@@ -214,13 +242,22 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
+    // UUID валидация
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ 
+        message: 'Invalid UUID format', 
+        field: 'id',
+        value: id
+      });
+    }
+
     // Проверяем существование рапорта
-    const existingReportResult = await pool.query('SELECT id FROM filled_reports WHERE id = $1', [parseInt(id)]);
+    const existingReportResult = await pool.query('SELECT id FROM filled_reports WHERE id = $1', [id]);
     if (existingReportResult.rows.length === 0) {
       return res.status(404).json({ error: 'Report not found' });
     }
 
-    await pool.query('DELETE FROM filled_reports WHERE id = $1', [parseInt(id)]);
+    await pool.query('DELETE FROM filled_reports WHERE id = $1', [id]);
 
     res.json({ message: 'Report deleted successfully' });
   } catch (error) {
