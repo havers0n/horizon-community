@@ -22,6 +22,12 @@ jobs:
       - name: Install all dependencies
         run: npm ci
 
+      - name: Install dependencies in shared libraries
+        run: |
+          echo "🔧 Устанавливаем зависимости в shared библиотеках..."
+          cd libs/shared/schema && npm install
+          cd ../../..
+
       - name: Create .env file for Vite build
         run: |
           echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
@@ -29,10 +35,15 @@ jobs:
           echo "Создан .env файл для сборки фронтенда:"
           cat .env
 
+      - name: Run module diagnostics
+        run: |
+          echo "🔍 Запускаем диагностику модулей..."
+          npm run check-modules
+
       - name: Build application
         run: npm run build:production
 
-      - name: Verify build artifacts
+      - name: Verify build artifacts and check for zod
         run: |
           echo "📋 Проверяем наличие билд-артефактов..."
           
@@ -45,6 +56,29 @@ jobs:
           fi
           
           echo "✅ Все билд-артефакты найдены."
+          
+          # Проверяем наличие zod в собранных файлах
+          echo "🔍 Проверяем наличие zod в собранных файлах..."
+          
+          if find dist/apps/client/js -name "*.js" -exec grep -l "zod" {} \; | head -1; then
+            echo "✅ zod найден в собранных файлах клиента"
+          else
+            echo "⚠️  zod не найден в собранных файлах клиента"
+          fi
+          
+          if find dist/apps/mdtclient/js -name "*.js" -exec grep -l "zod" {} \; | head -1; then
+            echo "✅ zod найден в собранных файлах MDT"
+          else
+            echo "⚠️  zod не найден в собранных файлах MDT"
+          fi
+          
+          # Проверяем наличие zod-vendor файла
+          if find dist -name "*zod*" -type f; then
+            echo "✅ zod-vendor файл найден"
+          else
+            echo "⚠️  zod-vendor файл не найден"
+          fi
+          
           ls -R dist
 
       - name: Clean up node_modules before deploy
@@ -73,12 +107,30 @@ jobs:
             # Устанавливаем production-зависимости
             echo "🔧 Устанавливаем зависимости..."
             npm install --production
+            
+            # Устанавливаем зависимости в shared библиотеке
+            echo "🔧 Устанавливаем зависимости в shared/schema..."
+            cd libs/shared/schema && npm install && cd ../../../
 
             # ВОТ ФИНАЛЬНЫЙ КЛЮЧ: ВОССТАНАВЛИВАЕМ ССЫЛКУ ПОСЛЕ КОПИРОВАНИЯ
             echo "🔗 Восстанавливаем символическую ссылку на .env файл..."
             # Используем абсолютный путь для 100% надежности
             # -f означает --force, он перезапишет ссылку, если она вдруг осталась
             ln -sf /var/www/.env .env
+
+            # Проверяем наличие zod в собранных файлах на сервере
+            echo "🔍 Проверяем наличие zod в собранных файлах на сервере..."
+            if find dist/apps/client/js -name "*.js" -exec grep -l "zod" {} \; | head -1; then
+              echo "✅ zod найден в собранных файлах клиента на сервере"
+            else
+              echo "❌ zod НЕ найден в собранных файлах клиента на сервере"
+            fi
+            
+            if find dist -name "*zod*" -type f; then
+              echo "✅ zod-vendor файл найден на сервере"
+            else
+              echo "❌ zod-vendor файл НЕ найден на сервере"
+            fi
 
             # Теперь запускаем PM2, который найдет .env по этой ссылке
             echo "🚀 Запускаем/перезапускаем приложение через ecosystem.config.js..."
@@ -87,7 +139,7 @@ jobs:
             pm2 save
             echo "✅ Деплой завершен успешно!"
 
-      - name: Health check
+      - name: Health check and module verification
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -108,3 +160,22 @@ jobs:
               pm2 logs roleplayidentity --lines 20 --nostream
               exit 1
             fi
+            
+            echo "🔍 Проверяем доступность статических файлов..."
+            if curl -f http://localhost:5000/ > /dev/null 2>&1; then
+              echo "✅ Статические файлы клиента доступны!"
+            else
+              echo "⚠️  Статические файлы клиента недоступны"
+            fi
+            
+            echo "🔍 Проверяем доступность MDT..."
+            if curl -f http://localhost:5000/mdt/ > /dev/null 2>&1; then
+              echo "✅ MDT интерфейс доступен!"
+            else
+              echo "⚠️  MDT интерфейс недоступен"
+            fi
+            
+            echo "📋 Финальная проверка структуры файлов:"
+            ls -la dist/apps/client/js/ | head -10
+            echo "..."
+            ls -la dist/apps/mdtclient/js/ | head -10
