@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*", "./index.ts", "../../libs/shared-types/src/**/*", "../../libs/shared-utils/src/**/*", "../../libs/shared/schema/src/**/*"],
+  "include": ["./src/**/*", "./routes/**/*", "./services/**/*", "./index.ts", "../../libs/shared-types/src/**/*", "../../libs/shared-utils/src/**/*", "../../libs/shared/schema/src/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.js"],
   "compilerOptions": {
     "composite": true,

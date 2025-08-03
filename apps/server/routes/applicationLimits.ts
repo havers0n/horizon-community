@@ -1,34 +1,68 @@
-import { Router } from "express";
-import { storage } from "../storage";
-import { BusinessLogic } from "../businessLogic";
+import express from 'express';
+import { ApplicationLimitsService } from '../services/ApplicationLimitsService';
+import { SupabaseStorage } from '../services/SupabaseStorage';
+import { NotificationService } from '../services/NotificationService';
 
-const router: import('express').Router = Router();
-const logic = new BusinessLogic(storage);
+const router = express.Router();
 
-// Проверка лимита заявок/отпусков для текущего пользователя
-router.get("/check-limit", async (req: any, res) => {
-  if (!req.user) return res.status(401).json({ allowed: false, reason: "Unauthorized" });
-  const { type } = req.query;
-  if (!type) return res.status(400).json({ allowed: false, reason: "Type required" });
-  const result = await logic.canSubmitApplication(req.user.id, String(type));
-  if (!result.allowed) {
-    return res.status(429).json(result);
+const storage = new SupabaseStorage();
+const notificationService = new NotificationService(storage);
+const applicationLimitsService = new ApplicationLimitsService(storage, notificationService);
+
+// GET /api/application-limits - Получить текущие лимиты
+router.get('/', async (req, res) => {
+  try {
+    const limits = applicationLimitsService.getLimits();
+    const stats = await applicationLimitsService.getResetStats();
+    
+    res.json({
+      limits,
+      stats
+    });
+  } catch (error) {
+    console.error('Error getting application limits:', error);
+    res.status(500).json({ error: 'Failed to get application limits' });
   }
-  res.json(result);
 });
 
-// Проверка лимита заявок/отпусков для текущего пользователя (новый endpoint)
-router.get("/:type", async (req: any, res) => {
-  if (!req.user) return res.status(401).json({ restriction: { allowed: false, reason: "Unauthorized" } });
-  const { type } = req.params;
-  if (!type) return res.status(400).json({ restriction: { allowed: false, reason: "Type required" } });
-  
+// POST /api/application-limits/reset - Ручной сброс лимитов (только для админов)
+router.post('/reset', async (req, res) => {
   try {
-    const result = await logic.canSubmitApplication(req.user.id, String(type));
-    res.json({ restriction: result });
+    await applicationLimitsService.manualResetLimits();
+    
+    res.json({
+      success: true,
+      message: 'Application limits reset successfully',
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    console.error('Error checking application limit:', error);
-    res.status(500).json({ restriction: { allowed: false, reason: "Internal server error" } });
+    console.error('Error resetting application limits:', error);
+    res.status(500).json({ error: 'Failed to reset application limits' });
+  }
+});
+
+// PUT /api/application-limits - Обновить лимиты (только для админов)
+router.put('/', async (req, res) => {
+  try {
+    const { entryApplicationsPerMonth, leaveApplicationsPerMonth, promotionQualificationCooldownDays } = req.body;
+    
+    applicationLimitsService.updateLimits({
+      entryApplicationsPerMonth,
+      leaveApplicationsPerMonth,
+      promotionQualificationCooldownDays
+    });
+    
+    const updatedLimits = applicationLimitsService.getLimits();
+    
+    res.json({
+      success: true,
+      message: 'Application limits updated successfully',
+      limits: updatedLimits,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating application limits:', error);
+    res.status(500).json({ error: 'Failed to update application limits' });
   }
 });
 

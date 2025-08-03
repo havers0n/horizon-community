@@ -1,48 +1,41 @@
 import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { registerRoutes } from './routes';
+import { storage } from './storage';
+import { ApplicationService } from './services/ApplicationService';
+import { NotificationService } from './services/NotificationService';
+import { Scheduler } from './scheduler';
+import { log, serveStatic } from './production';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-import express, { type Request, type Response, type NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { storage } from "./storage";
-import { BusinessLogic } from "./businessLogic";
-import { Scheduler } from "./scheduler";
-import { log, serveStatic } from "./production";
-import { 
-  loggingMiddleware, 
-  errorLoggingMiddleware, 
-  performanceMiddleware, 
-  securityLoggingMiddleware 
-} from "./middleware/logging.middleware.js";
-import { logger } from "./services/LoggerService.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-
-// Оптимизированные middleware для логирования и производительности
-app.use(loggingMiddleware);
-app.use(performanceMiddleware);
-app.use(securityLoggingMiddleware);
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "X-CAD-Token"],
+  credentials: true,
+  maxAge: 86400
+}));
 
 (async () => {
   const server = await registerRoutes(app);
 
   // Инициализация планировщика
-  const businessLogic = new BusinessLogic(storage);
-  const scheduler = new Scheduler(businessLogic, storage, {
+  const notificationService = new NotificationService(storage);
+  const applicationService = new ApplicationService(storage, notificationService);
+  const scheduler = new Scheduler(applicationService, storage, {
     resetLimitsCron: "0 0 1 * *", // 1 число каждого месяца в 00:00
     leaveProcessingCron: "0 9 * * *", // каждый день в 9:00
     timezone: "Europe/Moscow"

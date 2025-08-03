@@ -1,157 +1,153 @@
-import React from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
+import { useState } from 'react'
 import { Button } from '@/shared/ui/button'
-import { Badge } from '@/shared/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { DashboardStats } from '@/features/dashboard/ui/dashboard-stats'
+import { QuickActions } from '@/features/dashboard/ui/quick-actions'
+import { RecentActivity } from '@/features/dashboard/ui/recent-activity'
+import { ApplicationModal } from '@/features/applications'
+import { NotificationsModal } from '@/features/notifications'
+import { MDTEmbed } from '@/features/mdt-integration'
+import { Plus, Bell, Monitor, FileText, Users, Calendar } from 'lucide-react'
+import { Activity } from '@/features/dashboard/model'
 
 export default function DashboardPage() {
+  const [showMDT, setShowMDT] = useState(false)
+
+  const mockStats = {
+    activeSessions: 3,
+    documents: 12,
+    timeSpent: '4ч 30м',
+    productivity: 85
+  }
+
+  const mockActivities: Activity[] = [
+    {
+      id: '1',
+      userId: '1',
+      type: 'login',
+      description: 'Вход в систему',
+      timestamp: new Date().toISOString(),
+      metadata: {}
+    },
+    {
+      id: '2',
+      userId: '1',
+      type: 'profile_update',
+      description: 'Обновлен профиль',
+      timestamp: new Date(Date.now() - 3600000).toISOString(),
+      metadata: {}
+    },
+    {
+      id: '3',
+      userId: '1',
+      type: 'document_upload',
+      description: 'Загружен отчет',
+      timestamp: new Date(Date.now() - 7200000).toISOString(),
+      metadata: {}
+    }
+  ]
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Дашборд</h1>
-        <p className="text-muted-foreground">
-          Обзор вашей деятельности и статистики
-        </p>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Панель управления</h1>
+          <p className="text-muted-foreground">Добро пожаловать в личный кабинет</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <NotificationsModal>
+            <Button variant="outline" size="icon">
+              <Bell className="h-4 w-4" />
+            </Button>
+          </NotificationsModal>
+          
+          <ApplicationModal>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Создать заявку
+            </Button>
+          </ApplicationModal>
+        </div>
       </div>
 
-      <div className="grid gap-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Основная статистика */}
+        <div className="lg:col-span-2">
+          <DashboardStats stats={mockStats} />
+        </div>
+
+        {/* Быстрые действия */}
+        <div>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Отчетов за месяц</CardTitle>
+            <CardHeader>
+              <CardTitle>Быстрые действия</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">
-                +2 с прошлого месяца
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Активных заявок</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">
-                1 требует внимания
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Тестов пройдено</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">
-                Средний балл: 85%
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Часов на дежурстве</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">156</div>
-              <p className="text-xs text-muted-foreground">
-                За текущий месяц
-              </p>
+              <QuickActions />
             </CardContent>
           </Card>
         </div>
+      </div>
 
-        {/* Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Последняя активность */}
+        <RecentActivity activities={mockActivities} />
+
+        {/* Интеграции */}
         <Card>
           <CardHeader>
-            <CardTitle>Быстрые действия</CardTitle>
-            <CardDescription>
-              Часто используемые функции
-            </CardDescription>
+            <CardTitle>Интеграции</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button className="h-20 flex-col">
-                <span className="text-lg">📝</span>
-                <span className="text-sm">Новый отчет</span>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center space-y-2"
+                onClick={() => setShowMDT(true)}
+              >
+                <Monitor className="h-6 w-6" />
+                <span className="text-sm">MDT Система</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
-                <span className="text-lg">📋</span>
-                <span className="text-sm">Заявка</span>
+              
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center space-y-2"
+                onClick={() => window.location.href = '/reports'}
+              >
+                <FileText className="h-6 w-6" />
+                <span className="text-sm">Отчеты</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
-                <span className="text-lg">📊</span>
-                <span className="text-sm">Статистика</span>
+              
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center space-y-2"
+                onClick={() => window.location.href = '/departments'}
+              >
+                <Users className="h-6 w-6" />
+                <span className="text-sm">Департаменты</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
-                <span className="text-lg">❓</span>
-                <span className="text-sm">Поддержка</span>
+              
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center space-y-2"
+                onClick={() => window.location.href = '/applications'}
+              >
+                <Calendar className="h-6 w-6" />
+                <span className="text-sm">Заявки</span>
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Последняя активность</CardTitle>
-            <CardDescription>
-              Ваши недавние действия в системе
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { action: 'Создан отчет', time: '2 часа назад', type: 'report' },
-                { action: 'Подана заявка на отпуск', time: '1 день назад', type: 'application' },
-                { action: 'Пройден тест по ПДД', time: '2 дня назад', type: 'test' },
-                { action: 'Обновлен профиль', time: '3 дня назад', type: 'profile' },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">{activity.action}</span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {activity.time}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Уведомления</CardTitle>
-            <CardDescription>
-              Важные сообщения и обновления
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-semibold text-blue-900">Новый тест доступен</h4>
-                <p className="text-sm text-blue-700 mt-1">
-                  Тест "Основы криминалистики" теперь доступен для прохождения
-                </p>
-                <Button size="sm" className="mt-2">Пройти тест</Button>
-              </div>
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-semibold text-yellow-900">Заявка требует внимания</h4>
-                <p className="text-sm text-yellow-700 mt-1">
-                  Ваша заявка на перевод была рассмотрена, требуется дополнительная информация
-                </p>
-                <Button size="sm" variant="outline" className="mt-2">Просмотреть</Button>
-              </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* MDT Embed Modal */}
+      {showMDT && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <MDTEmbed onClose={() => setShowMDT(false)} />
+          </div>
+        </div>
+      )}
     </div>
   )
-}
-
-export { DashboardPage } 
+} 

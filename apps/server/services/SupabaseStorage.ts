@@ -52,7 +52,7 @@ export class SupabaseStorage {
     return result;
   }
 
-  async update(table: string, id: number, data: any): Promise<any | null> {
+  async update(table: string, id: string, data: any): Promise<any | null> {
     const client = this.getClientForTable(table);
     const { data: result, error } = await client
       .from(table)
@@ -69,7 +69,7 @@ export class SupabaseStorage {
     return result;
   }
 
-  async delete(table: string, id: number): Promise<boolean> {
+  async delete(table: string, id: string): Promise<boolean> {
     const client = this.getClientForTable(table);
     const { error } = await client
       .from(table)
@@ -84,7 +84,7 @@ export class SupabaseStorage {
     return true;
   }
 
-  async getById(table: string, id: number): Promise<any | null> {
+  async getById(table: string, id: string): Promise<any | null> {
     const client = this.getClientForTable(table);
     const { data, error } = await client
       .from(table)
@@ -226,7 +226,7 @@ export class SupabaseStorage {
     return result || [];
   }
 
-  async batchUpdate(table: string, updates: Array<{ id: number; data: any }>): Promise<any[]> {
+  async batchUpdate(table: string, updates: Array<{ id: string; data: any }>): Promise<any[]> {
     const results: any[] = [];
     
     for (const update of updates) {

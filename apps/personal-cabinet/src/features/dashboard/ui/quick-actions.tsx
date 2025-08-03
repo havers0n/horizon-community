@@ -1,4 +1,4 @@
-import { Button } from '../../../../../../libs/ui-components/src/components/button'
+import { Button } from '@/shared/ui/button'
 import { QuickAction } from '../model'
 
 interface QuickActionsProps {
@@ -9,26 +9,34 @@ export function QuickActions({ actions }: QuickActionsProps) {
   const defaultActions = [
     {
       id: '1',
-      title: 'Редактировать профиль',
-      description: 'Обновить личную информацию',
-      icon: '👤',
-      href: '/profile',
+      title: 'Создать заявку',
+      description: 'Подать новую заявку',
+      icon: '📝',
+      href: '/applications',
       color: 'blue'
     },
     {
       id: '2',
-      title: 'Настройки',
-      description: 'Изменить настройки аккаунта',
-      icon: '⚙️',
-      href: '/settings',
-      color: 'gray'
+      title: 'Отчеты',
+      description: 'Просмотр отчетов',
+      icon: '📊',
+      href: '/reports',
+      color: 'green'
+    },
+    {
+      id: '3',
+      title: 'Тесты',
+      description: 'Пройти тестирование',
+      icon: '🧪',
+      href: '/tests',
+      color: 'purple'
     }
   ]
 
   const displayActions = actions || defaultActions
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {displayActions.map((action) => (
         <Button
           key={action.id}
@@ -36,12 +44,10 @@ export function QuickActions({ actions }: QuickActionsProps) {
           className="h-auto p-4 flex flex-col items-start space-y-2"
           onClick={() => window.location.href = action.href}
         >
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">{action.icon}</span>
-            <div>
-              <div className="font-medium">{action.title}</div>
-              <div className="text-sm text-gray-500">{action.description}</div>
-            </div>
+          <div className="text-2xl">{action.icon}</div>
+          <div className="text-left">
+            <h3 className="font-semibold">{action.title}</h3>
+            <p className="text-sm text-muted-foreground">{action.description}</p>
           </div>
         </Button>
       ))}

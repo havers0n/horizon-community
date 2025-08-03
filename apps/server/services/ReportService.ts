@@ -1,307 +1,477 @@
-import { supabaseStorage } from './SupabaseStorage.js';
-import type { Report, InsertReport } from '../types.js';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../../../packages/db-types/src/index';
+import { AppError } from '../utils/AppError';
 
-// ===== REPORT SERVICE - БИЗНЕС-ЛОГИКА ДЛЯ ОТЧЕТОВ =====
+// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
+type ReportTemplates = Database['mdt']['Tables']['report_templates']['Row'];
+type ReportTemplatesInsert = Database['mdt']['Tables']['report_templates']['Insert'];
+type ReportTemplatesUpdate = Database['mdt']['Tables']['report_templates']['Update'];
 
-export class ReportService {
-  
-  // ===== АДАПТЕРЫ ТИПОВ =====
-  
-  private adaptSupabaseReportToReport(supabaseReport: any): Report {
-    return {
-      id: supabaseReport.id,
-      authorId: supabaseReport.user_id,
-      status: supabaseReport.status,
-      fileUrl: supabaseReport.file_url,
-      supervisorComment: supabaseReport.supervisor_comment || undefined,
-      createdAt: new Date(supabaseReport.created_at),
-      updatedAt: new Date(supabaseReport.updated_at)
-    };
-  }
+type EmsFdReports = Database['mdt']['Tables']['ems_fd_reports']['Row'];
+type EmsFdReportsInsert = Database['mdt']['Tables']['ems_fd_reports']['Insert'];
+type EmsFdReportsUpdate = Database['mdt']['Tables']['ems_fd_reports']['Update'];
 
-  private adaptReportToSupabaseReport(report: InsertReport): any {
-    return {
-      user_id: report.authorId,
-      status: report.status,
-      file_url: report.fileUrl,
-      supervisor_comment: report.supervisorComment || null
-    };
-  }
+type LawReports = Database['mdt']['Tables']['law_reports']['Row'];
+type LawReportsInsert = Database['mdt']['Tables']['law_reports']['Insert'];
+type LawReportsUpdate = Database['mdt']['Tables']['law_reports']['Update'];
 
-  // ===== ОСНОВНЫЕ ОПЕРАЦИИ =====
-  
-  async getReport(id: number): Promise<Report | undefined> {
-    const data = await supabaseStorage.getById('reports', id);
-    return data ? this.adaptSupabaseReportToReport(data) : undefined;
-  }
+// ===== ФИЛЬТРЫ =====
+export interface ReportTemplateFilters {
+  category?: string;
+  subcategory?: string;
+  difficulty?: string;
+  department_id?: string;
+  search?: string;
+  tags?: string[];
+  limit?: number;
+  offset?: number;
+}
 
-  async getReportsByUser(userId: number): Promise<Report[]> {
-    const data = await supabaseStorage.list('reports', { user_id: userId });
-    return data.map(report => this.adaptSupabaseReportToReport(report));
-  }
+export interface EmsFdReportFilters {
+  author_character_id?: string;
+  incident_type?: string;
+  date_from?: string;
+  date_to?: string;
+  limit?: number;
+  offset?: number;
+}
 
-  async getAllReports(): Promise<Report[]> {
-    const data = await supabaseStorage.list('reports');
-    return data.map(report => this.adaptSupabaseReportToReport(report));
-  }
+export interface LawReportFilters {
+  author_character_id?: string;
+  incident_type?: string;
+  date_from?: string;
+  date_to?: string;
+  limit?: number;
+  offset?: number;
+}
 
-  async createReport(report: InsertReport): Promise<Report> {
-    const supabaseReport = this.adaptReportToSupabaseReport(report);
-    const data = await supabaseStorage.insert('reports', supabaseReport);
-    
-    if (!data) {
-      throw new Error('Failed to create report');
-    }
-    
-    return this.adaptSupabaseReportToReport(data);
-  }
+// ===== СТАТИСТИКА =====
+export interface ReportTemplateStats {
+  total: number;
+  active: number;
+  inactive: number;
+  by_category: Record<string, number>;
+}
 
-  async updateReport(id: number, updates: Partial<Report>): Promise<Report | undefined> {
-    const supabaseUpdates: any = {};
-    
-    if (updates.authorId !== undefined) supabaseUpdates.user_id = updates.authorId;
-    if (updates.status !== undefined) supabaseUpdates.status = updates.status;
-    if (updates.fileUrl !== undefined) supabaseUpdates.file_url = updates.fileUrl;
-    if (updates.supervisorComment !== undefined) supabaseUpdates.supervisor_comment = updates.supervisorComment;
-    
-    const data = await supabaseStorage.update('reports', id, supabaseUpdates);
-    return data ? this.adaptSupabaseReportToReport(data) : undefined;
-  }
+export interface TagStats {
+  tag: string;
+  count: number;
+}
 
-  async deleteReport(id: number): Promise<boolean> {
-    return await supabaseStorage.delete('reports', id);
-  }
+export interface ReportStats {
+  total_ems_fd: number;
+  total_law: number;
+  by_type: Record<string, number>;
+  by_author: Record<string, number>;
+}
 
-  // ===== ПОИСК И ФИЛЬТРАЦИЯ =====
-  
-  async getReportsWithFilters(filters: {
-    authorId?: number;
-    status?: string;
-    dateFrom?: Date;
-    dateTo?: Date;
-    limit?: number;
-    offset?: number;
-  }): Promise<Report[]> {
-    const supabaseFilters: Record<string, any> = {};
-    
-    if (filters.authorId !== undefined) supabaseFilters.user_id = filters.authorId;
-    if (filters.status !== undefined) supabaseFilters.status = filters.status;
-    
-    const data = await supabaseStorage.list('reports', supabaseFilters, {
-      limit: filters.limit,
-      offset: filters.offset,
-      orderBy: { column: 'created_at', ascending: false }
-    });
-    
-    let reports = data.map(report => this.adaptSupabaseReportToReport(report));
-    
-    // Фильтрация по датам (если указана)
-    if (filters.dateFrom) {
-      reports = reports.filter(report => report.createdAt >= filters.dateFrom!);
-    }
-    
-    if (filters.dateTo) {
-      reports = reports.filter(report => report.createdAt <= filters.dateTo!);
-    }
-    
-    return reports;
-  }
+class ReportService {
+  private supabase;
 
-  async getReportsByStatus(status: string): Promise<Report[]> {
-    const data = await supabaseStorage.list('reports', { status });
-    return data.map(report => this.adaptSupabaseReportToReport(report));
-  }
-
-  async getReportsByDateRange(dateFrom: Date, dateTo: Date): Promise<Report[]> {
-    const allReports = await this.getAllReports();
-    return allReports.filter(report => 
-      report.createdAt >= dateFrom && report.createdAt <= dateTo
+  constructor() {
+    this.supabase = createClient(
+      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
   }
 
-  async getRecentReports(limit: number = 10): Promise<Report[]> {
-    const data = await supabaseStorage.list('reports', {}, {
-      limit,
-      orderBy: { column: 'created_at', ascending: false }
-    });
-    return data.map(report => this.adaptSupabaseReportToReport(report));
+  // ===== МЕТОДЫ ДЛЯ REPORT TEMPLATES =====
+
+  public async getReportTemplates(filters: ReportTemplateFilters = {}): Promise<ReportTemplates[]> {
+    let query = this.supabase
+      .from('report_templates')
+      .select('*')
+      .eq('is_active', true);
+
+    if (filters.category && filters.category !== 'all') {
+      query = query.eq('category', filters.category);
+    }
+    if (filters.department_id) {
+      query = query.eq('department_id', filters.department_id);
+    }
+    if (filters.search) {
+      query = query.or(`title.ilike.%${filters.search}%,body.ilike.%${filters.search}%`);
+    }
+    if (filters.tags && filters.tags.length > 0) {
+      query = query.overlaps('tags', filters.tags);
+    }
+
+    query = query
+      .limit(filters.limit || 50)
+      .range(filters.offset || 0, (filters.offset || 0) + (filters.limit || 50) - 1);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[ReportService] Error fetching report templates:', error);
+      throw new AppError('Ошибка при получении шаблонов отчетов.', 500);
+    }
+
+    return data || [];
   }
 
-  // ===== СТАТИСТИКА =====
-  
-  async getReportCount(): Promise<number> {
-    return await supabaseStorage.count('reports');
+  public async getReportTemplateById(id: string): Promise<ReportTemplates | null> {
+    const { data, error } = await this.supabase
+      .from('report_templates')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error(`[ReportService] Error fetching template ${id}:`, error);
+      throw new AppError('Ошибка при получении шаблона отчета.', 500);
+    }
+
+    return data;
   }
 
-  async getReportCountByUser(userId: number): Promise<number> {
-    return await supabaseStorage.count('reports', { user_id: userId });
-  }
-
-  async getReportCountByStatus(status: string): Promise<number> {
-    return await supabaseStorage.count('reports', { status });
-  }
-
-  async getReportStats(): Promise<{
-    total: number;
-    byStatus: Record<string, number>;
-    byUser: Record<number, number>;
-    recent: number; // за последние 7 дней
-  }> {
-    const allReports = await this.getAllReports();
-    const stats = {
-      total: allReports.length,
-      byStatus: {} as Record<string, number>,
-      byUser: {} as Record<number, number>,
-      recent: 0
+  public async createReportTemplate(
+    templateData: Omit<ReportTemplatesInsert, 'id' | 'created_at' | 'updated_at' | 'is_active'>,
+    createdByCharacterId: string
+  ): Promise<ReportTemplates> {
+    const insertData: ReportTemplatesInsert = {
+      ...templateData,
+      created_by_character_id: createdByCharacterId,
+      is_active: true
     };
+
+    const { data, error } = await this.supabase
+      .from('report_templates')
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error('[ReportService] Error creating report template:', error);
+      throw new AppError('Не удалось создать шаблон отчета.', 500);
+    }
+
+    return data;
+  }
+
+  public async updateReportTemplate(id: string, updates: ReportTemplatesUpdate): Promise<ReportTemplates> {
+    const { data, error } = await this.supabase
+      .from('report_templates')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error(`[ReportService] Error updating template ${id}:`, error);
+      throw new AppError('Не удалось обновить шаблон отчета.', 500);
+    }
+
+    return data;
+  }
+
+  public async deleteReportTemplate(id: string): Promise<boolean> {
+    const { error } = await this.supabase
+      .from('report_templates')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error(`[ReportService] Error deleting template ${id}:`, error);
+      throw new AppError('Не удалось удалить шаблон отчета.', 500);
+    }
+
+    return true;
+  }
+
+  public async getReportTemplateStats(): Promise<ReportTemplateStats> {
+    const { data, error } = await this.supabase
+      .from('report_templates')
+      .select('is_active, category');
+
+    if (error) {
+      console.error('[ReportService] Error fetching template stats:', error);
+      throw new AppError('Ошибка при получении статистики шаблонов.', 500);
+    }
+
+    const total = data?.length || 0;
+    const active = data?.filter(t => t.is_active).length || 0;
+    const inactive = total - active;
+
+    const by_category: Record<string, number> = {};
+
+    data?.forEach(template => {
+      const category = template.category || 'uncategorized';
+      by_category[category] = (by_category[category] || 0) + 1;
+    });
+
+    return {
+      total,
+      active,
+      inactive,
+      by_category
+    };
+  }
+
+  public async getReportTemplateTagStats(): Promise<TagStats[]> {
+    const { data, error } = await this.supabase
+      .from('report_templates')
+      .select('tags')
+      .eq('is_active', true);
+
+    if (error) {
+      console.error('[ReportService] Error fetching tag stats:', error);
+      throw new AppError('Ошибка при получении статистики тегов.', 500);
+    }
+
+    const tagCounts: Record<string, number> = {};
     
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    allReports.forEach(report => {
-      // Подсчет по статусам
-      stats.byStatus[report.status] = (stats.byStatus[report.status] || 0) + 1;
-      
-      // Подсчет по пользователям
-      stats.byUser[report.authorId] = (stats.byUser[report.authorId] || 0) + 1;
-      
-      // Подсчет недавних отчетов
-      if (report.createdAt >= sevenDaysAgo) {
-        stats.recent++;
+    data?.forEach(template => {
+      if (template.tags && Array.isArray(template.tags)) {
+        template.tags.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
       }
     });
-    
-    return stats;
+
+    return Object.entries(tagCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 20)
+      .map(([tag, count]) => ({ tag, count }));
   }
 
-  // ===== БИЗНЕС-ЛОГИКА =====
-  
-  async approveReport(id: number, supervisorComment?: string): Promise<Report | undefined> {
-    return await this.updateReport(id, { 
-      status: 'approved',
-      supervisorComment: supervisorComment || undefined
+  // ===== МЕТОДЫ ДЛЯ EMS/FD REPORTS =====
+
+  public async getEmsFdReports(filters: EmsFdReportFilters = {}): Promise<EmsFdReports[]> {
+    let query = this.supabase
+      .from('ems_fd_reports')
+      .select('*');
+
+    if (filters.author_character_id) {
+      query = query.eq('author_character_id', filters.author_character_id);
+    }
+    if (filters.incident_type) {
+      query = query.eq('incident_type', filters.incident_type);
+    }
+    if (filters.date_from) {
+      query = query.gte('incident_time', filters.date_from);
+    }
+    if (filters.date_to) {
+      query = query.lte('incident_time', filters.date_to);
+    }
+
+    query = query
+      .order('incident_time', { ascending: false })
+      .limit(filters.limit || 50)
+      .range(filters.offset || 0, (filters.offset || 0) + (filters.limit || 50) - 1);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[ReportService] Error fetching EMS/FD reports:', error);
+      throw new AppError('Ошибка при получении отчетов EMS/FD.', 500);
+    }
+
+    return data || [];
+  }
+
+  public async getEmsFdReportById(id: string): Promise<EmsFdReports | null> {
+    const { data, error } = await this.supabase
+      .from('ems_fd_reports')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error(`[ReportService] Error fetching EMS/FD report ${id}:`, error);
+      throw new AppError('Ошибка при получении отчета EMS/FD.', 500);
+    }
+
+    return data;
+  }
+
+  public async createEmsFdReport(data: EmsFdReportsInsert): Promise<EmsFdReports> {
+    const { data: newReport, error } = await this.supabase
+      .from('ems_fd_reports')
+      .insert(data)
+      .select()
+      .single();
+
+    if (error || !newReport) {
+      console.error('[ReportService] Error creating EMS/FD report:', error);
+      throw new AppError('Не удалось создать отчет EMS/FD.', 500);
+    }
+
+    return newReport;
+  }
+
+  public async updateEmsFdReport(id: string, updates: EmsFdReportsUpdate): Promise<EmsFdReports> {
+    const { data, error } = await this.supabase
+      .from('ems_fd_reports')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error(`[ReportService] Error updating EMS/FD report ${id}:`, error);
+      throw new AppError('Не удалось обновить отчет EMS/FD.', 500);
+    }
+
+    return data;
+  }
+
+  public async deleteEmsFdReport(id: string): Promise<boolean> {
+    const { error } = await this.supabase
+      .from('ems_fd_reports')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error(`[ReportService] Error deleting EMS/FD report ${id}:`, error);
+      throw new AppError('Не удалось удалить отчет EMS/FD.', 500);
+    }
+
+    return true;
+  }
+
+  // ===== МЕТОДЫ ДЛЯ LAW REPORTS =====
+
+  public async getLawReports(filters: LawReportFilters = {}): Promise<LawReports[]> {
+    let query = this.supabase
+      .from('law_reports')
+      .select('*');
+
+    if (filters.author_character_id) {
+      query = query.eq('author_character_id', filters.author_character_id);
+    }
+    if (filters.incident_type) {
+      query = query.eq('incident_type', filters.incident_type);
+    }
+    if (filters.date_from) {
+      query = query.gte('incident_time', filters.date_from);
+    }
+    if (filters.date_to) {
+      query = query.lte('incident_time', filters.date_to);
+    }
+
+    query = query
+      .order('incident_time', { ascending: false })
+      .limit(filters.limit || 50)
+      .range(filters.offset || 0, (filters.offset || 0) + (filters.limit || 50) - 1);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[ReportService] Error fetching law reports:', error);
+      throw new AppError('Ошибка при получении отчетов правоохранительных органов.', 500);
+    }
+
+    return data || [];
+  }
+
+  public async getLawReportById(id: string): Promise<LawReports | null> {
+    const { data, error } = await this.supabase
+      .from('law_reports')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error(`[ReportService] Error fetching law report ${id}:`, error);
+      throw new AppError('Ошибка при получении отчета правоохранительных органов.', 500);
+    }
+
+    return data;
+  }
+
+  public async createLawReport(data: LawReportsInsert): Promise<LawReports> {
+    const { data: newReport, error } = await this.supabase
+      .from('law_reports')
+      .insert(data)
+      .select()
+      .single();
+
+    if (error || !newReport) {
+      console.error('[ReportService] Error creating law report:', error);
+      throw new AppError('Не удалось создать отчет правоохранительных органов.', 500);
+    }
+
+    return newReport;
+  }
+
+  public async updateLawReport(id: string, updates: LawReportsUpdate): Promise<LawReports> {
+    const { data, error } = await this.supabase
+      .from('law_reports')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error(`[ReportService] Error updating law report ${id}:`, error);
+      throw new AppError('Не удалось обновить отчет правоохранительных органов.', 500);
+    }
+
+    return data;
+  }
+
+  public async deleteLawReport(id: string): Promise<boolean> {
+    const { error } = await this.supabase
+      .from('law_reports')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error(`[ReportService] Error deleting law report ${id}:`, error);
+      throw new AppError('Не удалось удалить отчет правоохранительных органов.', 500);
+    }
+
+    return true;
+  }
+
+  // ===== ОБЩАЯ СТАТИСТИКА =====
+
+  public async getReportStats(): Promise<ReportStats> {
+    const [emsFdData, lawData] = await Promise.all([
+      this.supabase.from('ems_fd_reports').select('incident_type, author_character_id'),
+      this.supabase.from('law_reports').select('incident_type, author_character_id')
+    ]);
+
+    if (emsFdData.error || lawData.error) {
+      console.error('[ReportService] Error fetching report stats:', { emsFdError: emsFdData.error, lawError: lawData.error });
+      throw new AppError('Ошибка при получении статистики отчетов.', 500);
+    }
+
+    const total_ems_fd = emsFdData.data?.length || 0;
+    const total_law = lawData.data?.length || 0;
+
+    const by_type: Record<string, number> = {};
+    const by_author: Record<string, number> = {};
+
+    // Обрабатываем EMS/FD отчеты
+    emsFdData.data?.forEach(report => {
+      const type = report.incident_type || 'unknown';
+      const author = report.author_character_id || 'unknown';
+      
+      by_type[type] = (by_type[type] || 0) + 1;
+      by_author[author] = (by_author[author] || 0) + 1;
     });
-  }
 
-  async rejectReport(id: number, supervisorComment: string): Promise<Report | undefined> {
-    return await this.updateReport(id, { 
-      status: 'rejected',
-      supervisorComment
+    // Обрабатываем Law отчеты
+    lawData.data?.forEach(report => {
+      const type = report.incident_type || 'unknown';
+      const author = report.author_character_id || 'unknown';
+      
+      by_type[type] = (by_type[type] || 0) + 1;
+      by_author[author] = (by_author[author] || 0) + 1;
     });
-  }
 
-  async submitForReview(id: number): Promise<Report | undefined> {
-    return await this.updateReport(id, { status: 'pending_review' });
-  }
-
-  async markAsDraft(id: number): Promise<Report | undefined> {
-    return await this.updateReport(id, { status: 'draft' });
-  }
-
-  async archiveReport(id: number): Promise<Report | undefined> {
-    return await this.updateReport(id, { status: 'archived' });
-  }
-
-  async getPendingReports(): Promise<Report[]> {
-    return await this.getReportsByStatus('pending_review');
-  }
-
-  async getApprovedReports(): Promise<Report[]> {
-    return await this.getReportsByStatus('approved');
-  }
-
-  async getRejectedReports(): Promise<Report[]> {
-    return await this.getReportsByStatus('rejected');
-  }
-
-  async getDraftReports(): Promise<Report[]> {
-    return await this.getReportsByStatus('draft');
-  }
-
-  async getArchivedReports(): Promise<Report[]> {
-    return await this.getReportsByStatus('archived');
-  }
-
-  async getUserReportStats(userId: number): Promise<{
-    total: number;
-    approved: number;
-    rejected: number;
-    pending: number;
-    draft: number;
-    archived: number;
-  }> {
-    const userReports = await this.getReportsByUser(userId);
-    
     return {
-      total: userReports.length,
-      approved: userReports.filter(r => r.status === 'approved').length,
-      rejected: userReports.filter(r => r.status === 'rejected').length,
-      pending: userReports.filter(r => r.status === 'pending_review').length,
-      draft: userReports.filter(r => r.status === 'draft').length,
-      archived: userReports.filter(r => r.status === 'archived').length
+      total_ems_fd,
+      total_law,
+      by_type,
+      by_author
     };
-  }
-
-  async validateReportData(report: InsertReport): Promise<{ isValid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-    
-    if (!report.authorId || report.authorId <= 0) {
-      errors.push('Author ID is required and must be positive');
-    }
-    
-    if (!report.status || report.status.trim().length === 0) {
-      errors.push('Status is required');
-    }
-    
-    if (!report.fileUrl || report.fileUrl.trim().length === 0) {
-      errors.push('File URL is required');
-    } else {
-      // Простая валидация URL
-      try {
-        new URL(report.fileUrl);
-      } catch {
-        errors.push('Invalid file URL format');
-      }
-    }
-    
-    // Валидация статуса
-    const validStatuses = ['draft', 'pending_review', 'approved', 'rejected', 'archived'];
-    if (report.status && !validStatuses.includes(report.status)) {
-      errors.push(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
-    }
-    
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  }
-
-  async canUserEditReport(userId: number, reportId: number): Promise<boolean> {
-    const report = await this.getReport(reportId);
-    if (!report) return false;
-    
-    // Пользователь может редактировать только свои отчеты в статусе draft
-    return report.authorId === userId && report.status === 'draft';
-  }
-
-  async canUserDeleteReport(userId: number, reportId: number): Promise<boolean> {
-    const report = await this.getReport(reportId);
-    if (!report) return false;
-    
-    // Пользователь может удалять только свои отчеты в статусе draft
-    return report.authorId === userId && report.status === 'draft';
-  }
-
-  async canUserApproveReport(userId: number, reportId: number): Promise<boolean> {
-    const report = await this.getReport(reportId);
-    if (!report) return false;
-    
-    // Только супервайзеры могут одобрять отчеты
-    // Здесь должна быть проверка роли пользователя
-    // Пока что возвращаем false для безопасности
-    return false;
   }
 }
 
-// Экспортируем единственный экземпляр
-export const reportService = new ReportService(); 
+export default new ReportService(); 
