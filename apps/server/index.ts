@@ -95,7 +95,7 @@ app.use(cors({
     }
     
     // Для production
-    const publicPath = path.resolve(__dirname, "..", "..", "apps", "client");
+    const publicPath = path.resolve(__dirname, "..", "..", "dist", "apps", "client");
     const indexPath = path.join(publicPath, 'index.html');
     if (fs.existsSync(indexPath)) {
       return res.sendFile(indexPath);

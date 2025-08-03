@@ -32,7 +32,8 @@
     "test:client": "cd apps/client && npm run test",
     "test:mdt": "cd apps/mdtclient && npm run test",
     "test:server": "cd apps/server && npm run test",
-    "check-ports": "node scripts/check-ports.js"
+    "check-ports": "node scripts/check-ports.js",
+    "check-production": "node scripts/check-production-config.js"
   },
   "workspaces": [
     "apps/*",
