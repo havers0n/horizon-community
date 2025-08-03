@@ -1,119 +1,52 @@
 // Адаптеры для совместимости типов данных между фронтендом и бэкендом
+import type { User, Application, Notification } from '../types/database';
 
-// Типы фронтенда (как ожидает клиент)
-export interface FrontendUser {
-  id: number;
-  name: string;
-  department: string;
-  isSupervisor: boolean;
-}
-
-export interface FrontendApplication {
-  id: number;
-  type: string;
-  status: string;
-  authorId: number;
-  data?: any;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface FrontendNotification {
-  id: number;
-  content: string;
-  isRead: boolean;
-  createdAt: string;
-  link?: string;
-}
-
-// Типы бэкенда (как возвращает сервер)
-export interface BackendUser {
-  id: string; // UUID
-  username: string;
-  email: string;
-  role: string;
-  departmentId?: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BackendApplication {
-  id: string; // UUID
-  type: string;
-  status: string;
-  authorId: string; // UUID
-  data?: any;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BackendNotification {
-  id: string; // UUID
-  content: string;
-  isRead: boolean;
-  createdAt: string;
-  link?: string;
-}
-
-// Адаптеры для преобразования типов
-
-export const adaptBackendUserToFrontend = (backendUser: BackendUser): FrontendUser => ({
-  id: parseInt(backendUser.id.replace(/-/g, '').substring(0, 8), 16), // Временное решение для совместимости
-  name: backendUser.username,
-  department: backendUser.departmentId || '',
-  isSupervisor: ['supervisor', 'admin'].includes(backendUser.role)
+// Новые адаптеры с правильными UUID типами
+export const adaptBackendUserToFrontend = (backendUser: User): User => ({
+  ...backendUser,
+  // Все поля уже имеют правильные типы UUID
 });
 
-export const adaptBackendApplicationToFrontend = (backendApp: BackendApplication): FrontendApplication => ({
-  id: parseInt(backendApp.id.replace(/-/g, '').substring(0, 8), 16), // Временное решение
-  type: backendApp.type,
-  status: backendApp.status,
-  authorId: parseInt(backendApp.authorId.replace(/-/g, '').substring(0, 8), 16), // Временное решение
-  data: backendApp.data,
-  createdAt: backendApp.createdAt,
-  updatedAt: backendApp.updatedAt
+export const adaptBackendApplicationToFrontend = (backendApp: Application): Application => ({
+  ...backendApp,
+  // Все поля уже имеют правильные типы UUID
 });
 
-export const adaptBackendNotificationToFrontend = (backendNotif: BackendNotification): FrontendNotification => ({
-  id: parseInt(backendNotif.id.replace(/-/g, '').substring(0, 8), 16), // Временное решение
-  content: backendNotif.content,
-  isRead: backendNotif.isRead,
-  createdAt: backendNotif.createdAt,
-  link: backendNotif.link
+export const adaptBackendNotificationToFrontend = (backendNotif: Notification): Notification => ({
+  ...backendNotif,
+  // Все поля уже имеют правильные типы UUID
 });
 
 // Адаптеры для массивов
-export const adaptBackendUsersToFrontend = (backendUsers: BackendUser[]): FrontendUser[] => 
+export const adaptBackendUsersToFrontend = (backendUsers: User[]): User[] => 
   backendUsers.map(adaptBackendUserToFrontend);
 
-export const adaptBackendApplicationsToFrontend = (backendApps: BackendApplication[]): FrontendApplication[] => 
+export const adaptBackendApplicationsToFrontend = (backendApps: Application[]): Application[] => 
   backendApps.map(adaptBackendApplicationToFrontend);
 
-export const adaptBackendNotificationsToFrontend = (backendNotifs: BackendNotification[]): FrontendNotification[] => 
+export const adaptBackendNotificationsToFrontend = (backendNotifs: Notification[]): Notification[] => 
   backendNotifs.map(adaptBackendNotificationToFrontend);
 
 // Обратные адаптеры (если понадобятся)
-export const adaptFrontendUserToBackend = (frontendUser: FrontendUser): Partial<BackendUser> => ({
-  username: frontendUser.name,
-  departmentId: frontendUser.department || undefined,
-  role: frontendUser.isSupervisor ? 'supervisor' : 'candidate'
+export const adaptFrontendUserToBackend = (frontendUser: User): Partial<User> => ({
+  username: frontendUser.username,
+  department_id: frontendUser.department_id || undefined,
+  role: frontendUser.role
 });
 
-export const adaptFrontendApplicationToBackend = (frontendApp: FrontendApplication): Partial<BackendApplication> => ({
+export const adaptFrontendApplicationToBackend = (frontendApp: Application): Partial<Application> => ({
   type: frontendApp.type,
   status: frontendApp.status,
   data: frontendApp.data
 });
 
-// Утилиты для работы с ID
-export const generateFrontendId = (backendId: string): number => {
-  return parseInt(backendId.replace(/-/g, '').substring(0, 8), 16);
+// Утилиты для работы с UUID (больше не нужны, но оставляем для совместимости)
+export const generateFrontendId = (backendId: string): string => {
+  return backendId; // Просто возвращаем UUID как есть
 };
 
-export const generateBackendId = (frontendId: number): string => {
-  // Это временное решение - в реальности нужно хранить маппинг ID
-  return frontendId.toString(16).padStart(32, '0');
+export const generateBackendId = (frontendId: string): string => {
+  return frontendId; // Просто возвращаем UUID как есть
 };
 
 // Типы для API ответов
