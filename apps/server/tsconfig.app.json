@@ -1,0 +1,16 @@
+// apps/server/tsconfig.app.json
+{
+    "extends": "./tsconfig.json", // Наследуем от tsconfig.json в этой же папке
+    "compilerOptions": {
+      "outDir": "../../dist/out-tsc", // Nx обычно компилирует сюда
+      "types": ["node"]
+    },
+    "exclude": [
+      "jest.config.ts",
+      "src/**/*.spec.ts",
+      "src/**/*.test.ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ]
+  }

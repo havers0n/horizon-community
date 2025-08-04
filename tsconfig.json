@@ -1,34 +1,11 @@
 {
-  "include": ["apps/*/src/**/*", "libs/*/src/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "**/*.test.tsx"],
-  "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
-    "strict": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "jsx": "preserve",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "types": ["node", "vite/client", "jest"],
-    "paths": {
-      "@client/*": ["./apps/client/src/*"],
-      "@mdtclient/*": ["./apps/mdtclient/src/*"],
-      "@server/*": ["./apps/server/*"],
-      "@shared-schema/*": ["./libs/shared-schema/src/*"],
-      "@shared-types/*": ["./libs/shared-types/src/*"],
-      "@shared-utils/*": ["./libs/shared-utils/src/*"],
-      "@assets/*": ["./public/*"]
-    }
-  },
+  // Этот файл теперь только для IDE и для указания ссылок на под-проекты
+  "files": [], // Говорим, что этот конфиг сам по себе ничего не компилирует
   "references": [
     { "path": "./apps/client" },
     { "path": "./apps/mdtclient" },
     { "path": "./apps/server" },
+    { "path": "./packages/db-types" }, // ✅ Добавляем ссылку на наш пакет
     { "path": "./libs/shared-schema" },
     { "path": "./libs/shared-types" },
     { "path": "./libs/shared-utils" }
