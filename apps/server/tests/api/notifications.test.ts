@@ -43,13 +43,12 @@ describe('Notifications API', () => {
   };
 
   const mockNotification = {
-    id: 1,
-    recipientId: 1,
+    id: 'notif123',
     content: 'Test notification',
-    isRead: false,
-    link: '/test/link',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    recipient_user_id: 'user123', // ✅ ИСПРАВЛЕНО: snake_case
+    is_read: false, // ✅ ИСПРАВЛЕНО: snake_case
+    link: null,
+    created_at: '2023-01-01T00:00:00Z'
   };
 
   // Мокаем middleware аутентификации
@@ -87,7 +86,7 @@ describe('Notifications API', () => {
 
   describe('GET /api/notifications/unread', () => {
     it('should return unread notifications when authenticated', async () => {
-      const unreadNotifications = [{ ...mockNotification, isRead: false }];
+      const unreadNotifications = [{ ...mockNotification, is_read: false }]; // ✅ ИСПРАВЛЕНО: snake_case
       (storage.getUnreadNotificationsByUser as jest.Mock).mockResolvedValue(unreadNotifications);
 
       const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
@@ -107,7 +106,7 @@ describe('Notifications API', () => {
 
   describe('POST /api/notifications/:id/read', () => {
     it('should mark notification as read when user is recipient', async () => {
-      const readNotification = { ...mockNotification, isRead: true };
+      const readNotification = { ...mockNotification, is_read: true }; // ✅ ИСПРАВЛЕНО: snake_case
       (storage.getNotificationById as jest.Mock).mockResolvedValue(mockNotification);
       (storage.markNotificationAsRead as jest.Mock).mockResolvedValue(readNotification);
 
@@ -142,7 +141,7 @@ describe('Notifications API', () => {
     });
 
     it('should return 403 when user is not recipient', async () => {
-      const otherUserNotification = { ...mockNotification, recipientId: 999 };
+      const otherUserNotification = { ...mockNotification, recipient_user_id: 999 };
       (storage.getNotificationById as jest.Mock).mockResolvedValue(otherUserNotification);
 
       const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
@@ -214,7 +213,7 @@ describe('Notifications API', () => {
     });
 
     it('should return 403 when user is not recipient', async () => {
-      const otherUserNotification = { ...mockNotification, recipientId: 999 };
+      const otherUserNotification = { ...mockNotification, recipient_user_id: 999 };
       (storage.getNotificationById as jest.Mock).mockResolvedValue(otherUserNotification);
 
       const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
@@ -266,7 +265,7 @@ describe('Notifications API', () => {
     });
 
     it('should return 403 when user is not recipient', async () => {
-      const otherUserNotification = { ...mockNotification, recipientId: 999 };
+      const otherUserNotification = { ...mockNotification, recipient_user_id: 999 };
       (storage.getNotificationById as jest.Mock).mockResolvedValue(otherUserNotification);
 
       const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
@@ -293,7 +292,7 @@ describe('Notifications API', () => {
         .mockResolvedValueOnce(notifications[1])
         .mockResolvedValueOnce(notifications[2]);
       
-      (storage.markNotificationAsRead as jest.Mock).mockResolvedValue({ ...mockNotification, isRead: true });
+      (storage.markNotificationAsRead as jest.Mock).mockResolvedValue({ ...mockNotification, is_read: true }); // ✅ ИСПРАВЛЕНО: snake_case
 
       const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
       require('../../middleware/auth.middleware').authenticateToken = mockAuthMiddleware;

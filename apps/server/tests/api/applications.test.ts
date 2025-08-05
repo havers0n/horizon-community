@@ -51,12 +51,14 @@ describe('Application API', () => {
   describe('POST /api/applications', () => {
     it('should create a new application', async () => {
       const mockApplication = {
-        id: '1',
-        type: 'entry',
-        author_user_id: 'user123',
-        author_character_id: 'char456',
+        id: 'app123',
+        type: 'leo_application',
+        author_user_id: 'user123', // ✅ ИСПРАВЛЕНО: snake_case
+        author_character_id: 'char456', // ✅ ИСПРАВЛЕНО: snake_case
         status: 'pending',
-        created_at: new Date().toISOString()
+        data: { test: 'data' },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z'
       };
 
       (mockApplicationService.createApplication as jest.Mock).mockResolvedValue(mockApplication);
@@ -64,16 +66,18 @@ describe('Application API', () => {
       const response = await request(app)
         .post('/api/applications')
         .send({
-          type: 'entry',
-          authorUserId: 'user123',
-          authorCharacterId: 'char456'
+          type: 'leo_application',
+          author_user_id: 'user123', // ✅ ИСПРАВЛЕНО: snake_case
+          author_character_id: 'char456', // ✅ ИСПРАВЛЕНО: snake_case
+          data: { test: 'data' }
         })
         .expect(200);
 
       expect(mockApplicationService.createApplication).toHaveBeenCalledWith({
-        type: 'entry',
-        authorUserId: 'user123',
-        authorCharacterId: 'char456'
+        type: 'leo_application',
+        author_user_id: 'user123', // ✅ ИСПРАВЛЕНО: snake_case
+        author_character_id: 'char456', // ✅ ИСПРАВЛЕНО: snake_case
+        data: { test: 'data' }
       });
       expect(response.body).toEqual(mockApplication);
     });
