@@ -1,6 +1,12 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Model
-export * from '@/shared/types';
+export type {
+  LawReports,
+  LawReportsInsert,
+  LawReportsUpdate,
+  EmsFdReports,
+  EmsFdReportsInsert,
+  EmsFdReportsUpdate,
+} from '@roleplay-identity/db-types';
 export * from './model/store';
 
 // API

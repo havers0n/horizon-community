@@ -35,7 +35,8 @@
     "check-ports": "node scripts/check-ports.js",
     "check-production": "node scripts/check-production-config.js",
     "check-modules": "node scripts/fix-module-issues.js",
-    "force-rebuild": "node scripts/force-rebuild.js"
+    "force-rebuild": "node scripts/force-rebuild.js",
+    "db:sync": "node scripts/sync-db-types.mjs"
   },
   "workspaces": [
     "apps/*",

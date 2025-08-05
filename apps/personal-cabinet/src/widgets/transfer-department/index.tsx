@@ -1,7 +1,14 @@
+import React, { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
 import { TransferDepartmentFeature } from '@features/transfer-department'
+
+// Lazy load components
+const TransferForm = React.lazy(() => 
+  TransferDepartmentFeature.TransferForm().then(component => ({ default: component }))
+)
+const MyRequests = React.lazy(() => 
+  TransferDepartmentFeature.MyRequests().then(component => ({ default: component }))
+)
 
 export function TransferDepartmentWidget() {
   return (
@@ -14,7 +21,9 @@ export function TransferDepartmentWidget() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TransferDepartmentFeature.TransferForm />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <TransferForm />
+          </Suspense>
         </CardContent>
       </Card>
       
@@ -23,7 +32,9 @@ export function TransferDepartmentWidget() {
           <CardTitle>Мои заявки на перевод</CardTitle>
         </CardHeader>
         <CardContent>
-          <TransferDepartmentFeature.MyRequests />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <MyRequests />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

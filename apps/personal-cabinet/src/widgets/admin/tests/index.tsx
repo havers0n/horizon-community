@@ -1,7 +1,9 @@
+import React, { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
-import { AdminTestsFeature } from '@features/admin/tests'
+
+// Lazy load components
+const TestManager = React.lazy(() => import('@/features/admin/tests/ui/test-manager'))
+const TestResults = React.lazy(() => import('@/features/admin/tests/ui/test-results'))
 
 export function AdminTestsWidget() {
   return (
@@ -10,11 +12,13 @@ export function AdminTestsWidget() {
         <CardHeader>
           <CardTitle>Управление тестами</CardTitle>
           <CardDescription>
-            Создание и редактирование тестов
+            Создание и управление тестами
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AdminTestsFeature.TestManager />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <TestManager />
+          </Suspense>
         </CardContent>
       </Card>
       
@@ -23,7 +27,9 @@ export function AdminTestsWidget() {
           <CardTitle>Результаты тестов</CardTitle>
         </CardHeader>
         <CardContent>
-          <AdminTestsFeature.TestResults />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <TestResults />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

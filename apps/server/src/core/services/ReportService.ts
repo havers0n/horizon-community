@@ -69,7 +69,7 @@ export interface ReportStats {
   by_author: Record<string, number>;
 }
 
-class ReportService {
+export class ReportService {
   // ✅✅✅ Явно указываем, что клиент работает с таблицами из схемы 'mdt'
   private supabase: SupabaseClient<Database, 'mdt'>;
 
@@ -409,7 +409,3 @@ class ReportService {
     };
   }
 }
-
-// Правильно инстанцируем и экспортируем сервис
-const reportService = new ReportService();
-export default reportService;

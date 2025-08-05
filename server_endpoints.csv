@@ -1,0 +1,57 @@
+Метод,Путь,Описание,Аутентификация,Роль,Статус
+GET,/api/health,Проверка здоровья основного API,❌,-,✅
+GET,/api/v1/health,Проверка здоровья v1 API,❌,-,✅
+POST,/api/v1/auth/register,Регистрация пользователя,❌,-,✅
+POST,/api/v1/auth/login,Вход в систему,❌,-,✅
+GET,/api/v1/auth/me,Получение профиля пользователя,✅,-,✅
+POST,/api/v1/auth/logout,Выход из системы,✅,-,✅
+POST,/api/v1/auth/verify,Проверка токена,❌,-,✅
+POST,/api/v1/characters,Создание персонажа,✅,citizen,✅
+GET,/api/v1/characters/my,Получение персонажей пользователя,✅,citizen,✅
+GET,/api/v1/characters/:id,Получение персонажа по ID,❌,-,✅
+PUT,/api/v1/characters/:id,Обновление персонажа,✅,citizen,✅
+DELETE,/api/v1/characters/:id,Удаление персонажа,✅,citizen,⚠️
+POST,/api/v1/characters/:id/profiles/leo,Создание LEO профиля,✅,admin,⚠️
+PUT,/api/v1/characters/:id/profiles/leo,Обновление LEO профиля,✅,admin,⚠️
+GET,/api/v1/admin/health,Проверка здоровья админ API,❌,-,⚠️
+GET,/api/v1/report-templates/health,Проверка здоровья шаблонов,❌,-,⚠️
+GET,/api/v1/ems-fd-reports/health,Проверка здоровья EMS/FD отчетов,❌,-,⚠️
+GET,/api/v1/law-reports/health,Проверка здоровья отчетов,❌,-,⚠️
+GET,/api/v1/discord/health,Проверка здоровья Discord API,❌,-,⚠️
+GET,/api/v1/forum/health,Проверка здоровья форума,❌,-,⚠️
+GET,/api/v1/realtime/health,Проверка здоровья realtime,❌,-,⚠️
+GET,/api/public/departments,Получение списка департаментов,❌,-,✅
+GET,/api/public/departments/:id,Получение департамента по ID,❌,-,✅
+GET,/api/public/health,Проверка здоровья публичного API,❌,-,✅
+GET,/api/test/test,Тестовый эндпоинт,✅,-,✅
+GET,/api/test/health,Тестовый health check,✅,-,✅
+GET,/api/test/auth-test,Тест аутентификации,✅,-,✅
+GET,/api/test/get-token,Получение тестового токена,✅,-,✅
+POST,/api/realtime/broadcast,Отправка сообщения,✅,-,✅
+GET,/api/realtime/events,Получение событий,✅,-,✅
+GET,/api/realtime/stats,Статистика realtime,✅,-,✅
+POST,/api/realtime/subscribe,Подписка на события,✅,-,✅
+POST,/api/realtime/unsubscribe,Отписка от событий,✅,-,✅
+POST,/api/realtime/heartbeat,Heartbeat,✅,-,✅
+POST,/api/realtime-simple/broadcast,Отправка сообщения (простая версия),✅,-,✅
+GET,/api/realtime-simple/events,Получение событий (простая версия),✅,-,✅
+GET,/api/realtime-simple/stats,Статистика (простая версия),✅,-,✅
+POST,/api/realtime-simple/subscribe,Подписка (простая версия),✅,-,✅
+POST,/api/realtime-simple/unsubscribe,Отписка (простая версия),✅,-,✅
+POST,/api/realtime-simple/heartbeat,Heartbeat (простая версия),✅,-,✅
+GET,/api/discord/auth,Discord аутентификация,❌,-,✅
+POST,/api/discord/callback,Discord callback,❌,-,✅
+POST,/api/discord/webhook,Discord webhook,❌,-,✅
+GET,/api/discord/guild-info,Информация о гильдии,❌,-,✅
+GET,/api/forum/stats,Статистика форума,✅,-,✅
+GET,/api/forum/categories,Получение категорий,✅,-,✅
+GET,/api/forum/categories/:categoryId/topics,Получение тем категории,✅,-,✅
+POST,/api/forum/topics,Создание темы,✅,-,✅
+GET,/api/forum/topics/:topicId,Получение темы,✅,-,✅
+POST,/api/forum/topics/:topicId/posts,Создание поста,✅,-,✅
+PUT,/api/forum/posts/:postId,Обновление поста,✅,-,✅
+DELETE,/api/forum/posts/:postId,Удаление поста,✅,-,✅
+POST,/api/forum/posts/:postId/reactions,Реакции на пост,✅,-,✅
+POST,/api/forum/topics/:topicId/subscribe,Подписка на тему,✅,-,✅
+GET,/api/forum/search,Поиск по форуму,✅,-,✅
+GET,/api/forum/recent,Недавние посты,✅,-,✅ 

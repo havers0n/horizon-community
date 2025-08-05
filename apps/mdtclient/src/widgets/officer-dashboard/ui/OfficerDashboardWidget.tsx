@@ -1,30 +1,26 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from '@/shared/ui/atoms/Card';
-import { Button } from '@/shared/ui/atoms/Button';
-import { Badge } from '@/shared/ui/atoms/Badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/atoms/Tabs';
-import { 
-  Shield, 
-  Radio, 
-  Car, 
-  Clock, 
-  MapPin, 
-  AlertTriangle, 
-  Phone, 
-  User 
-} from 'lucide-react';
-import { useUnitManagementStore } from '@/features/unit-management/model/store';
-import { useIncidentManagementStore } from '@/features/incident-management/model/store';
 import { useBoloManagementStore } from '@/features/bolo-management/model/store';
+import { useIncidentManagementStore } from '@/features/incident-management/model/store';
+import { useUnitManagementStore } from '@/features/unit-management/model/store';
+import { Badge } from '@/shared/ui/atoms/Badge';
+import { Button } from '@/shared/ui/atoms/Button';
+import { Card, CardContent, CardHeader } from '@/shared/ui/atoms/Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/atoms/Tabs';
+import type { Bolos, Incidents, Units } from '@roleplay-identity/db-types';
+import { AlertTriangle, Car, Clock, MapPin, Phone, Radio, Shield, User } from 'lucide-react';
+import React, { useState } from 'react';
 
-const statusOptions = [
+const statusOptions: {
+  value: Units['status'];
+  label: string;
+  icon: React.ElementType;
+  color: string;
+}[] = [
   { value: 'available', label: 'Доступен (10-8)', icon: Shield, color: 'bg-green-500' },
   { value: 'busy', label: 'Занят (10-12)', icon: Clock, color: 'bg-orange-500' },
-  { value: 'enRoute', label: 'В пути (10-31)', icon: Car, color: 'bg-blue-500' },
-  { value: 'onScene', label: 'На месте (10-97)', icon: MapPin, color: 'bg-purple-500' },
+  { value: 'en_route', label: 'В пути (10-31)', icon: Car, color: 'bg-blue-500' },
+  { value: 'on_scene', label: 'На месте (10-97)', icon: MapPin, color: 'bg-purple-500' },
   { value: 'unavailable', label: 'Недоступен (10-7)', icon: User, color: 'bg-gray-500' },
-  { value: 'panic', label: 'Паника (10-99)', icon: AlertTriangle, color: 'bg-red-500' }
+  { value: 'panic', label: 'Паника (10-99)', icon: AlertTriangle, color: 'bg-red-500' },
 ];
 
 const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
@@ -62,29 +58,31 @@ export const OfficerDashboardWidget: React.FC = () => {
   const { bolos } = useBoloManagementStore();
 
   // Моковые данные для текущего офицера (в реальном приложении будут из API)
-  const mockCurrentOfficer = units[0] || {
+  const mockCurrentOfficer: Units = units[0] || {
     id: '1',
     name: 'Джон Смит',
-    callSign: '1-ADAM-12',
-    department: 'LSPD Patrol Division',
+    callsign: '1-ADAM-12',
+    department_id: '1',
     status: 'available',
-    vehicle: 'Круизер LSPD #12',
+    vehicle_id: '1',
     location: 'Центральный участок',
-    lastUpdate: '14:35'
+    updated_at: '14:35',
+    user_id: '',
+    type: 'patrol',
   };
 
-  const [currentStatus, setCurrentStatus] = useState(mockCurrentOfficer.status);
+  const [currentStatus, setCurrentStatus] = useState<Units['status']>(mockCurrentOfficer.status);
 
-  const getStatusInfo = (status: string) => {
-    return statusOptions.find(option => option.value === status) || statusOptions[0];
+  const getStatusInfo = (status: Units['status']) => {
+    return statusOptions.find((option) => option.value === status) || statusOptions[0];
   };
 
   const currentStatusInfo = getStatusInfo(currentStatus);
 
-  const handleStatusChange = (newStatus: string) => {
+  const handleStatusChange = (newStatus: Units['status']) => {
     setCurrentStatus(newStatus);
     // Обновляем статус в сторе
-    updateUnitStatus(mockCurrentOfficer.id, newStatus as any);
+    updateUnitStatus(mockCurrentOfficer.id, newStatus);
   };
 
   return (
@@ -102,11 +100,15 @@ export const OfficerDashboardWidget: React.FC = () => {
           <div className="p-2 bg-blue-900/20 border border-blue-700/30 rounded text-xs">
             <div className="flex items-center gap-1 mb-1">
               <Radio className="h-3 w-3 text-blue-400" />
-              <span className="font-medium text-white">{mockCurrentOfficer.callSign}</span>
+              <span className="font-medium text-white">{mockCurrentOfficer.callsign}</span>
             </div>
             <div className="text-secondary-300 space-y-0.5">
-              <div>Офицер: <span className="text-white">{mockCurrentOfficer.name}</span></div>
-              <div>Департамент: <span className="text-white">{mockCurrentOfficer.department}</span></div>
+              <div>
+                Офицер: <span className="text-white">{mockCurrentOfficer.name}</span>
+              </div>
+              <div>
+                Департамент: <span className="text-white">{mockCurrentOfficer.department_id}</span>
+              </div>
             </div>
           </div>
 
@@ -116,22 +118,26 @@ export const OfficerDashboardWidget: React.FC = () => {
               <div className={`w-2 h-2 rounded-full ${currentStatusInfo.color}`}></div>
               <span className="font-medium text-white">Текущий статус</span>
             </div>
-            
+
             <div className="flex items-center gap-1 mb-1">
               <currentStatusInfo.icon className="h-3 w-3 text-secondary-400" />
               <span className="text-secondary-300">{currentStatusInfo.label}</span>
             </div>
 
-            {mockCurrentOfficer.vehicle && (
+            {mockCurrentOfficer.vehicle_id && (
               <div className="flex items-center gap-1 mb-1">
                 <Car className="h-2.5 w-2.5 text-secondary-400" />
-                <span className="text-secondary-300">{mockCurrentOfficer.vehicle}</span>
+                <span className="text-secondary-300">
+                  Круизер LSPD #{mockCurrentOfficer.vehicle_id}
+                </span>
               </div>
             )}
 
             <div className="flex items-center gap-1">
               <Clock className="h-2.5 w-2.5 text-secondary-400" />
-              <span className="text-secondary-400">Обновлено: {mockCurrentOfficer.lastUpdate}</span>
+              <span className="text-secondary-400">
+                Обновлено: {mockCurrentOfficer.updated_at}
+              </span>
             </div>
           </div>
 
@@ -141,7 +147,7 @@ export const OfficerDashboardWidget: React.FC = () => {
             {statusOptions.map((status) => (
               <Button
                 key={status.value}
-                variant={currentStatus === status.value ? "default" : "outline"}
+                variant={currentStatus === status.value ? 'default' : 'outline'}
                 size="sm"
                 className="w-full justify-start h-7 text-xs"
                 onClick={() => handleStatusChange(status.value)}
@@ -193,19 +199,23 @@ export const OfficerDashboardWidget: React.FC = () => {
 
             <TabsContent value="calls" className="mt-2 h-full">
               <div className="space-y-1 max-h-48 overflow-y-auto">
-                {incidents.map((incident) => (
+                {incidents.map((incident: Incidents) => (
                   <div
                     key={incident.id}
                     className="p-2 border border-secondary-700 rounded text-xs hover:bg-secondary-800/30 transition-colors cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex items-center gap-1">
-                        {getTypeIcon(incident.type)}
-                        <span className={`font-medium ${getPriorityColor(incident.priority)}`}>
+                        {getTypeIcon(incident.type || '')}
+                        <span
+                          className={`font-medium ${getPriorityColor(incident.priority || 'low')}`}
+                        >
                           {incident.type}
                         </span>
                       </div>
-                      <span className="text-secondary-400 text-xs">{incident.timestamp}</span>
+                      <span className="text-secondary-400 text-xs">
+                        {incident.created_at}
+                      </span>
                     </div>
                     <div className="text-secondary-300 mb-1">{incident.location}</div>
                     <div className="text-secondary-400 text-xs line-clamp-2">
@@ -218,7 +228,7 @@ export const OfficerDashboardWidget: React.FC = () => {
 
             <TabsContent value="bolos" className="mt-2 h-full">
               <div className="space-y-1 max-h-48 overflow-y-auto">
-                {bolos.map((bolo) => (
+                {bolos.map((bolo: Bolos) => (
                   <div
                     key={bolo.id}
                     className="p-2 border border-secondary-700 rounded text-xs hover:bg-secondary-800/30 transition-colors cursor-pointer"
@@ -226,16 +236,16 @@ export const OfficerDashboardWidget: React.FC = () => {
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3 text-orange-400" />
-                        <span className={`font-medium ${getPriorityColor(bolo.priority)}`}>
-                          {bolo.type.toUpperCase()}
+                        <span
+                          className={`font-medium ${getPriorityColor(bolo.priority || 'low')}`}
+                        >
+                          {bolo.type?.toUpperCase()}
                         </span>
                       </div>
-                      <span className="text-secondary-400 text-xs">{bolo.timestamp}</span>
+                      <span className="text-secondary-400 text-xs">{bolo.created_at}</span>
                     </div>
                     <div className="text-secondary-300 mb-1">{bolo.description}</div>
-                    <div className="text-secondary-400 text-xs">
-                      Причина: {bolo.reason}
-                    </div>
+                    <div className="text-secondary-400 text-xs">Причина: {bolo.reason}</div>
                   </div>
                 ))}
               </div>

@@ -64,7 +64,7 @@ export interface LocalUser {
   isSupervisor: boolean
 }
 
-export enum Department {
+export enum UserDepartment {
   LSPD = 'LSPD',
   BCSO = 'BCSO',
   LSFD = 'LSFD',

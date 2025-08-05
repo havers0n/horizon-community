@@ -1,19 +1,16 @@
 import request from 'supertest';
 import express from 'express';
-import { storage } from '../../storage';
-import { ApplicationService } from '../../services/ApplicationService';
-import { NotificationService } from '../../services/NotificationService';
+import { ApplicationService } from '../../src/core/services/ApplicationService';
 
 // Мокаем ApplicationService
-jest.mock('../../services/ApplicationService', () => ({
+jest.mock('../../src/core/services/ApplicationService', () => ({
   ApplicationService: jest.fn().mockImplementation(() => ({
-    canSubmitApplication: jest.fn(),
-    getUserApplicationStats: jest.fn(),
-    advanceApplicationStatus: jest.fn(),
-    getActiveJointPositions: jest.fn(),
-    processJointApplication: jest.fn(),
-    removeJointPosition: jest.fn(),
-    resetMonthlyLimits: jest.fn()
+    createApplication: jest.fn(),
+    getApplicationById: jest.fn(),
+    updateApplication: jest.fn(),
+    deleteApplication: jest.fn(),
+    getUserApplications: jest.fn(),
+    getApplicationsByStatus: jest.fn()
   }))
 }));
 
@@ -26,39 +23,89 @@ describe('Application API', () => {
     app.use(express.json());
 
     // Создаем мок сервиса
-    const notificationService = new NotificationService(storage);
-    mockApplicationService = new ApplicationService(storage, notificationService);
+    mockApplicationService = new ApplicationService();
 
     // Добавляем тестовые роуты
-    app.post('/api/applications/check', async (req, res) => {
+    app.post('/api/applications', async (req, res) => {
       try {
-        const { userId, type } = req.body;
-        const restriction = await mockApplicationService.canSubmitApplication(userId, type);
-        const stats = await mockApplicationService.getUserApplicationStats(userId);
-        res.json({ restriction, stats });
+        const application = await mockApplicationService.createApplication(req.body);
+        res.json(application);
+      } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
+    app.get('/api/applications/:id', async (req, res) => {
+      try {
+        const application = await mockApplicationService.getApplicationById(req.params.id);
+        if (!application) {
+          return res.status(404).json({ error: 'Application not found' });
+        }
+        res.json(application);
       } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
       }
     });
   });
 
-  describe('POST /api/applications/check', () => {
-    it('should check application submission', async () => {
-      const mockUser = { id: '1', email: 'test@example.com' };
-      const mockRestriction = { allowed: true, remainingCount: 2 };
-      const mockStats = { thisMonth: { entryApplications: 1 } };
+  describe('POST /api/applications', () => {
+    it('should create a new application', async () => {
+      const mockApplication = {
+        id: '1',
+        type: 'entry',
+        author_user_id: 'user123',
+        author_character_id: 'char456',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
 
-      (mockApplicationService.canSubmitApplication as jest.Mock).mockResolvedValue(mockRestriction);
-      (mockApplicationService.getUserApplicationStats as jest.Mock).mockResolvedValue(mockStats);
+      (mockApplicationService.createApplication as jest.Mock).mockResolvedValue(mockApplication);
 
       const response = await request(app)
-        .post('/api/applications/check')
-        .send({ userId: mockUser.id, type: 'entry' })
+        .post('/api/applications')
+        .send({
+          type: 'entry',
+          authorUserId: 'user123',
+          authorCharacterId: 'char456'
+        })
         .expect(200);
 
-      expect(mockApplicationService.canSubmitApplication).toHaveBeenCalledWith(mockUser.id, 'entry');
-      expect(response.body.restriction).toEqual(mockRestriction);
-      expect(response.body.stats).toEqual(mockStats);
+      expect(mockApplicationService.createApplication).toHaveBeenCalledWith({
+        type: 'entry',
+        authorUserId: 'user123',
+        authorCharacterId: 'char456'
+      });
+      expect(response.body).toEqual(mockApplication);
+    });
+  });
+
+  describe('GET /api/applications/:id', () => {
+    it('should get application by id', async () => {
+      const mockApplication = {
+        id: '1',
+        type: 'entry',
+        author_user_id: 'user123',
+        author_character_id: 'char456',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      (mockApplicationService.getApplicationById as jest.Mock).mockResolvedValue(mockApplication);
+
+      const response = await request(app)
+        .get('/api/applications/1')
+        .expect(200);
+
+      expect(mockApplicationService.getApplicationById).toHaveBeenCalledWith('1');
+      expect(response.body).toEqual(mockApplication);
+    });
+
+    it('should return 404 when application not found', async () => {
+      (mockApplicationService.getApplicationById as jest.Mock).mockResolvedValue(null);
+
+      await request(app)
+        .get('/api/applications/999')
+        .expect(404);
     });
   });
 }); 

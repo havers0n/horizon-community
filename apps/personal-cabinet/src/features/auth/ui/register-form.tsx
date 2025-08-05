@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
-import { AuthAPI } from '../api'
+import { useAuth } from '../ui/auth-provider'
 import { Link, useNavigate } from 'react-router-dom'
 
 const registerSchema = z.object({
@@ -26,6 +26,7 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const { signUp } = useAuth()
 
   const {
     register,
@@ -40,10 +41,15 @@ export function RegisterForm() {
     setError('')
 
     try {
-      await AuthAPI.signUp(data)
+      await signUp({
+        email: data.email,
+        password: data.password,
+        first_name: data.firstName,
+        last_name: data.lastName
+      })
       navigate('/dashboard')
-    } catch (err) {
-      setError('Ошибка при регистрации. Попробуйте еще раз.')
+    } catch (err: any) {
+      setError(err.message || 'Ошибка при регистрации. Попробуйте еще раз.')
     } finally {
       setIsLoading(false)
     }

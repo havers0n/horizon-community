@@ -20,7 +20,7 @@ import type {
 } from '@roleplay-identity/db-types';
 
 
-class CharacterService {
+export class CharacterService {
   // ✅ Указываем, что основной клиент работает со схемой 'common'
   private supabase: SupabaseClient<Database, 'common'>;
   // ✅ Создаем отдельный клиент для работы со схемой 'public' (для профилей пользователей)
@@ -39,7 +39,7 @@ class CharacterService {
     const { data, error } = await this.supabase
       .from('characters')
       .select('*')
-      .eq('user_id', userId);
+      .eq('owner_id', userId); // ✅ ИСПРАВЛЕНО
 
     if (error) {
       console.error(`[CharacterService] Error fetching characters for user ${userId}:`, error);
@@ -132,18 +132,18 @@ class CharacterService {
    * ✅ ДОБАВЛЕН МЕТОД: Обновить LEO профиль
    */
   public async updateLeoProfile(characterId: string, data: LeoProfilesUpdate): Promise<LeoProfiles> {
-    const { data: updatedProfile, error } = await this.supabase
+    const result = await (this.supabase as any)
       .from('leo_profiles')
       .update(data)
       .eq('character_id', characterId)
       .select()
       .single();
 
-    if (error || !updatedProfile) {
-      console.error(`[CharacterService] Error updating LEO profile for char ${characterId}:`, error);
+    if (result.error || !result.data) {
+      console.error(`[CharacterService] Error updating LEO profile for char ${characterId}:`, result.error);
       throw new AppError('Не удалось обновить LEO профиль.', 500);
     }
-    return updatedProfile;
+    return result.data;
   }
   
   // ===========================================
@@ -171,18 +171,18 @@ class CharacterService {
    * ✅ ДОБАВЛЕН МЕТОД: Обновить EMS профиль
    */
   public async updateEmsProfile(characterId: string, data: EmsProfilesUpdate): Promise<EmsProfiles> {
-    const { data: updatedProfile, error } = await this.supabase
+    const result = await (this.supabase as any)
       .from('ems_profiles')
       .update(data)
       .eq('character_id', characterId)
       .select()
       .single();
 
-    if (error || !updatedProfile) {
-      console.error(`[CharacterService] Error updating EMS profile for char ${characterId}:`, error);
+    if (result.error || !result.data) {
+      console.error(`[CharacterService] Error updating EMS profile for char ${characterId}:`, result.error);
       throw new AppError('Не удалось обновить EMS профиль.', 500);
     }
-    return updatedProfile;
+    return result.data;
   }
 
   // ===========================================
@@ -204,6 +204,3 @@ class CharacterService {
     return data;
   }
 }
-
-const characterService = new CharacterService();
-export default characterService;

@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useEffect } from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { useUnitManagementStore } from '../model/store';

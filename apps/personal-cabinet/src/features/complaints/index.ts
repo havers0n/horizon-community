@@ -1,0 +1,1 @@
+export { ComplaintModal } from './ui/complaint-modal' 

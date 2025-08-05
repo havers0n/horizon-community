@@ -1,6 +1,6 @@
 // src/core/services/ApplicationService.ts
 
-import { supabase } from '../lib/supabase';
+import { mdtClient } from '../lib/supabase';
 import type { Database } from '@roleplay-identity/db-types';
 import { AppError } from '../../utils/AppError';
 
@@ -23,7 +23,12 @@ export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 
 // ===== СОВРЕМЕННЫЙ APPLICATION SERVICE =====
 export class ApplicationService {
-  private supabase = supabase;
+  // ✅ Используем клиент для схемы 'mdt', где находится таблица applications
+  private supabase = mdtClient;
+
+  constructor() {
+    // Конструктор может быть пустым, так как supabase уже инициализирован
+  }
 
   /**
    * Создать новую заявку
@@ -180,7 +185,3 @@ export class ApplicationService {
     }
   }
 }
-
-// Экспортируем экземпляр сервиса
-const applicationService = new ApplicationService();
-export default applicationService;

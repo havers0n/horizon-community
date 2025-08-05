@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../core/lib/supabase.js';
 import type { Database } from '@roleplay-identity/db-types';
+import type { User } from '@roleplay-identity/shared-schema';
 
 // Типы из packages/db-types
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -10,7 +11,7 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 declare global {
   namespace Express {
     interface Request {
-      user?: Profile;
+      user?: User;
     }
   }
 }
@@ -26,7 +27,7 @@ if (supabaseUrl && supabaseServiceKey) {
 
 export type AuthenticatedRequest = Request;
 
-export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<Profile | null> {
+export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<User | null> {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -43,8 +44,7 @@ export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<P
       id: 'mock-user-id',
       username: 'mock-user',
       email: 'mock@example.com',
-      role: 'candidate',
-      created_at: new Date().toISOString()
+      role: 'candidate'
     };
   }
 
@@ -78,7 +78,13 @@ export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<P
     }
     
     console.log(`🔧 Profile found:`, profile.email);
-    return profile;
+    // Преобразуем Profile в User
+    return {
+      id: profile.id,
+      username: profile.username,
+      email: profile.email,
+      role: profile.role
+    };
   } catch (error) {
     console.error('Error getting authenticated user:', error);
     return null;

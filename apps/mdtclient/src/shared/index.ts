@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Types - главный экспорт всех типов (приоритет)
 export * from './types';
 

@@ -1,9 +1,9 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
 import { Card, CardHeader, Button } from '@/shared/ui/atoms';
 import { useMDTCalls, useMDTUnits } from '@/hooks/useMDT';
 import { useLocale } from '@/shared/contexts/LocaleContext';
 import { MapPin, Clock, Users, Phone } from 'lucide-react';
+import type { Calls911, Units } from '@roleplay-identity/db-types';
 
 interface CallQueueWidgetProps {
   isCompact?: boolean;
@@ -23,19 +23,20 @@ export const CallQueueWidget: React.FC<CallQueueWidgetProps> = ({
   const activeCalls = calls.filter(call => call.status !== 'closed').slice(0, maxItems);
   const availableUnits = units.filter(u => u.status === 'available');
 
-  const handleStatusChange = async (callId: string, newStatus: string) => {
+  const handleStatusChange = async (callId: string, newStatus: Calls911['status']) => {
     await updateCallStatus(callId, newStatus);
   };
 
-  const handleAssignUnits = async (callId: string, unitIds: number[]) => {
+  const handleAssignUnits = async (callId: string, unitIds: string[]) => {
     await assignUnitsToCall(callId, unitIds);
   };
 
-  const getPriorityColor = (priority: number) => {
+  const getPriorityColor = (priority: Calls911['priority']) => {
     switch (priority) {
-      case 1: return 'bg-green-600';
-      case 2: return 'bg-yellow-600';
-      case 3: return 'bg-red-600';
+      case 'low': return 'bg-green-600';
+      case 'medium': return 'bg-yellow-600';
+      case 'high': return 'bg-red-600';
+      case 'critical': return 'bg-red-800';
       default: return 'bg-secondary-600';
     }
   };
@@ -59,7 +60,7 @@ export const CallQueueWidget: React.FC<CallQueueWidgetProps> = ({
 
   return (
     <Card className={className}>
-      <CardHeader>{t('dispatch.callQueue')}</CardHeader>
+      <CardHeader><>{t('dispatch.callQueue')}</></CardHeader>
       <div className="p-4 space-y-3">
         {activeCalls.length > 0 ? (
           activeCalls.map(call => (
@@ -78,17 +79,17 @@ export const CallQueueWidget: React.FC<CallQueueWidgetProps> = ({
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock size={12} />
-                  {new Date(call.createdAt).toLocaleTimeString()}
+                  {new Date(call.created_at).toLocaleTimeString()}
                 </span>
                 <span className="flex items-center gap-1">
                   <Users size={12} />
-                  {call.assignedUnits.length} units
+                  {call.assigned_units.length} units
                 </span>
               </div>
               <div className="flex gap-2">
                 <select 
                   className="bg-secondary-700 border border-secondary-600 rounded px-2 py-1 text-xs"
-                  onChange={(e) => handleStatusChange(call.id, e.target.value)}
+                  onChange={(e) => handleStatusChange(call.id, e.target.value as Calls911['status'])}
                   value={call.status}
                 >
                   <option value="pending">Pending</option>
@@ -102,7 +103,7 @@ export const CallQueueWidget: React.FC<CallQueueWidgetProps> = ({
                   size="sm" 
                   onClick={() => {
                     if (availableUnits.length > 0) {
-                      handleAssignUnits(call.id, [parseInt(availableUnits[0].id)]);
+                      handleAssignUnits(call.id, [availableUnits[0].id]);
                     }
                   }}
                   disabled={availableUnits.length === 0}

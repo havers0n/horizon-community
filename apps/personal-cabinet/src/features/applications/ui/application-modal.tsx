@@ -1,11 +1,24 @@
 import { useState } from 'react'
-import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
-import { Textarea } from '@/shared/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog'
+import { Button } from '@/shared/ui/button'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
+import { Textarea } from '@/shared/ui/textarea'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/shared/lib/use-toast'
+import { Plus } from 'lucide-react'
+
+const applicationSchema = z.object({
+  type: z.string().min(1, 'Тип заявки обязателен'),
+  data: z.object({
+    details: z.string().min(10, 'Пожалуйста, предоставьте подробную информацию')
+  })
+})
+
+type ApplicationFormData = z.infer<typeof applicationSchema>
 
 interface ApplicationModalProps {
   children?: React.ReactNode
@@ -14,134 +27,120 @@ interface ApplicationModalProps {
 }
 
 export function ApplicationModal({ children, isOpen, onOpenChange }: ApplicationModalProps) {
-  const [formData, setFormData] = useState({
-    type: '',
-    title: '',
-    description: '',
-    department: '',
-    priority: 'medium'
-  })
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = typeof isOpen === 'boolean' ? isOpen : internalOpen
+  const setOpen = onOpenChange || setInternalOpen
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
+
+  const form = useForm<ApplicationFormData>({
+    resolver: zodResolver(applicationSchema),
+    defaultValues: {
+      type: '',
+      data: {
+        details: ''
+      }
+    }
+  })
+
+  const mutation = useMutation({
+    mutationFn: async (data: ApplicationFormData) => {
       // Здесь будет API вызов для создания заявки
-      console.log('Создание заявки:', formData)
-      
+      console.log('Создание заявки:', data)
+      return { success: true }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/applications'] })
       toast({
         title: 'Успешно',
-        description: 'Заявка создана и отправлена на рассмотрение',
+        description: 'Заявка отправлена успешно'
       })
-      
-      setFormData({
-        type: '',
-        title: '',
-        description: '',
-        department: '',
-        priority: 'medium'
-      })
-      
-      onOpenChange?.(false)
-    } catch (error) {
+      setOpen(false)
+      form.reset()
+    },
+    onError: () => {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось создать заявку',
+        description: 'Не удалось отправить заявку',
         variant: 'destructive'
       })
     }
+  })
+
+  const onSubmit = (data: ApplicationFormData) => {
+    mutation.mutate(data)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {children}
+        {children || (
+          <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+            <div className="flex items-center space-x-3">
+              <Plus className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">Новая заявка</span>
+            </div>
+          </button>
+        )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Создать заявку</DialogTitle>
+          <DialogTitle>Новая заявка</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="type">Тип заявки</Label>
-            <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите тип заявки" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="leave">Отпуск</SelectItem>
-                <SelectItem value="transfer">Перевод</SelectItem>
-                <SelectItem value="joint">Совместительство</SelectItem>
-                <SelectItem value="complaint">Жалоба</SelectItem>
-                <SelectItem value="other">Другое</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="title">Заголовок</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Краткое описание заявки"
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Тип заявки</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите тип заявки..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="promotion">Запрос на повышение</SelectItem>
+                      <SelectItem value="transfer_dept">Перевод в департамент</SelectItem>
+                      <SelectItem value="transfer_div">Перевод в подразделение</SelectItem>
+                      <SelectItem value="leave">Запрос на отпуск</SelectItem>
+                      <SelectItem value="qualification">Запрос на квалификацию</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="department">Департамент</Label>
-            <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите департамент" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lspd">LSPD</SelectItem>
-                <SelectItem value="bcso">BCSO</SelectItem>
-                <SelectItem value="lsfd">LSFD</SelectItem>
-                <SelectItem value="sams">SAMS</SelectItem>
-                <SelectItem value="safr">SAFR</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="priority">Приоритет</Label>
-            <Select value={formData.priority} onValueChange={(value) => setFormData({ ...formData, priority: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Низкий</SelectItem>
-                <SelectItem value="medium">Средний</SelectItem>
-                <SelectItem value="high">Высокий</SelectItem>
-                <SelectItem value="urgent">Срочный</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Описание</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Подробное описание заявки"
-              rows={4}
-              required
+            <FormField
+              control={form.control}
+              name="data.details"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Детали</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Пожалуйста, предоставьте подробную информацию о вашей заявке..." 
+                      className="min-h-[100px]"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange?.(false)}>
-              Отмена
-            </Button>
-            <Button type="submit">
-              Создать заявку
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-3">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Отмена
+              </Button>
+              <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? 'Отправка...' : 'Отправить заявку'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

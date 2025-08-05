@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { LawReport } from './types';
+import type { LawReports } from '@roleplay-identity/db-types';
 
 interface LawEnforcementState {
-  reports: LawReport[];
-  addReport: (report: LawReport) => void;
+  reports: LawReports[];
+  addReport: (report: LawReports) => void;
   deleteReport: (reportId: string) => void;
-  updateReport: (report: LawReport) => void;
+  updateReport: (report: LawReports) => void;
 }
 
 export const useLawEnforcementStore = create<LawEnforcementState>((set) => ({

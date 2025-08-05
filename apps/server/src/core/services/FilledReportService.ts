@@ -1,14 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../../../packages/db-types/src/index';
+import { createSupabaseClient } from '../lib/supabase';
+import type { Database } from '@roleplay-identity/db-types';
 
 // TODO: Regenerate DB types to include filled_reports
 const TABLE_NAME = 'filled_reports' as any;
 
 export class FilledReportService {
-  private supabase: ReturnType<typeof createClient<Database>>;
+  private supabase: any;
+  private reportService: any;
+  private reportTemplateService: any;
 
-  constructor(supabaseUrl: string, supabaseKey: string) {
-    this.supabase = createClient<Database>(supabaseUrl, supabaseKey);
+  constructor(reportService: any, reportTemplateService: any) {
+    this.supabase = createSupabaseClient('mdt');
+    this.reportService = reportService;
+    this.reportTemplateService = reportTemplateService;
   }
 
   // Methods for filled reports will be added here

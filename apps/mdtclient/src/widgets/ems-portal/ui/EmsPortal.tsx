@@ -1,31 +1,50 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React, { useState } from 'react';
-import { Card } from '@/shared/ui/atoms/Card';
-import { UnitList } from '@/features/unit-management';
 import { EmsCallList } from '@/features/ems-call-management';
-// ВРЕМЕННЫЕ ЗАГЛУШКИ
-const EmsReportsList = () => <div className="text-yellow-500">[EmsReportsList Placeholder]</div>;
-const EmsReportForm = () => <div className="text-yellow-500">[EmsReportForm Placeholder]</div>;
-const EmsPersonnelList = () => <div className="text-yellow-500">[EmsPersonnelList Placeholder]</div>;
 import { PatientSearch } from '@/features/patient-management';
 import { ShiftManagement } from '@/features/shift-management';
-import { 
-  LayoutDashboard, 
-  Ambulance, 
-  Phone, 
-  FileText, 
-  Users, 
-  Calendar,
-  HeartPulse,
+import { UnitList } from '@/features/unit-management';
+import { Card } from '@/shared/ui/atoms/Card';
+import {
   AlertTriangle,
+  Ambulance,
   BarChart3,
+  Calendar,
+  FileText,
+  HeartPulse,
+  LayoutDashboard,
+  Phone,
   Settings,
   User,
-  Clock
 } from 'lucide-react';
+import React, { useState } from 'react';
+
+// Interfaces for placeholder components
+interface EmsReportsListProps {
+  onCreate: () => void;
+  showCreateButton: boolean;
+}
+interface EmsReportFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+interface EmsPersonnelListProps {
+  showCreateButton: boolean;
+}
+
+// ВРЕМЕННЫЕ ЗАГЛУШКИ
+const EmsReportsList: React.FC<EmsReportsListProps> = () => (
+  <div className="text-yellow-500">[EmsReportsList Placeholder]</div>
+);
+const EmsReportForm: React.FC<EmsReportFormProps> = () => (
+  <div className="text-yellow-500">[EmsReportForm Placeholder]</div>
+);
+const EmsPersonnelList: React.FC<EmsPersonnelListProps> = () => (
+  <div className="text-yellow-500">[EmsPersonnelList Placeholder]</div>
+);
 
 export const EmsPortal: React.FC = () => {
-  const [activeView, setActiveView] = useState<'dashboard' | 'calls' | 'units' | 'reports' | 'personnel' | 'shifts' | 'patients'>('dashboard');
+  const [activeView, setActiveView] = useState<
+    'dashboard' | 'calls' | 'units' | 'reports' | 'personnel' | 'shifts' | 'patients'
+  >('dashboard');
   const [showReportForm, setShowReportForm] = useState(false);
 
   const navigationItems = [
@@ -35,7 +54,7 @@ export const EmsPortal: React.FC = () => {
     { id: 'reports', label: 'Рапорты', icon: FileText },
     { id: 'personnel', label: 'Сотрудники', icon: Users },
     { id: 'shifts', label: 'Журнал смен', icon: Calendar },
-    { id: 'patients', label: 'Пациенты', icon: User }
+    { id: 'patients', label: 'Пациенты', icon: User },
   ] as const;
 
   const renderDashboard = () => (
@@ -126,7 +145,7 @@ export const EmsPortal: React.FC = () => {
             <h3 className="text-lg font-semibold text-white">Быстрые действия</h3>
           </div>
           <div className="space-y-2">
-            <button 
+            <button
               className="w-full text-left p-2 hover:bg-secondary-700 rounded text-sm transition-colors"
               onClick={() => setShowReportForm(true)}
             >
@@ -184,10 +203,7 @@ export const EmsPortal: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white">Система отчетов</h2>
       </div>
-      <EmsReportsList 
-        onCreate={() => setShowReportForm(true)}
-        showCreateButton={true}
-      />
+      <EmsReportsList onCreate={() => setShowReportForm(true)} showCreateButton={true} />
     </div>
   );
 
@@ -196,9 +212,7 @@ export const EmsPortal: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white">Управление персоналом</h2>
       </div>
-      <EmsPersonnelList 
-        showCreateButton={true}
-      />
+      <EmsPersonnelList showCreateButton={true} />
     </div>
   );
 
@@ -216,14 +230,22 @@ export const EmsPortal: React.FC = () => {
 
   const renderContent = () => {
     switch (activeView) {
-      case 'dashboard': return renderDashboard();
-      case 'calls': return renderCalls();
-      case 'units': return renderUnits();
-      case 'reports': return renderReports();
-      case 'personnel': return renderPersonnel();
-      case 'shifts': return renderShifts();
-      case 'patients': return renderPatients();
-      default: return renderDashboard();
+      case 'dashboard':
+        return renderDashboard();
+      case 'calls':
+        return renderCalls();
+      case 'units':
+        return renderUnits();
+      case 'reports':
+        return renderReports();
+      case 'personnel':
+        return renderPersonnel();
+      case 'shifts':
+        return renderShifts();
+      case 'patients':
+        return renderPatients();
+      default:
+        return renderDashboard();
     }
   };
 
@@ -240,7 +262,7 @@ export const EmsPortal: React.FC = () => {
 
       {/* Навигация */}
       <div className="flex border-b border-secondary-700 overflow-x-auto">
-        {navigationItems.map(item => (
+        {navigationItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveView(item.id)}
@@ -257,15 +279,10 @@ export const EmsPortal: React.FC = () => {
       </div>
 
       {/* Контент */}
-      <div className="min-h-[600px]">
-        {renderContent()}
-      </div>
+      <div className="min-h-[600px]">{renderContent()}</div>
 
       {/* Модальное окно создания отчета */}
-      <EmsReportForm
-        isOpen={showReportForm}
-        onClose={() => setShowReportForm(false)}
-      />
+      <EmsReportForm isOpen={showReportForm} onClose={() => setShowReportForm(false)} />
     </div>
   );
 }; 

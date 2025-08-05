@@ -5,9 +5,11 @@
     { "path": "./apps/client" },
     { "path": "./apps/mdtclient" },
     { "path": "./apps/server" },
+    { "path": "./apps/personal-cabinet" }, // ✅ Добавляем ссылку на personal-cabinet
     { "path": "./packages/db-types" }, // ✅ Добавляем ссылку на наш пакет
-    { "path": "./libs/shared-schema" },
     { "path": "./libs/shared-types" },
-    { "path": "./libs/shared-utils" }
+    { "path": "./libs/shared-utils" },
+    { "path": "./libs/ui-components" },
+    { "path": "./libs/shared/schema" } // ✅ Добавляем ссылку на schema
   ]
 }

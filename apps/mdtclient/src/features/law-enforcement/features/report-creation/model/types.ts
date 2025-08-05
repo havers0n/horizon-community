@@ -1,6 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import type { LawReport } from '@/shared';
-
 export interface ReportCreationFormData {
   // Основная информация
   citizenName: string;
@@ -30,7 +27,7 @@ export interface ReportCreationActions {
   setFormData: (data: Partial<ReportCreationFormData>) => void;
   setCurrentStep: (step: number) => void;
   setShowForm: (show: boolean) => void;
-  createReport: (report: LawReport) => void;
+  createReport: (report: import('@roleplay-identity/db-types').LawReports) => void;
   clearForm: () => void;
   clearError: () => void;
 }

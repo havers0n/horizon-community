@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
+
 import { Button } from '@shared/ui/button'
 import { Input } from '@shared/ui/input'
 import { Label } from '@shared/ui/label'
@@ -109,4 +109,6 @@ export function ApplicationForm() {
       </Button>
     </form>
   )
-} 
+}
+
+export default ApplicationForm 

@@ -1,7 +1,9 @@
+import React, { Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
-import { NotificationsFeature } from '@features/notifications'
+
+// Lazy load components
+const NotificationList = React.lazy(() => import('@/features/notifications/ui/notification-list'))
+const NotificationSettings = React.lazy(() => import('@/features/notifications/ui/notification-settings'))
 
 export function NotificationsWidget() {
   return (
@@ -11,7 +13,9 @@ export function NotificationsWidget() {
           <CardTitle>Уведомления</CardTitle>
         </CardHeader>
         <CardContent>
-          <NotificationsFeature.NotificationList />
+          <Suspense fallback={<div>Загрузка уведомлений...</div>}>
+            <NotificationList />
+          </Suspense>
         </CardContent>
       </Card>
       
@@ -20,7 +24,9 @@ export function NotificationsWidget() {
           <CardTitle>Настройки уведомлений</CardTitle>
         </CardHeader>
         <CardContent>
-          <NotificationsFeature.Settings />
+          <Suspense fallback={<div>Загрузка настроек...</div>}>
+            <NotificationSettings />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

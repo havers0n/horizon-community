@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Главный экспорт для FSD архитектуры
 // Этот файл экспортирует все публичные API из каждого слоя
 
@@ -60,54 +59,36 @@ export {
   LanguageSwitcher,
 } from './features';
 
-// Entities layer - экспортируем только уникальные типы
-export {
-  // Citizen
-  Citizen,
-  CreateCitizenRequest,
-  UpdateCitizenRequest,
-  
-  // Vehicle
-  Vehicle,
-  CreateVehicleRequest,
-  UpdateVehicleRequest,
-  
-  // Weapon
-  Weapon,
-  CreateWeaponRequest,
-  UpdateWeaponRequest,
-  
-  // Company
-  Company,
-  CreateCompanyRequest,
-  UpdateCompanyRequest,
-  
-  // Incident
-  Incident,
-  CreateIncidentRequest,
-  UpdateIncidentRequest,
-  
-  // EMS
-  Patient,
-  EmsUnit,
-  MedicalRecord,
-  EmsReport,
-  
-  // Fire
-  FireIncident,
-  CreateFireIncidentRequest,
-  UpdateFireIncidentRequest,
-  
-  // Dispatch
-  Call911,
-  DispatchUnit,
-  DispatchStatus,
-  UnitStatus,
-  UnitType,
-  
-  // Department
-  Department,
-} from './entities';
+// Re-export types from @roleplay-identity/db-types
+export type {
+  Characters,
+  CharactersInsert,
+  CharactersUpdate,
+  Vehicles,
+  VehiclesInsert,
+  VehiclesUpdate,
+  Weapons,
+  WeaponsInsert,
+  WeaponsUpdate,
+  Companies,
+  CompaniesInsert,
+  CompaniesUpdate,
+  Incidents,
+  IncidentsInsert,
+  IncidentsUpdate,
+  Calls911,
+  Calls911Insert,
+  Calls911Update,
+  Units,
+  UnitsInsert,
+  UnitsUpdate,
+  Bolos,
+  BolosInsert,
+  BolosUpdate,
+  Departments,
+  DepartmentsInsert,
+  DepartmentsUpdate,
+} from '@roleplay-identity/db-types';
 
 // Shared layer
 export * from './shared';

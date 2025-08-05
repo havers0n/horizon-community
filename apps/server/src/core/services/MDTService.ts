@@ -577,7 +577,4 @@ export class MDTService {
 
     return data;
   }
-}
-
-// Экспортируем экземпляр сервиса
-export default new MDTService(); 
+} 

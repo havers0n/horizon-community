@@ -31,7 +31,7 @@ export interface TagStats {
   count: number;
 }
 
-class ReportTemplateService {
+export class ReportTemplateService {
   private TABLE_NAME = 'report_templates';
 
   async getReportTemplates(filters: ReportTemplateFilters): Promise<ReportTemplate[]> {
@@ -65,5 +65,3 @@ class ReportTemplateService {
     throw new Error('Метод не реализован');
   }
 }
-
-export default ReportTemplateService;

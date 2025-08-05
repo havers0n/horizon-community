@@ -1,33 +1,43 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import { useState, useEffect } from 'react';
-import type { Unit, Call911 } from '@/shared/types';
-import type { Bolo } from '@/entities/dispatch/model/types';
+import type { Units, Calls911, Bolos } from '@roleplay-identity/db-types';
+import { useState } from 'react';
 
 // Моковые данные для демонстрации
-const MOCK_UNITS: Unit[] = [
+const MOCK_UNITS: Units[] = [
   {
     id: '1',
     name: '1-ADAM-12',
     type: 'patrol',
     status: 'available',
-    departmentId: 1,
+    department_id: 1,
     location: 'Downtown',
-    lastUpdate: new Date().toISOString(),
-    callsign: '1-ADAM-12'
+    updated_at: new Date().toISOString(),
+    callsign: '1-ADAM-12',
+    created_at: new Date().toISOString(),
+    user_id: '',
+    character_id: null,
+    is_panic: false,
+    radio_channel: null,
+    badge_number: null,
   },
   {
     id: '2',
     name: '1-BOY-12',
     type: 'patrol',
     status: 'busy',
-    departmentId: 1,
+    department_id: 1,
     location: 'Westside',
-    lastUpdate: new Date().toISOString(),
-    callsign: '1-BOY-12'
-  }
+    updated_at: new Date().toISOString(),
+    callsign: '1-BOY-12',
+    created_at: new Date().toISOString(),
+    user_id: '',
+    character_id: null,
+    is_panic: false,
+    radio_channel: null,
+    badge_number: null,
+  },
 ];
 
-const MOCK_CALLS: Call911[] = [
+const MOCK_CALLS: Calls911[] = [
   {
     id: '1',
     caller: 'John Doe',
@@ -35,14 +45,20 @@ const MOCK_CALLS: Call911[] = [
     description: 'Domestic disturbance',
     priority: 'high',
     status: 'active',
-    assignedUnits: ['1'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    type: 'emergency'
-  }
+    assigned_units: ['1'],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    type: 'emergency',
+    department_id: null,
+    full_address: null,
+    position: null,
+    short_id: null,
+    title: null,
+    character_id: null,
+  },
 ];
 
-const MOCK_BOLOS: Bolo[] = [
+const MOCK_BOLOS: Bolos[] = [
   {
     id: '1',
     type: 'vehicle',
@@ -59,66 +75,68 @@ const MOCK_BOLOS: Bolo[] = [
     author_full_name: 'Dispatch Officer',
     title: 'Stolen vehicle',
     description: 'Stolen vehicle',
-    vehicle: {
-      plate: 'ABC123',
-      model: 'Toyota Camry',
-      color: 'Red'
-    }
-  }
+    updated_at: new Date().toISOString(),
+    department_id: null,
+  },
 ];
 
 export function useMDTUnits() {
-  const [units, setUnits] = useState<Unit[]>(MOCK_UNITS);
+  const [units, setUnits] = useState<Units[]>(MOCK_UNITS);
   const [loading, setLoading] = useState(false);
 
-  const updateUnitStatus = (unitId: string, status: Unit['status']) => {
-    setUnits(prev => prev.map(unit => 
-      unit.id === unitId ? { ...unit, status, lastUpdate: new Date().toISOString() } : unit
-    ));
+  const updateUnitStatus = (unitId: string, status: Units['status']) => {
+    setUnits((prev) =>
+      prev.map((unit) =>
+        unit.id === unitId ? { ...unit, status, updated_at: new Date().toISOString() } : unit
+      )
+    );
   };
 
   return {
     units,
     loading,
-    updateUnitStatus
+    updateUnitStatus,
   };
 }
 
 export function useMDTCalls() {
-  const [calls, setCalls] = useState<Call911[]>(MOCK_CALLS);
+  const [calls, setCalls] = useState<Calls911[]>(MOCK_CALLS);
   const [loading, setLoading] = useState(false);
 
   const assignUnitToCall = (callId: string, unitId: string) => {
-    setCalls(prev => prev.map(call => 
-      call.id === callId 
-        ? { ...call, assignedUnits: [...call.assignedUnits, unitId] }
-        : call
-    ));
+    setCalls((prev) =>
+      prev.map((call) =>
+        call.id === callId
+          ? { ...call, assigned_units: [...(call.assigned_units || []), unitId] }
+          : call
+      )
+    );
   };
 
   return {
     calls,
     loading,
-    assignUnitToCall
+    assignUnitToCall,
   };
 }
 
 export function useMDTBOLOs() {
-  const [bolos, setBolos] = useState<Bolo[]>(MOCK_BOLOS);
+  const [bolos, setBolos] = useState<Bolos[]>(MOCK_BOLOS);
   const [loading, setLoading] = useState(false);
 
-  const createBOLO = (bolo: Omit<Bolo, 'id' | 'created_at'>) => {
-    const newBOLO: Bolo = {
+  const createBOLO = (bolo: Omit<Bolos, 'id' | 'created_at' | 'updated_at'>) => {
+    const newBOLO: Bolos = {
       ...bolo,
       id: Date.now().toString(),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
-    setBolos(prev => [...prev, newBOLO]);
+    setBolos((prev) => [...prev, newBOLO]);
   };
 
   return {
     bolos,
     loading,
-    createBOLO
+    createBOLO,
   };
 } 

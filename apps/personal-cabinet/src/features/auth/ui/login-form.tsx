@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
-import { AuthAPI } from '../api'
+import { useAuth } from '../ui/auth-provider'
 import { Link, useNavigate } from 'react-router-dom'
 
 const loginSchema = z.object({
@@ -20,6 +20,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const { signIn } = useAuth()
 
   const {
     register,
@@ -34,10 +35,10 @@ export function LoginForm() {
     setError('')
 
     try {
-      await AuthAPI.signIn(data)
+      await signIn(data.email, data.password)
       navigate('/dashboard')
-    } catch (err) {
-      setError('Неверный email или пароль')
+    } catch (err: any) {
+      setError(err.message || 'Неверный email или пароль')
     } finally {
       setIsLoading(false)
     }

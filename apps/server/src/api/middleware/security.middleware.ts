@@ -109,7 +109,7 @@ export const helmetConfig = {
     preload: true
   },
   noSniff: true,
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' as const }
 };
 
 // ===== INPUT VALIDATION =====

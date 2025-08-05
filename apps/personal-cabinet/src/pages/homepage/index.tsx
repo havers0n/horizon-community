@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, Navigate } from 'react-router-dom'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { DiscordIcon, VKIcon } from '@/shared/ui/icons'
+import { useAuth } from '@/features/auth'
 
 interface CommunityStats {
   totalMembers: number
@@ -12,26 +13,18 @@ interface CommunityStats {
   averageResponseTime: string
 }
 
-interface GalleryItem {
-  id: number
-  title: string
-  description: string
-  imageUrl: string
-  department: string
-  author: string
-  date: string
-  likes: number
-}
+
 
 export default function Homepage() {
-  const [stats, setStats] = useState<CommunityStats>({
+  const { user, isLoading } = useAuth()
+  const [stats] = useState<CommunityStats>({
     totalMembers: 1250,
     activeDepartments: 7,
     totalApplications: 3420,
     averageResponseTime: '2.5 часа'
   })
 
-  const [gallery, setGallery] = useState<GalleryItem[]>([])
+
 
   useEffect(() => {
     // Загрузка статистики и галереи
@@ -53,6 +46,20 @@ export default function Homepage() {
 
   const handleVKClick = () => {
     window.open('https://vk.com/roleplayidentity', '_blank')
+  }
+
+  // Редирект авторизованных пользователей на dashboard
+  if (!isLoading && user) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  // Показываем загрузку пока проверяется аутентификация
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
 
   return (

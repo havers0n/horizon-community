@@ -1,27 +1,21 @@
-import { LoginCredentials, RegisterCredentials } from '../model'
-import { apiRequest } from '@/shared/lib/queryClient'
+import { LoginCredentials, RegisterPayload } from '../model'
+import { login, register, logout, getCurrentUser } from '@/shared/api/auth-service'
 
 export class AuthAPI {
-  private static baseUrl = '/api/auth'
-
   static async signIn(credentials: LoginCredentials) {
-    const response = await apiRequest('POST', `${AuthAPI.baseUrl}/login`, credentials)
-    return response.json()
+    return login(credentials)
   }
 
-  static async signUp(credentials: RegisterCredentials) {
-    const response = await apiRequest('POST', `${AuthAPI.baseUrl}/register`, credentials)
-    return response.json()
+  static async signUp(credentials: RegisterPayload) {
+    return register(credentials)
   }
 
   static async signOut() {
-    const response = await apiRequest('POST', `${AuthAPI.baseUrl}/logout`)
-    return response.json()
+    return logout()
   }
 
   static async getCurrentUser() {
-    const response = await apiRequest('GET', `${AuthAPI.baseUrl}/me`)
-    return response.json()
+    return getCurrentUser()
   }
 }
 

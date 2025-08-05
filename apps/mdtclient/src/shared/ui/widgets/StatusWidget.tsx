@@ -1,8 +1,7 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React from 'react';
-import { Card, CardHeader } from '@/shared/ui/atoms';
 import { DispatchStatusManager } from '@/components/DispatchStatusManager';
+import { Card, CardHeader } from '@/shared/ui/atoms';
 import { User } from 'lucide-react';
+import React from 'react';
 
 interface StatusWidgetProps {
   isCompact?: boolean;
@@ -23,9 +22,16 @@ export const StatusWidget: React.FC<StatusWidgetProps> = ({ isCompact = false, c
 
   return (
     <Card className={className}>
-      <CardHeader>Статус</CardHeader>
+      <CardHeader>
+        <>{'Статус'}</>
+      </CardHeader>
       <div className="p-4">
-        <DispatchStatusManager />
+        <DispatchStatusManager
+          currentStatus="available"
+          onStatusChange={() => {
+            // Mock function
+          }}
+        />
       </div>
     </Card>
   );

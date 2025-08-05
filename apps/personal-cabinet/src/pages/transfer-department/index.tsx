@@ -1,9 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
 import { TransferDepartmentWidget } from '@widgets/transfer-department'
 
-export default function TransferDepartmentPage() {
+function TransferDepartmentPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -16,4 +13,6 @@ export default function TransferDepartmentPage() {
       <TransferDepartmentWidget />
     </div>
   )
-} 
+}
+
+export default TransferDepartmentPage 

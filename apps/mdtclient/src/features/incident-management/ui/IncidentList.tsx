@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useEffect } from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { IncidentCard } from '@/entities/incident/ui/IncidentCard';
@@ -28,7 +27,7 @@ export const IncidentList: React.FC<IncidentListProps> = ({
   }, [loadIncidents]);
 
   const activeIncidents = incidents.filter(incident => 
-    incident.events.length > 0 && incident.involvedUnits.length > 0
+    (incident.events?.length || 0) > 0 && (incident.involvedUnits?.length || 0) > 0
   );
   const displayedIncidents = activeIncidents.slice(0, maxItems);
 

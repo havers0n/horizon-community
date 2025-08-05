@@ -1,8 +1,16 @@
-// UI Components
+// Local UI components
 export * from './ui'
 
-// Lib utilities
-export * from './lib'
+// API and Services
+export * from './api'
 
-// Types
-export * from './types' 
+// Contexts
+export * from './contexts'
+
+// Hooks
+export * from './hooks'
+
+// Utils
+export * from './lib/utils'
+
+// Types - убираем дублирующий экспорт, так как типы уже экспортируются из ./api 

@@ -1,12 +1,10 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React, { useEffect } from 'react';
+import { DispatchApi } from '@/shared/api/dispatch';
+import type { Bolos, Calls911, Units } from '@roleplay-identity/db-types';
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
-import type { Call911, Unit, UnitStatus } from '@/shared/types';
-import type { Bolo } from '@/entities/dispatch/model/types';
-import { useRealTime } from '../../../../hooks/useRealTime';
 import { authUtils } from '../../../lib/auth';
-import { DispatchApi } from '@/shared/api/dispatch';
+import { useRealTime } from '../../../../hooks/useRealTime';
+import { useEffect } from 'react';
 
 // Временные константы для WebSocket событий (пока не подключена схема)
 const WEBSOCKET_EVENTS = {
@@ -22,14 +20,14 @@ const WEBSOCKET_EVENTS = {
 // Типы для состояния дашборда
 interface DashboardState {
   // Основные данные
-  currentOfficer: Unit | null;
-  activeCalls: Call911[];
-  activeBolos: Bolo[];
-  
+  currentOfficer: Units | null;
+  activeCalls: Calls911[];
+  activeBolos: Bolos[];
+
   // Состояние загрузки
   isLoading: boolean;
   error: string | null;
-  
+
   // Статистика
   stats: {
     totalCalls: number;
@@ -38,7 +36,7 @@ interface DashboardState {
     pendingCalls: number;
     completedCalls: number;
   };
-  
+
   // Флаги состояния
   isInitialized: boolean;
   lastUpdate: string;
@@ -49,28 +47,28 @@ interface DashboardActions {
   // Инициализация и загрузка данных
   fetchDashboardData: () => Promise<void>;
   initializeDashboard: () => Promise<void>;
-  
+
   // Управление офицером
-  setCurrentOfficer: (officer: Unit | null) => void;
-  changeOfficerStatus: (newStatus: UnitStatus) => Promise<void>;
-  
+  setCurrentOfficer: (officer: Units | null) => void;
+  changeOfficerStatus: (newStatus: Units['status']) => Promise<void>;
+
   // Управление вызовами
-  setActiveCalls: (calls: Call911[]) => void;
-  addCall: (call: Call911) => void;
-  updateCall: (callId: string, updates: Partial<Call911>) => void;
+  setActiveCalls: (calls: Calls911[]) => void;
+  addCall: (call: Calls911) => void;
+  updateCall: (callId: string, updates: Partial<Calls911>) => void;
   removeCall: (callId: string) => void;
-  
+
   // Управление BOLO
-  setActiveBolos: (bolos: Bolo[]) => void;
-  addBolo: (bolo: Bolo) => void;
-  updateBolo: (boloId: string, updates: Partial<Bolo>) => void;
+  setActiveBolos: (bolos: Bolos[]) => void;
+  addBolo: (bolo: Bolos) => void;
+  updateBolo: (boloId: string, updates: Partial<Bolos>) => void;
   removeBolo: (boloId: string) => void;
-  
+
   // Управление состоянием
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setStats: (stats: DashboardState['stats']) => void;
-  
+
   // Очистка состояния
   reset: () => void;
 }
@@ -96,6 +94,12 @@ const initialState: DashboardState = {
   lastUpdate: new Date().toISOString(),
 };
 
+// WebSocket Event Type
+interface WebSocketEvent<T> {
+  type: string;
+  data: T;
+}
+
 // Создание стора с Zustand
 export const useDashboardStore = create<DashboardStore>()(
   devtools(
@@ -105,16 +109,17 @@ export const useDashboardStore = create<DashboardStore>()(
       // Инициализация дашборда
       initializeDashboard: async () => {
         const { setLoading, setError, fetchDashboardData } = get();
-        
+
         try {
           setLoading(true);
           setError(null);
-          
+
           await fetchDashboardData();
-          
+
           set({ isInitialized: true });
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Ошибка инициализации дашборда';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Ошибка инициализации дашборда';
           setError(errorMessage);
           console.error('Dashboard initialization error:', error);
         } finally {
@@ -124,15 +129,16 @@ export const useDashboardStore = create<DashboardStore>()(
 
       // Загрузка всех данных дашборда
       fetchDashboardData: async () => {
-        const { setLoading, setError, setActiveCalls, setActiveBolos, setStats, setCurrentOfficer } = get();
-        
+        const { setLoading, setError, setActiveCalls, setActiveBolos, setStats, setCurrentOfficer } =
+          get();
+
         try {
           setLoading(true);
           setError(null);
 
           // Проверяем аутентификацию перед загрузкой данных
           const token = authUtils.getToken();
-          
+
           if (!token) {
             setError('Требуется авторизация');
             setLoading(false);
@@ -140,16 +146,16 @@ export const useDashboardStore = create<DashboardStore>()(
           }
 
           // Параллельная загрузка всех данных
-          const [callsResponse, bolosResponse, statsResponse, unitsResponse] = await Promise.allSettled([
-            DispatchApi.getActiveCalls(),
-            DispatchApi.getActiveBolos(),
-            DispatchApi.getDispatchStats(),
-            DispatchApi.getActiveUnits(),
-          ]);
+          const [callsResponse, bolosResponse, statsResponse, unitsResponse] =
+            await Promise.allSettled([
+              DispatchApi.getActiveCalls(),
+              DispatchApi.getActiveBolos(),
+              DispatchApi.getDispatchStats(),
+              DispatchApi.getActiveUnits(),
+            ]);
 
           // Обработка результатов вызовов
           if (callsResponse.status === 'fulfilled') {
-            // API возвращает массив напрямую
             if (Array.isArray(callsResponse.value)) {
               setActiveCalls(callsResponse.value);
             } else {
@@ -163,27 +169,8 @@ export const useDashboardStore = create<DashboardStore>()(
 
           // Обработка результатов BOLO
           if (bolosResponse.status === 'fulfilled') {
-            // Безопасная проверка, что value является массивом
             if (Array.isArray(bolosResponse.value)) {
-              const activeBolos = bolosResponse.value
-                .filter(bolo => bolo.status === 'active')
-                .map(bolo => ({
-                  ...bolo,
-                  // Маппинг полей для совместимости с интерфейсом BOLO
-                  createdAt: bolo.created_at || new Date().toISOString(),
-                  author: bolo.author_full_name || bolo.author_name || bolo.author_character_id,
-                  // Для обратной совместимости с существующими компонентами
-                  person: bolo.subject_name ? {
-                    name: bolo.subject_name,
-                    description: bolo.subject_description
-                  } : undefined,
-                  vehicle: bolo.vehicle_plate ? {
-                    plate: bolo.vehicle_plate,
-                    model: bolo.vehicle_description || '',
-                    color: ''
-                  } : undefined
-                }));
-              setActiveBolos(activeBolos);
+              setActiveBolos(bolosResponse.value);
             } else {
               console.warn('Unexpected BOLOs response format:', bolosResponse.value);
               setActiveBolos([]);
@@ -195,45 +182,29 @@ export const useDashboardStore = create<DashboardStore>()(
 
           // Обработка статистики
           if (statsResponse.status === 'fulfilled') {
-            // Проверяем, что value является объектом с нужными полями
             if (statsResponse.value && typeof statsResponse.value === 'object') {
-              // Преобразуем API статистику в формат дашборда
-              const apiStats = statsResponse.value;
+              const apiStats = statsResponse.value as any;
               setStats({
                 totalCalls: apiStats.activeCallsCount || 0,
                 activeIncidents: apiStats.activeBolosCount || 0,
                 availableUnits: apiStats.activeUnitsCount || 0,
                 pendingCalls: apiStats.pendingCallsCount || 0,
-                completedCalls: 0, // API не предоставляет эту информацию
+                completedCalls: 0,
               });
             } else {
               console.warn('Unexpected stats response format:', statsResponse.value);
-              setStats({
-                totalCalls: 0,
-                activeIncidents: 0,
-                availableUnits: 0,
-                pendingCalls: 0,
-                completedCalls: 0,
-              });
+              setStats(initialState.stats);
             }
           } else {
             console.error('Failed to fetch stats:', statsResponse.reason);
-            setStats({
-              totalCalls: 0,
-              activeIncidents: 0,
-              availableUnits: 0,
-              pendingCalls: 0,
-              completedCalls: 0,
-            });
+            setStats(initialState.stats);
           }
 
           // Обработка юнитов (поиск текущего офицера)
           if (unitsResponse.status === 'fulfilled') {
-            // Проверяем, что value является массивом
             if (Array.isArray(unitsResponse.value)) {
-              // TODO: Определить текущего офицера по ID пользователя
-              // Пока берем первого доступного офицера
-              const currentOfficer = unitsResponse.value.find(unit => unit.status === 'available') || null;
+              const currentOfficer =
+                unitsResponse.value.find((unit) => unit.status === 'available') || null;
               setCurrentOfficer(currentOfficer);
             } else {
               console.warn('Unexpected units response format:', unitsResponse.value);
@@ -249,17 +220,11 @@ export const useDashboardStore = create<DashboardStore>()(
           const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки данных';
           setError(errorMessage);
           console.error('Dashboard data fetch error:', error);
-          
+
           // Устанавливаем пустые значения при ошибке
           setActiveCalls([]);
           setActiveBolos([]);
-          setStats({
-            totalCalls: 0,
-            activeIncidents: 0,
-            availableUnits: 0,
-            pendingCalls: 0,
-            completedCalls: 0,
-          });
+          setStats(initialState.stats);
           setCurrentOfficer(null);
         } finally {
           setLoading(false);
@@ -273,7 +238,7 @@ export const useDashboardStore = create<DashboardStore>()(
 
       changeOfficerStatus: async (newStatus) => {
         const { currentOfficer, setCurrentOfficer, setError } = get();
-        
+
         if (!currentOfficer) {
           setError('Текущий офицер не определен');
           return;
@@ -281,10 +246,10 @@ export const useDashboardStore = create<DashboardStore>()(
 
         try {
           await DispatchApi.updateUnitStatus(currentOfficer.id, newStatus);
-          // Обновляем статус локально, так как API не возвращает обновленный объект
           setCurrentOfficer({ ...currentOfficer, status: newStatus });
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Ошибка изменения статуса';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Ошибка изменения статуса';
           setError(errorMessage);
           console.error('Status change error:', error);
         }
@@ -302,26 +267,26 @@ export const useDashboardStore = create<DashboardStore>()(
             ...state.stats,
             totalCalls: state.stats.totalCalls + 1,
             pendingCalls: state.stats.pendingCalls + 1,
-          }
+          },
         }));
       },
 
       updateCall: (callId, updates) => {
         set((state) => ({
-          activeCalls: state.activeCalls.map(call => 
+          activeCalls: state.activeCalls.map((call) =>
             call.id === callId ? { ...call, ...updates } : call
-          )
+          ),
         }));
       },
 
       removeCall: (callId) => {
         set((state) => ({
-          activeCalls: state.activeCalls.filter(call => call.id !== callId),
+          activeCalls: state.activeCalls.filter((call) => call.id !== callId),
           stats: {
             ...state.stats,
             pendingCalls: Math.max(0, state.stats.pendingCalls - 1),
             completedCalls: state.stats.completedCalls + 1,
-          }
+          },
         }));
       },
 
@@ -332,21 +297,21 @@ export const useDashboardStore = create<DashboardStore>()(
 
       addBolo: (bolo) => {
         set((state) => ({
-          activeBolos: [...state.activeBolos, bolo]
+          activeBolos: [...state.activeBolos, bolo],
         }));
       },
 
       updateBolo: (boloId, updates) => {
         set((state) => ({
-          activeBolos: state.activeBolos.map(bolo => 
+          activeBolos: state.activeBolos.map((bolo) =>
             bolo.id === boloId ? { ...bolo, ...updates } : bolo
-          )
+          ),
         }));
       },
 
       removeBolo: (boloId) => {
         set((state) => ({
-          activeBolos: state.activeBolos.filter(bolo => bolo.id !== boloId)
+          activeBolos: state.activeBolos.filter((bolo) => bolo.id !== boloId),
         }));
       },
 
@@ -377,81 +342,73 @@ export const useDashboardStore = create<DashboardStore>()(
 
 // Хук для Real-Time обновлений
 export const useDashboardRealTime = () => {
-  const { 
-    addCall, 
-    updateCall, 
-    removeCall, 
-    addBolo, 
-    updateBolo, 
-    removeBolo,
-    setCurrentOfficer 
-  } = useDashboardStore();
+  const { addCall, updateCall, removeCall, addBolo, updateBolo, removeBolo, setCurrentOfficer } =
+    useDashboardStore();
 
   const { onEvent, offEvent } = useRealTime(['dashboard', 'calls', 'bolos', 'units']);
 
   // Обработчики Real-Time событий
   useEffect(() => {
     // Обработка новых вызовов
-    const handleNewCall = (event: any) => {
+    const handleNewCall = (event: WebSocketEvent<Calls911>) => {
       if (event.type === WEBSOCKET_EVENTS.NEW_CALL) {
         addCall(event.data);
       }
     };
 
     // Обработка обновлений вызовов
-    const handleCallUpdate = (event: any) => {
+    const handleCallUpdate = (event: WebSocketEvent<{ callId: string; status: Calls911['status'] }>) => {
       if (event.type === WEBSOCKET_EVENTS.CALL_STATUS_UPDATE) {
         updateCall(event.data.callId, { status: event.data.status });
       }
     };
 
     // Обработка завершения вызовов
-    const handleCallComplete = (event: any) => {
+    const handleCallComplete = (event: WebSocketEvent<{ callId: string }>) => {
       if (event.type === WEBSOCKET_EVENTS.CALL_COMPLETED) {
         removeCall(event.data.callId);
       }
     };
 
     // Обработка новых BOLO
-    const handleNewBolo = (event: any) => {
+    const handleNewBolo = (event: WebSocketEvent<Bolos>) => {
       if (event.type === WEBSOCKET_EVENTS.NEW_BOLO) {
         addBolo(event.data);
       }
     };
 
     // Обработка обновлений BOLO
-    const handleBoloUpdate = (event: any) => {
+    const handleBoloUpdate = (event: WebSocketEvent<{ boloId: string; updates: Partial<Bolos> }>) => {
       if (event.type === WEBSOCKET_EVENTS.BOLO_UPDATE) {
         updateBolo(event.data.boloId, event.data.updates);
       }
     };
 
     // Обработка удаления BOLO
-    const handleBoloRemove = (event: any) => {
+    const handleBoloRemove = (event: WebSocketEvent<{ boloId: string }>) => {
       if (event.type === WEBSOCKET_EVENTS.BOLO_REMOVED) {
         removeBolo(event.data.boloId);
       }
     };
 
     // Обработка обновлений юнитов
-    const handleUnitUpdate = (event: any) => {
+    const handleUnitUpdate = (event: WebSocketEvent<Units>) => {
       if (event.type === WEBSOCKET_EVENTS.UNIT_STATUS_UPDATE) {
-        // Обновляем текущего офицера, если это он
         const { currentOfficer } = useDashboardStore.getState();
-        if (currentOfficer && currentOfficer.id === event.data.unitId) {
+        if (currentOfficer && currentOfficer.id === event.data.id) {
           setCurrentOfficer(event.data);
         }
       }
     };
 
     // Регистрируем обработчики
-    onEvent(WEBSOCKET_EVENTS.NEW_CALL, handleNewCall);
-    onEvent(WEBSOCKET_EVENTS.CALL_STATUS_UPDATE, handleCallUpdate);
-    onEvent(WEBSOCKET_EVENTS.CALL_COMPLETED, handleCallComplete);
-    onEvent(WEBSOCKET_EVENTS.NEW_BOLO, handleNewBolo);
-    onEvent(WEBSOCKET_EVENTS.BOLO_UPDATE, handleBoloUpdate);
-    onEvent(WEBSOCKET_EVENTS.BOLO_REMOVED, handleBoloRemove);
-    onEvent(WEBSOCKET_EVENTS.UNIT_STATUS_UPDATE, handleUnitUpdate);
+    onEvent(WEBSOCKET_EVENTS.NEW_CALL, handleNewCall as (event: unknown) => void);
+    onEvent(WEBSOCKET_EVENTS.CALL_STATUS_UPDATE, handleCallUpdate as (event: unknown) => void);
+    onEvent(WEBSOCKET_EVENTS.CALL_COMPLETED, handleCallComplete as (event: unknown) => void);
+    onEvent(WEBSOCKET_EVENTS.NEW_BOLO, handleNewBolo as (event: unknown) => void);
+    onEvent(WEBSOCKET_EVENTS.BOLO_UPDATE, handleBoloUpdate as (event: unknown) => void);
+    onEvent(WEBSOCKET_EVENTS.BOLO_REMOVED, handleBoloRemove as (event: unknown) => void);
+    onEvent(WEBSOCKET_EVENTS.UNIT_STATUS_UPDATE, handleUnitUpdate as (event: unknown) => void);
 
     // Очистка обработчиков
     return () => {
@@ -463,7 +420,17 @@ export const useDashboardRealTime = () => {
       offEvent(WEBSOCKET_EVENTS.BOLO_REMOVED);
       offEvent(WEBSOCKET_EVENTS.UNIT_STATUS_UPDATE);
     };
-  }, [onEvent, offEvent, addCall, updateCall, removeCall, addBolo, updateBolo, removeBolo, setCurrentOfficer]);
+  }, [
+    onEvent,
+    offEvent,
+    addCall,
+    updateCall,
+    removeCall,
+    addBolo,
+    updateBolo,
+    removeBolo,
+    setCurrentOfficer,
+  ]);
 
   return null; // Этот хук не возвращает данных, только настраивает подписки
 };

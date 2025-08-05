@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../services/LoggerService.js';
+import { logger } from '../../core/services/index.js';
 
 /**
  * Middleware для логирования API запросов

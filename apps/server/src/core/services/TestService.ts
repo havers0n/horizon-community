@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tests, TestsInsert, TestsUpdate, TestResults, TestSessions } from "../../../packages/db-types/src/index";
+import { Database, Tests, TestsInsert, TestsUpdate, TestResults, TestSessions } from "@roleplay-identity/db-types";
 import { mdtClient } from "../lib/supabase";
 
 export class TestService {
@@ -309,6 +309,4 @@ export class TestService {
       throw new Error("Не удалось получить аналитику тестов.");
     }
   }
-}
-
-export const testService = new TestService(); 
+} 

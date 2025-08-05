@@ -1,6 +1,9 @@
+import React, { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { EntryApplicationFeature } from '@features/entry-application'
+
+// Lazy load components
+const ApplicationForm = React.lazy(() => import('@/features/entry-application/ui/application-form'))
+const MyApplications = React.lazy(() => import('@/features/entry-application/ui/my-applications'))
 
 export function EntryApplicationWidget() {
   return (
@@ -13,7 +16,9 @@ export function EntryApplicationWidget() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EntryApplicationFeature.ApplicationForm />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <ApplicationForm />
+          </Suspense>
         </CardContent>
       </Card>
       
@@ -22,7 +27,9 @@ export function EntryApplicationWidget() {
           <CardTitle>Мои заявки</CardTitle>
         </CardHeader>
         <CardContent>
-          <EntryApplicationFeature.MyApplications />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <MyApplications />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

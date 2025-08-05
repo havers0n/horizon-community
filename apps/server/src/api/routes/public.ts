@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { publicService } from '../services/PublicService';
+import { publicService } from '../../core/services/index.js';
 
 const router = Router();
 

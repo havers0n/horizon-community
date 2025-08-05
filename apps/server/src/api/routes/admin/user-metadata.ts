@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { supabase } from '../../lib/supabase';
+import { createSupabaseClient } from '../../lib/supabase';
 
 const adminRouter = Router();
 
@@ -16,6 +16,8 @@ adminRouter.post('/fix', async (req, res) => {
 
     try {
         console.log(`[Admin] Attempting to fix metadata for user: ${userId}`);
+        
+        const supabase = createSupabaseClient('public');
         
         // Получаем пользователя из Supabase Auth
         const { data: { user }, error: getUserError } = await supabase.auth.admin.getUserById(userId);
@@ -115,6 +117,7 @@ adminRouter.get('/check/:userId', async (req, res) => {
     try {
         console.log(`[Admin] Checking metadata for user: ${userId}`);
         
+        const supabase = createSupabaseClient('public');
         const { data: { user }, error: getUserError } = await supabase.auth.admin.getUserById(userId);
         
         if (getUserError) {
@@ -170,6 +173,8 @@ adminRouter.post('/fix-by-email', async (req, res) => {
     try {
         console.log(`[Admin] Attempting to fix metadata for user by email: ${email}`);
         
+        const supabase = createSupabaseClient('public');
+        
         // Получаем всех пользователей и ищем по email
         const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
         
@@ -177,7 +182,7 @@ adminRouter.post('/fix-by-email', async (req, res) => {
             throw listError;
         }
         
-        const user = users.find(u => u.email === email);
+        const user = users?.find((u: any) => u.email === email);
         
         if (!user) {
             return res.status(404).json({ 

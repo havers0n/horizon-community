@@ -1,10 +1,12 @@
-import { ProfileWidget } from '@widgets/profile'
-import { PageLayout } from '@shared/ui/page-layout'
+import React from 'react'
 
-export function ProfilePage() {
+const ProfilePage: React.FC = () => {
   return (
-    <PageLayout title="Профиль">
-      <ProfileWidget />
-    </PageLayout>
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Профиль</h1>
+      <p>Страница профиля в разработке</p>
+    </div>
   )
-} 
+}
+
+export default ProfilePage 

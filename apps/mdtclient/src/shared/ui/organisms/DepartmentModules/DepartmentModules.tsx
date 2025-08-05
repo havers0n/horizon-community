@@ -1,11 +1,10 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
 import { useUI } from '@/shared/contexts/UIContext';
-import { departments } from '../DepartmentSelector';
+import { departments, Department } from '../DepartmentSelector';
 import { OfficerDashboardWidget } from '@/widgets/officer-dashboard';
-import { CitizenPortalWidget } from '@/widgets/citizen-portal';
-import { EMSPortalWidget } from '@/widgets/ems-portal';
-import { DispatchPortalWidget } from '@/widgets/dispatch-portal';
+import { CitizenPortalNew } from '@/widgets/citizen-portal';
+import { EmsPortal } from '@/widgets/ems-portal';
+import { DispatchPortal } from '@/widgets/dispatch-portal';
 import { FDPortalWidget } from '@/widgets/fd-portal';
 
 interface DepartmentModulesProps {
@@ -15,16 +14,21 @@ interface DepartmentModulesProps {
 export const DepartmentModules: React.FC<DepartmentModulesProps> = ({ className }) => {
   const { currentDepartment } = useUI();
 
+  const handleBackToModules = () => {
+    // Логика возврата к модулям
+    console.log('Back to modules');
+  };
+
   const renderDepartmentModule = () => {
     switch (currentDepartment) {
       case 'pd':
         return <OfficerDashboardWidget />;
       case 'cd':
-        return <CitizenPortalWidget />;
+        return <CitizenPortalNew />;
       case 'md':
-        return <EMSPortalWidget />;
+        return <EmsPortal />;
       case 'dispatch':
-        return <DispatchPortalWidget />;
+        return <DispatchPortal onBackToModules={handleBackToModules} />;
       case 'fd':
         return <FDPortalWidget />;
       default:

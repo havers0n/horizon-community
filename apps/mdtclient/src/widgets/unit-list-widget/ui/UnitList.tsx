@@ -16,7 +16,34 @@ import {
   Radio,
   Shield,
   Car,
-  Truck
+  Truck,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Maximize2,
+  Minimize2,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Play,
+  Pause,
+  RotateCcw,
+  Calendar,
+  Timer,
+  Star,
+  Heart,
+  Zap,
+  Target,
+  Navigation,
+  Layers,
+  Volume2,
+  Mic,
+  MicOff,
+  Wifi,
+  WifiOff,
+  BarChart3,
+  TrendingUp,
+  AlertCircle
 } from 'lucide-react';
 
 interface UnitListProps {
@@ -28,29 +55,58 @@ interface UnitListProps {
 const getStatusColor = (status: UnitStatus) => {
   switch (status) {
     case 'available':
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-500/20 text-green-400 border-green-500/30';
     case 'busy':
-      return 'bg-orange-100 text-orange-800';
+      return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
     case 'enRoute':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
     case 'onScene':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
     case 'unavailable':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     case 'panic':
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-500/20 text-red-400 border-red-500/30';
     case 'transporting':
-      return 'bg-indigo-100 text-indigo-800';
+      return 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30';
     case 'outOfService':
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-500/20 text-red-400 border-red-500/30';
     case 'training':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
     case 'dispatched':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
     case 'cleared':
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-500/20 text-green-400 border-green-500/30';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  }
+};
+
+const getStatusIcon = (status: UnitStatus) => {
+  switch (status) {
+    case 'available':
+      return CheckCircle;
+    case 'busy':
+      return AlertCircle;
+    case 'enRoute':
+      return Navigation;
+    case 'onScene':
+      return MapPin;
+    case 'unavailable':
+      return XCircle;
+    case 'panic':
+      return AlertTriangle;
+    case 'transporting':
+      return Car;
+    case 'outOfService':
+      return XCircle;
+    case 'training':
+      return Star;
+    case 'dispatched':
+      return Play;
+    case 'cleared':
+      return CheckCircle;
+    default:
+      return Clock;
   }
 };
 
@@ -94,45 +150,179 @@ const formatTime = (timestamp: string) => {
   });
 };
 
+const UnitCard: React.FC<{
+  unit: Unit;
+  onSelect: (unit: Unit) => void;
+  onStatusChange: (unitId: string, status: UnitStatus) => void;
+}> = ({ unit, onSelect, onStatusChange }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<UnitStatus>(unit.status);
+  
+  const StatusIcon = getStatusIcon(unit.status);
+
+  const handleStatusChange = () => {
+    if (selectedStatus !== unit.status) {
+      onStatusChange(unit.id, selectedStatus);
+    }
+  };
+
+  const getTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const unitTime = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - unitTime.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Только что';
+    if (diffInMinutes < 60) return `${diffInMinutes} мин назад`;
+    const hours = Math.floor(diffInMinutes / 60);
+    return `${hours} ч назад`;
+  };
+
+  return (
+    <Card className="bg-slate-800/30 backdrop-blur-xl border-slate-700/50 hover:bg-slate-700/30 transition-all duration-200 cursor-pointer group">
+      <div className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3 flex-1">
+            <div className={`p-2 rounded-lg ${getStatusColor(unit.status)} group-hover:scale-110 transition-transform duration-200`}>
+              <StatusIcon className="h-4 w-4" />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className={`${getStatusColor(unit.status)} border text-xs font-medium`}>
+                  <StatusIcon className="h-3 w-3 mr-1" />
+                  {unit.status}
+                </Badge>
+                <span className="text-xs text-slate-400 ml-auto">
+                  {getTimeAgo(unit.lastUpdate || unit.timestamp)}
+                </span>
+              </div>
+              
+              <h4 className="text-sm font-medium text-slate-200 mb-1 group-hover:text-white transition-colors duration-200">
+                {unit.name || unit.unitNumber}
+              </h4>
+              
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                {getUnitIcon(unit.type)}
+                <span>{unit.type || 'Неизвестный тип'}</span>
+                {unit.department && (
+                  <>
+                    <Shield className="h-3 w-3 ml-2" />
+                    <span className={getDepartmentColor(unit.department)}>{unit.department}</span>
+                  </>
+                )}
+              </div>
+
+              {unit.location && (
+                <div className="flex items-center gap-1 mt-2">
+                  <MapPin className="h-3 w-3 text-slate-400" />
+                  <span className="text-xs text-slate-400">{unit.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-1 ml-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(unit);
+              }}
+              className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all duration-200"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Expanded Actions */}
+        {isExpanded && (
+          <div className="mt-4 pt-4 border-t border-slate-700/50 space-y-3">
+            {/* Status Update */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 w-16">Статус:</span>
+              <Select value={selectedStatus} onValueChange={(value: string) => setSelectedStatus(value as UnitStatus)}>
+                <SelectTrigger className="h-8 text-xs bg-slate-700/50 border-slate-600">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {[
+                    { value: 'available', label: 'Доступен', icon: CheckCircle },
+                    { value: 'busy', label: 'Занят', icon: AlertCircle },
+                    { value: 'enRoute', label: 'В пути', icon: Navigation },
+                    { value: 'onScene', label: 'На месте', icon: MapPin },
+                    { value: 'unavailable', label: 'Недоступен', icon: XCircle },
+                    { value: 'panic', label: 'Паника', icon: AlertTriangle },
+                    { value: 'transporting', label: 'Транспортировка', icon: Car },
+                    { value: 'outOfService', label: 'Вне службы', icon: XCircle },
+                    { value: 'training', label: 'Обучение', icon: Star },
+                    { value: 'dispatched', label: 'Назначен', icon: Play },
+                    { value: 'cleared', label: 'Освобожден', icon: CheckCircle }
+                  ].map(({ value, label, icon: Icon }) => (
+                    <SelectItem key={value} value={value} className="text-xs">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-3 w-3" />
+                        {label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                onClick={handleStatusChange}
+                disabled={selectedStatus === unit.status}
+                className="h-8 px-3 text-xs bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30 transition-all duration-200"
+              >
+                Обновить
+              </Button>
+            </div>
+
+            {/* Additional Info */}
+            {unit.officer && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400 w-16">Офицер:</span>
+                <span className="text-xs text-slate-300">{unit.officer}</span>
+              </div>
+            )}
+
+            {unit.vehicle && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400 w-16">Транспорт:</span>
+                <span className="text-xs text-slate-300">{unit.vehicle}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
+
 export const UnitList: React.FC<UnitListProps> = ({
   units,
   onUnitSelect,
   onStatusChange
 }) => {
-  const [filteredUnits, setFilteredUnits] = useState<Unit[]>(units);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let filtered = [...units];
-
-    // Фильтр по поиску
-    if (searchQuery) {
-      filtered = filtered.filter(unit => 
-        unit.unitNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        unit.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        unit.characterName?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Фильтр по статусу
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(unit => unit.status === statusFilter);
-    }
-
-    // Фильтр по департаменту
-    if (departmentFilter !== 'all') {
-      filtered = filtered.filter(unit => unit.departmentId === departmentFilter);
-    }
-
-    setFilteredUnits(filtered);
-  }, [units, searchQuery, statusFilter, departmentFilter]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<UnitStatus | 'all'>('all');
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
   const handleUnitSelect = (unit: Unit) => {
-    setSelectedUnit(unit);
     onUnitSelect(unit);
   };
 
@@ -149,16 +339,22 @@ export const UnitList: React.FC<UnitListProps> = ({
   };
 
   const getStatusOptions = () => [
+    { value: 'all', label: 'Все статусы' },
     { value: 'available', label: 'Доступен' },
     { value: 'busy', label: 'Занят' },
     { value: 'enRoute', label: 'В пути' },
     { value: 'onScene', label: 'На месте' },
     { value: 'unavailable', label: 'Недоступен' },
+    { value: 'panic', label: 'Паника' },
+    { value: 'transporting', label: 'Транспортировка' },
     { value: 'outOfService', label: 'Вне службы' },
-    { value: 'training', label: 'Тренировка' }
+    { value: 'training', label: 'Обучение' },
+    { value: 'dispatched', label: 'Назначен' },
+    { value: 'cleared', label: 'Освобожден' }
   ];
 
   const getDepartmentOptions = () => [
+    { value: 'all', label: 'Все департаменты' },
     { value: '1', label: 'LSPD' },
     { value: '2', label: 'BCSO' },
     { value: '3', label: 'SAHP' },
@@ -166,179 +362,166 @@ export const UnitList: React.FC<UnitListProps> = ({
     { value: '5', label: 'SAMS' }
   ];
 
-  const statusCounts = units.reduce((acc, unit) => {
-    acc[unit.status] = (acc[unit.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const filteredUnits = units.filter(unit => {
+    const matchesSearch = searchQuery === '' || 
+      (unit.name && unit.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (unit.unitNumber && unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (unit.officer && unit.officer.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesStatus = statusFilter === 'all' || unit.status === statusFilter;
+    const matchesDepartment = departmentFilter === 'all' || unit.department === departmentFilter;
+
+    return matchesSearch && matchesStatus && matchesDepartment;
+  });
+
+  const availableUnits = filteredUnits.filter(unit => unit.status === 'available');
+  const busyUnits = filteredUnits.filter(unit => unit.status === 'busy' || unit.status === 'enRoute');
+  const otherUnits = filteredUnits.filter(unit => !['available', 'busy', 'enRoute'].includes(unit.status));
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Активные юниты</h3>
-          <Badge variant="secondary">{units.length} всего</Badge>
+      {/* Enhanced Header */}
+      <div className="mb-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-white">Активные юниты</h3>
+            <p className="text-sm text-slate-400">Всего юнитов: {units.length}</p>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.reload()}
+            className="flex items-center gap-2 bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600 transition-all duration-200"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Обновить
+          </Button>
         </div>
 
-        {/* Фильтры */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Поиск по номеру или имени..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Поиск по имени, номеру, офицеру..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-slate-800/50 border-slate-700/50 text-slate-300 placeholder:text-slate-400 focus:border-blue-500/50"
+          />
+        </div>
+        
+        {/* Filters */}
+        <div className="flex items-center gap-2">
+          <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value as UnitStatus | 'all')}>
+            <SelectTrigger className="h-8 text-xs bg-slate-700/50 border-slate-600">
+              <SelectValue placeholder="Фильтр по статусу" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              {getStatusOptions().map(option => (
+                <SelectItem key={option.value} value={option.value} className="text-xs">
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Статус" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                {getStatusOptions().map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label} ({statusCounts[option.value] || 0})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Департамент" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все</SelectItem>
-                {getDepartmentOptions().map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <SelectTrigger className="h-8 text-xs bg-slate-700/50 border-slate-600">
+              <SelectValue placeholder="Фильтр по департаменту" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              {getDepartmentOptions().map(option => (
+                <SelectItem key={option.value} value={option.value} className="text-xs">
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {filteredUnits.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500">
+      {/* Units List with Status Grouping */}
+      <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
             <div className="text-center">
-              <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>Нет юнитов, соответствующих фильтрам</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-2 text-sm text-slate-400">Обновление статуса...</p>
+            </div>
+          </div>
+        ) : filteredUnits.length === 0 ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-center">
+              <Users className="h-8 w-8 text-slate-500 mx-auto" />
+              <p className="mt-2 text-sm text-slate-500">Нет юнитов в этой категории</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-2 p-4">
-            {filteredUnits.map((unit) => (
-              <Card 
-                key={unit.id} 
-                className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-                  selectedUnit?.id === unit.id ? 'ring-2 ring-blue-500' : ''
-                }`}
-                onClick={() => handleUnitSelect(unit)}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      {getUnitIcon(unit.unitType)}
-                      <span className="font-medium">
-                        {unit.unitNumber || unit.name}
-                      </span>
-                      <Badge className={getStatusColor(unit.status)}>
-                        {unit.status}
-                      </Badge>
-                      <span className={`text-sm font-medium ${getDepartmentColor(unit.departmentId)}`}>
-                        {unit.department}
-                      </span>
-                    </div>
-
-                    <div className="space-y-1">
-                      {unit.characterName && (
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">{unit.characterName}</span>
-                        </div>
-                      )}
-
-                      {unit.location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">{unit.location}</span>
-                        </div>
-                      )}
-
-                      {unit.lastUpdate && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">
-                            Обновлено: {formatTime(unit.lastUpdate)}
-                          </span>
-                        </div>
-                      )}
-
-                      {unit.isPanic && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className="bg-red-100 text-red-800">
-                            ПАНИКА
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <Select 
-                      value={unit.status} 
-                      onValueChange={(value) => handleStatusChange(unit.id, value as UnitStatus)}
-                      disabled={loading}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getStatusOptions().map(option => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <>
+            {/* Available Units */}
+            {availableUnits.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <h4 className="text-sm font-medium text-green-400">ДОСТУПНЫЕ ЮНИТЫ</h4>
+                  <Badge className="text-xs bg-green-500/20 text-green-400 border-green-500/30">{availableUnits.length}</Badge>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                <div className="space-y-2">
+                  {availableUnits.map(unit => (
+                    <UnitCard
+                      key={unit.id}
+                      unit={unit}
+                      onSelect={handleUnitSelect}
+                      onStatusChange={handleStatusChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-      {/* Статистика */}
-      <div className="border-t border-gray-200 p-4 bg-gray-50">
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div className="text-center">
-            <div className="font-medium text-green-600">
-              {statusCounts.available || 0}
-            </div>
-            <div className="text-gray-500">Доступны</div>
-          </div>
-          <div className="text-center">
-            <div className="font-medium text-orange-600">
-              {statusCounts.busy || 0}
-            </div>
-            <div className="text-gray-500">Заняты</div>
-          </div>
-          <div className="text-center">
-            <div className="font-medium text-blue-600">
-              {statusCounts.enRoute || 0}
-            </div>
-            <div className="text-gray-500">В пути</div>
-          </div>
-        </div>
+            {/* Busy Units */}
+            {busyUnits.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-orange-400" />
+                  <h4 className="text-sm font-medium text-orange-400">ЗАНЯТЫЕ ЮНИТЫ</h4>
+                  <Badge className="text-xs bg-orange-500/20 text-orange-400 border-orange-500/30">{busyUnits.length}</Badge>
+                </div>
+                <div className="space-y-2">
+                  {busyUnits.map(unit => (
+                    <UnitCard
+                      key={unit.id}
+                      unit={unit}
+                      onSelect={handleUnitSelect}
+                      onStatusChange={handleStatusChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Other Units */}
+            {otherUnits.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-slate-400" />
+                  <h4 className="text-sm font-medium text-slate-400">ДРУГИЕ ЮНИТЫ</h4>
+                  <Badge className="text-xs bg-slate-500/20 text-slate-400 border-slate-500/30">{otherUnits.length}</Badge>
+                </div>
+                <div className="space-y-2">
+                  {otherUnits.map(unit => (
+                    <UnitCard
+                      key={unit.id}
+                      unit={unit}
+                      onSelect={handleUnitSelect}
+                      onStatusChange={handleStatusChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

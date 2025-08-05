@@ -1,8 +1,7 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React from 'react';
-import { Card, CardHeader } from '@/shared/ui/atoms';
 import { DispatchSearch } from '@/components/DispatchSearch';
+import { Card, CardHeader } from '@/shared/ui/atoms';
 import { Search } from 'lucide-react';
+import React from 'react';
 
 interface SearchWidgetProps {
   isCompact?: boolean;
@@ -23,7 +22,9 @@ export const SearchWidget: React.FC<SearchWidgetProps> = ({ isCompact = false, c
 
   return (
     <Card className={className}>
-      <CardHeader>Поиск</CardHeader>
+      <CardHeader>
+        <>{'Поиск'}</>
+      </CardHeader>
       <div className="p-4">
         <DispatchSearch />
       </div>

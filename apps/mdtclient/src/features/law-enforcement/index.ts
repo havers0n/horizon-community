@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Law Enforcement Feature
 export * from './ui';
 export * from './model';
@@ -11,9 +10,21 @@ export { AddressSearchWidget } from './features/address-search';
 export { ReportCreationWidget } from './features/report-creation';
 export * from './ui/PenalCodeSearch';
 
-// Types - используем алиасы для избежания конфликтов
-export type { LawReport, LawReportFormData } from './model/types';
-export type { CitizenSearchResult as LawEnforcementCitizenSearchResult } from './features/citizen-search/model/types';
+// Types - используем типы из @roleplay-identity/db-types
+export type {
+  LawReports,
+  LawReportsInsert,
+  LawReportsUpdate,
+  Characters,
+  CharactersInsert,
+  CharactersUpdate,
+  Vehicles,
+  VehiclesInsert,
+  VehiclesUpdate,
+  Weapons,
+  WeaponsInsert,
+  WeaponsUpdate,
+} from '@roleplay-identity/db-types';
 
 // Store
 export { useLawEnforcementStore } from './model/store';

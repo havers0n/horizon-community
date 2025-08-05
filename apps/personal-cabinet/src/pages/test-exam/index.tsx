@@ -1,11 +1,6 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
-import { Progress } from '@shared/ui/progress'
-import { Alert, AlertDescription } from '@shared/ui/alert'
 import { TestExamWidget } from '@widgets/test-exam'
 
-export default function TestExamPage() {
+function TestExamPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -18,4 +13,6 @@ export default function TestExamPage() {
       <TestExamWidget />
     </div>
   )
-} 
+}
+
+export default TestExamPage 

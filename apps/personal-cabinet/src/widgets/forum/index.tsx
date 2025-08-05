@@ -1,13 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
-import { Input } from '@shared/ui/input'
-import { Avatar, AvatarFallback } from '@shared/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@shared/ui/dialog'
-import { Textarea } from '@shared/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@shared/ui/dropdown-menu'
-import { ForumFeature } from '@features/forum'
+// src/widgets/forum/index.tsx
+
+import React, { Suspense } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
+
+// 1. УБИРАЕМ импорт ForumFeature. Он нам больше не нужен.
+
+// 2. ИСПОЛЬЗУЕМ React.lazy с прямым динамическим импортом.
+// React сам поймет, что нужно загрузить компонент TopicList из файла по этому пути.
+const TopicList = React.lazy(() => import('@/features/forum/ui/topic-list'));
+const CreateTopic = React.lazy(() => import('@/features/forum/ui/create-topic'));
 
 export function ForumWidget() {
   return (
@@ -17,7 +18,10 @@ export function ForumWidget() {
           <CardTitle>Форум</CardTitle>
         </CardHeader>
         <CardContent>
-          <ForumFeature.TopicList />
+          {/* Suspense теперь работает как надо */}
+          <Suspense fallback={<div>Загрузка списка тем...</div>}>
+            <TopicList />
+          </Suspense>
         </CardContent>
       </Card>
       
@@ -26,9 +30,21 @@ export function ForumWidget() {
           <CardTitle>Создать новую тему</CardTitle>
         </CardHeader>
         <CardContent>
-          <ForumFeature.CreateTopic />
+          <Suspense fallback={<div>Загрузка формы...</div>}>
+            <CreateTopic />
+          </Suspense>
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}
+
+// Убедитесь, что у вас есть эти файлы и они экспортируют компоненты по умолчанию:
+// - src/features/forum/ui/topic-list.tsx -> export default TopicList;
+// - src/features/forum/ui/create-topic.tsx -> export default CreateTopic;
+
+// Если они экспортируют именованные компоненты (export const TopicList),
+// то используйте такой синтаксис:
+// const TopicList = React.lazy(() => 
+//   import('@/features/forum/ui/topic-list').then(module => ({ default: module.TopicList }))
+// );

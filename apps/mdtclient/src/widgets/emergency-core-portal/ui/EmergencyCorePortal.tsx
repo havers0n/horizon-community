@@ -7,6 +7,7 @@ import { DispatchPortal } from '@/widgets/dispatch-portal';
 import { EmsPortal } from '@/widgets/ems-portal';
 import { FDPortalWidget } from '@/widgets/fd-portal';
 import { Button } from '@/shared/ui/atoms/Button';
+import { Playground } from '@/pages/Playground';
 
 export const EmergencyCorePortal: React.FC = () => {
   const { selectedDepartmentId, selectDepartment } = useCoreNavigationStore();
@@ -31,6 +32,8 @@ export const EmergencyCorePortal: React.FC = () => {
         return <EmsPortal />;
       case 'fire':
         return <FDPortalWidget />;
+      case 'playground':
+        return <Playground />;
       default:
         return (
           <div className="h-full flex items-center justify-center">
@@ -90,7 +93,8 @@ const getDepartmentName = (departmentId: string): string => {
     'law-enforcement': 'Правоохранительные органы',
     'dispatch': 'Диспетчерская служба',
     'ems': 'Скорая помощь',
-    'fire': 'Пожарная служба'
+    'fire': 'Пожарная служба',
+    'playground': '🎨 Playground - Эксперименты'
   };
   
   return departmentNames[departmentId] || 'Неизвестный департамент';

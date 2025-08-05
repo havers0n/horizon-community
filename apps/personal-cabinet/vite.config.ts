@@ -9,7 +9,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@ui': path.resolve(__dirname, '../../libs/ui-components/src'),
-      '@shared': path.resolve(__dirname, '../../libs/ui-components/src'),
+      '@shared': path.resolve(__dirname, './src/shared'),
+      '@shared/ui': path.resolve(__dirname, './src/shared/ui'),
       '@shared-ui': path.resolve(__dirname, './src/shared'),
       '@entities': path.resolve(__dirname, './src/entities'),
       '@features': path.resolve(__dirname, './src/features'),

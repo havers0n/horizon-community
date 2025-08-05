@@ -1,9 +1,17 @@
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
+import React, { Suspense } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs'
 import { LeaveManagementFeature } from '@features/leave-management'
+
+// Lazy load components
+const MyLeaves = React.lazy(() => 
+  LeaveManagementFeature.MyLeaves().then(component => ({ default: component }))
+)
+const NewRequest = React.lazy(() => 
+  LeaveManagementFeature.NewRequest().then(component => ({ default: component }))
+)
+const History = React.lazy(() => 
+  LeaveManagementFeature.History().then(component => ({ default: component }))
+)
 
 export function LeaveManagementWidget() {
   return (
@@ -16,15 +24,21 @@ export function LeaveManagementWidget() {
         </TabsList>
         
         <TabsContent value="my-leaves" className="space-y-4">
-          <LeaveManagementFeature.MyLeaves />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <MyLeaves />
+          </Suspense>
         </TabsContent>
         
         <TabsContent value="new-request" className="space-y-4">
-          <LeaveManagementFeature.NewRequest />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <NewRequest />
+          </Suspense>
         </TabsContent>
         
         <TabsContent value="history" className="space-y-4">
-          <LeaveManagementFeature.History />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <History />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

@@ -1,4 +1,4 @@
-import type { Citizen } from '@/shared';
+import type { Characters } from '@roleplay-identity/db-types';
 
 export interface CitizenSearchResult {
   id: string;
@@ -11,7 +11,7 @@ export interface CitizenSearchResult {
 
 export interface CitizenSearchState {
   suggestions: CitizenSearchResult[];
-  selectedPerson: Citizen | null;
+  selectedPerson: Characters | null;
   showSuggestions: boolean;
   isLoading: boolean;
   error: string | null;

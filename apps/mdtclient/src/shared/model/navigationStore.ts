@@ -1,7 +1,19 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import { create } from 'zustand';
 import { departments } from '@/data/departments';
-import { Department, MDTModule } from '@/shared/types';
+
+// Локальные интерфейсы для UI-специфичных данных
+interface Department {
+  id: string;
+  name: string;
+  modules: MDTModule[];
+}
+
+interface MDTModule {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}
 
 interface NavigationState {
   // Состояние
