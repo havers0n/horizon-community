@@ -4,7 +4,7 @@ import { useCitizenSearchStore } from '../model/store';
 import { Button, Card, CardHeader } from '@/shared/ui/atoms';
 import { SearchInput } from '@/shared/ui/molecules';
 import { useLocale } from '@/shared/contexts/LocaleContext';
-import { PersonDetails } from '../../../ui/PersonDetails';
+import { PersonCard } from './PersonCard';
 
 export const CitizenSearchWidget: React.FC = () => {
   const { t } = useLocale();
@@ -60,7 +60,7 @@ export const CitizenSearchWidget: React.FC = () => {
       </Card>
 
       {selectedPerson && (
-        <PersonDetails person={selectedPerson} />
+        <PersonCard person={selectedPerson} />
       )}
     </div>
   );

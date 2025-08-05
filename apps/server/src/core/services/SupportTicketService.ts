@@ -7,9 +7,9 @@ import {
   SupportTickets,
   SupportTicketsInsert,
   SupportTicketsUpdate
-} from 'db-types';
+} from '@roleplay-identity/db-types';
 import { createSupabaseClient } from '../lib/supabase';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../../utils/AppError';
 
 // Локальный тип для сообщений, т.к. он относится к бизнес-логике, а не к схеме БД
 export interface TicketMessage {
@@ -19,12 +19,12 @@ export interface TicketMessage {
   timestamp: string; // ISO String
 }
 
-class SupportTicketService {
-  private supabase: SupabaseClient<Database>;
+export class SupportTicketService {
+  private supabase: any;
 
   constructor() {
     // ПРАВИЛО 2: Создаем независимый экземпляр клиента
-    this.supabase = createSupabaseClient();
+    this.supabase = createSupabaseClient('public');
   }
 
   public async getTicketById(ticketId: string): Promise<SupportTickets | null> {
@@ -144,7 +144,3 @@ class SupportTicketService {
     return updatedTicket;
   }
 }
-
-// Правильно инстанцируем и экспортируем сервис
-const supportTicketService = new SupportTicketService();
-export default supportTicketService;

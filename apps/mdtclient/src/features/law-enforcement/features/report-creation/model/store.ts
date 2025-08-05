@@ -1,8 +1,7 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import { create } from 'zustand';
 import { useLawEnforcementStore } from '../../../model/store';
 import type { ReportCreationState, ReportCreationActions, ReportCreationFormData } from './types';
-import type { LawReport } from '@/shared';
+import type { LawReports } from '@roleplay-identity/db-types';
 
 type ReportCreationStore = ReportCreationState & ReportCreationActions;
 
@@ -19,6 +18,23 @@ const initialFormData: ReportCreationFormData = {
   suspectWeapon: '',
   additionalFlags: []
 };
+
+// Адаптер для преобразования формы в тип LawReports
+const adaptFormDataToLawReports = (formData: ReportCreationFormData, authorId: string): LawReports => ({
+  id: crypto.randomUUID(),
+  title: `Отчет: ${formData.incidentType}`,
+  description: formData.description,
+  author_character_id: authorId,
+  call_id: null,
+  incident_location: formData.incidentAddress,
+  incident_time: formData.incidentTime,
+  incident_type: formData.incidentType,
+  participants: JSON.stringify([{ name: formData.citizenName }]),
+  penal_codes: JSON.stringify([{ article: formData.article, sanction: formData.sanctionType }]),
+  seized_items: JSON.stringify([{ item: formData.seizedItems, vehicle: formData.suspectVehicle, weapon: formData.suspectWeapon }]),
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+});
 
 export const useReportCreationStore = create<ReportCreationStore>((set, get) => ({
   // State
@@ -43,7 +59,7 @@ export const useReportCreationStore = create<ReportCreationStore>((set, get) => 
     set({ showForm: show });
   },
 
-  createReport: (report: LawReport) => {
+  createReport: (report: LawReports) => {
     set({ isLoading: true, error: null });
     
     try {

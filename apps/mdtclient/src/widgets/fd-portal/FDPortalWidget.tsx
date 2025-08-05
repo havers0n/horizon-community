@@ -13,4 +13,4 @@ const FDPortalWidget: React.FC = () => {
   );
 };
 
-export default FDPortalWidget; 
+export { FDPortalWidget }; 

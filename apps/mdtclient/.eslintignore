@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+dist/
+build/
+coverage/
+
+# Generated files
+supabase-generated.ts
+*.config.js
+*.config.ts
+
+# Test files (handled by overrides)
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Storybook files
+**/*.stories.ts
+**/*.stories.tsx
+
+# Build artifacts
+*.min.js
+*.min.ts
+
+# Environment files
+.env*
+!.env.example
+
+# Backup files
+backup/
+*.backup
+*.bak
+
+# Temporary files
+*.tmp
+*.temp 

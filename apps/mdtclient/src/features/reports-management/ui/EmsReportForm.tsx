@@ -1,18 +1,17 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
 import { Button } from '@/shared/ui/atoms/Button';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Modal } from '@/shared/ui/atoms/Modal';
 import { FileText, PlusCircle, Stethoscope, Flame, Save, X, ArrowLeft } from 'lucide-react';
-import type { EmsReport } from '@/shared/types';
-import type { MedicalReportData, FireReportData } from '../model/types';
+import type { EmsFdReports } from '@roleplay-identity/db-types';
+import type { MedicalReportFormData, FireReportFormData } from '../model/types';
 import { useReportsStore } from '../model/store';
 
 interface EmsReportFormProps {
   isOpen: boolean;
   onClose: () => void;
   selectedCall?: any; // TODO: Replace with proper call type
-  onSave?: (report: EmsReport) => void;
+  onSave?: (report: EmsFdReports) => void;
 }
 
 export const EmsReportForm: React.FC<EmsReportFormProps> = ({
@@ -25,7 +24,7 @@ export const EmsReportForm: React.FC<EmsReportFormProps> = ({
   const [step, setStep] = useState<'type' | 'form'>('type');
   const [reportType, setReportType] = useState<'medical' | 'fire' | 'rescue'>('medical');
   
-  const [medicalData, setMedicalData] = useState<MedicalReportData>({
+  const [medicalData, setMedicalData] = useState<MedicalReportFormData>({
     patientName: selectedCall?.patientInfo?.name || '',
     incidentLocation: selectedCall?.location || '',
     incidentTime: selectedCall?.timestamp ? new Date(selectedCall.timestamp).toISOString().slice(0, 16) : '',
@@ -43,7 +42,7 @@ export const EmsReportForm: React.FC<EmsReportFormProps> = ({
     disposition: ''
   });
 
-  const [fireData, setFireData] = useState<FireReportData>({
+  const [fireData, setFireData] = useState<FireReportFormData>({
     incidentLocation: selectedCall?.location || '',
     incidentTime: selectedCall?.timestamp ? new Date(selectedCall.timestamp).toISOString().slice(0, 16) : '',
     incidentType: '',
@@ -57,18 +56,18 @@ export const EmsReportForm: React.FC<EmsReportFormProps> = ({
     hazards: []
   });
 
-  const handleMedicalDataChange = (field: keyof MedicalReportData, value: any) => {
+  const handleMedicalDataChange = (field: keyof MedicalReportFormData, value: any) => {
     setMedicalData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleVitalSignsChange = (field: keyof MedicalReportData['vitalSigns'], value: any) => {
+  const handleVitalSignsChange = (field: keyof MedicalReportFormData['vitalSigns'], value: any) => {
     setMedicalData(prev => ({
       ...prev,
       vitalSigns: { ...prev.vitalSigns, [field]: value }
     }));
   };
 
-  const handleFireDataChange = (field: keyof FireReportData, value: any) => {
+  const handleFireDataChange = (field: keyof FireReportFormData, value: any) => {
     setFireData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -109,34 +108,28 @@ export const EmsReportForm: React.FC<EmsReportFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const reportData: EmsReport = {
+    const reportData: EmsFdReports = {
       id: `report_${Date.now()}`,
-      type: reportType,
-      author: 'Current User', // TODO: Get from auth context
-      authorId: 'current_user_id',
-      callId: selectedCall?.id || '',
-      incidentLocation: reportType === 'medical' ? medicalData.incidentLocation : fireData.incidentLocation,
-      incidentTime: reportType === 'medical' ? medicalData.incidentTime : fireData.incidentTime,
-      incidentType: reportType === 'medical' ? medicalData.incidentType : fireData.incidentType,
+      title: `${reportType === 'medical' ? 'Медицинский' : reportType === 'fire' ? 'Пожарный' : 'Спасательный'} отчет`,
       description: reportType === 'medical' ? medicalData.description : fireData.description,
+      author_character_id: 'current_user_id', // TODO: Get from auth context
+      call_id: selectedCall?.id || null,
+      incident_location: reportType === 'medical' ? medicalData.incidentLocation : fireData.incidentLocation,
+      incident_time: reportType === 'medical' ? medicalData.incidentTime : fireData.incidentTime,
+      incident_type: reportType === 'medical' ? medicalData.incidentType : fireData.incidentType,
       outcome: reportType === 'medical' ? medicalData.outcome : fireData.outcome,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...(reportType === 'medical' && {
-        patientName: medicalData.patientName,
-        treatmentProvided: medicalData.treatmentProvided,
-        medications: medicalData.medications,
-        vitalSigns: medicalData.vitalSigns,
-        disposition: medicalData.disposition
-      }),
-      ...(reportType === 'fire' && {
-        fireDetails: {
-          structureType: fireData.structureType,
-          fireOrigin: fireData.fireOrigin,
-          damage: fireData.damage,
-          cause: fireData.cause
-        }
-      })
+      treatment_provided: reportType === 'medical' ? medicalData.treatmentProvided : null,
+      medications_administered: reportType === 'medical' ? JSON.stringify(medicalData.medications) : null,
+      vital_signs: reportType === 'medical' ? JSON.stringify(medicalData.vitalSigns) : null,
+      fire_details: reportType === 'fire' ? JSON.stringify({
+        structureType: fireData.structureType,
+        fireOrigin: fireData.fireOrigin,
+        damage: fireData.damage,
+        cause: fireData.cause
+      }) : null,
+      patients: reportType === 'medical' ? JSON.stringify([{ name: medicalData.patientName, disposition: medicalData.disposition }]) : null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     addReport(reportData);

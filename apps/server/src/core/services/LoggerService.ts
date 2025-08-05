@@ -145,7 +145,4 @@ export class LoggerService {
       throw error;
     }
   }
-}
-
-// Создаем глобальный экземпляр логгера
-export const logger = new LoggerService(); 
+} 

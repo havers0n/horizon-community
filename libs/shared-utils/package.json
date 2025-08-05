@@ -11,7 +11,7 @@
     }
   },
   "dependencies": {
-    "@roleplay-identity/shared-types": "*"
+    "@roleplay-identity/shared-types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "5.6.3"

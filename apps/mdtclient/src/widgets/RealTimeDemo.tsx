@@ -1,15 +1,24 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React, { useState, useEffect } from 'react';
-import { useRealTime, useUnitUpdates, useCallUpdates, useAlertUpdates } from '../../hooks/useRealTime';
+import type { Calls911, Units } from '@roleplay-identity/db-types';
+import React, { useEffect, useState } from 'react';
+import { useAlertUpdates, useCallUpdates, useRealTime, useUnitUpdates } from '../../hooks/useRealTime';
+import { Badge } from '../shared/ui/atoms/Badge';
 import { Button } from '../shared/ui/atoms/Button';
 import { Card } from '../shared/ui/atoms/Card';
-import { Badge } from '../shared/ui/atoms/Badge';
-import { StatusIndicator } from '../shared/ui/atoms/StatusIndicator';
 import { Notification } from '../shared/ui/atoms/Notification';
+import { StatusIndicator } from '../shared/ui/atoms/StatusIndicator';
+
+interface NotificationType {
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  message: string;
+}
+
+// TODO: Define a proper type for alerts
+type AlertType = any;
 
 export const RealTimeDemo: React.FC = () => {
-  const [notifications, setNotifications] = useState<any[]>([]);
-  
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
+
   // Используем real-time хуки
   const realTime = useRealTime(['all']);
   const units = useUnitUpdates();
@@ -17,13 +26,13 @@ export const RealTimeDemo: React.FC = () => {
   const alerts = useAlertUpdates();
 
   // Добавление уведомления
-  const addNotification = (type: 'info' | 'success' | 'warning' | 'error', message: string) => {
+  const addNotification = (type: NotificationType['type'], message: string) => {
     const id = Date.now().toString();
-    setNotifications(prev => [...prev, { id, type, message }]);
-    
+    setNotifications((prev) => [...prev, { id, type, message }]);
+
     // Автоматически удаляем через 5 секунд
     setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 5000);
   };
 
@@ -54,7 +63,7 @@ export const RealTimeDemo: React.FC = () => {
   const sendTestEvent = () => {
     realTime.sendEvent('test_event', {
       message: 'Тестовое событие',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   };
 
@@ -77,8 +86,8 @@ export const RealTimeDemo: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">Real-Time Demo</h1>
         <div className="flex items-center space-x-2">
-          <StatusIndicator 
-            status={realTime.isConnected ? 'available' : 'unavailable'} 
+          <StatusIndicator
+            status={realTime.isConnected ? 'available' : 'unavailable'}
             size="sm"
           />
           <span className="text-sm text-gray-300">
@@ -96,7 +105,9 @@ export const RealTimeDemo: React.FC = () => {
             <div className="text-sm text-gray-400">Всего событий</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-400">{realTime.stats.connectedClients}</div>
+            <div className="text-2xl font-bold text-green-400">
+              {realTime.stats.connectedClients}
+            </div>
             <div className="text-sm text-gray-400">Подключенных клиентов</div>
           </div>
           <div className="text-center">
@@ -114,7 +125,7 @@ export const RealTimeDemo: React.FC = () => {
       <Card className="p-4">
         <h2 className="text-lg font-semibold text-white mb-4">Управление</h2>
         <div className="flex flex-wrap gap-2">
-          <Button 
+          <Button
             onClick={toggleConnection}
             variant={realTime.isConnected ? 'destructive' : 'default'}
           >
@@ -133,19 +144,17 @@ export const RealTimeDemo: React.FC = () => {
       <Card className="p-4">
         <h2 className="text-lg font-semibold text-white mb-4">Активные юниты ({units.size})</h2>
         <div className="space-y-2">
-          {Array.from(units.values()).map((unit: any) => (
-            <div key={unit.unitId} className="flex items-center justify-between p-2 bg-gray-800 rounded">
+          {Array.from(units.values()).map((unit: Units) => (
+            <div key={unit.id} className="flex items-center justify-between p-2 bg-gray-800 rounded">
               <div className="flex items-center space-x-2">
                 <StatusIndicator status={unit.status} size="sm" />
-                <span className="text-white">Юнит {unit.unitId}</span>
+                <span className="text-white">Юнит {unit.id}</span>
               </div>
               <Badge variant="outline">{unit.status}</Badge>
             </div>
           ))}
           {units.size === 0 && (
-            <div className="text-gray-400 text-center py-4">
-              Нет активных юнитов
-            </div>
+            <div className="text-gray-400 text-center py-4">Нет активных юнитов</div>
           )}
         </div>
       </Card>
@@ -154,7 +163,7 @@ export const RealTimeDemo: React.FC = () => {
       <Card className="p-4">
         <h2 className="text-lg font-semibold text-white mb-4">Активные вызовы ({calls.size})</h2>
         <div className="space-y-2">
-          {Array.from(calls.values()).map((call: any) => (
+          {Array.from(calls.values()).map((call: Calls911) => (
             <div key={call.id} className="flex items-center justify-between p-2 bg-gray-800 rounded">
               <div>
                 <div className="text-white font-medium">{call.description}</div>
@@ -166,9 +175,7 @@ export const RealTimeDemo: React.FC = () => {
             </div>
           ))}
           {calls.size === 0 && (
-            <div className="text-gray-400 text-center py-4">
-              Нет активных вызовов
-            </div>
+            <div className="text-gray-400 text-center py-4">Нет активных вызовов</div>
           )}
         </div>
       </Card>
@@ -177,8 +184,11 @@ export const RealTimeDemo: React.FC = () => {
       <Card className="p-4">
         <h2 className="text-lg font-semibold text-white mb-4">Тревоги ({alerts.length})</h2>
         <div className="space-y-2">
-          {alerts.map((alert: any) => (
-            <div key={alert.id} className="flex items-center justify-between p-2 bg-red-900/20 border border-red-500/30 rounded">
+          {alerts.map((alert: AlertType) => (
+            <div
+              key={alert.id}
+              className="flex items-center justify-between p-2 bg-red-900/20 border border-red-500/30 rounded"
+            >
               <div>
                 <div className="text-red-400 font-medium">{alert.type}</div>
                 <div className="text-sm text-gray-400">
@@ -189,9 +199,7 @@ export const RealTimeDemo: React.FC = () => {
             </div>
           ))}
           {alerts.length === 0 && (
-            <div className="text-gray-400 text-center py-4">
-              Нет активных тревог
-            </div>
+            <div className="text-gray-400 text-center py-4">Нет активных тревог</div>
           )}
         </div>
       </Card>
@@ -223,7 +231,7 @@ export const RealTimeDemo: React.FC = () => {
             type={notification.type}
             title={notification.message}
             onClose={() => {
-              setNotifications(prev => prev.filter(n => n.id !== notification.id));
+              setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
             }}
           />
         ))}

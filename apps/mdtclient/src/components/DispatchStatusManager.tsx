@@ -1,28 +1,27 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
+import type { Units } from '@roleplay-identity/db-types';
 import React, { useState } from 'react';
-import { UnitStatus } from '@/shared/types';
 
 interface DispatchStatusManagerProps {
-  currentStatus: UnitStatus;
-  onStatusChange: (status: UnitStatus) => void;
+  currentStatus: Units['status'];
+  onStatusChange: (status: Units['status']) => void;
 }
 
 export const DispatchStatusManager: React.FC<DispatchStatusManagerProps> = ({
   currentStatus,
-  onStatusChange
+  onStatusChange,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const statusOptions: { value: UnitStatus; label: string; color: string }[] = [
+  const statusOptions: { value: Units['status']; label: string; color: string }[] = [
     { value: 'available', label: 'Available', color: 'bg-green-500' },
     { value: 'busy', label: 'Busy', color: 'bg-yellow-500' },
-    { value: 'enRoute', label: 'En Route', color: 'bg-blue-500' },
-    { value: 'onScene', label: 'On Scene', color: 'bg-purple-500' },
+    { value: 'en_route', label: 'En Route', color: 'bg-blue-500' },
+    { value: 'on_scene', label: 'On Scene', color: 'bg-purple-500' },
     { value: 'unavailable', label: 'Unavailable', color: 'bg-red-500' },
     { value: 'panic', label: 'Panic', color: 'bg-red-600' },
   ];
 
-  const currentStatusOption = statusOptions.find(option => option.value === currentStatus);
+  const currentStatusOption = statusOptions.find((option) => option.value === currentStatus);
 
   return (
     <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
@@ -35,7 +34,7 @@ export const DispatchStatusManager: React.FC<DispatchStatusManagerProps> = ({
           {isExpanded ? '▼' : '▶'}
         </button>
       </div>
-      
+
       <div className="mt-3 flex items-center space-x-3">
         <div className={`w-3 h-3 rounded-full ${currentStatusOption?.color}`} />
         <span className="text-white font-medium">{currentStatusOption?.label}</span>
@@ -59,7 +58,7 @@ export const DispatchStatusManager: React.FC<DispatchStatusManagerProps> = ({
           ))}
         </div>
       )}
-      
+
       <div className="mt-4 text-sm text-slate-400">
         <p>Current status: {currentStatusOption?.label}</p>
         <p>Last updated: {new Date().toLocaleTimeString()}</p>

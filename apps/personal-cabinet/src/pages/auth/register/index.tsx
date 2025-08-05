@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -38,7 +38,12 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true)
     try {
-      await signUp(data.email, data.password, data.firstName, data.lastName)
+      await signUp({
+        email: data.email,
+        password: data.password,
+        first_name: data.firstName,
+        last_name: data.lastName
+      })
       navigate('/dashboard')
     } catch (error) {
       console.error('Registration error:', error)

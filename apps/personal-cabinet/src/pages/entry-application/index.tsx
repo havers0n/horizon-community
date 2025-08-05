@@ -1,5 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
+
 import { EntryApplicationWidget } from '@widgets/entry-application'
 
 export default function EntryApplicationPage() {

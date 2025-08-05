@@ -1,7 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs'
+
 import { JointPositionsWidget } from '@widgets/joint-positions'
 
 export default function JointPositionsPage() {

@@ -1,11 +1,23 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/atoms/Card';
 import { Button } from '@/shared/ui/atoms/Button';
 import { useNavigationStore } from '@/shared/model/navigationStore';
-import { Department } from '@/shared/types';
 import { LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/shared/contexts/AuthContext';
+
+// Локальный интерфейс для UI-специфичных данных департамента
+interface Department {
+  id: string;
+  name: string;
+  modules: MDTModule[];
+}
+
+interface MDTModule {
+  id: string;
+  name: string;
+  description?: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}
 
 interface SidebarProps {
   department: Department;

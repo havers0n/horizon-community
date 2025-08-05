@@ -1,10 +1,9 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
-import { Call911 } from '@/shared/types';
+import type { Calls911 } from '@roleplay-identity/db-types';
 
 interface Call911HandlerProps {
-  call: Call911;
-  onUpdate: (callId: string, updates: Partial<Call911>) => void;
+  call: Calls911;
+  onUpdate: (callId: string, updates: Partial<Calls911>) => void;
   onAssign: (callId: string, unitId: string) => void;
 }
 
@@ -15,12 +14,12 @@ export const Call911Handler: React.FC<Call911HandlerProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleStatusChange = (newStatus: string) => {
-    onUpdate(call.id, { status: newStatus as any });
+  const handleStatusChange = (newStatus: Calls911['status']) => {
+    onUpdate(call.id, { status: newStatus });
   };
 
-  const handlePriorityChange = (newPriority: string) => {
-    onUpdate(call.id, { priority: newPriority as any });
+  const handlePriorityChange = (newPriority: Calls911['priority']) => {
+    onUpdate(call.id, { priority: newPriority });
   };
 
   return (
@@ -57,7 +56,7 @@ export const Call911Handler: React.FC<Call911HandlerProps> = ({
           <div className="flex space-x-2">
             <select
               value={call.status}
-              onChange={(e) => handleStatusChange(e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value as Calls911['status'])}
               className="bg-slate-700 text-white px-3 py-1 rounded text-sm"
             >
               <option value="pending">Pending</option>
@@ -67,7 +66,7 @@ export const Call911Handler: React.FC<Call911HandlerProps> = ({
             
             <select
               value={call.priority}
-              onChange={(e) => handlePriorityChange(e.target.value)}
+              onChange={(e) => handlePriorityChange(e.target.value as Calls911['priority'])}
               className="bg-slate-700 text-white px-3 py-1 rounded text-sm"
             >
               <option value="low">Low</option>
@@ -77,10 +76,9 @@ export const Call911Handler: React.FC<Call911HandlerProps> = ({
           </div>
           
           <div className="text-sm text-slate-400">
-            <p>Caller: {call.callerName || 'Anonymous'}</p>
-            <p>Phone: {call.callerPhone || 'N/A'}</p>
-            {/* @ts-expect-error - TODO: Fix after major refactoring. Property 'createdAt' might be undefined */}
-            <p>Time: {new Date(call.createdAt).toLocaleString()}</p>
+            <p>Caller: {call.caller_name || 'Anonymous'}</p>
+            <p>Phone: {call.caller_phone || 'N/A'}</p>
+            <p>Time: {new Date(call.created_at).toLocaleString()}</p>
           </div>
         </div>
       )}

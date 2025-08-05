@@ -50,4 +50,8 @@ export * from './schemas';
 export * from './types';
 
 // Явный экспорт основных типов для обеспечения совместимости
-export type { User, Department, Application, ReportTemplate, Report, FilledReport } from './types'; 
+export type { User, Department, Application, ReportTemplate, Report, FilledReport } from './types';
+
+// Экспорт WebSocket типов
+export type { WebSocketEventType } from './types';
+export { WEBSOCKET_EVENTS } from './types'; 

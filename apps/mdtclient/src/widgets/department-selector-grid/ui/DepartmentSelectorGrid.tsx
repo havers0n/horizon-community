@@ -1,19 +1,12 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React from 'react';
-import { 
-  Shield, 
-  Phone, 
-  Stethoscope, 
-  Flame,
-  ArrowLeft
-} from 'lucide-react';
 import { useCoreNavigationStore } from '@/shared/model/coreNavigationStore';
 import { Button } from '@/shared/ui/atoms/Button';
+import { Flame, Phone, Shield, Stethoscope, Palette } from 'lucide-react';
+import React from 'react';
 
 interface Department {
   id: string;
   name: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   description: string;
   color: string;
 }
@@ -24,29 +17,36 @@ const emergencyDepartments: Department[] = [
     name: 'Правоохранительные органы',
     icon: Shield,
     description: 'Полиция, детективы, спецподразделения',
-    color: 'from-blue-600/20 to-blue-800/20 border-blue-500/30'
+    color: 'from-blue-600/20 to-blue-800/20 border-blue-500/30',
   },
   {
     id: 'dispatch',
     name: 'Диспетчерская служба',
     icon: Phone,
     description: 'Управление вызовами и координация',
-    color: 'from-green-600/20 to-green-800/20 border-green-500/30'
+    color: 'from-green-600/20 to-green-800/20 border-green-500/30',
   },
   {
     id: 'ems',
     name: 'Скорая помощь',
     icon: Stethoscope,
     description: 'Медицинская помощь и реанимация',
-    color: 'from-red-600/20 to-red-800/20 border-red-500/30'
+    color: 'from-red-600/20 to-red-800/20 border-red-500/30',
   },
   {
     id: 'fire',
     name: 'Пожарная служба',
     icon: Flame,
     description: 'Пожарная безопасность и спасательные операции',
-    color: 'from-orange-600/20 to-orange-800/20 border-orange-500/30'
-  }
+    color: 'from-orange-600/20 to-orange-800/20 border-orange-500/30',
+  },
+  {
+    id: 'playground',
+    name: '🎨 Playground',
+    icon: Palette,
+    description: 'Эксперименты с интерфейсами и компонентами',
+    color: 'from-purple-600/20 to-purple-800/20 border-purple-500/30',
+  },
 ];
 
 export const DepartmentSelectorGrid: React.FC = () => {
@@ -61,9 +61,7 @@ export const DepartmentSelectorGrid: React.FC = () => {
       {/* Заголовок */}
       <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Ядро экстренных служб
-          </h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Ядро экстренных служб</h1>
           <p className="text-slate-400">
             Выберите департамент для доступа к специализированному порталу
           </p>
@@ -75,7 +73,7 @@ export const DepartmentSelectorGrid: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {emergencyDepartments.map((department) => {
             const Icon = department.icon;
-            
+
             return (
               <Button
                 key={department.id}
@@ -92,7 +90,7 @@ export const DepartmentSelectorGrid: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <Icon className="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-200" />
                   </div>
-                  
+
                   <div className="mt-4">
                     <h3 className="text-lg font-semibold text-white mb-2">
                       {department.name}

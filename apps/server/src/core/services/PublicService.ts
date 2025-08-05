@@ -87,7 +87,4 @@ export class PublicService {
       throw error;
     }
   }
-}
-
-// Экспортируем единственный экземпляр
-export const publicService = new PublicService(); 
+} 

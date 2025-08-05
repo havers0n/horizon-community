@@ -1,11 +1,10 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
+import type { EmsFdReports } from '@roleplay-identity/db-types';
 import { 
-  EmsReport, 
   CreateEmsReportRequest, 
   UpdateEmsReportRequest, 
   EmsReportSearchParams, 
   EmsReportSearchResult 
-} from '@/shared/types';
+} from '../model/types';
 
 export class ReportsApi {
   private static baseUrl = '/api/ems/reports';
@@ -14,9 +13,9 @@ export class ReportsApi {
     try {
       const queryParams = new URLSearchParams();
       
-      if (params.type) queryParams.append('type', params.type);
-      if (params.authorId) queryParams.append('authorId', params.authorId);
-      if (params.callId) queryParams.append('callId', params.callId);
+      if (params.incident_type) queryParams.append('incident_type', params.incident_type);
+      if (params.author_character_id) queryParams.append('author_character_id', params.author_character_id);
+      if (params.call_id) queryParams.append('call_id', params.call_id);
       if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);
       if (params.dateTo) queryParams.append('dateTo', params.dateTo);
       if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -35,7 +34,7 @@ export class ReportsApi {
     }
   }
 
-  static async getReport(id: string): Promise<EmsReport> {
+  static async getReport(id: string): Promise<EmsFdReports> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`);
       
@@ -50,7 +49,7 @@ export class ReportsApi {
     }
   }
 
-  static async createReport(data: CreateEmsReportRequest): Promise<EmsReport> {
+  static async createReport(data: CreateEmsReportRequest): Promise<EmsFdReports> {
     try {
       const response = await fetch(this.baseUrl, {
         method: 'POST',
@@ -71,7 +70,7 @@ export class ReportsApi {
     }
   }
 
-  static async updateReport(id: string, data: UpdateEmsReportRequest): Promise<EmsReport> {
+  static async updateReport(id: string, data: UpdateEmsReportRequest): Promise<EmsFdReports> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`, {
         method: 'PUT',
@@ -107,7 +106,7 @@ export class ReportsApi {
     }
   }
 
-  static async getReportsByType(type: 'medical' | 'fire' | 'rescue', limit = 10): Promise<EmsReport[]> {
+  static async getReportsByType(type: string, limit = 10): Promise<EmsFdReports[]> {
     try {
       const response = await fetch(`${this.baseUrl}/type/${type}?limit=${limit}`);
       
@@ -123,7 +122,7 @@ export class ReportsApi {
     }
   }
 
-  static async getReportsByAuthor(authorId: string, limit = 10): Promise<EmsReport[]> {
+  static async getReportsByAuthor(authorId: string, limit = 10): Promise<EmsFdReports[]> {
     try {
       const response = await fetch(`${this.baseUrl}/author/${authorId}?limit=${limit}`);
       
@@ -139,7 +138,7 @@ export class ReportsApi {
     }
   }
 
-  static async getReportsByCall(callId: string): Promise<EmsReport[]> {
+  static async getReportsByCall(callId: string): Promise<EmsFdReports[]> {
     try {
       const response = await fetch(`${this.baseUrl}/call/${callId}`);
       
@@ -159,8 +158,8 @@ export class ReportsApi {
     try {
       const queryParams = new URLSearchParams();
       
-      if (params.type) queryParams.append('type', params.type);
-      if (params.authorId) queryParams.append('authorId', params.authorId);
+      if (params.incident_type) queryParams.append('incident_type', params.incident_type);
+      if (params.author_character_id) queryParams.append('author_character_id', params.author_character_id);
       if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);
       if (params.dateTo) queryParams.append('dateTo', params.dateTo);
 

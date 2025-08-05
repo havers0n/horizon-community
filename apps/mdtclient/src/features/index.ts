@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 // Features - явные экспорты всех фич приложения
 
 // Auth & UI

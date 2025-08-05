@@ -1,11 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@roleplay-identity/db-types';
+// apps/server/src/core/services/AuthService.ts
 
-// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
-type Profile = Database['public']['Tables']['profiles']['Row'];
-type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+import { createClient, SupabaseClient } from '@supabase/supabase-js'; // Import createClient for admin operations
+import { createSupabaseClient } from '../lib/supabase';
+import { AppError } from '../../utils/AppError';
+import type { Database, Profiles, ProfilesInsert } from '@roleplay-identity/db-types';
 
-// ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
+// --- ОТЛАДКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ---
+const keyForDebug = process.env.SUPABASE_SERVICE_ROLE_KEY || 'КЛЮЧ НЕ НАЙДЕН!';
+console.log('--- ОТЛАДКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ---');
+console.log(`[DEBUG] Загруженный SUPABASE_URL: ${process.env.SUPABASE_URL}`);
+console.log(`[DEBUG] Длина ключа: ${keyForDebug.length}`);
+console.log(`[DEBUG] Ключ начинается с: ${keyForDebug.substring(0, 8)}...`);
+console.log('------------------------------------');
+
 export interface RegisterData {
   username: string;
   email: string;
@@ -17,282 +24,115 @@ export interface LoginData {
   password: string;
 }
 
-export interface AuthResponse {
-  success: boolean;
-  data?: {
-    user: Profile;
-    session?: any;
-  };
-  error?: string;
-}
-
-// ===== СОВРЕМЕННЫЙ AUTH SERVICE =====
 export class AuthService {
-  private supabaseAdmin;
-  private supabase;
+  // ✅ CORRECTED: We only need a client for the 'public' schema to access profiles.
+  private supabasePublic: SupabaseClient<Database, 'public'>;
+  // ✅ We need a special, non-schema-typed admin client for user management.
+  private supabaseAdmin: SupabaseClient;
 
   constructor() {
+    console.log('[AuthService] Initializing AuthService...');
+    console.log('[AuthService] SUPABASE_URL:', process.env.SUPABASE_URL ? 'SET' : 'NOT SET');
+    console.log('[AuthService] SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
+    
+    // This client is for accessing our public.profiles table
+    this.supabasePublic = createSupabaseClient('public');
+
+    // This special client is for auth.admin operations that require the service_role_key
     this.supabaseAdmin = createClient(
-      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     
-    this.supabase = createClient(
-      process.env.VITE_SUPABASE_URL!,
-      process.env.VITE_SUPABASE_ANON_KEY!
-    );
+    console.log('[AuthService] AuthService initialized successfully');
   }
 
-  // ===== РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ =====
-  async registerUser(data: RegisterData): Promise<AuthResponse> {
-    try {
-      // ✅ UUID правило: все ID как string
-      const { username, email, password } = data;
+  // ===== USER REGISTRATION =====
+  async registerUser(data: RegisterData): Promise<Profiles> {
+    const { username, email, password } = data;
 
-      // Проверяем существование пользователя
-      const { data: existingUsers, error: checkError } = await this.supabaseAdmin.auth.admin.listUsers();
-      
-      if (checkError) {
-        return {
-          success: false,
-          error: 'Failed to check existing users'
-        };
-      }
-      
-      const userExists = existingUsers.users.some(user => 
-        user.email === email || user.user_metadata?.username === username
-      );
-      
-      if (userExists) {
-        return {
-          success: false,
-          error: 'User already exists'
-        };
-      }
-      
-      // Создаем пользователя в Supabase Auth
+    console.log('[AuthService] Starting user registration for:', email);
+
+    try {
+      // Use the admin client to create a user in the auth schema
+      console.log('[AuthService] Creating user in Supabase Auth...');
       const { data: authData, error: authError } = await this.supabaseAdmin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
-        user_metadata: { username }
+        user_metadata: { username },
       });
-      
+
       if (authError) {
-        return {
-          success: false,
-          error: authError.message
-        };
-      }
-
-      // ✅ Сервисный слой: создаем профиль в БД
-      const profileData: ProfileInsert = {
-        id: authData.user.id, // ✅ UUID как string
-        username,
-        email,
-        role: 'candidate'
-      };
-
-      const { data: profile, error: profileError } = await this.supabaseAdmin
-        .from('profiles')
-        .insert(profileData)
-        .select()
-        .single();
-      
-      if (profileError) {
-        // Удаляем созданного пользователя если не удалось создать профиль
-        await this.supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-        return {
-          success: false,
-          error: 'Failed to create user profile'
-        };
-      }
-      
-      return {
-        success: true,
-        data: {
-          user: profile,
-          session: authData.session
+        console.error('[AuthService] Auth error:', authError);
+        if (authError.message.includes('User already registered')) {
+          throw new AppError('A user with this email or username already exists.', 409); // 409 Conflict
         }
-      };
-    } catch (error) {
-      console.error('[AuthService] Registration error:', error);
-      return {
-        success: false,
-        error: 'Registration failed'
-      };
-    }
-  }
-
-  // ===== АВТОРИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ =====
-  async loginUser(data: LoginData): Promise<AuthResponse> {
-    try {
-      const { email, password } = data;
-      
-      // Аутентификация через Supabase
-      const { data: authData, error: authError } = await this.supabaseAdmin.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (authError) {
-        return {
-          success: false,
-          error: 'Invalid credentials'
-        };
+        throw new AppError(authError.message, 500);
       }
       
-      // ✅ Сервисный слой: получаем профиль из БД
-      const { data: profile, error: profileError } = await this.supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id) // ✅ UUID как string
-        .single();
-      
-      if (profileError || !profile) {
-        return {
-          success: false,
-          error: 'User profile not found'
-        };
-      }
-      
-      return {
-        success: true,
-        data: {
-          user: profile
-        }
-      };
-    } catch (error) {
-      console.error('[AuthService] Login error:', error);
-      return {
-        success: false,
-        error: 'Login failed'
-      };
-    }
-  }
+      const newUser = authData.user;
+      console.log('[AuthService] User created in Auth, ID:', newUser.id);
 
-  // ===== ПОЛУЧЕНИЕ ПРОФИЛЯ ПОЛЬЗОВАТЕЛЯ =====
-  async getUserProfile(userId: string): Promise<Profile | null> {
-    try {
-      const { data: profile, error } = await this.supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('id', userId) // ✅ UUID как string
-        .single();
-
-      if (error || !profile) {
-        return null;
+      // ✅ REMOVED: Manual profile creation - Supabase trigger will handle this automatically
+      // The trigger will create the profile with the same ID as the user
+      console.log('[AuthService] Waiting for Supabase trigger to create profile...');
+      
+      // Wait a moment for the trigger to execute
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Fetch the created profile
+      const profile = await this.getUserProfile(newUser.id);
+      
+      if (!profile) {
+        console.error('[AuthService] Profile not found after trigger execution');
+        // Critical error: user created in Auth, but profile not created by trigger. Rollback.
+        await this.supabaseAdmin.auth.admin.deleteUser(newUser.id);
+        throw new AppError('Failed to create user profile after registration.', 500);
       }
 
+      console.log('[AuthService] Registration successful for:', email);
       return profile;
     } catch (error) {
-      console.error('[AuthService] Error getting user profile:', error);
-      return null;
+      console.error('[AuthService] Registration failed:', error);
+      throw error;
     }
   }
 
-  // ===== ВАЛИДАЦИЯ ТОКЕНА =====
-  async validateToken(token: string): Promise<Profile | null> {
-    try {
-      const { data: { user }, error } = await this.supabaseAdmin.auth.getUser(token);
+  // ===== USER LOGIN =====
+  async loginUser(data: LoginData): Promise<{ profile: Profiles; session: any }> {
+    const { email, password } = data;
 
-      if (error || !user) {
-        return null;
-      }
-
-      return await this.getUserProfile(user.id);
-    } catch (error) {
-      console.error('[AuthService] Token validation error:', error);
-      return null;
-    }
-  }
-
-  // ===== ВЫХОД ИЗ СИСТЕМЫ =====
-  async logoutUser(): Promise<{ success: boolean; error?: string }> {
-    try {
-      // Supabase обрабатывает выход на клиентской стороне
-      return { success: true };
-    } catch (error) {
-      console.error('[AuthService] Logout error:', error);
-      return {
-        success: false,
-        error: 'Logout failed'
-      };
-    }
-  }
-
-  // ===== МЕТОДЫ ДЛЯ MIDDLEWARE =====
-  
-  async authenticate(token: string): Promise<AuthUser | null> {
-    return await this.validateToken(token);
-  }
-
-  async validateCadToken(cadToken: string): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
-    try {
-      // Здесь должна быть логика валидации CAD токена
-      // Пока возвращаем заглушку
-      return {
-        success: false,
-        error: 'CAD token validation not implemented'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'CAD token validation failed'
-      };
-    }
-  }
-
-  async validateApiToken(apiToken: string): Promise<{ valid: boolean; user?: AuthUser; error?: string }> {
-    try {
-      // Здесь должна быть логика валидации API токена
-      // Пока возвращаем заглушку
-      return {
-        valid: false,
-        error: 'API token validation not implemented'
-      };
-    } catch (error) {
-      return {
-        valid: false,
-        error: 'API token validation failed'
-      };
-    }
-  }
-
-  hasMinimumRole(user: AuthUser | undefined, minimumRole: string): boolean {
-    if (!user) return false;
+    // Any client can be used for standard auth operations like signInWithPassword
+    const { data: authData, error: authError } = await this.supabasePublic.auth.signInWithPassword({
+      email,
+      password,
+    });
     
-    const roleHierarchy = {
-      'candidate': 0,
-      'citizen': 1,
-      'leo': 2,
-      'ems_fd': 2,
-      'dispatch': 3,
-      'admin': 4
-    };
+    if (authError || !authData.user) {
+      throw new AppError('Invalid email or password.', 401); // 401 Unauthorized
+    }
+
+    const profile = await this.getUserProfile(authData.user.id);
     
-    const userRoleLevel = roleHierarchy[user.role as keyof typeof roleHierarchy] || 0;
-    const requiredRoleLevel = roleHierarchy[minimumRole as keyof typeof roleHierarchy] || 0;
-    
-    return userRoleLevel >= requiredRoleLevel;
+    if (!profile) {
+      throw new AppError('User profile not found.', 404); // 404 Not Found
+    }
+
+    return { profile, session: authData.session };
   }
 
-  hasRole(user: AuthUser | undefined, role: string): boolean {
-    if (!user) return false;
-    return user.role === role;
-  }
+  // ===== GET USER PROFILE =====
+  async getUserProfile(userId: string): Promise<Profiles | null> {
+    const { data, error } = await this.supabasePublic
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-  hasPermission(user: AuthUser | undefined, permission: string): boolean {
-    if (!user) return false;
-    
-    // Базовая логика проверки разрешений
-    // В реальном приложении здесь должна быть более сложная логика
-    return user.role === 'admin' || user.role === 'dispatch';
+    if (error && error.code !== 'PGRST116') {
+        console.error(`[AuthService] Error fetching profile for ${userId}:`, error);
+    }
+    return data;
   }
 }
-
-// Экспортируем экземпляр для использования в middleware
-export const authService = new AuthService();
-
-// Экспортируем тип для совместимости
-export type AuthUser = Profile; 

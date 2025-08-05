@@ -1,31 +1,15 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import type { Citizen, CitizenSearchResult } from '@/shared/types';
+import type { Characters, CharactersInsert, CharactersUpdate } from '@roleplay-identity/db-types';
 
 export interface SearchCitizensRequest {
   query: string;
   limit?: number;
 }
 
-export interface CreateCitizenRequest {
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  ssn: string;
-  gender: 'male' | 'female' | 'other';
-  ethnicity: string;
-  hairColor: string;
-  eyeColor: string;
-  weight: number;
-  height: number;
-  postalCode?: string;
-  address?: string;
-  phoneNumber?: string;
-  occupation?: string;
-  additionalInfo?: string;
-}
+// Используем строго типизированные типы из БД
+export type CreateCitizenRequest = CharactersInsert;
 
 export class CitizensApi {
-  static async searchCitizens(data: SearchCitizensRequest): Promise<CitizenSearchResult[]> {
+  static async searchCitizens(data: SearchCitizensRequest): Promise<Characters[]> {
     const response = await fetch('/api/citizens/search', {
       method: 'POST',
       headers: {
@@ -41,7 +25,7 @@ export class CitizensApi {
     return response.json();
   }
 
-  static async getCitizen(id: string): Promise<Citizen> {
+  static async getCitizen(id: string): Promise<Characters> {
     const response = await fetch(`/api/citizens/${id}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +39,7 @@ export class CitizensApi {
     return response.json();
   }
 
-  static async createCitizen(data: CreateCitizenRequest): Promise<Citizen> {
+  static async createCitizen(data: CreateCitizenRequest): Promise<Characters> {
     const response = await fetch('/api/citizens', {
       method: 'POST',
       headers: {
@@ -71,7 +55,7 @@ export class CitizensApi {
     return response.json();
   }
 
-  static async updateCitizen(id: string, data: Partial<Citizen>): Promise<Citizen> {
+  static async updateCitizen(id: string, data: CharactersUpdate): Promise<Characters> {
     const response = await fetch(`/api/citizens/${id}`, {
       method: 'PUT',
       headers: {

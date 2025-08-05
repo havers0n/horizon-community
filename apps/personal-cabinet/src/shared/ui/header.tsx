@@ -1,5 +1,5 @@
 import { useAuth } from '@/features/auth'
-import { Button } from '@/shared/ui/button'
+import { Button } from '@shared/ui/button'
 import { User, LogOut } from 'lucide-react'
 
 export function Header() {

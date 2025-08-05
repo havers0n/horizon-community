@@ -1,8 +1,17 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
+import React, { Suspense } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs'
 import { JointPositionsFeature } from '@features/joint-positions'
+
+// Lazy load components
+const AvailablePositions = React.lazy(() => 
+  JointPositionsFeature.AvailablePositions().then(component => ({ default: component }))
+)
+const MyApplications = React.lazy(() => 
+  JointPositionsFeature.MyApplications().then(component => ({ default: component }))
+)
+const CreatePosition = React.lazy(() => 
+  JointPositionsFeature.CreatePosition().then(component => ({ default: component }))
+)
 
 export function JointPositionsWidget() {
   return (
@@ -15,15 +24,21 @@ export function JointPositionsWidget() {
         </TabsList>
         
         <TabsContent value="available" className="space-y-4">
-          <JointPositionsFeature.AvailablePositions />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <AvailablePositions />
+          </Suspense>
         </TabsContent>
         
         <TabsContent value="my-applications" className="space-y-4">
-          <JointPositionsFeature.MyApplications />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <MyApplications />
+          </Suspense>
         </TabsContent>
         
         <TabsContent value="create" className="space-y-4">
-          <JointPositionsFeature.CreatePosition />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <CreatePosition />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

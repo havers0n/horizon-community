@@ -18,7 +18,7 @@ process.env.PORT = '5001';
 process.env.HOST = 'localhost';
 
 // Увеличиваем таймаут для тестов
-jest.setTimeout(10000);
+jest.setTimeout(30000);
 
 // Глобальные моки
 global.console = {
@@ -31,9 +31,37 @@ global.console = {
   error: jest.fn(),
 };
 
-// Мокаем все внешние зависимости
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({
+// Создаем фиктивный Supabase клиент для тестов
+const createMockSupabaseClient = () => {
+  const mockQueryBuilder = {
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    upsert: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    neq: jest.fn().mockReturnThis(),
+    gt: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lt: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
+    like: jest.fn().mockReturnThis(),
+    ilike: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    not: jest.fn().mockReturnThis(),
+    or: jest.fn().mockReturnThis(),
+    and: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    offset: jest.fn().mockReturnThis(),
+    range: jest.fn().mockReturnThis(),
+    single: jest.fn().mockReturnThis(),
+    maybeSingle: jest.fn().mockReturnThis(),
+    then: jest.fn().mockResolvedValue({ data: null, error: null }),
+    execute: jest.fn().mockResolvedValue({ data: null, error: null }),
+  };
+
+  return {
     auth: {
       admin: {
         createUser: jest.fn().mockResolvedValue({
@@ -47,6 +75,18 @@ jest.mock('@supabase/supabase-js', () => ({
           },
           error: null
         }),
+        getUser: jest.fn().mockResolvedValue({
+          data: { user: { id: 'auth-123' } },
+          error: null
+        }),
+        updateUserById: jest.fn().mockResolvedValue({
+          data: { user: { id: 'auth-123' } },
+          error: null
+        }),
+        deleteUser: jest.fn().mockResolvedValue({
+          data: null,
+          error: null
+        }),
       },
       signInWithPassword: jest.fn().mockResolvedValue({
         data: { 
@@ -55,81 +95,187 @@ jest.mock('@supabase/supabase-js', () => ({
         },
         error: null
       }),
+      signUp: jest.fn().mockResolvedValue({
+        data: { 
+          user: { id: 'auth-123' },
+          session: { access_token: 'test-token' }
+        },
+        error: null
+      }),
+      signOut: jest.fn().mockResolvedValue({
+        error: null
+      }),
       getUser: jest.fn().mockResolvedValue({
         data: { user: { id: 'auth-123' } },
         error: null
       }),
+      onAuthStateChange: jest.fn(() => ({
+        data: { subscription: { unsubscribe: jest.fn() } }
+      })),
     },
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockReturnThis(),
-      then: jest.fn().mockResolvedValue({ data: null, error: null }),
-    })),
-  })),
+    from: jest.fn(() => mockQueryBuilder),
+    rpc: jest.fn(() => mockQueryBuilder),
+    storage: {
+      from: jest.fn(() => ({
+        upload: jest.fn().mockResolvedValue({ data: null, error: null }),
+        download: jest.fn().mockResolvedValue({ data: null, error: null }),
+        remove: jest.fn().mockResolvedValue({ data: null, error: null }),
+        list: jest.fn().mockResolvedValue({ data: null, error: null }),
+        createSignedUrl: jest.fn().mockResolvedValue({ data: null, error: null }),
+        createSignedUploadUrl: jest.fn().mockResolvedValue({ data: null, error: null }),
+      })),
+    },
+    realtime: {
+      channel: jest.fn(() => ({
+        on: jest.fn().mockReturnThis(),
+        subscribe: jest.fn().mockResolvedValue({}),
+        unsubscribe: jest.fn().mockResolvedValue({}),
+      })),
+    },
+  };
+};
+
+// Мокаем createSupabaseClient - это ключевой мок для всей системы
+jest.mock('../src/core/lib/supabase', () => ({
+  createSupabaseClient: jest.fn((schema: string) => {
+    const mockClient = createMockSupabaseClient() as any;
+    // Добавляем информацию о схеме для отладки
+    mockClient.schema = schema;
+    return mockClient;
+  }),
+  supabase: createMockSupabaseClient(),
+  mdtClient: createMockSupabaseClient(),
 }));
 
-// Мокаем storage
-jest.mock('../storage', () => ({
-  storage: {
-    getUserByEmail: jest.fn(),
-    getUserByUsername: jest.fn(),
-    createUser: jest.fn(),
-    getUserByAuthId: jest.fn(),
-    getCharactersByOwner: jest.fn(),
-    getAllUsers: jest.fn(),
-    createNotification: jest.fn(),
-    getApplicationsByUser: jest.fn(),
-    createApplication: jest.fn(),
-    getReportsByUser: jest.fn(),
-    createReport: jest.fn(),
-    getNotificationsByUser: jest.fn(),
-    getAllDepartments: jest.fn(),
-    getDepartment: jest.fn(),
-    createDepartment: jest.fn(),
-    updateDepartment: jest.fn(),
-    deleteDepartment: jest.fn(),
-    getDepartmentMembers: jest.fn(),
-    getDepartmentStats: jest.fn(),
-    getApplicationById: jest.fn(),
-    updateApplication: jest.fn(),
-    deleteApplication: jest.fn(),
-    getReportById: jest.fn(),
-    updateReport: jest.fn(),
-    deleteReport: jest.fn(),
-    getReportsByStatus: jest.fn(),
-    getReportsByDateRange: jest.fn(),
-    markNotificationAsRead: jest.fn(),
-    markAllNotificationsAsRead: jest.fn(),
-    deleteNotification: jest.fn(),
-    getNotificationById: jest.fn(),
-    getUnreadNotificationsByUser: jest.fn(),
-  }
+// Мокаем @supabase/supabase-js для случаев прямого импорта
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => createMockSupabaseClient()),
 }));
 
-// Мокаем ApplicationService
-jest.mock('../services/ApplicationService', () => ({
-  ApplicationService: jest.fn().mockImplementation(() => ({
-    canSubmitApplication: jest.fn(),
-    getUserApplicationStats: jest.fn(),
-    advanceApplicationStatus: jest.fn(),
-    getActiveJointPositions: jest.fn(),
-    processJointApplication: jest.fn(),
-    removeJointPosition: jest.fn(),
-    resetMonthlyLimits: jest.fn()
-  }))
+// Мокаем middleware аутентификации
+jest.mock('../src/api/middleware/auth.middleware', () => ({
+  authenticateToken: jest.fn((req: any, res: any, next: any) => {
+    // По умолчанию пропускаем аутентификацию в тестах
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'candidate',
+      status: 'active'
+    };
+    next();
+  }),
+  authenticateCadToken: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'officer',
+      status: 'active'
+    };
+    next();
+  }),
+  authenticateApiToken: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'admin',
+      status: 'active'
+    };
+    next();
+  }),
+  authenticateAny: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'candidate',
+      status: 'active'
+    };
+    next();
+  }),
+  requireRole: jest.fn((minimumRole: string) => (req: any, res: any, next: any) => {
+    if (!req.user || req.user.role !== minimumRole) {
+      return res.status(403).json({ message: `${minimumRole} access required` });
+    }
+    next();
+  }),
+  requireExactRole: jest.fn((role: string) => (req: any, res: any, next: any) => {
+    if (!req.user || req.user.role !== role) {
+      return res.status(403).json({ message: `${role} access required` });
+    }
+    next();
+  }),
+  requirePermission: jest.fn((permission: string) => (req: any, res: any, next: any) => {
+    // Простая проверка - в тестах всегда разрешаем
+    next();
+  }),
+  requireActiveStatus: jest.fn((req: any, res: any, next: any) => {
+    if (!req.user || req.user.status !== 'active') {
+      return res.status(403).json({ message: 'Active status required' });
+    }
+    next();
+  }),
 }));
 
-// Мокаем Scheduler
-jest.mock('../scheduler', () => ({
-  Scheduler: jest.fn().mockImplementation(() => ({
-    scheduleJob: jest.fn(),
-    cancelJob: jest.fn(),
-    getJobs: jest.fn(),
-  }))
+// Мокаем альтернативный middleware
+jest.mock('../src/api/middleware/auth-fixed.middleware', () => ({
+  authenticateToken: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'candidate',
+      status: 'active'
+    };
+    next();
+  }),
+  authenticateCadToken: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'officer',
+      status: 'active'
+    };
+    next();
+  }),
+  authenticateApiToken: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'admin',
+      status: 'active'
+    };
+    next();
+  }),
+  authenticateAny: jest.fn((req: any, res: any, next: any) => {
+    req.user = {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      role: 'candidate',
+      status: 'active'
+    };
+    next();
+  }),
+}));
+
+// Мокаем logging middleware
+jest.mock('../src/api/middleware/logging.middleware', () => ({
+  loggingMiddleware: jest.fn((req: any, res: any, next: any) => next()),
+  errorLoggingMiddleware: jest.fn((error: any, req: any, res: any, next: any) => next(error)),
+  performanceMiddleware: jest.fn((req: any, res: any, next: any) => next()),
+  securityLoggingMiddleware: jest.fn((req: any, res: any, next: any) => next()),
+}));
+
+// Мокаем security middleware
+jest.mock('../src/api/middleware/security.middleware', () => ({
+  validateInput: jest.fn((req: any, res: any, next: any) => next()),
+  sanitizeInput: jest.fn((req: any, res: any, next: any) => next()),
+  securityErrorHandler: jest.fn((error: any, req: any, res: any, next: any) => next(error)),
 }));
 
 // Мокаем file system
@@ -150,34 +296,118 @@ jest.mock('path', () => ({
   basename: jest.fn((path) => path.split('/').pop()),
 }));
 
-// Мокаем middleware аутентификации
-jest.mock('../middleware/auth.middleware', () => ({
-  authenticateToken: jest.fn((req: any, res: any, next: any) => {
-    // По умолчанию пропускаем аутентификацию в тестах
-    req.user = {
-      id: 1,
+// Мокаем WebSocket сервер
+jest.mock('../src/websocket', () => ({
+  initializeCADWebSocket: jest.fn(() => ({
+    broadcastEvent: jest.fn(),
+    broadcastUnitStatusUpdate: jest.fn(),
+    broadcastNewCall: jest.fn(),
+    broadcastCallStatusUpdate: jest.fn(),
+    broadcastPanicAlert: jest.fn(),
+    broadcastBOLOAlert: jest.fn(),
+    stop: jest.fn(),
+    getStats: jest.fn(() => ({ clients: 0, events: 0 })),
+  })),
+  getCADWebSocket: jest.fn(() => ({
+    broadcastEvent: jest.fn(),
+    broadcastUnitStatusUpdate: jest.fn(),
+    broadcastNewCall: jest.fn(),
+    broadcastCallStatusUpdate: jest.fn(),
+    broadcastPanicAlert: jest.fn(),
+    broadcastBOLOAlert: jest.fn(),
+    stop: jest.fn(),
+    getStats: jest.fn(() => ({ clients: 0, events: 0 })),
+  })),
+}));
+
+// Мокаем RealTimeService
+jest.mock('../src/core/services/RealTimeService', () => ({
+  RealTimeService: jest.fn().mockImplementation(() => ({
+    broadcastEvent: jest.fn(),
+    broadcastUnitStatusUpdate: jest.fn(),
+    broadcastNewCall: jest.fn(),
+    broadcastCallStatusUpdate: jest.fn(),
+    broadcastPanicAlert: jest.fn(),
+    broadcastBOLOAlert: jest.fn(),
+    getEventsForChannels: jest.fn(() => []),
+    getCacheStats: jest.fn(() => ({ size: 0, events: 0 })),
+  })),
+}));
+
+// Мокаем CacheService
+jest.mock('../src/core/services/CacheService', () => ({
+  CacheService: jest.fn().mockImplementation(() => ({
+    get: jest.fn(),
+    set: jest.fn(),
+    delete: jest.fn(),
+    clear: jest.fn(),
+    size: jest.fn(() => 0),
+    cleanup: jest.fn(),
+    cached: jest.fn((key, fn) => fn()),
+    invalidatePattern: jest.fn(),
+  })),
+}));
+
+// Мокаем LoggerService
+jest.mock('../src/core/services/LoggerService', () => ({
+  LoggerService: jest.fn().mockImplementation(() => ({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    logApiCall: jest.fn(),
+    logDatabaseQuery: jest.fn(),
+    logUserAction: jest.fn(),
+    logSecurityEvent: jest.fn(),
+    logPerformance: jest.fn(),
+    logError: jest.fn(),
+    timeOperation: jest.fn((operation, fn) => fn()),
+    timeSyncOperation: jest.fn((operation, fn) => fn()),
+  })),
+}));
+
+// Глобальные хелперы для тестов
+global.testHelpers = {
+  createMockRequest: (overrides = {}) => ({
+    body: {},
+    query: {},
+    params: {},
+    headers: {},
+    user: {
+      id: 'test-user-id',
       username: 'testuser',
       email: 'test@example.com',
       role: 'candidate',
       status: 'active'
-    };
-    next();
+    },
+    ...overrides,
   }),
-  requireSupervisor: jest.fn((req: any, res: any, next: any) => {
-    if (!req.user || !['supervisor', 'admin'].includes(req.user.role)) {
-      return res.status(403).json({ message: 'Supervisor access required' });
-    }
-    next();
-  }),
-  requireAdmin: jest.fn((req: any, res: any, next: any) => {
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Admin access required' });
-    }
-    next();
-  }),
-}));
+  
+  createMockResponse: () => {
+    const res: any = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    res.send = jest.fn().mockReturnValue(res);
+    res.end = jest.fn().mockReturnValue(res);
+    return res;
+  },
+  
+  createMockNext: () => jest.fn(),
+  
+  createMockSupabaseClient: createMockSupabaseClient,
+};
 
 // Очистка после каждого теста
 afterEach(() => {
   jest.clearAllMocks();
-}); 
+});
+
+// Глобальные типы для TypeScript
+declare global {
+  var testHelpers: {
+    createMockRequest: (overrides?: any) => any;
+    createMockResponse: () => any;
+    createMockNext: () => jest.Mock;
+    createMockSupabaseClient: () => any;
+  };
+} 

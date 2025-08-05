@@ -1,8 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
+import React, { Suspense } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs'
-import { AdminLeaveManagementFeature } from '@features/admin/leave-management'
+
+// Lazy load components
+const PendingRequests = React.lazy(() => import('@/features/admin/leave-management/ui/pending-requests'))
+const ApprovedRequests = React.lazy(() => import('@/features/admin/leave-management/ui/approved-requests'))
+const RejectedRequests = React.lazy(() => import('@/features/admin/leave-management/ui/rejected-requests'))
 
 export function AdminLeaveManagementWidget() {
   return (
@@ -15,15 +17,21 @@ export function AdminLeaveManagementWidget() {
         </TabsList>
         
         <TabsContent value="pending" className="space-y-4">
-          <AdminLeaveManagementFeature.PendingRequests />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <PendingRequests />
+          </Suspense>
         </TabsContent>
         
         <TabsContent value="approved" className="space-y-4">
-          <AdminLeaveManagementFeature.ApprovedRequests />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <ApprovedRequests />
+          </Suspense>
         </TabsContent>
         
         <TabsContent value="rejected" className="space-y-4">
-          <AdminLeaveManagementFeature.RejectedRequests />
+          <Suspense fallback={<div>Загрузка...</div>}>
+            <RejectedRequests />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware';
 import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
 import { SupportTicketService } from '../../../core/services/SupportTicketService';
-import type { MDTSupportTickets } from 'db-types';
+import type { SupportTickets } from '@roleplay-identity/db-types';
 
 const router = Router();
 
@@ -24,11 +24,12 @@ router.post('/tickets/:ticketId/reply', authenticateToken, requireRole('admin'),
     }
 
     // ✅ Сервисный слой: вся бизнес-логика в сервисе
-    const updatedTicket = await supportTicketService.replyToTicket(ticketId, {
-      senderId: userId,
-      content: content.trim(),
-      senderRole: 'admin'
-    });
+    const updatedTicket = await supportTicketService.replyToTicket(
+      ticketId,
+      userId,
+      content.trim(),
+      'admin'
+    );
 
     if (!updatedTicket) {
       return res.status(404).json({ 

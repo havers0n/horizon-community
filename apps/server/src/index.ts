@@ -8,6 +8,9 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
 
+// Импортируем типы для DI
+import type { ServicesContainer } from './types/services';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,7 +30,49 @@ app.use(cors({
 }));
 
 (async () => {
-  const server = await registerRoutes(app);
+  // ===== ЭТАП 1: СОЗДАНИЕ КОНТЕЙНЕРА СЕРВИСОВ =====
+  
+  // Импортируем все сервисы из централизованного файла
+  const {
+    authService,
+    characterService,
+    applicationService,
+    supportTicketService,
+    call911Service,
+    reportService,
+    mdtService,
+    reportTemplateService,
+    realTimeService,
+    testService,
+    publicService,
+    logger,
+    cacheService,
+    filledReportService
+  } = await import('./core/services/index.js');
+
+  // Создаем контейнер всех сервисов
+  const services: ServicesContainer = {
+    // Сервисы-экземпляры (уже созданные)
+    authService,
+    characterService,
+    applicationService,
+    supportTicketService,
+    call911Service,
+    reportService,
+    mdtService,
+    reportTemplateService,
+    realTimeService,
+    filledReportService,
+    
+    // Сервисы-классы (создаем экземпляры)
+    testService,
+    publicService,
+    loggerService: logger,
+    cacheService,
+  };
+
+  // Передаем контейнер сервисов в registerRoutes
+  const server = await registerRoutes(app, services);
 
   // Graceful shutdown
   process.on('SIGINT', () => {

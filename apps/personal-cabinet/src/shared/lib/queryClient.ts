@@ -25,6 +25,24 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const token = localStorage.getItem('authToken')
+  
+  // Если URL не начинается с http, добавляем базовый URL
+  let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  
+  // Если VITE_API_URL не содержит /api, добавляем его
+  if (baseUrl && !baseUrl.includes('/api')) {
+    baseUrl = `${baseUrl}/api`
+  }
+  
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
+  
+  // Отладочная информация для диагностики
+  console.log('🔍 URL Debug:', {
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    baseUrl,
+    originalUrl: url,
+    fullUrl
+  })
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -34,11 +52,27 @@ export async function apiRequest(
     headers.Authorization = `Bearer ${token}`
   }
 
-  const response = await fetch(url, {
+  console.log(`🌐 API Request: ${method} ${fullUrl}`, { 
+    originalUrl: url,
+    baseUrl,
+    fullUrl,
+    data, 
+    headers 
+  })
+
+  const response = await fetch(fullUrl, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
   })
+
+  console.log(`📡 API Response: ${response.status} ${response.statusText}`)
+  
+  // Добавляем больше информации об ошибках
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error(`❌ API Error: ${response.status} ${response.statusText}`, errorText)
+  }
 
   return throwIfResNotOk(response)
 }
@@ -52,7 +86,16 @@ export const getQueryFn = <T>(options: {
 }): QueryFunction<T> => {
   return async ({ queryKey }) => {
     const [_, url] = queryKey
-    const res = await fetch(url as string, {
+    let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+    
+    // Если VITE_API_URL не содержит /api, добавляем его
+    if (baseUrl && !baseUrl.includes('/api')) {
+      baseUrl = `${baseUrl}/api`
+    }
+    
+    const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
+    
+    const res = await fetch(fullUrl, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('authToken')}`,
       },

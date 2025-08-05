@@ -1,3 +1,6 @@
 export * from './ui'
 export * from './api'
-export * from './model' 
+export * from './model'
+export { AuthProvider, useAuth } from './ui/auth-provider'
+export { LoginForm } from './ui/login-form'
+export { RegisterForm } from './ui/register-form' 

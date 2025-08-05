@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { AuthContextType } from '../model'
+import { AuthContextType, RegisterPayload } from '../model'
 import { AuthAPI } from '../api'
 import { setAuthState, clearAuthState, getAuthState } from '@/shared/lib/auth'
-import { User } from '@/entities/user'
+import type { Database } from '@roleplay-identity/db-types'
+
+type Profiles = Database['public']['Tables']['profiles']['Row']
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -11,7 +13,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<Omit<User, 'passwordHash'> | null>(null)
+  const [user, setUser] = useState<Profiles | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -19,7 +21,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const authState = getAuthState()
         if (authState.token && authState.user) {
-          setUser(authState.user)
+          // Проверяем токен через API
+          try {
+            const userData = await AuthAPI.getCurrentUser()
+            setUser(userData)
+          } catch (error) {
+            console.error('Token validation failed:', error)
+            clearAuthState()
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error)
@@ -35,23 +44,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     try {
       const response = await AuthAPI.signIn({ email, password })
-      const { user: userData, token } = response
       
-      setAuthState(userData, token)
-      setUser(userData)
+      // Новый API возвращает данные напрямую
+      const { user: userData, access_token } = response
+      
+      if (userData && access_token) {
+        setAuthState(userData, access_token)
+        setUser(userData)
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       console.error('Sign in failed:', error)
       throw error
     }
   }
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+  const signUp = async (data: RegisterPayload) => {
     try {
-      const response = await AuthAPI.signUp({ email, password, firstName, lastName })
-      const { user: userData, token } = response
+      const response = await AuthAPI.signUp(data)
       
-      setAuthState(userData, token)
-      setUser(userData)
+      // Новый API возвращает данные напрямую
+      const { user: userData, access_token } = response
+      
+      if (userData && access_token) {
+        setAuthState(userData, access_token)
+        setUser(userData)
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       console.error('Sign up failed:', error)
       throw error

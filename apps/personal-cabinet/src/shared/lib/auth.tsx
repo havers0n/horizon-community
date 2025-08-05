@@ -1,7 +1,9 @@
-import { User } from '@/entities/user'
+import type { Database } from '@roleplay-identity/db-types'
+
+type Profiles = Database['public']['Tables']['profiles']['Row']
 
 export interface AuthState {
-  user: Omit<User, 'passwordHash'> | null
+  user: Profiles | null
   token: string | null
 }
 
@@ -15,7 +17,7 @@ export const getAuthState = (): AuthState => {
   }
 }
 
-export const setAuthState = (user: Omit<User, 'passwordHash'>, token: string) => {
+export const setAuthState = (user: Profiles, token: string) => {
   localStorage.setItem('authToken', token)
   localStorage.setItem('authUser', JSON.stringify(user))
 }

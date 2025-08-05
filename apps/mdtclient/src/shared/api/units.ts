@@ -1,14 +1,13 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import type { Unit } from '@/shared/types';
+import type { Units } from '@roleplay-identity/db-types';
 
 export class UnitsApi {
-  static async getUnits(): Promise<Unit[]> {
+  static async getUnits(): Promise<Units[]> {
     const response = await fetch('/api/units');
     if (!response.ok) throw new Error('Failed to get units');
     return response.json();
   }
 
-  static async updateUnitStatus(id: string, status: Unit['status']): Promise<Unit> {
+  static async updateUnitStatus(id: string, status: Units['status']): Promise<Units> {
     const response = await fetch(`/api/units/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

@@ -96,12 +96,4 @@ export class CacheService {
       }
     }
   }
-}
-
-// Создаем глобальный экземпляр кэша
-export const cacheService = new CacheService();
-
-// Автоматическая очистка кэша каждые 10 минут
-setInterval(() => {
-  cacheService.cleanup();
-}, 10 * 60 * 1000); 
+} 

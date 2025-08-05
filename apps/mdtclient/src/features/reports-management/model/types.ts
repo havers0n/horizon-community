@@ -1,66 +1,19 @@
-export interface EmsReport {
-  id: string;
-  type: 'medical' | 'fire' | 'rescue';
-  author: string;
-  authorId: string;
-  callId?: string;
-  incidentLocation: string;
-  incidentTime: string;
-  incidentType: string;
-  description: string;
-  outcome: string;
-  createdAt: string;
-  updatedAt: string;
-  
-  // Медицинская информация
-  patientName?: string;
-  treatmentProvided?: string;
-  medications?: string[];
-  vitalSigns?: {
-    heartRate: number;
-    bloodPressure: string;
-    temperature: number;
-    oxygenSaturation: number;
-  };
-  disposition?: string;
-  
-  // Пожарная информация
-  fireDetails?: {
-    structureType: string;
-    fireOrigin: string;
-    damage: string;
-    cause: string;
-  };
-}
+import type { EmsFdReports } from '@roleplay-identity/db-types';
 
 export interface CreateEmsReportRequest {
-  type: 'medical' | 'fire' | 'rescue';
-  callId?: string;
-  incidentLocation: string;
-  incidentTime: string;
-  incidentType: string;
+  title: string;
   description: string;
-  outcome: string;
-  
-  // Медицинская информация
-  patientName?: string;
-  treatmentProvided?: string;
-  medications?: string[];
-  vitalSigns?: {
-    heartRate: number;
-    bloodPressure: string;
-    temperature: number;
-    oxygenSaturation: number;
-  };
-  disposition?: string;
-  
-  // Пожарная информация
-  fireDetails?: {
-    structureType: string;
-    fireOrigin: string;
-    damage: string;
-    cause: string;
-  };
+  author_character_id: string;
+  call_id?: string | null;
+  incident_location: string;
+  incident_time: string;
+  incident_type: string;
+  outcome?: string | null;
+  treatment_provided?: string | null;
+  medications_administered?: any;
+  vital_signs?: any;
+  fire_details?: any;
+  patients?: any;
 }
 
 export interface UpdateEmsReportRequest extends Partial<CreateEmsReportRequest> {
@@ -68,9 +21,9 @@ export interface UpdateEmsReportRequest extends Partial<CreateEmsReportRequest> 
 }
 
 export interface EmsReportSearchParams {
-  type?: 'medical' | 'fire' | 'rescue';
-  authorId?: string;
-  callId?: string;
+  incident_type?: string;
+  author_character_id?: string;
+  call_id?: string;
   dateFrom?: string;
   dateTo?: string;
   limit?: number;
@@ -78,12 +31,12 @@ export interface EmsReportSearchParams {
 }
 
 export interface EmsReportSearchResult {
-  reports: EmsReport[];
+  reports: EmsFdReports[];
   total: number;
   hasMore: boolean;
 }
 
-export interface MedicalReportData {
+export interface MedicalReportFormData {
   patientName: string;
   incidentLocation: string;
   incidentTime: string;
@@ -101,7 +54,7 @@ export interface MedicalReportData {
   disposition: string;
 }
 
-export interface FireReportData {
+export interface FireReportFormData {
   incidentLocation: string;
   incidentTime: string;
   incidentType: string;

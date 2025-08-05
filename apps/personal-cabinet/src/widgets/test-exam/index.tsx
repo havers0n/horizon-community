@@ -1,22 +1,21 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
-import { Progress } from '@shared/ui/progress'
-import { Alert, AlertDescription } from '@shared/ui/alert'
-import { TestExamFeature } from '@features/test-exam'
+import React, { Suspense } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
+
+// Lazy load components
+const AvailableTests = React.lazy(() => import('@/features/test-exam/ui/available-tests'))
+const MyResults = React.lazy(() => import('@/features/test-exam/ui/my-results'))
 
 export function TestExamWidget() {
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Доступные экзамены</CardTitle>
-          <CardDescription>
-            Выберите экзамен для прохождения
-          </CardDescription>
+          <CardTitle>Доступные тесты</CardTitle>
         </CardHeader>
         <CardContent>
-          <TestExamFeature.AvailableTests />
+          <Suspense fallback={<div>Загрузка тестов...</div>}>
+            <AvailableTests />
+          </Suspense>
         </CardContent>
       </Card>
       
@@ -25,7 +24,9 @@ export function TestExamWidget() {
           <CardTitle>Мои результаты</CardTitle>
         </CardHeader>
         <CardContent>
-          <TestExamFeature.MyResults />
+          <Suspense fallback={<div>Загрузка результатов...</div>}>
+            <MyResults />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

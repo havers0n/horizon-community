@@ -2,7 +2,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseClient } from '../lib/supabase';
-import { AppError } from '../../../utils/AppError'; // ✅ Исправим этот путь, если он неверный
+import { AppError } from '../../utils/AppError';
 
 // ПРАВИЛО 2: ✅ Импортируем ВСЕ типы напрямую из db-types
 import type {
@@ -15,13 +15,13 @@ import type {
   UnitsOnDutyUpdate
 } from '@roleplay-identity/db-types';
 
-class Call911Service {
+export class Call911Service {
   // ✅ Явно указываем, что клиент работает с таблицами из схемы 'mdt'
-  private supabase: SupabaseClient<Database, 'mdt'>; 
+  private supabase: any; 
 
   constructor() {
     // ✅ Создаем клиент для конкретной схемы
-    this.supabase = createSupabaseClient('mdt');
+    this.supabase = createSupabaseClient('public');
   }
 
   // ===== ОСНОВНЫЕ ОПЕРАЦИИ С ВЫЗОВАМИ =====
@@ -130,6 +130,3 @@ class Call911Service {
 
   // ... (здесь должны быть остальные методы из старого файла, но они уже написаны по этому же принципу)
 }
-
-const call911Service = new Call911Service();
-export default call911Service;

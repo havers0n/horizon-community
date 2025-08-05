@@ -1,16 +1,15 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React from 'react';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Badge } from '@/shared/ui/atoms/Badge';
-import { Call911 } from '@/shared/types';
+import type { Calls911 } from '@roleplay-identity/db-types';
 import { Phone, MapPin, Clock, AlertTriangle } from 'lucide-react';
 
 interface Calls911WidgetProps {
-  calls: Call911[];
-  onCallClick: (call: Call911) => void;
+  calls: Calls911[];
+  onCallClick: (call: Calls911) => void;
 }
 
-const getPriorityColor = (priority: string) => {
+const getPriorityColor = (priority: Calls911['priority']) => {
   switch (priority) {
     case 'critical':
       return 'bg-red-500 text-white';
@@ -25,7 +24,7 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: Calls911['status']) => {
   switch (status) {
     case 'pending':
       return 'bg-yellow-100 text-yellow-800';
@@ -57,25 +56,25 @@ export const Calls911Widget: React.FC<Calls911WidgetProps> = ({
   const priorityCounts = calls.reduce((acc, call) => {
     acc[call.priority] = (acc[call.priority] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<Calls911['priority'], number>);
 
   const statusCounts = calls.reduce((acc, call) => {
     acc[call.status] = (acc[call.status] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<Calls911['status'], number>);
 
   const sortedCalls = [...calls].sort((a, b) => {
     // Сортируем по приоритету, затем по времени создания
-    const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
-    const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
-    const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+    const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 } as const;
+    const aPriority = priorityOrder[a.priority] || 0;
+    const bPriority = priorityOrder[b.priority] || 0;
     
     if (aPriority !== bPriority) {
       return bPriority - aPriority;
     }
     
-    return new Date(a.createdAt || a.timestamp).getTime() - 
-           new Date(b.createdAt || b.timestamp).getTime();
+    return new Date(a.created_at).getTime() - 
+           new Date(b.created_at).getTime();
   });
 
   return (
@@ -143,7 +142,7 @@ export const Calls911Widget: React.FC<Calls911WidgetProps> = ({
                     </Badge>
                   </div>
                   <span className="text-xs text-gray-500">
-                    {formatTime(call.createdAt || call.timestamp)}
+                    {formatTime(call.created_at)}
                   </span>
                 </div>
 
@@ -151,7 +150,7 @@ export const Calls911Widget: React.FC<Calls911WidgetProps> = ({
                   <div className="flex items-center gap-2">
                     <Phone className="h-3 w-3 text-gray-400" />
                     <span className="text-sm font-medium">
-                      {call.callerName || call.caller}
+                      {call.caller_name || call.caller}
                     </span>
                   </div>
 
@@ -166,10 +165,10 @@ export const Calls911Widget: React.FC<Calls911WidgetProps> = ({
                     {call.description}
                   </p>
 
-                  {call.assignedUnits && call.assignedUnits.length > 0 && (
+                  {call.assigned_units && call.assigned_units.length > 0 && (
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-xs text-gray-500">
-                        Назначено: {call.assignedUnits.length} юнит(ов)
+                        Назначено: {call.assigned_units.length} юнит(ов)
                       </span>
                     </div>
                   )}

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+dist/
+build/
+coverage/
+
+# Generated files
+supabase-generated.ts
+*.config.js
+*.config.ts
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build artifacts
+*.min.js
+*.min.css
+
+# Environment files
+.env*
+
+# Backup files
+backup/
+*.backup
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log 

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { realTimeService } from '../services/RealTimeService.js';
+import { realTimeService } from '../../core/services/index.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = Router();

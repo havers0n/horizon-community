@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { getCADWebSocket } from '../websocket.js';
+import { getCADWebSocket } from '../../websocket';
 
 const router = Router();
 
@@ -124,7 +124,7 @@ router.get('/stats', authenticateToken, (req: Request, res: Response) => {
     
     // Получаем статистику WebSocket сервера
     const wsServer = getCADWebSocket();
-    const wsStats = wsServer ? wsServer.getStats() : { connectedClients: 0, totalEvents: 0 };
+    const wsStats = wsServer ? wsServer.getStats() : { totalClients: 0, authenticatedClients: 0, dispatchers: 0, admins: 0 };
     
     res.json({
       success: true,
@@ -135,8 +135,8 @@ router.get('/stats', authenticateToken, (req: Request, res: Response) => {
         cacheTimeout: 5 * 60 * 1000
       },
       websocket: {
-        connectedClients: wsStats.connectedClients || 0,
-        totalEvents: wsStats.totalEvents || 0
+        connectedClients: wsStats.totalClients || 0,
+        totalEvents: totalEvents || 0
       },
       timestamp: Date.now()
     });

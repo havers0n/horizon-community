@@ -22,15 +22,15 @@ import { Card, CardHeader, Button, Badge } from '@/shared/ui/atoms';
 import { DataTable } from '@/shared/ui/molecules';
 import { PersonTabs } from './PersonTabs';
 import { PersonEditModal } from './PersonEditModal';
-import type { Citizen } from '@/shared';
+import type { Characters } from '@roleplay-identity/db-types';
 import { MOCK_VEHICLES, MOCK_WEAPONS, MOCK_PETS } from '../../../model/constants';
 
 interface PersonCardProps {
-  person: Citizen & { ssn?: string; flags?: string[]; addressFlags?: string[] };
+  person: Characters;
 }
 
 export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'vehicles' | 'weapons' | 'pets'>('overview');
   const [showEditModal, setShowEditModal] = useState(false);
 
   const personVehicles = MOCK_VEHICLES.filter(v => v.ownerId === person.id);
@@ -89,8 +89,8 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <img 
-                  src={person.imageUrl || '/default-avatar.png'} 
-                  alt={`${person.firstName} ${person.lastName}`} 
+                  src={person.mugshot_url || '/default-avatar.png'} 
+                  alt={`${person.first_name} ${person.last_name}`} 
                   className="w-20 h-20 rounded-full border-2 border-secondary-600"
                 />
                 {person.flags?.includes('dangerous') && (
@@ -101,11 +101,11 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                  {person.firstName} {person.lastName}
+                  {person.first_name} {person.last_name}
                   {getGenderIcon(person.gender)}
                 </h2>
                 <p className="text-secondary-400">
-                  Возраст: {calculateAge(person.dateOfBirth)} лет • {formatDate(person.dateOfBirth)}
+                  Возраст: {person.date_of_birth ? calculateAge(person.date_of_birth) : 'Не указан'} лет • {person.date_of_birth ? formatDate(person.date_of_birth) : 'Не указана'}
                 </p>
                 {person.ssn && (
                   <p className="text-secondary-400 flex items-center gap-1">
@@ -148,19 +148,19 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Цвет волос:</span>
-                  <span className="text-white">{person.weight || 'Не указан'}</span>
+                  <span className="text-white">Не указан</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Цвет глаз:</span>
-                  <span className="text-white">{person.height || 'Не указан'}</span>
+                  <span className="text-white">Не указан</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Вес:</span>
-                  <span className="text-white">{person.weight || 'Не указан'} кг</span>
+                  <span className="text-white">Не указан</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Рост:</span>
-                  <span className="text-white">{person.height || 'Не указан'} см</span>
+                  <span className="text-white">Не указан</span>
                 </div>
               </div>
             </div>
@@ -174,11 +174,11 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Адрес:</span>
-                  <span className="text-white">{person.address}</span>
+                  <span className="text-white">{person.address || 'Не указан'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Номер телефона:</span>
-                  <span className="text-white">Не указан</span>
+                  <span className="text-white">{person.phone_number || 'Не указан'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-secondary-400">Род занятий:</span>
@@ -189,20 +189,15 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
           </div>
 
           {/* Флаги и предупреждения */}
-          {(person.flags?.length || person.addressFlags?.length) && (
+          {person.flags && person.flags.length > 0 && (
             <div className="mt-6 pt-6 border-t border-secondary-700">
               <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                 <AlertTriangle className="h-5 w-5" />
                 Флаги и предупреждения
               </h3>
               <div className="flex flex-wrap gap-2">
-                {person.flags?.map((flag, index) => (
+                {person.flags.map((flag, index) => (
                   <Badge key={index} variant="destructive" className="bg-red-600">
-                    {flag}
-                  </Badge>
-                ))}
-                {person.addressFlags?.map((flag, index) => (
-                  <Badge key={index} variant="secondary" className="bg-yellow-600">
                     {flag}
                   </Badge>
                 ))}

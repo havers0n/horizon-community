@@ -1,11 +1,10 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { useLocale } from '@/shared/contexts/LocaleContext';
-import { Globe, ChevronDown } from 'lucide-react';
+import { ChevronDown, Globe } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 export const TopHeader: React.FC = () => {
-  const { user } = useAuth();
+  const { user, activeCharacter } = useAuth();
   const { locale, setLocale, t } = useLocale();
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -22,9 +21,16 @@ export const TopHeader: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false
+      hour12: false,
     });
   };
+
+  // TODO: Fetch department name by ID
+  const departmentName = activeCharacter?.departmentId || 'N/A';
+  const characterName =
+    activeCharacter?.firstName && activeCharacter?.lastName
+      ? `${activeCharacter.firstName} ${activeCharacter.lastName}`
+      : user?.name;
 
   return (
     <header className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-600/50 px-6 py-3 shadow-lg shadow-slate-900/30">
@@ -32,11 +38,11 @@ export const TopHeader: React.FC = () => {
         {/* Left side - App name and user info */}
         <div className="flex items-center space-x-4">
           <div className="text-xl font-bold text-blue-400 glow-primary">SC-MDT</div>
-          {user && (
+          {characterName && (
             <div className="text-sm text-slate-300">
-              <span className="font-medium">{user.name}</span>
+              <span className="font-medium">{characterName}</span>
               <span className="mx-2">•</span>
-              <span>{user.department}</span>
+              <span>{departmentName}</span>
             </div>
           )}
         </div>
@@ -62,7 +68,7 @@ export const TopHeader: React.FC = () => {
           <div className="text-sm font-mono text-slate-300 bg-gradient-to-r from-slate-700/30 to-slate-600/30 px-3 py-1 rounded-lg backdrop-blur-sm border border-slate-600/30">
             {formatTime(currentTime)}
           </div>
-          
+
           <div className="flex items-center space-x-2 bg-gradient-to-r from-slate-700/30 to-slate-600/30 px-3 py-1 rounded-lg backdrop-blur-sm border border-slate-600/30">
             <Globe className="w-4 h-4 text-slate-400" />
             <select
@@ -87,9 +93,9 @@ export const TopHeader: React.FC = () => {
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </div>
 
-          {user?.unitId && (
+          {activeCharacter?.callsign && (
             <div className="text-sm text-slate-300 font-mono bg-gradient-to-r from-blue-600/20 to-blue-700/20 px-3 py-1 rounded-lg backdrop-blur-sm border border-blue-600/30 glow-primary">
-              {user.unitId}
+              {activeCharacter.callsign}
             </div>
           )}
         </div>

@@ -1,5 +1,14 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 export * from './ui/CreateOfficerForm';
 export * from './ui/CreateOfficerSection';
 export * from './ui/EmsPersonnelList';
-export * from '@/shared/types'; 
+export type {
+  Characters,
+  CharactersInsert,
+  CharactersUpdate,
+  LeoProfiles,
+  LeoProfilesInsert,
+  LeoProfilesUpdate,
+  EmsProfiles,
+  EmsProfilesInsert,
+  EmsProfilesUpdate,
+} from '@roleplay-identity/db-types'; 

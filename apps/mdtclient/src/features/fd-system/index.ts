@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 // FD System feature - явные экспорты
 
 // Model layer

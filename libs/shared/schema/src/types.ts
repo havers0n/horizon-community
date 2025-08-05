@@ -291,3 +291,29 @@ export interface FAQItem {
   answer: string;
   category: 'general' | 'technical' | 'application' | 'gameplay';
 }
+
+// WebSocket типы
+export type WebSocketEventType = 
+  | 'unit_status_update'
+  | 'new_call'
+  | 'call_status_update'
+  | 'panic_alert'
+  | 'bolo_alert'
+  | 'user_online'
+  | 'user_offline'
+  | 'message'
+  | 'notification'
+  | 'system_alert';
+
+export const WEBSOCKET_EVENTS = {
+  UNIT_STATUS_UPDATE: 'unit_status_update' as const,
+  NEW_CALL: 'new_call' as const,
+  CALL_STATUS_UPDATE: 'call_status_update' as const,
+  PANIC_ALERT: 'panic_alert' as const,
+  BOLO_ALERT: 'bolo_alert' as const,
+  USER_ONLINE: 'user_online' as const,
+  USER_OFFLINE: 'user_offline' as const,
+  MESSAGE: 'message' as const,
+  NOTIFICATION: 'notification' as const,
+  SYSTEM_ALERT: 'system_alert' as const,
+} as const;

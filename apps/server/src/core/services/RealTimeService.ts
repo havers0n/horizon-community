@@ -1,5 +1,4 @@
-import { getCADWebSocket } from '../../websocket';
-import { WEBSOCKET_EVENTS, WebSocketEventType } from '@roleplay-identity/shared-schema';
+import { getCADWebSocket, WEBSOCKET_EVENTS, WebSocketEventType } from '../../websocket';
 
 // Кэш для HTTP polling клиентов (FiveM)
 interface CachedEvent {

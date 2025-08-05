@@ -1,9 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
-import { Button } from '@shared/ui/button'
-import { Badge } from '@shared/ui/badge'
 import { NotificationsWidget } from '@widgets/notifications'
 
-export default function NotificationsPage() {
+function NotificationsPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -16,4 +13,6 @@ export default function NotificationsPage() {
       <NotificationsWidget />
     </div>
   )
-} 
+}
+
+export default NotificationsPage 

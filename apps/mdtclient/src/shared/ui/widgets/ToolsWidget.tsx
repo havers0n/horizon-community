@@ -1,8 +1,7 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import React from 'react';
-import { Card, CardHeader } from '@/shared/ui/atoms';
 import { DispatchTools } from '@/components/DispatchTools';
+import { Card, CardHeader } from '@/shared/ui/atoms';
 import { Wrench } from 'lucide-react';
+import React from 'react';
 
 interface ToolsWidgetProps {
   isCompact?: boolean;
@@ -23,7 +22,9 @@ export const ToolsWidget: React.FC<ToolsWidgetProps> = ({ isCompact = false, cla
 
   return (
     <Card className={className}>
-      <CardHeader>Инструменты</CardHeader>
+      <CardHeader>
+        <>{'Инструменты'}</>
+      </CardHeader>
       <div className="p-4">
         <DispatchTools />
       </div>

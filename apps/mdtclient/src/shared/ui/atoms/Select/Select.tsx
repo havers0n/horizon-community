@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '../../../../shared/lib/utils';
 import { ChevronDown } from 'lucide-react';

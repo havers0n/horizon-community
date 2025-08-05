@@ -1,15 +1,31 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
 import { Button } from '@/shared/ui/atoms/Button';
 import { Card } from '@/shared/ui/atoms/Card';
 import { Modal } from '@/shared/ui/atoms/Modal';
 import { Users, Eye, Edit, Trash2, Plus, Search, Filter, User, Shield, Phone, Mail } from 'lucide-react';
-import type { EmsPersonnel, EmsRank } from '../model/types';
+import type { Characters, EmsProfiles, Json } from '@roleplay-identity/db-types';
 import { usePersonnelStore } from '../model/store';
 
+// Правильный тип для EMS персонала, основанный на реальных типах из БД
+type EmsPersonnelWithDetails = Characters & EmsProfiles & {
+  // Дополнительные данные, которые могут быть получены через JOIN
+  department_name?: string;
+  division_name?: string;
+  rank_name?: string;
+  // Квалификации из character_qualifications
+  qualifications?: Array<{
+    id: string;
+    qualification_id: string;
+    qualification_name: string;
+    obtained_date: string;
+    expires_date: string | null;
+    issued_by_character_id: string | null;
+  }>;
+};
+
 interface EmsPersonnelListProps {
-  personnel?: EmsPersonnel[];
-  onEdit?: (personnel: EmsPersonnel) => void;
+  personnel?: EmsPersonnelWithDetails[];
+  onEdit?: (personnel: EmsPersonnelWithDetails) => void;
   onDelete?: (personnelId: string) => void;
   onCreate?: () => void;
   maxItems?: number;
@@ -17,40 +33,52 @@ interface EmsPersonnelListProps {
 }
 
 const PersonnelDetailsModal: React.FC<{ 
-  personnel: EmsPersonnel; 
+  personnel: EmsPersonnelWithDetails; 
   onClose: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }> = ({ personnel, onClose, onEdit, onDelete }) => {
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Не указано';
     return new Date(dateString).toLocaleDateString('ru-RU');
   };
 
-  const getRankLabel = (rank: EmsRank) => {
-    const rankLabels: Record<EmsRank, string> = {
-      paramedic: 'Парамедик',
-      emt_basic: 'EMT Basic',
-      emt_intermediate: 'EMT Intermediate',
-      emt_advanced: 'EMT Advanced',
-      firefighter: 'Пожарный',
-      firefighter_ii: 'Пожарный II',
-      engineer: 'Инженер',
-      lieutenant: 'Лейтенант',
-      captain: 'Капитан',
-      battalion_chief: 'Начальник батальона',
-      deputy_chief: 'Заместитель начальника',
-      chief: 'Начальник'
+  const getRankLabel = (rankId: string) => {
+    // В реальном приложении здесь должна быть логика получения названия ранга по ID
+    const rankLabels: Record<string, string> = {
+      'paramedic': 'Парамедик',
+      'emt_basic': 'EMT Basic',
+      'emt_intermediate': 'EMT Intermediate',
+      'emt_advanced': 'EMT Advanced',
+      'firefighter': 'Пожарный',
+      'firefighter_ii': 'Пожарный II',
+      'engineer': 'Инженер',
+      'lieutenant': 'Лейтенант',
+      'captain': 'Капитан',
+      'battalion_chief': 'Начальник батальона',
+      'deputy_chief': 'Заместитель начальника',
+      'chief': 'Начальник'
     };
-    return rankLabels[rank] || rank;
+    return rankLabels[rankId] || rankId;
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'active': return 'text-green-400';
       case 'inactive': return 'text-gray-400';
       case 'suspended': return 'text-yellow-400';
       case 'terminated': return 'text-red-400';
       default: return 'text-secondary-400';
+    }
+  };
+
+  const getStatusLabel = (status: string | null) => {
+    switch (status) {
+      case 'active': return 'Активен';
+      case 'inactive': return 'Неактивен';
+      case 'suspended': return 'Приостановлен';
+      case 'terminated': return 'Уволен';
+      default: return 'Неизвестно';
     }
   };
 
@@ -64,15 +92,13 @@ const PersonnelDetailsModal: React.FC<{
           </div>
           <div>
             <h3 className="text-lg font-semibold">
-              {personnel.firstName} {personnel.lastName}
+              {personnel.first_name} {personnel.last_name}
             </h3>
             <p className="text-sm text-secondary-400">
-              {getRankLabel(personnel.rank)} • {personnel.badgeNumber}
+              {getRankLabel(personnel.rank_id)} • {personnel.id}
             </p>
-            <p className={`text-sm ${getStatusColor(personnel.employmentInfo.status)}`}>
-              {personnel.employmentInfo.status === 'active' ? 'Активен' : 
-               personnel.employmentInfo.status === 'inactive' ? 'Неактивен' :
-               personnel.employmentInfo.status === 'suspended' ? 'Приостановлен' : 'Уволен'}
+            <p className={`text-sm ${getStatusColor(personnel.status)}`}>
+              {getStatusLabel(personnel.status)}
             </p>
           </div>
         </div>
@@ -83,20 +109,19 @@ const PersonnelDetailsModal: React.FC<{
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-secondary-400" />
-              <span className="text-sm text-secondary-300">{personnel.contactInfo.phone}</span>
+              <span className="text-sm text-secondary-300">{personnel.phone_number || 'Не указано'}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-secondary-400" />
-              <span className="text-sm text-secondary-300">{personnel.contactInfo.email}</span>
+              <span className="text-sm text-secondary-300">{personnel.occupation || 'Не указано'}</span>
             </div>
           </div>
-          <div className="mt-3 p-3 bg-secondary-800 rounded">
-            <h5 className="text-sm font-medium text-secondary-300 mb-1">Экстренный контакт</h5>
-            <p className="text-sm text-secondary-400">
-              {personnel.contactInfo.emergencyContact.name} ({personnel.contactInfo.emergencyContact.relationship})
-            </p>
-            <p className="text-sm text-secondary-400">{personnel.contactInfo.emergencyContact.phone}</p>
-          </div>
+          {personnel.address && (
+            <div className="mt-3 p-3 bg-secondary-800 rounded">
+              <h5 className="text-sm font-medium text-secondary-300 mb-1">Адрес</h5>
+              <p className="text-sm text-secondary-400">{personnel.address}</p>
+            </div>
+          )}
         </div>
 
         {/* Информация о работе */}
@@ -104,28 +129,51 @@ const PersonnelDetailsModal: React.FC<{
           <h4 className="font-semibold text-secondary-200 mb-3">Информация о работе</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <span className="text-sm font-medium text-secondary-300">Отдел: </span>
-              <span className="text-sm text-secondary-400">{personnel.department}</span>
+              <span className="text-sm font-medium text-secondary-300">Отдел ID: </span>
+              <span className="text-sm text-secondary-400">{personnel.department_id}</span>
             </div>
-            <div>
-              <span className="text-sm font-medium text-secondary-300">Должность: </span>
-              <span className="text-sm text-secondary-400">{personnel.employmentInfo.position}</span>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-secondary-300">Дата найма: </span>
-              <span className="text-sm text-secondary-400">{formatDate(personnel.employmentInfo.hireDate)}</span>
-            </div>
-            {personnel.employmentInfo.supervisor && (
+            {personnel.division_id && (
               <div>
-                <span className="text-sm font-medium text-secondary-300">Руководитель: </span>
-                <span className="text-sm text-secondary-400">{personnel.employmentInfo.supervisor}</span>
+                <span className="text-sm font-medium text-secondary-300">Подразделение ID: </span>
+                <span className="text-sm text-secondary-400">{personnel.division_id}</span>
               </div>
             )}
+            <div>
+              <span className="text-sm font-medium text-secondary-300">Звание: </span>
+              <span className="text-sm text-secondary-400">{getRankLabel(personnel.rank_id)}</span>
+            </div>
+            <div>
+              <span className="text-sm font-medium text-secondary-300">Дата создания профиля: </span>
+              <span className="text-sm text-secondary-400">{formatDate(personnel.created_at)}</span>
+            </div>
           </div>
         </div>
 
+        {/* Лицензии и медицинская информация */}
+        {(personnel.licenses || personnel.medical_info) && (
+          <div>
+            <h4 className="font-semibold text-secondary-200 mb-3">Дополнительная информация</h4>
+            {personnel.licenses && (
+              <div className="mb-3">
+                <h5 className="text-sm font-medium text-secondary-300 mb-1">Лицензии</h5>
+                <div className="p-3 bg-secondary-800 rounded">
+                  <pre className="text-sm text-secondary-400">{JSON.stringify(personnel.licenses, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+            {personnel.medical_info && (
+              <div>
+                <h5 className="text-sm font-medium text-secondary-300 mb-1">Медицинская информация</h5>
+                <div className="p-3 bg-secondary-800 rounded">
+                  <pre className="text-sm text-secondary-400">{JSON.stringify(personnel.medical_info, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Квалификации */}
-        {personnel.qualifications.length > 0 && (
+        {personnel.qualifications && personnel.qualifications.length > 0 && (
           <div>
             <h4 className="font-semibold text-secondary-200 mb-3">Квалификации</h4>
             <div className="space-y-2">
@@ -133,55 +181,19 @@ const PersonnelDetailsModal: React.FC<{
                 <div key={qual.id} className="p-3 bg-secondary-800 rounded">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h5 className="text-sm font-medium text-white">{qual.name}</h5>
-                      <p className="text-xs text-secondary-400">{qual.issuingAuthority}</p>
+                      <h5 className="text-sm font-medium text-white">{qual.qualification_name}</h5>
+                      <p className="text-xs text-secondary-400">ID: {qual.qualification_id}</p>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      qual.status === 'active' ? 'bg-green-600/20 text-green-400' :
-                      qual.status === 'expired' ? 'bg-red-600/20 text-red-400' :
-                      'bg-yellow-600/20 text-yellow-400'
-                    }`}>
-                      {qual.status === 'active' ? 'Активна' : 
-                       qual.status === 'expired' ? 'Истекла' : 'Ожидает'}
+                    <span className="text-xs px-2 py-1 rounded bg-green-600/20 text-green-400">
+                      Активна
                     </span>
                   </div>
-                  {qual.expiryDate && (
-                    <p className="text-xs text-secondary-500 mt-1">
-                      Истекает: {formatDate(qual.expiryDate)}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Сертификации */}
-        {personnel.certifications.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-secondary-200 mb-3">Сертификации</h4>
-            <div className="space-y-2">
-              {personnel.certifications.map(cert => (
-                <div key={cert.id} className="p-3 bg-secondary-800 rounded">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h5 className="text-sm font-medium text-white">{cert.name}</h5>
-                      <p className="text-xs text-secondary-400">{cert.issuingAuthority}</p>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      cert.status === 'active' ? 'bg-green-600/20 text-green-400' :
-                      cert.status === 'expired' ? 'bg-red-600/20 text-red-400' :
-                      'bg-yellow-600/20 text-yellow-400'
-                    }`}>
-                      {cert.status === 'active' ? 'Активна' : 
-                       cert.status === 'expired' ? 'Истекла' : 'Ожидает'}
-                    </span>
+                  <div className="mt-2 text-xs text-secondary-500">
+                    <p>Получена: {formatDate(qual.obtained_date)}</p>
+                    {qual.expires_date && (
+                      <p>Истекает: {formatDate(qual.expires_date)}</p>
+                    )}
                   </div>
-                  {cert.expiryDate && (
-                    <p className="text-xs text-secondary-500 mt-1">
-                      Истекает: {formatDate(cert.expiryDate)}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
@@ -220,7 +232,7 @@ export const EmsPersonnelList: React.FC<EmsPersonnelListProps> = ({
   showCreateButton = true
 }) => {
   const { personnel: storePersonnel, deletePersonnel } = usePersonnelStore();
-  const [selectedPersonnel, setSelectedPersonnel] = useState<EmsPersonnel | null>(null);
+  const [selectedPersonnel, setSelectedPersonnel] = useState<EmsPersonnelWithDetails | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'details'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRank, setFilterRank] = useState<string>('');
@@ -231,18 +243,18 @@ export const EmsPersonnelList: React.FC<EmsPersonnelListProps> = ({
   // Фильтрация
   const filteredPersonnel = personnel.filter(person => {
     const matchesSearch = searchQuery === '' || 
-      person.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      person.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      person.badgeNumber.toLowerCase().includes(searchQuery.toLowerCase());
+      person.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      person.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      person.id.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesRank = filterRank === '' || person.rank === filterRank;
+    const matchesRank = filterRank === '' || person.rank_id === filterRank;
     
     return matchesSearch && matchesRank;
   });
   
   const displayPersonnel = maxItems ? filteredPersonnel.slice(0, maxItems) : filteredPersonnel;
 
-  const handleViewDetails = (person: EmsPersonnel) => {
+  const handleViewDetails = (person: EmsPersonnelWithDetails) => {
     setSelectedPersonnel(person);
     setViewMode('details');
   };
@@ -270,31 +282,41 @@ export const EmsPersonnelList: React.FC<EmsPersonnelListProps> = ({
     handleCloseDetails();
   };
 
-  const getRankLabel = (rank: EmsRank) => {
-    const rankLabels: Record<EmsRank, string> = {
-      paramedic: 'Парамедик',
-      emt_basic: 'EMT Basic',
-      emt_intermediate: 'EMT Intermediate',
-      emt_advanced: 'EMT Advanced',
-      firefighter: 'Пожарный',
-      firefighter_ii: 'Пожарный II',
-      engineer: 'Инженер',
-      lieutenant: 'Лейтенант',
-      captain: 'Капитан',
-      battalion_chief: 'Начальник батальона',
-      deputy_chief: 'Заместитель начальника',
-      chief: 'Начальник'
+  const getRankLabel = (rankId: string) => {
+    const rankLabels: Record<string, string> = {
+      'paramedic': 'Парамедик',
+      'emt_basic': 'EMT Basic',
+      'emt_intermediate': 'EMT Intermediate',
+      'emt_advanced': 'EMT Advanced',
+      'firefighter': 'Пожарный',
+      'firefighter_ii': 'Пожарный II',
+      'engineer': 'Инженер',
+      'lieutenant': 'Лейтенант',
+      'captain': 'Капитан',
+      'battalion_chief': 'Начальник батальона',
+      'deputy_chief': 'Заместитель начальника',
+      'chief': 'Начальник'
     };
-    return rankLabels[rank] || rank;
+    return rankLabels[rankId] || rankId;
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'active': return 'bg-green-600';
       case 'inactive': return 'bg-gray-600';
       case 'suspended': return 'bg-yellow-600';
       case 'terminated': return 'bg-red-600';
       default: return 'bg-secondary-600';
+    }
+  };
+
+  const getStatusLabel = (status: string | null) => {
+    switch (status) {
+      case 'active': return 'Активен';
+      case 'inactive': return 'Неактивен';
+      case 'suspended': return 'Приостановлен';
+      case 'terminated': return 'Уволен';
+      default: return 'Неизвестно';
     }
   };
 
@@ -336,7 +358,7 @@ export const EmsPersonnelList: React.FC<EmsPersonnelListProps> = ({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400" />
             <input
               type="text"
-              placeholder="Поиск по имени или номеру..."
+              placeholder="Поиск по имени или ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-secondary-700 border border-secondary-600 rounded-md text-white"
@@ -378,18 +400,16 @@ export const EmsPersonnelList: React.FC<EmsPersonnelListProps> = ({
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">
-                        {person.firstName} {person.lastName}
+                        {person.first_name} {person.last_name}
                       </h3>
                       <p className="text-sm text-secondary-400">
-                        {getRankLabel(person.rank)} • {person.badgeNumber}
+                        {getRankLabel(person.rank_id)} • {person.id}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(person.employmentInfo.status)}`}>
-                      {person.employmentInfo.status === 'active' ? 'Активен' : 
-                       person.employmentInfo.status === 'inactive' ? 'Неактивен' :
-                       person.employmentInfo.status === 'suspended' ? 'Приостановлен' : 'Уволен'}
+                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(person.status)}`}>
+                      {getStatusLabel(person.status)}
                     </span>
                     <Button size="sm" variant="secondary">
                       <Eye className="h-4 w-4" />
@@ -401,17 +421,17 @@ export const EmsPersonnelList: React.FC<EmsPersonnelListProps> = ({
                   <div className="flex items-center gap-4 text-sm text-secondary-300">
                     <div className="flex items-center gap-1">
                       <Shield className="h-3 w-3" />
-                      <span>{person.department}</span>
+                      <span>Отдел: {person.department_id}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Phone className="h-3 w-3" />
-                      <span>{person.contactInfo.phone}</span>
+                      <span>{person.phone_number || 'Телефон не указан'}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center justify-between text-xs text-secondary-500">
-                    <span>Найм: {new Date(person.employmentInfo.hireDate).toLocaleDateString('ru-RU')}</span>
-                    <span>Квалификаций: {person.qualifications.length}</span>
+                    <span>Создан: {formatDate(person.created_at)}</span>
+                    <span>Квалификаций: {person.qualifications?.length || 0}</span>
                   </div>
                 </div>
               </div>

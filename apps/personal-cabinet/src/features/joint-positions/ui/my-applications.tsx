@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card'
+
 import { Badge } from '@shared/ui/badge'
 
 export function MyApplications() {

@@ -1,28 +1,20 @@
-import { User } from '@/entities/user'
+import type { Database } from '@roleplay-identity/db-types'
+import type { LoginCredentials, RegisterPayload, AuthResponse } from '@/shared/api/auth-service'
 
-export interface LoginCredentials {
-  email: string
-  password: string
-}
+type Profiles = Database['public']['Tables']['profiles']['Row']
 
-export interface RegisterCredentials {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  username?: string
-}
+export type { LoginCredentials, RegisterPayload, AuthResponse }
 
 export interface AuthState {
-  user: Omit<User, 'passwordHash'> | null
+  user: Profiles | null
   isLoading: boolean
   isAuthenticated: boolean
 }
 
 export interface AuthContextType {
-  user: Omit<User, 'passwordHash'> | null
+  user: Profiles | null
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
+  signUp: (data: RegisterPayload) => Promise<void>
   signOut: () => Promise<void>
 } 

@@ -1,19 +1,19 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
 import React, { useState } from 'react';
 import { Card, CardHeader, Button, Modal } from '../../../shared/ui/atoms';
 import { DataTable } from '../../../shared/ui/molecules';
 import { Eye, Edit, Trash2, FileText } from 'lucide-react';
 import { useLocale } from '@/shared/contexts/LocaleContext';
-import type { LawReport } from '../model/types';
+import type { LawReports, Json } from '@roleplay-identity/db-types';
 
 interface LawReportsListProps {
-  reports: LawReport[];
+  reports: LawReports[];
   onDelete?: (reportId: string) => void;
-  onEdit?: (report: LawReport) => void;
+  onEdit?: (report: LawReports) => void;
 }
 
-const LawReportDetailsModal: React.FC<{ report: LawReport; onClose: () => void }> = ({ report, onClose }) => {
-  const formatDate = (dateString: string) => {
+const LawReportDetailsModal: React.FC<{ report: LawReports; onClose: () => void }> = ({ report, onClose }) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Не указано';
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: 'numeric',
       month: 'long',
@@ -23,12 +23,25 @@ const LawReportDetailsModal: React.FC<{ report: LawReport; onClose: () => void }
     });
   };
 
-  const getSanctionTypeLabel = (type: string) => {
-    switch (type) {
-      case 'warning': return 'Предупреждение';
-      case 'arrest': return 'Арест';
-      case 'fine': return 'Штраф';
-      default: return type;
+  const formatJsonField = (value: Json | null, fieldName: string) => {
+    if (!value) return 'Не указано';
+    
+    try {
+      if (typeof value === 'string') {
+        const parsed = JSON.parse(value);
+        return (
+          <div className="bg-secondary-800 p-3 rounded">
+            <pre className="text-sm text-secondary-400">{JSON.stringify(parsed, null, 2)}</pre>
+          </div>
+        );
+      }
+      return (
+        <div className="bg-secondary-800 p-3 rounded">
+          <pre className="text-sm text-secondary-400">{JSON.stringify(value, null, 2)}</pre>
+        </div>
+      );
+    } catch {
+      return <span className="text-secondary-400">{String(value)}</span>;
     }
   };
 
@@ -37,55 +50,43 @@ const LawReportDetailsModal: React.FC<{ report: LawReport; onClose: () => void }
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p><strong>Гражданский:</strong> {report.citizenName}</p>
-            <p><strong>Адрес инцидента:</strong> {report.incidentAddress}</p>
-            <p><strong>Время инцидента:</strong> {formatDate(report.incidentTime)}</p>
-            <p><strong>Тип инцидента:</strong> {report.incidentType}</p>
-            <p><strong>Статья:</strong> {report.penalCode}</p>
-            <p><strong>Тип санкции:</strong> {getSanctionTypeLabel(report.sanctionType)}</p>
+            <p><strong>Название полицейского отчета о правонарушении по уголовному делу о правонарушении:</strong> {report.title}</p>
+            <p><strong>Место совершения правонарушения по уголовному делу о правонарушении по уголовному делу:</strong> {report.incident_location}</p>
+            <p><strong>Дата и время совершения правонарушения по уголовному делу о правонарушении по уголовному делу:</strong> {formatDate(report.incident_time)}</p>
+            <p><strong>Категория правонарушения по уголовному делу о правонарушении по уголовному делу:</strong> {report.incident_type}</p>
+            <p><strong>ID сотрудника правоохранительных органов, составившего отчет о правонарушении по уголовному делу:</strong> <span className="font-mono text-sm">{report.author_character_id}</span></p>
+            <p><strong>Дата и время составления полицейского отчета о правонарушении по уголовному делу:</strong> {formatDate(report.created_at)}</p>
+            {report.updated_at && (
+              <p><strong>Дата и время последнего редактирования полицейского отчета о правонарушении:</strong> {formatDate(report.updated_at)}</p>
+            )}
+            {report.call_id && (
+              <p><strong>Связанный вызов в систему экстренного реагирования по уголовному делу о правонарушении:</strong> <span className="font-mono text-sm">{report.call_id}</span></p>
+            )}
           </div>
           <div>
-            <p><strong>Автор:</strong> {report.author}</p>
-            <p><strong>Дата создания:</strong> {formatDate(report.createdAt)}</p>
-            <p><strong>Описание:</strong></p>
+            <p><strong>Подробное описание правонарушения и обстоятельств уголовного дела о правонарушении:</strong></p>
             <p className="text-secondary-400 bg-secondary-800 p-2 rounded">{report.description}</p>
           </div>
         </div>
 
-        {report.seizedItems.length > 0 && (
+        {report.penal_codes && (
           <div>
-            <p><strong>Изъятые вещи:</strong></p>
-            <ul className="list-disc list-inside text-secondary-400">
-              {report.seizedItems.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+            <p><strong>Примененные статьи уголовного кодекса и санкции по уголовному делу о правонарушении:</strong></p>
+            {formatJsonField(report.penal_codes, 'penal_codes')}
           </div>
         )}
 
-        {report.suspectVehicle && (
+        {report.seized_items && (
           <div>
-            <p><strong>Транспорт подозреваемого:</strong></p>
-            <div className="bg-secondary-800 p-3 rounded">
-              <p>Номерной знак: {report.suspectVehicle.plate || 'Не указан'}</p>
-              <p>Модель: {report.suspectVehicle.model || 'Не указана'}</p>
-              <p>Цвет: {report.suspectVehicle.color || 'Не указан'}</p>
-              <p>Эвакуирован: {report.suspectVehicle.isImpounded ? 'Да' : 'Нет'}</p>
-              <p>Угнанное ТС: {report.suspectVehicle.isStolen ? 'Да' : 'Нет'}</p>
-            </div>
+            <p><strong>Изъятые предметы и вещественные доказательства по уголовному делу о правонарушении по уголовному делу:</strong></p>
+            {formatJsonField(report.seized_items, 'seized_items')}
           </div>
         )}
 
-        {report.suspectWeapon && (
+        {report.participants && (
           <div>
-            <p><strong>Оружие подозреваемого:</strong></p>
-            <div className="bg-secondary-800 p-3 rounded">
-              <p>Серийный номер: {report.suspectWeapon.serialNumber || 'Не указан'}</p>
-              <p>Модель: {report.suspectWeapon.model || 'Не указана'}</p>
-              <p>Тип: {report.suspectWeapon.type || 'Не указан'}</p>
-              <p>Имеет серийный номер: {report.suspectWeapon.hasSerialNumber ? 'Да' : 'Нет'}</p>
-              <p>Зарегистрировано: {report.suspectWeapon.isRegistered ? 'Да' : 'Нет'}</p>
-            </div>
+            <p><strong>Участники и свидетели правонарушения по уголовному делу о правонарушении по уголовному делу:</strong></p>
+            {formatJsonField(report.participants, 'participants')}
           </div>
         )}
 
@@ -99,9 +100,10 @@ const LawReportDetailsModal: React.FC<{ report: LawReport; onClose: () => void }
 
 export const LawReportsList: React.FC<LawReportsListProps> = ({ reports, onDelete, onEdit }) => {
   const { t } = useLocale();
-  const [selectedReport, setSelectedReport] = useState<LawReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<LawReports | null>(null);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Не указано';
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: 'numeric',
       month: 'short',
@@ -109,64 +111,55 @@ export const LawReportsList: React.FC<LawReportsListProps> = ({ reports, onDelet
     });
   };
 
-  const getSanctionTypeColor = (type: string) => {
-    switch (type) {
-      case 'warning': return 'bg-yellow-600';
-      case 'arrest': return 'bg-red-600';
-      case 'fine': return 'bg-orange-600';
-      default: return 'bg-gray-600';
-    }
-  };
-
-  const getSanctionTypeLabel = (type: string) => {
-    switch (type) {
-      case 'warning': return 'Предупреждение';
-      case 'arrest': return 'Арест';
-      case 'fine': return 'Штраф';
-      default: return type;
-    }
-  };
-
   const reportColumns = [
-    { key: 'citizenName', header: 'Гражданский' },
-    { key: 'incidentType', header: 'Тип инцидента' },
-    { key: 'penalCode', header: 'Статья' },
-    { key: 'sanctionType', header: 'Санкция', render: (value: string) => (
-      <span className={`px-2 py-1 rounded text-xs ${getSanctionTypeColor(value)}`}>
-        {getSanctionTypeLabel(value)}
-      </span>
-    )},
-    { key: 'createdAt', header: 'Дата создания', render: (value: string) => formatDate(value) },
-    { key: 'author', header: 'Автор' },
-    { key: 'actions', header: 'Действия', render: (value: any, row: LawReport) => (
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => setSelectedReport(row)}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-        {onEdit && (
+    { key: 'title', header: 'Название' },
+    { key: 'incident_type', header: 'Тип инцидента' },
+    { key: 'incident_location', header: 'Место инцидента' },
+    { 
+      key: 'author_character_id', 
+      header: 'ID автора',
+      render: (value: unknown) => (
+        <span className="font-mono text-sm">{value as string}</span>
+      )
+    },
+    { 
+      key: 'created_at', 
+      header: 'Дата создания', 
+      render: (value: unknown) => formatDate(value as string | null) 
+    },
+    { 
+      key: 'actions', 
+      header: 'Действия', 
+      render: (_value: unknown, row: LawReports) => (
+        <div className="flex gap-2">
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => onEdit(row)}
+            onClick={() => setSelectedReport(row)}
           >
-            <Edit className="h-4 w-4" />
+            <Eye className="h-4 w-4" />
           </Button>
-        )}
-        {onDelete && (
-          <Button
-            size="sm"
-            variant="danger"
-            onClick={() => onDelete(row.id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    )}
+          {onEdit && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onEdit(row)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => onDelete(row.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )
+    }
   ];
 
   return (

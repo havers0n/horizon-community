@@ -1,5 +1,4 @@
-// @ts-nocheck - TODO: Remove after major refactoring is complete
-import type { User } from '@/shared/types';
+import type { Users } from '@roleplay-identity/db-types';
 
 export interface LoginRequest {
   email: string;
@@ -7,7 +6,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: User;
+  user: Users;
   token: string;
 }
 
@@ -18,7 +17,7 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  user: User;
+  user: Users;
   token: string;
 }
 
@@ -64,7 +63,7 @@ export class AuthApi {
     });
   }
 
-  static async getCurrentUser(): Promise<User> {
+  static async getCurrentUser(): Promise<Users> {
     const response = await fetch('/api/auth/me', {
       headers: {
         'Content-Type': 'application/json',
