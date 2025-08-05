@@ -18,7 +18,8 @@
     "build:archive:ps": "powershell -ExecutionPolicy Bypass -File scripts/build-and-archive.ps1",
     "build:archive:simple": "node scripts/build-and-archive-simple.js",
     "build:archive:correct": "node scripts/build-and-archive-correct.js",
-    "install:all": "npm install",
+    "install:all": "npm install && npm run install:workspaces",
+    "install:workspaces": "npm install --workspaces",
     "install:all:production": "npm ci --production",
     "clean": "npm run clean:client && npm run clean:mdt && npm run clean:server",
     "clean:client": "cd apps/client && npm run clean",
@@ -36,12 +37,16 @@
     "check-production": "node scripts/check-production-config.js",
     "check-modules": "node scripts/fix-module-issues.js",
     "force-rebuild": "node scripts/force-rebuild.js",
-    "db:sync": "node scripts/sync-db-types.mjs"
+    "db:sync": "node scripts/sync-db-types.mjs",
+    "fix:workspace-deps": "node scripts/fix-workspace-deps.js",
+    "fix:workspace-deps:check": "node scripts/fix-workspace-deps.js --check",
+    "fix:workspace-deps:fix": "node scripts/fix-workspace-deps.js --fix"
   },
   "workspaces": [
     "apps/*",
     "libs/*",
-    "libs/*/*"
+    "libs/*/*",
+    "packages/*"
   ],
   "devDependencies": {
     "concurrently": "^8.2.2",

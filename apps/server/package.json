@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.25",
-    "@roleplay-identity/db-types": "workspace:*",
+    "@roleplay-identity/db-types": "^1.0.0",
     "@supabase/supabase-js": "^2.52.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
