@@ -30,18 +30,29 @@ type MDTEmsFdReport = Database['mdt']['Tables']['ems_fd_reports']['Row'];
 type MDTEmsFdReportInsert = Database['mdt']['Tables']['ems_fd_reports']['Insert'];
 type MDTEmsFdReportUpdate = Database['mdt']['Tables']['ems_fd_reports']['Update'];
 
+// ===== ENUM ТИПЫ ИЗ СХЕМЫ БД =====
+type BoloPriority = Database['mdt']['Enums']['bolo_priority'];
+type BoloStatus = Database['mdt']['Enums']['bolo_status'];
+type BoloType = Database['mdt']['Enums']['bolo_type'];
+type CallPriority = Database['mdt']['Enums']['call_priority'];
+type CallStatus = Database['mdt']['Enums']['call_status'];
+type CallType = Database['mdt']['Enums']['call_type'];
+type ApplicationStatus = Database['mdt']['Enums']['application_status'];
+type ComplaintStatus = Database['mdt']['Enums']['complaint_status'];
+type SupportTicketStatus = Database['mdt']['Enums']['support_ticket_status'];
+
 // ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
 export interface CreateBoloData {
-  type: string;
+  type: BoloType; // ✅ ИСПРАВЛЕНО: используем ENUM из схемы
   reason: string;
-  priority?: 'low' | 'medium' | 'high' | 'critical';
-  authorCharacterId: string;
-  subjectName?: string;
-  subjectDescription?: string;
+  priority?: BoloPriority; // ✅ ИСПРАВЛЕНО: используем ENUM из схемы
+  author_character_id: string; // ✅ ИСПРАВЛЕНО: snake_case
+  subject_name?: string; // ✅ ИСПРАВЛЕНО: snake_case
+  subject_description?: string; // ✅ ИСПРАВЛЕНО: snake_case
   location?: string;
-  vehicleDescription?: string;
-  vehiclePlate?: string;
-  status?: 'active' | 'resolved' | 'expired' | 'deleted';
+  vehicle_description?: string; // ✅ ИСПРАВЛЕНО: snake_case
+  vehicle_plate?: string; // ✅ ИСПРАВЛЕНО: snake_case
+  status?: BoloStatus; // ✅ ИСПРАВЛЕНО: используем ENUM из схемы
 }
 
 export interface UpdateBoloData extends Partial<CreateBoloData> {}
@@ -50,20 +61,20 @@ export interface CreateSignalData {
   title: string;
   description?: string;
   type?: string;
-  authorCharacterId?: string;
-  priority?: 'low' | 'medium' | 'high' | 'emergency';
+  author_character_id?: string; // ✅ ИСПРАВЛЕНО: snake_case
+  priority?: CallPriority; // ✅ ИСПРАВЛЕНО: используем ENUM из схемы
   location?: string;
   coordinates?: any;
-  isActive?: boolean;
-  expiresAt?: string;
+  is_active?: boolean; // ✅ ИСПРАВЛЕНО: snake_case
+  expires_at?: string; // ✅ ИСПРАВЛЕНО: snake_case
 }
 
 export interface UpdateSignalData extends Partial<CreateSignalData> {}
 
 export interface CreateNotificationData {
   content: string;
-  recipientUserId: string;
-  isRead?: boolean;
+  recipient_user_id: string; // ✅ ИСПРАВЛЕНО: snake_case
+  is_read?: boolean; // ✅ ИСПРАВЛЕНО: snake_case
   link?: string;
 }
 
@@ -71,11 +82,11 @@ export interface UpdateNotificationData extends Partial<CreateNotificationData> 
 
 export interface CreateApplicationData {
   type: string;
-  authorUserId: string;
-  authorCharacterId: string;
+  author_user_id: string; // ✅ ИСПРАВЛЕНО: snake_case
+  author_character_id: string; // ✅ ИСПРАВЛЕНО: snake_case
   data?: any;
-  status?: 'pending' | 'approved' | 'rejected';
-  statusHistory?: any[];
+  status?: ApplicationStatus; // ✅ ИСПРАВЛЕНО: используем ENUM из схемы
+  status_history?: any[]; // ✅ ИСПРАВЛЕНО: snake_case
 }
 
 export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
@@ -83,14 +94,14 @@ export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 export interface CreateLawReportData {
   title: string;
   description: string;
-  authorCharacterId: string;
-  incidentLocation: string;
-  incidentTime: string;
-  incidentType: string;
+  author_character_id: string; // ✅ ИСПРАВЛЕНО: snake_case
+  incident_location: string; // ✅ ИСПРАВЛЕНО: snake_case
+  incident_time: string; // ✅ ИСПРАВЛЕНО: snake_case
+  incident_type: string; // ✅ ИСПРАВЛЕНО: snake_case
   participants?: any;
-  penalCodes?: any;
-  seizedItems?: any;
-  callId?: string;
+  penal_codes?: any; // ✅ ИСПРАВЛЕНО: snake_case
+  seized_items?: any; // ✅ ИСПРАВЛЕНО: snake_case
+  call_id?: string; // ✅ ИСПРАВЛЕНО: snake_case
 }
 
 export interface UpdateLawReportData extends Partial<CreateLawReportData> {}
@@ -98,17 +109,17 @@ export interface UpdateLawReportData extends Partial<CreateLawReportData> {}
 export interface CreateEmsFdReportData {
   title: string;
   description: string;
-  authorCharacterId: string;
-  incidentLocation: string;
-  incidentTime: string;
-  incidentType: string;
+  author_character_id: string; // ✅ ИСПРАВЛЕНО: snake_case
+  incident_location: string; // ✅ ИСПРАВЛЕНО: snake_case
+  incident_time: string; // ✅ ИСПРАВЛЕНО: snake_case
+  incident_type: string; // ✅ ИСПРАВЛЕНО: snake_case
   patients?: any;
-  vitalSigns?: any;
-  medicationsAdministered?: any;
-  treatmentProvided?: string;
+  vital_signs?: any; // ✅ ИСПРАВЛЕНО: snake_case
+  medications_administered?: any; // ✅ ИСПРАВЛЕНО: snake_case
+  treatment_provided?: string; // ✅ ИСПРАВЛЕНО: snake_case
   outcome?: string;
-  fireDetails?: any;
-  callId?: string;
+  fire_details?: any; // ✅ ИСПРАВЛЕНО: snake_case
+  call_id?: string; // ✅ ИСПРАВЛЕНО: snake_case
 }
 
 export interface UpdateEmsFdReportData extends Partial<CreateEmsFdReportData> {}
@@ -151,12 +162,12 @@ export class MDTService {
       type: boloData.type,
       reason: boloData.reason,
       priority: boloData.priority || 'medium',
-      author_character_id: boloData.authorCharacterId,
-      subject_name: boloData.subjectName,
-      subject_description: boloData.subjectDescription,
+      author_character_id: boloData.author_character_id,
+      subject_name: boloData.subject_name,
+      subject_description: boloData.subject_description,
       location: boloData.location,
-      vehicle_description: boloData.vehicleDescription,
-      vehicle_plate: boloData.vehiclePlate,
+      vehicle_description: boloData.vehicle_description,
+      vehicle_plate: boloData.vehicle_plate,
       status: boloData.status || 'active',
     };
 
@@ -283,12 +294,12 @@ export class MDTService {
       title: signalData.title,
       description: signalData.description,
       type: signalData.type,
-      author_character_id: signalData.authorCharacterId,
+      author_character_id: signalData.author_character_id,
       priority: signalData.priority || 'medium',
       location: signalData.location,
       coordinates: signalData.coordinates,
-      is_active: signalData.isActive ?? true,
-      expires_at: signalData.expiresAt,
+      is_active: signalData.is_active ?? true,
+      expires_at: signalData.expires_at,
     };
 
     const { data, error } = await (supabase as any)
@@ -369,8 +380,8 @@ export class MDTService {
   async createNotification(notificationData: CreateNotificationData): Promise<MDTNotification> {
     const insertData: MDTNotificationInsert = {
       content: notificationData.content,
-      recipient_user_id: notificationData.recipientUserId,
-      is_read: notificationData.isRead ?? false,
+      recipient_user_id: notificationData.recipient_user_id,
+      is_read: notificationData.is_read ?? false,
       link: notificationData.link,
     };
 
@@ -449,11 +460,11 @@ export class MDTService {
   async createApplication(applicationData: CreateApplicationData): Promise<MDTApplication> {
     const insertData: MDTApplicationInsert = {
       type: applicationData.type,
-      author_user_id: applicationData.authorUserId,
-      author_character_id: applicationData.authorCharacterId,
+      author_user_id: applicationData.author_user_id,
+      author_character_id: applicationData.author_character_id,
       data: applicationData.data,
       status: applicationData.status || 'pending',
-      status_history: applicationData.statusHistory,
+      status_history: applicationData.status_history,
     };
 
     const { data, error } = await (supabase as any)
@@ -491,14 +502,14 @@ export class MDTService {
     const insertData: MDTLawReportInsert = {
       title: reportData.title,
       description: reportData.description,
-      author_character_id: reportData.authorCharacterId,
-      incident_location: reportData.incidentLocation,
-      incident_time: reportData.incidentTime,
-      incident_type: reportData.incidentType,
+      author_character_id: reportData.author_character_id,
+      incident_location: reportData.incident_location,
+      incident_time: reportData.incident_time,
+      incident_type: reportData.incident_type,
       participants: reportData.participants,
-      penal_codes: reportData.penalCodes,
-      seized_items: reportData.seizedItems,
-      call_id: reportData.callId,
+      penal_codes: reportData.penal_codes,
+      seized_items: reportData.seized_items,
+      call_id: reportData.call_id,
     };
 
     const { data, error } = await (supabase as any)
@@ -536,17 +547,17 @@ export class MDTService {
     const insertData: MDTEmsFdReportInsert = {
       title: reportData.title,
       description: reportData.description,
-      author_character_id: reportData.authorCharacterId,
-      incident_location: reportData.incidentLocation,
-      incident_time: reportData.incidentTime,
-      incident_type: reportData.incidentType,
+      author_character_id: reportData.author_character_id,
+      incident_location: reportData.incident_location,
+      incident_time: reportData.incident_time,
+      incident_type: reportData.incident_type,
       patients: reportData.patients,
-      vital_signs: reportData.vitalSigns,
-      medications_administered: reportData.medicationsAdministered,
-      treatment_provided: reportData.treatmentProvided,
+      vital_signs: reportData.vital_signs,
+      medications_administered: reportData.medications_administered,
+      treatment_provided: reportData.treatment_provided,
       outcome: reportData.outcome,
-      fire_details: reportData.fireDetails,
-      call_id: reportData.callId,
+      fire_details: reportData.fire_details,
+      call_id: reportData.call_id,
     };
 
     const { data, error } = await (supabase as any)

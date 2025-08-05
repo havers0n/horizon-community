@@ -4,26 +4,31 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseClient } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
 
-// ✅ Импортируем ВСЕ нужные типы, включая профили
+// ✅ ПРАВИЛЬНЫЕ импорты из обновленной схемы БД
 import type {
   Database,
-  Characters,
-  CharactersInsert,
-  CharactersUpdate,
-  Profiles,
-  LeoProfiles,
-  LeoProfilesInsert,
-  LeoProfilesUpdate,
-  EmsProfiles,
-  EmsProfilesInsert,
-  EmsProfilesUpdate,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
 } from '@roleplay-identity/db-types';
 
+// ✅ Определяем типы на основе обновленной схемы
+type Characters = Tables<'characters'>;
+type CharactersInsert = TablesInsert<'characters'>;
+type CharactersUpdate = TablesUpdate<'characters'>;
+
+type LeoProfiles = Tables<'leo_profiles'>;
+type LeoProfilesInsert = TablesInsert<'leo_profiles'>;
+type LeoProfilesUpdate = TablesUpdate<'leo_profiles'>;
+
+type EmsProfiles = Tables<'ems_profiles'>;
+type EmsProfilesInsert = TablesInsert<'ems_profiles'>;
+type EmsProfilesUpdate = TablesUpdate<'ems_profiles'>;
+
+type Profiles = Tables<'profiles'>;
 
 export class CharacterService {
-  // ✅ Указываем, что основной клиент работает со схемой 'common'
   private supabase: SupabaseClient<Database, 'common'>;
-  // ✅ Создаем отдельный клиент для работы со схемой 'public' (для профилей пользователей)
   private publicSupabase: SupabaseClient<Database, 'public'>;
 
   constructor() {
@@ -39,7 +44,7 @@ export class CharacterService {
     const { data, error } = await this.supabase
       .from('characters')
       .select('*')
-      .eq('owner_id', userId); // ✅ ИСПРАВЛЕНО
+      .eq('user_id', userId); // ✅ ИСПРАВЛЕНО: user_id вместо owner_id
 
     if (error) {
       console.error(`[CharacterService] Error fetching characters for user ${userId}:`, error);
@@ -132,18 +137,18 @@ export class CharacterService {
    * ✅ ДОБАВЛЕН МЕТОД: Обновить LEO профиль
    */
   public async updateLeoProfile(characterId: string, data: LeoProfilesUpdate): Promise<LeoProfiles> {
-    const result = await (this.supabase as any)
+    const { data: updatedProfile, error } = await this.supabase
       .from('leo_profiles')
       .update(data)
-      .eq('character_id', characterId)
+      .eq('id', characterId) // ✅ ИСПРАВЛЕНО: id вместо character_id
       .select()
       .single();
 
-    if (result.error || !result.data) {
-      console.error(`[CharacterService] Error updating LEO profile for char ${characterId}:`, result.error);
+    if (error || !updatedProfile) {
+      console.error(`[CharacterService] Error updating LEO profile for char ${characterId}:`, error);
       throw new AppError('Не удалось обновить LEO профиль.', 500);
     }
-    return result.data;
+    return updatedProfile;
   }
   
   // ===========================================
@@ -171,18 +176,18 @@ export class CharacterService {
    * ✅ ДОБАВЛЕН МЕТОД: Обновить EMS профиль
    */
   public async updateEmsProfile(characterId: string, data: EmsProfilesUpdate): Promise<EmsProfiles> {
-    const result = await (this.supabase as any)
+    const { data: updatedProfile, error } = await this.supabase
       .from('ems_profiles')
       .update(data)
-      .eq('character_id', characterId)
+      .eq('id', characterId) // ✅ ИСПРАВЛЕНО: id вместо character_id
       .select()
       .single();
 
-    if (result.error || !result.data) {
-      console.error(`[CharacterService] Error updating EMS profile for char ${characterId}:`, result.error);
+    if (error || !updatedProfile) {
+      console.error(`[CharacterService] Error updating EMS profile for char ${characterId}:`, error);
       throw new AppError('Не удалось обновить EMS профиль.', 500);
     }
-    return result.data;
+    return updatedProfile;
   }
 
   // ===========================================

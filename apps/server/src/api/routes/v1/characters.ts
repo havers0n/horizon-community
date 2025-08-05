@@ -9,24 +9,28 @@ import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
 import { validateRequest } from '../../../utils/validation';
 import type { ServicesContainer } from '../../../types/services';
 
-// ✅ Полный импорт всех необходимых типов из db-types
+// ✅ ПРАВИЛЬНЫЕ импорты типов из обновленной схемы БД
 import type {
-  CharactersInsert,
-  CharactersUpdate,
-  LeoProfilesInsert,
-  LeoProfilesUpdate,
-  EmsProfilesInsert,
-  EmsProfilesUpdate,
+  TablesInsert,
+  TablesUpdate,
 } from '@roleplay-identity/db-types';
+
+// ✅ Определяем типы на основе обновленной схемы
+type CharactersInsert = TablesInsert<'characters'>;
+type CharactersUpdate = TablesUpdate<'characters'>;
+type LeoProfilesInsert = TablesInsert<'leo_profiles'>;
+type LeoProfilesUpdate = TablesUpdate<'leo_profiles'>;
+type EmsProfilesInsert = TablesInsert<'ems_profiles'>;
+type EmsProfilesUpdate = TablesUpdate<'ems_profiles'>;
 
 // --- Zod Schemas ---
 const IdParamSchema = z.object({
   id: z.string().uuid('Неверный формат ID'),
 });
 
-// Схема для создания персонажа. owner_id теперь обязателен.
+// ✅ ИСПРАВЛЕНО: Схема для создания персонажа. user_id теперь обязателен.
 const CharacterCreateSchema = z.object({
-  owner_id: z.string().uuid(), // ✅ ИСПРАВЛЕНО
+  user_id: z.string().uuid(), // ✅ ИСПРАВЛЕНО: user_id вместо owner_id
   first_name: z.string().min(1, 'Имя обязательно'),
   last_name: z.string().min(1, 'Фамилия обязательна'),
   date_of_birth: z.string().datetime({ message: 'Неверный формат даты' }).optional().nullable(),
@@ -37,7 +41,7 @@ const CharacterCreateSchema = z.object({
   mugshot_url: z.string().url('Неверный URL-адрес для фото').optional().nullable(),
 });
 
-const CharacterUpdateSchema = CharacterCreateSchema.omit({ owner_id: true }).partial(); // ✅ ИСПРАВЛЕНО
+const CharacterUpdateSchema = CharacterCreateSchema.omit({ user_id: true }).partial(); // ✅ ИСПРАВЛЕНО
 
 const LeoProfileCreateSchema = z.object({
   department_id: z.string().uuid('Неверный формат ID департамента'),
@@ -74,8 +78,8 @@ export function createCharacterRoutes(services: ServicesContainer) {
     validateRequest({ body: CharacterCreateSchema }),
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        // Проверка, что пользователь создает персонажа для себя, а не для кого-то другого
-        if (req.user?.id !== req.body.owner_id) { // ✅ ИСПРАВЛЕНО
+        // ✅ ИСПРАВЛЕНО: Проверка, что пользователь создает персонажа для себя
+        if (req.user?.id !== req.body.user_id) { // ✅ user_id вместо owner_id
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
 
@@ -131,9 +135,9 @@ export function createCharacterRoutes(services: ServicesContainer) {
     validateRequest({ params: IdParamSchema, body: CharacterUpdateSchema }),
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        // Проверка на владение персонажем перед обновлением
+        // ✅ ИСПРАВЛЕНО: Проверка на владение персонажем перед обновлением
         const character = await characterService.getCharacterById(req.params.id);
-        if (!character || character.owner_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
+        if (!character || character.user_id !== req.user!.id) { // ✅ user_id вместо owner_id
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
 
@@ -148,32 +152,27 @@ export function createCharacterRoutes(services: ServicesContainer) {
   /**
    * DELETE /api/v1/characters/:id
    * Удалить персонажа.
-   * 
-   * ПРИМЕЧАНИЕ: Требует наличия метода `deleteCharacter(id)` в CharacterService.
    */
   router.delete('/:id',
     requireRole('citizen'),
     validateRequest({ params: IdParamSchema }),
     async (req: AuthenticatedRequest, res, next) => {
       try {
-        // Проверка на владение персонажем перед удалением
+        // ✅ ИСПРАВЛЕНО: Проверка на владение персонажем перед удалением
         const character = await characterService.getCharacterById(req.params.id);
-        if (!character || character.owner_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
+        if (!character || character.user_id !== req.user!.id) { // ✅ user_id вместо owner_id
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
         
-        // await characterService.deleteCharacter(req.params.id);
-        res.status(200).json({ success: true, message: 'Персонаж успешно удален (метод не реализован)' });
+        await characterService.deleteCharacter(req.params.id);
+        res.status(200).json({ success: true, message: 'Персонаж успешно удален' });
       } catch (error) {
         next(error);
       }
     }
   );
 
-
   // === РОУТЫ ДЛЯ ПРОФИЛЕЙ ===
-  // ПРИМЕЧАНИЕ: Эти роуты требуют, чтобы в CharacterService были реализованы
-  // соответствующие методы (например, createLeoProfile, getLeoProfile и т.д.).
 
   /**
    * POST /api/v1/characters/:id/profiles/leo
@@ -186,10 +185,10 @@ export function createCharacterRoutes(services: ServicesContainer) {
       try {
         const data: LeoProfilesInsert = {
           ...req.body,
-          character_id: req.params.id,
+          id: req.params.id, // ✅ ИСПРАВЛЕНО: id вместо character_id
         };
-        // const newProfile = await characterService.createLeoProfile(data);
-        res.status(201).json({ success: true, message: 'Профиль LEO создан (метод не реализован)', data });
+        const newProfile = await characterService.createLeoProfile(data);
+        res.status(201).json({ success: true, data: newProfile });
       } catch (error) {
         next(error);
       }
@@ -205,16 +204,51 @@ export function createCharacterRoutes(services: ServicesContainer) {
     validateRequest({ params: IdParamSchema, body: LeoProfileUpdateSchema }),
     async (req, res, next) => {
       try {
-        // const updatedProfile = await characterService.updateLeoProfile(req.params.id, req.body as LeoProfilesUpdate);
-        res.json({ success: true, message: 'Профиль LEO обновлен (метод не реализован)', data: req.body });
+        const updatedProfile = await characterService.updateLeoProfile(req.params.id, req.body as LeoProfilesUpdate);
+        res.json({ success: true, data: updatedProfile });
       } catch (error) {
         next(error);
       }
     }
   );
 
-  // ... Аналогичные роуты для EMS
-  // POST, PUT, DELETE для /:id/profiles/ems
+  /**
+   * POST /api/v1/characters/:id/profiles/ems
+   * Создать EMS профиль для персонажа.
+   */
+  router.post('/:id/profiles/ems',
+    requireRole('admin'),
+    validateRequest({ params: IdParamSchema, body: EmsProfileCreateSchema }),
+    async (req, res, next) => {
+      try {
+        const data: EmsProfilesInsert = {
+          ...req.body,
+          id: req.params.id, // ✅ ИСПРАВЛЕНО: id вместо character_id
+        };
+        const newProfile = await characterService.createEmsProfile(data);
+        res.status(201).json({ success: true, data: newProfile });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  /**
+   * PUT /api/v1/characters/:id/profiles/ems
+   * Обновить EMS профиль персонажа.
+   */
+  router.put('/:id/profiles/ems',
+    requireRole('admin'),
+    validateRequest({ params: IdParamSchema, body: EmsProfileUpdateSchema }),
+    async (req, res, next) => {
+      try {
+        const updatedProfile = await characterService.updateEmsProfile(req.params.id, req.body as EmsProfilesUpdate);
+        res.json({ success: true, data: updatedProfile });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
   return router;
 }
