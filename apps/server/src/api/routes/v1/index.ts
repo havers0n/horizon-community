@@ -2,6 +2,8 @@ import { Router } from 'express';
 import type { ServicesContainer } from '../../../types/services';
 import { createCharacterRoutes } from './characters';
 import { createCabinetRoutes } from './cabinet';
+import { createApplicationRoutes } from './applications';
+import { createDepartmentRoutes } from './departments';
 import { createAuthRoutes } from '../auth'; // <-- Импортируем фабричную функцию для auth роутов
 import { createTestRoutes } from './tests';
 import { authenticateToken } from '../../middleware/auth.middleware';
@@ -328,6 +330,8 @@ export function createV1Router(services: ServicesContainer): Router {
   router.use('/admin', createAdminRoutes(services));
   router.use('/characters', createCharacterRoutes(services));
   router.use('/cabinet', createCabinetRoutes(services));
+  router.use('/applications', createApplicationRoutes(services));
+  router.use('/departments', createDepartmentRoutes(services));
   router.use('/tests', createTestRoutes(services));
   router.use('/report-templates', createReportTemplatesRoutes(services));
   router.use('/ems-fd-reports', createEmsFdReportsRoutes(services));

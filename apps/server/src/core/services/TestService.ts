@@ -101,7 +101,7 @@ export class TestService {
         .from('applications')
         .select('type, status')
         .eq('author_user_id', userId)
-        .eq('status', 'approved');
+        .eq('status', 'accepted' as any); // TODO: Fix enum value, 'approved' is not valid here
 
       if (appsError) {
         console.error('[TestService] Error fetching user applications:', appsError);
@@ -197,7 +197,7 @@ export class TestService {
       }
 
       // 5. Подготовить вопросы для клиента (без правильных ответов)
-      const questionsForClient = test.questions.map((question: any) => {
+      const questionsForClient = (test.questions as any[]).map((question: any) => {
         const { correct_answer, ...questionWithoutAnswer } = question;
         return questionWithoutAnswer;
       });
@@ -259,8 +259,8 @@ export class TestService {
 
       // 4. Подсчитать результат
       let score = 0;
-      const totalQuestions = test.questions.length;
-      const correctAnswersMap = new Map(test.questions.map((q: any) => [q.id, q.correct_answer]));
+      const totalQuestions = (test.questions as any[]).length;
+      const correctAnswersMap = new Map((test.questions as any[]).map((q: any) => [q.id, q.correct_answer]));
       
       for (const userAnswer of answers) {
         const correctAnswer = correctAnswersMap.get(userAnswer.questionId);
@@ -288,7 +288,7 @@ export class TestService {
 
       const { error: resultError } = await this.db
         .from('test_results')
-        .insert(resultData);
+        .insert(resultData as any);
 
       if (resultError) {
         console.error('[TestService] Error saving result:', resultError);

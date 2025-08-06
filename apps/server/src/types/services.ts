@@ -17,6 +17,7 @@ import type { LoggerService } from '../core/services/LoggerService';
 import type { CacheService } from '../core/services/CacheService';
 import type { FilledReportService } from '../core/services/FilledReportService';
 import type { CabinetService } from '../core/services/CabinetService';
+import type { DepartmentService } from '../core/services/DepartmentService';
 
 
 /**
@@ -42,6 +43,7 @@ export interface ServicesContainer {
   cacheService: CacheService;
   filledReportService: FilledReportService;
   cabinetService: CabinetService;
+  departmentService: DepartmentService;
 }
 
 /**

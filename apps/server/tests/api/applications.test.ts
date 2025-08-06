@@ -1,123 +1,120 @@
 import request from 'supertest';
-import express from 'express';
-import { ApplicationService } from '../../src/core/services/ApplicationService';
+import type { Express } from 'express';
+import { createTestApp } from '../helpers/app-factory';
+import type { ServicesContainer } from '../../src/types/services';
 
-// Мокаем ApplicationService
-jest.mock('../../src/core/services/ApplicationService', () => ({
-  ApplicationService: jest.fn().mockImplementation(() => ({
-    createApplication: jest.fn(),
-    getApplicationById: jest.fn(),
-    updateApplication: jest.fn(),
-    deleteApplication: jest.fn(),
-    getUserApplications: jest.fn(),
-    getApplicationsByStatus: jest.fn()
-  }))
-}));
+// The auth middleware is now mocked globally in tests/setup.ts
+// No need for a local mock here.
 
-describe('Application API', () => {
-  let app: express.Application;
-  let mockApplicationService: ApplicationService;
+const MOCK_APPLICATION_ID = 'e7a4f45c-2d3a-4f4a-8f6d-3e7e4a5b6c7d';
+const MOCK_USER_ID = 'test-user-id'; // Corrected to match the mock in setup.ts
+const MOCK_CHARACTER_ID = 'char-test-id';
+
+describe('Application API (/api/v1/applications)', () => {
+  let app: Express;
+  let services: ServicesContainer;
 
   beforeEach(() => {
-    app = express();
-    app.use(express.json());
-
-    // Создаем мок сервиса
-    mockApplicationService = new ApplicationService();
-
-    // Добавляем тестовые роуты
-    app.post('/api/applications', async (req, res) => {
-      try {
-        const application = await mockApplicationService.createApplication(req.body);
-        res.json(application);
-      } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
-
-    app.get('/api/applications/:id', async (req, res) => {
-      try {
-        const application = await mockApplicationService.getApplicationById(req.params.id);
-        if (!application) {
-          return res.status(404).json({ error: 'Application not found' });
-        }
-        res.json(application);
-      } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
+    const testApp = createTestApp();
+    app = testApp.app;
+    services = testApp.services;
+    jest.clearAllMocks();
   });
 
-  describe('POST /api/applications', () => {
-    it('should create a new application', async () => {
-      const mockApplication = {
-        id: '1',
-        type: 'entry',
-        author_user_id: 'user123',
-        author_character_id: 'char456',
-        status: 'awaiting_interview',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-        data: null,
-        result: null,
-        review_comment: null,
-        reviewer_character_id: null,
-        status_history: []
+  describe('POST /', () => {
+    it('should create a new application and return 201', async () => {
+      const newApplicationData = { type: 'entry', data: { department: 'LSPD' } };
+      const createdApplication = {
+        id: MOCK_APPLICATION_ID,
+        author_user_id: MOCK_USER_ID,
+        ...newApplicationData
       };
 
-      (mockApplicationService.createApplication as jest.Mock).mockResolvedValue(mockApplication);
+      (services.applicationService.getUserApplications as jest.Mock).mockResolvedValue([]);
+      (services.applicationService.createApplication as jest.Mock).mockResolvedValue(createdApplication);
 
       const response = await request(app)
-        .post('/api/applications')
-        .send({
-          type: 'entry',
-          author_user_id: 'user123',
-          author_character_id: 'char456'
-        })
-        .expect(200);
+        .post('/api/v1/applications')
+        .send(newApplicationData)
+        .expect(201);
 
-      expect(mockApplicationService.createApplication).toHaveBeenCalledWith({
-        type: 'entry',
-        author_user_id: 'user123',
-        author_character_id: 'char456'
+      expect(response.body).toEqual(createdApplication);
+      expect(services.applicationService.createApplication).toHaveBeenCalledWith({
+        ...newApplicationData,
+        author_user_id: MOCK_USER_ID,
+        author_character_id: MOCK_CHARACTER_ID,
       });
-      expect(response.body).toEqual(mockApplication);
     });
   });
 
-  describe('GET /api/applications/:id', () => {
-    it('should get application by id', async () => {
-      const mockApplication = {
-        id: '1',
-        type: 'entry',
-        author_user_id: 'user123',
-        author_character_id: 'char456',
-        status: 'awaiting_interview',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-        data: null,
-        result: null,
-        review_comment: null,
-        reviewer_character_id: null,
-        status_history: []
-      };
-
-      (mockApplicationService.getApplicationById as jest.Mock).mockResolvedValue(mockApplication);
+  describe('GET /:id', () => {
+    it('should get an application by ID and return 200', async () => {
+      const application = { id: MOCK_APPLICATION_ID, type: 'entry' };
+      (services.applicationService.getApplicationById as jest.Mock).mockResolvedValue(application);
 
       const response = await request(app)
-        .get('/api/applications/1')
+        .get(`/api/v1/applications/${MOCK_APPLICATION_ID}`)
         .expect(200);
 
-      expect(mockApplicationService.getApplicationById).toHaveBeenCalledWith('1');
-      expect(response.body).toEqual(mockApplication);
+      expect(response.body).toEqual(application);
+      expect(services.applicationService.getApplicationById).toHaveBeenCalledWith(MOCK_APPLICATION_ID);
     });
 
-    it('should return 404 when application not found', async () => {
-      (mockApplicationService.getApplicationById as jest.Mock).mockResolvedValue(null);
-
+    it('should return 404 if application not found', async () => {
+      (services.applicationService.getApplicationById as jest.Mock).mockResolvedValue(null);
       await request(app)
-        .get('/api/applications/999')
+        .get(`/api/v1/applications/${MOCK_APPLICATION_ID}`)
         .expect(404);
+    });
+  });
+
+  describe('PUT /:id/status', () => {
+    it('should update application status and return 200', async () => {
+      const updatedApplication = { id: MOCK_APPLICATION_ID, status: 'approved' };
+      (services.applicationService.updateApplication as jest.Mock).mockResolvedValue(updatedApplication);
+
+      const response = await request(app)
+        .put(`/api/v1/applications/${MOCK_APPLICATION_ID}/status`)
+        .send({ status: 'approved' })
+        .expect(200);
+
+      expect(response.body).toEqual(updatedApplication);
+      expect(services.applicationService.updateApplication).toHaveBeenCalledWith(MOCK_APPLICATION_ID, { status: 'approved' });
+    });
+  });
+
+  describe('Application Limits', () => {
+    it('should return 429 when creating more than 3 applications per month', async () => {
+        const applicationsThisMonth = [
+            { id: '1', created_at: new Date().toISOString() },
+            { id: '2', created_at: new Date().toISOString() },
+            { id: '3', created_at: new Date().toISOString() },
+        ];
+        (services.applicationService.getUserApplications as jest.Mock).mockResolvedValue(applicationsThisMonth);
+
+        const response = await request(app)
+            .post('/api/v1/applications')
+            .send({ type: 'entry', data: { department: 'SAFD' } })
+            .expect(429);
+
+        expect(response.body.error).toContain('Лимит заявок на этот месяц исчерпан');
+        expect(services.applicationService.createApplication).not.toHaveBeenCalled();
+    });
+
+    it('should allow creating an application if limit is not reached', async () => {
+        const applicationsThisMonth = [
+            { id: '1', created_at: new Date().toISOString() },
+            { id: '2', created_at: new Date().toISOString() },
+        ];
+        (services.applicationService.getUserApplications as jest.Mock).mockResolvedValue(applicationsThisMonth);
+        (services.applicationService.createApplication as jest.Mock).mockResolvedValue({ id: '4' });
+
+        await request(app)
+            .post('/api/v1/applications')
+            .send({ type: 'entry', data: { department: 'LSSD' } })
+            .expect(201);
+
+        expect(services.applicationService.createApplication).toHaveBeenCalled();
     });
   });
 }); 

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AppError } from './AppError';
 
 /**
  * Обработчик ошибок валидации Zod
@@ -32,6 +33,12 @@ export function handleApiError(error: unknown): {
   status: number;
   details?: any;
 } {
+  if (error instanceof AppError) {
+    return {
+      message: error.message,
+      status: error.statusCode,
+    };
+  }
   if (error instanceof z.ZodError) {
     return {
       message: 'Validation failed',

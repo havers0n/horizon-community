@@ -31,7 +31,7 @@
     "test": "npm run test:client && npm run test:mdt && npm run test:server",
     "test:client": "cd apps/client && npm run test",
     "test:mdt": "cd apps/mdtclient && npm run test",
-    "test:server": "cd apps/server && npm run test",
+    "test:server": "jest --config ./apps/server/jest.config.ts",
     "check-ports": "node scripts/check-ports.js",
     "check-production": "node scripts/check-production-config.js",
     "check-modules": "node scripts/fix-module-issues.js",
@@ -62,5 +62,8 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1"
   }
 }

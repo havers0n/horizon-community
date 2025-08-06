@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Схема регистрации пользователя
 export const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(50, 'Username must be 50 characters or less'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters')
 });
