@@ -1,0 +1,688 @@
+{
+	"info": {
+		"_postman_id": "roleplay-identity-tests-api",
+		"name": "RolePlay Identity - Tests API",
+		"description": "Коллекция для тестирования API эндпоинтов системы тестирования",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Публичные API",
+			"item": [
+				{
+					"name": "GET /api/tests - Доступные тесты",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests"
+							]
+						},
+						"description": "Получение списка доступных тестов для пользователя"
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/tests/:id - Детали теста",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tests/{{test_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"{{test_id}}"
+							]
+						},
+						"description": "Получение детальной информации о конкретном тесте"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tests/:id/passing/start - Начало теста",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tests/{{test_id}}/passing/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"{{test_id}}",
+								"passing",
+								"start"
+							]
+						},
+						"description": "Начало прохождения теста. Создает новую сессию тестирования."
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tests/:id/passing/end - Отправка ответов",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"result\": {{result_id}},\n  \"answers\": [\n    {\n      \"questionId\": 1,\n      \"answer\": \"A\"\n    },\n    {\n      \"questionId\": 2,\n      \"answer\": [\"B\", \"C\"]\n    },\n    {\n      \"questionId\": 3,\n      \"answer\": \"Текстовый ответ\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tests/{{test_id}}/passing/end",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"{{test_id}}",
+								"passing",
+								"end"
+							]
+						},
+						"description": "Отправка ответов на тест и завершение тестирования"
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/result - Результаты теста",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/result?id={{result_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"result"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{result_id}}"
+								}
+							]
+						},
+						"description": "Получение результатов конкретного теста"
+					},
+					"response": []
+				}
+			],
+			"description": "Публичные API эндпоинты для работы с тестами"
+		},
+		{
+			"name": "Административные API",
+			"item": [
+				{
+					"name": "GET /api/tests (Admin) - Все тесты",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests"
+							]
+						},
+						"description": "Получение всех тестов для администратора"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tests/new - Создание теста",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Тестовый тест API\",\n  \"description\": \"Тест для проверки API эндпоинтов\",\n  \"time\": 1800,\n  \"access\": {\n    \"type\": 1,\n    \"groups\": [\"test_group\"]\n  },\n  \"questions\": [\n    {\n      \"question\": \"Какой HTTP метод используется для получения данных?\",\n      \"type\": 0,\n      \"options\": [\"GET\", \"POST\", \"PUT\", \"DELETE\"],\n      \"correct\": [\"GET\"],\n      \"status\": 1\n    },\n    {\n      \"question\": \"Какие методы используются для изменения данных?\",\n      \"type\": 1,\n      \"options\": [\"GET\", \"POST\", \"PUT\", \"DELETE\"],\n      \"correct\": [\"POST\", \"PUT\", \"DELETE\"],\n      \"status\": 1\n    },\n    {\n      \"question\": \"Опишите принципы REST API\",\n      \"type\": 2,\n      \"correct\": \"REST API основан на принципах: клиент-сервер, отсутствие состояния, кэширование, единообразный интерфейс, многоуровневая система\",\n      \"status\": 1\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tests/new",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"new"
+							]
+						},
+						"description": "Создание нового теста администратором"
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/dashboard - Аналитика",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard"
+							]
+						},
+						"description": "Получение аналитики по тестам"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/admin/accept - Одобрение теста",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/accept?id={{result_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"accept"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{result_id}}"
+								}
+							]
+						},
+						"description": "Одобрение запроса на прохождение теста"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/admin/decline - Отклонение теста",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/decline?id={{result_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"decline"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{result_id}}"
+								}
+							]
+						},
+						"description": "Отклонение запроса на прохождение теста"
+					},
+					"response": []
+				}
+			],
+			"description": "Административные API эндпоинты для управления тестами"
+		},
+		{
+			"name": "Тесты безопасности",
+			"item": [
+				{
+					"name": "GET /api/tests без авторизации",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests"
+							]
+						},
+						"description": "Проверка защиты от неавторизованного доступа"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tests/new с обычным токеном",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Неавторизованный тест\",\n  \"description\": \"Попытка создания теста обычным пользователем\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tests/new",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"new"
+							]
+						},
+						"description": "Проверка защиты административных функций"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tests/:id/passing/end с неверными данными",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"result\": \"invalid_id\",\n  \"answers\": \"invalid_answers\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tests/1/passing/end",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"1",
+								"passing",
+								"end"
+							]
+						},
+						"description": "Проверка валидации входных данных"
+					},
+					"response": []
+				}
+			],
+			"description": "Тесты для проверки безопасности API"
+		},
+		{
+			"name": "Дополнительные эндпоинты",
+			"item": [
+				{
+					"name": "GET /api/tests/:id/time - Время теста",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tests/{{test_id}}/time",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"{{test_id}}",
+								"time"
+							]
+						},
+						"description": "Получение информации о времени теста"
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/tests/:id/access - Доступ к тесту",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tests/{{test_id}}/access",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"{{test_id}}",
+								"access"
+							]
+						},
+						"description": "Проверка доступа пользователя к тесту"
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tests/:id/passing/ka - Keep Alive",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"result\": {{result_id}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tests/{{test_id}}/passing/ka",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tests",
+								"{{test_id}}",
+								"passing",
+								"ka"
+							]
+						},
+						"description": "Keep Alive для активной сессии тестирования"
+					},
+					"response": []
+				}
+			],
+			"description": "Дополнительные эндпоинты системы тестирования"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Логирование запросов",
+					"console.log('Отправка запроса:', pm.request.method, pm.request.url);",
+					"",
+					"// Добавление временной метки",
+					"pm.request.headers.add({",
+					"    key: 'X-Request-Timestamp',",
+					"    value: new Date().toISOString()",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Автоматические тесты для каждого запроса",
+					"pm.test('Статус код успешный', function () {",
+					"    pm.response.to.have.status(200);",
+					"});",
+					"",
+					"pm.test('Время ответа меньше 5 секунд', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Content-Type установлен', function () {",
+					"    pm.response.to.have.header('Content-Type');",
+					"});",
+					"",
+					"// Проверка структуры JSON ответа",
+					"if (pm.response.headers.get('Content-Type').includes('application/json')) {",
+					"    pm.test('Ответ является валидным JSON', function () {",
+					"        pm.response.to.be.json;",
+					"    });",
+					"}",
+					"",
+					"// Сохранение переменных из ответа",
+					"if (pm.response.json().id) {",
+					"    pm.collectionVariables.set('last_created_id', pm.response.json().id);",
+					"}",
+					"",
+					"if (pm.response.json().testId) {",
+					"    pm.collectionVariables.set('test_id', pm.response.json().testId);",
+					"}",
+					"",
+					"if (pm.response.json().resultId) {",
+					"    pm.collectionVariables.set('result_id', pm.response.json().resultId);",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "user_token",
+			"value": "user_test_token",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "admin_test_token",
+			"type": "string"
+		},
+		{
+			"key": "test_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "result_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+} 

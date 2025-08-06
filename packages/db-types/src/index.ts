@@ -1526,6 +1526,7 @@ export type Database = {
       test_results: {
         Row: {
           answers: Json | null
+          comment: string | null
           created_at: string | null
           id: string
           max_score: number | null
@@ -1533,12 +1534,16 @@ export type Database = {
           percentage: number | null
           score: number | null
           session_id: string
+          status: string | null
           test_id: string
           time_spent_seconds: number | null
+          time_taken: number | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           answers?: Json | null
+          comment?: string | null
           created_at?: string | null
           id?: string
           max_score?: number | null
@@ -1546,12 +1551,16 @@ export type Database = {
           percentage?: number | null
           score?: number | null
           session_id: string
+          status?: string | null
           test_id: string
           time_spent_seconds?: number | null
+          time_taken?: number | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           answers?: Json | null
+          comment?: string | null
           created_at?: string | null
           id?: string
           max_score?: number | null
@@ -1559,8 +1568,11 @@ export type Database = {
           percentage?: number | null
           score?: number | null
           session_id?: string
+          status?: string | null
           test_id?: string
           time_spent_seconds?: number | null
+          time_taken?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1583,30 +1595,42 @@ export type Database = {
       test_sessions: {
         Row: {
           application_id: string | null
+          created_at: string | null
           end_time: string | null
           id: string
           start_time: string | null
           status: string
           test_id: string
+          time_limit: number | null
+          updated_at: string | null
           user_id: string
+          violation_reason: string | null
         }
         Insert: {
           application_id?: string | null
+          created_at?: string | null
           end_time?: string | null
           id?: string
           start_time?: string | null
           status: string
           test_id: string
+          time_limit?: number | null
+          updated_at?: string | null
           user_id: string
+          violation_reason?: string | null
         }
         Update: {
           application_id?: string | null
+          created_at?: string | null
           end_time?: string | null
           id?: string
           start_time?: string | null
           status?: string
           test_id?: string
+          time_limit?: number | null
+          updated_at?: string | null
           user_id?: string
+          violation_reason?: string | null
         }
         Relationships: [
           {
@@ -1627,25 +1651,43 @@ export type Database = {
       }
       tests: {
         Row: {
+          created_at: string | null
           description: string | null
           duration_minutes: number | null
           id: string
+          is_active: boolean | null
+          passing_score: number | null
           questions: Json | null
+          required_application_type: string | null
+          time_limit: number | null
           title: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          is_active?: boolean | null
+          passing_score?: number | null
           questions?: Json | null
+          required_application_type?: string | null
+          time_limit?: number | null
           title: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          is_active?: boolean | null
+          passing_score?: number | null
           questions?: Json | null
+          required_application_type?: string | null
+          time_limit?: number | null
           title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

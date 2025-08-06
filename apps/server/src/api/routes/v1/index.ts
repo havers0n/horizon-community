@@ -3,6 +3,7 @@ import type { ServicesContainer } from '../../../types/services';
 import { createCharacterRoutes } from './characters';
 import { createCabinetRoutes } from './cabinet';
 import { createAuthRoutes } from '../auth'; // <-- Импортируем фабричную функцию для auth роутов
+import { createTestRoutes } from './tests';
 import { authenticateToken } from '../../middleware/auth.middleware';
 
 // Временные заглушки для остальных роутов
@@ -327,6 +328,7 @@ export function createV1Router(services: ServicesContainer): Router {
   router.use('/admin', createAdminRoutes(services));
   router.use('/characters', createCharacterRoutes(services));
   router.use('/cabinet', createCabinetRoutes(services));
+  router.use('/tests', createTestRoutes(services));
   router.use('/report-templates', createReportTemplatesRoutes(services));
   router.use('/ems-fd-reports', createEmsFdReportsRoutes(services));
   router.use('/law-reports', createLawReportsRoutes(services));

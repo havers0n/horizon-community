@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { realTimeService } from '../../core/services/index.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
+import { getCADWebSocket } from '../../websocket.js';
 
 const router: Router = Router();
 
@@ -71,7 +72,7 @@ router.get('/events', authenticateToken, (req: Request, res: Response) => {
 router.get('/stats', authenticateToken, (req: Request, res: Response) => {
   try {
     const stats = realTimeService.getCacheStats();
-    const wsServer = require('../websocket.js').getCADWebSocket();
+    const wsServer = getCADWebSocket();
     
     res.json({
       success: true,
