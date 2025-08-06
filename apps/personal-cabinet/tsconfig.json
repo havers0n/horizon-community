@@ -39,14 +39,17 @@
       "@ui": ["../../libs/ui-components/src"],
       
       // === ДОБАВЛЕННЫЙ ПУТЬ К ТИПАМ ===
-      "@roleplay-identity/db-types": ["../../packages/db-types/src/index.ts"]
+      "@roleplay-identity/db-types": ["../../packages/db-types/src/index.ts"],
+      "@roleplay-identity/shared-types": ["../../libs/shared-types/src/index.ts"],
+      "@roleplay-identity/shared-types/*": ["../../libs/shared-types/src/*"]
     }
   },
   "include": [
     "src", 
     "../../libs/ui-components/src",
     // Я также добавил путь к db-types в include для лучшей интеграции с IDE
-    "../../packages/db-types/src" 
+    "../../packages/db-types/src",
+    "../../libs/shared-types/src"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

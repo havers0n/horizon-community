@@ -1243,10 +1243,13 @@ export interface UpdateUserData {
 }
 
 // ===========================================
-// СУЩЕСТВУЮЩИЕ ТИПЫ (MDT Client)
+// РОЛИ ПОЛЬЗОВАТЕЛЕЙ (Единый источник истины)
 // ===========================================
 
-// MDT Client specific enums and types
+// Экспортируем все из централизованного файла ролей
+export * from './roles';
+
+// Для обратной совместимости с MDT Client
 export enum UserRole {
   CITIZEN = 'Citizen',
   LEO = 'LEO',

@@ -36,7 +36,8 @@
     "check-production": "node scripts/check-production-config.js",
     "check-modules": "node scripts/fix-module-issues.js",
     "force-rebuild": "node scripts/force-rebuild.js",
-    "db:sync": "node scripts/sync-db-types.mjs"
+    "db:sync": "node scripts/sync-db-types.mjs",
+    "sync:roles": "node scripts/sync-roles.mjs"
   },
   "workspaces": [
     "apps/*",
