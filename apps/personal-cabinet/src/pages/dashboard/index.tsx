@@ -1,215 +1,305 @@
-import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import { DashboardStats } from '@/features/dashboard/ui/dashboard-stats'
-import { QuickActions } from '@/features/dashboard/ui/quick-actions'
-import { ApplicationModal } from '@/features/applications'
-import { AchievementsModal } from '@/features/achievements'
-import { ComplaintModal } from '@/features/complaints'
-import { SupportModal } from '@/features/support'
-import { EntryApplicationModal } from '@/features/entry-application'
-import { LeaveModal } from '@/features/leave-management'
-import { TransferModal } from '@/features/transfer-department'
-import { JointModal } from '@/features/joint-positions'
-import { Plus, Bell, Trophy, AlertTriangle, HelpCircle, UserPlus, CalendarDays, Building2, Handshake } from 'lucide-react'
+import React from 'react';
+import { Layout } from '@/shared/ui';
+import { Card, CardContent, Skeleton } from '@/shared/ui';
+import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
+import { transformDashboardData } from '@/features/dashboard/model/types';
+import { ProfileWidget } from '@/widgets/dashboard/ui/profile-widget';
+import { FeedWidget } from '@/widgets/dashboard/ui/feed-widget';
+import { QuickActionsWidget } from '@/widgets/dashboard/ui/quick-actions-widget';
+import { AnnouncementsWidget } from '@/widgets/dashboard/ui/announcements-widget';
+import { UsefulLinksWidget } from '@/widgets/dashboard/ui/useful-links-widget';
+import { StatisticsWidget } from '@/widgets/dashboard/ui/statistics-widget';
+import { ApplicationStatusWidget } from '@/widgets/dashboard/ui/application-status-widget';
+import { NextStepsWidget } from '@/widgets/dashboard/ui/next-steps-widget';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
-// Расширенный интерфейс для Activity
-interface ExtendedActivity {
-  id: string
-  type: string
-  title: string
-  description: string
-  timestamp: Date
-  status: string
-}
+// Функция для определения роли кандидата
+const isCandidate = (role: string): boolean => {
+  return ['candidate', 'cadet_test', 'cadet_practice'].includes(role);
+};
 
-export default function DashboardPage() {
-  
-  const mockActivities: ExtendedActivity[] = [
-    {
-      id: '1',
-      type: 'application',
-      title: 'Заявка на повышение одобрена',
-      description: 'Ваша заявка на повышение до старшего офицера была одобрена',
-      timestamp: new Date('2024-01-15T10:30:00'),
-      status: 'completed'
-    },
-    {
-      id: '2',
-      type: 'leave',
-      title: 'Заявка на отпуск',
-      description: 'Заявка на ежегодный отпуск с 1 по 15 февраля',
-      timestamp: new Date('2024-01-14T14:20:00'),
-      status: 'pending'
-    },
-    {
-      id: '3',
-      type: 'transfer',
-      title: 'Перевод в следственный отдел',
-      description: 'Заявка на перевод в следственный отдел рассмотрена',
-      timestamp: new Date('2024-01-13T09:15:00'),
-      status: 'approved'
-    }
-  ]
+// Функция для определения роли участника
+const isMember = (role: string): boolean => {
+  return ['citizen', 'staff', 'admin'].includes(role);
+};
 
-  const mockStats = {
-    activeSessions: 5,
-    documents: 12,
-    timeSpent: '18 дней',
-    productivity: 85
-  }
-
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Панель управления</h1>
-          <p className="text-muted-foreground">Добро пожаловать в личный кабинет</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="icon">
-            <Bell className="h-4 w-4" />
-          </Button>
-          
-          <AchievementsModal>
-            <Button variant="outline" size="icon">
-              <Trophy className="h-4 w-4" />
-            </Button>
-          </AchievementsModal>
-
-          <ComplaintModal>
-            <Button variant="outline" size="icon">
-              <AlertTriangle className="h-4 w-4" />
-            </Button>
-          </ComplaintModal>
-
-          <SupportModal>
-            <Button variant="outline" size="icon">
-              <HelpCircle className="h-4 w-4" />
-            </Button>
-          </SupportModal>
-          
-          <ApplicationModal>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Создать заявку
-            </Button>
-          </ApplicationModal>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Основная статистика */}
-        <div className="lg:col-span-2">
-          <DashboardStats stats={mockStats} />
-        </div>
-
-        {/* Быстрые действия */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Быстрые действия</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <QuickActions />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Недавняя активность */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Недавняя активность</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockActivities.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{activity.title}</h4>
-                    <p className="text-sm text-muted-foreground">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {activity.timestamp.toLocaleDateString('ru-RU')}
-                    </p>
-                  </div>
-                  <div className={`px-2 py-1 rounded text-xs ${
-                    activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {activity.status === 'completed' ? 'Завершено' :
-                     activity.status === 'pending' ? 'На рассмотрении' : 'Одобрено'}
-                  </div>
-                </div>
-              ))}
-            </div>
+// Компонент загрузки
+const DashboardSkeleton = () => (
+  <div className="space-y-6">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {[...Array(6)].map((_, i) => (
+        <Card key={i}>
+          <CardContent className="p-6">
+            <Skeleton className="h-4 w-3/4 mb-4" />
+            <Skeleton className="h-20 w-full" />
           </CardContent>
         </Card>
-
-
-      </div>
-
-      {/* Новые модальные окна */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <EntryApplicationModal>
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <UserPlus className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Заявка на вступление</h3>
-                  <p className="text-sm text-muted-foreground">Подать заявку на вступление в организацию</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </EntryApplicationModal>
-
-        <LeaveModal>
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <CalendarDays className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Управление отпусками</h3>
-                  <p className="text-sm text-muted-foreground">Подать заявку на отпуск или посмотреть историю</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </LeaveModal>
-
-        <TransferModal>
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <Building2 className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Переводы</h3>
-                  <p className="text-sm text-muted-foreground">Заявка на перевод между департаментами</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TransferModal>
-
-        <JointModal>
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <Handshake className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Совместные позиции</h3>
-                  <p className="text-sm text-muted-foreground">Управление совместными позициями</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </JointModal>
-      </div>
-
-
+      ))}
     </div>
-  )
+  </div>
+);
+
+// Компонент ошибки
+const DashboardError = ({ error }: { error: Error }) => (
+  <Card>
+    <CardContent className="p-6">
+      <div className="text-center">
+        <div className="text-red-500 mb-4">
+          <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Ошибка загрузки дашборда
+        </h3>
+        <p className="text-gray-600 mb-4">
+          {error.message || 'Не удалось загрузить данные дашборда'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Попробовать снова
+        </button>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { data, isLoading, error } = useDashboardData();
+
+  // Обработчики для быстрых действий
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'promotion':
+        navigate('/applications/promotion');
+        break;
+      case 'transfer':
+        navigate('/applications/transfer');
+        break;
+      case 'combination':
+        navigate('/applications/combination');
+        break;
+      case 'vacation':
+        navigate('/applications/vacation');
+        break;
+      case 'report':
+        navigate('/reports/new');
+        break;
+      case 'complaint':
+        navigate('/complaints/new');
+        break;
+      default:
+        toast.info('Функция в разработке');
+    }
+  };
+
+  // Создание действий для QuickActionsWidget
+  const createQuickActions = (isCandidateRole: boolean) => {
+    if (isCandidateRole) {
+      return [
+        {
+          id: '1',
+          title: 'Подать заявку',
+          icon: 'FileText',
+          action: () => handleQuickAction('application'),
+          category: 'career' as const,
+        },
+        {
+          id: '2',
+          title: 'Пройти тест',
+          icon: 'Book',
+          action: () => handleQuickAction('test'),
+          category: 'career' as const,
+        },
+      ];
+    }
+
+    return [
+      {
+        id: '1',
+        title: '↑ Повышение',
+        icon: 'ArrowUp',
+        action: () => handleQuickAction('promotion'),
+        category: 'career' as const,
+      },
+      {
+        id: '2',
+        title: '⇄ Перевод',
+        icon: 'ArrowUpDown',
+        action: () => handleQuickAction('transfer'),
+        category: 'career' as const,
+      },
+      {
+        id: '3',
+        title: '⚯ Комбинация',
+        icon: 'Link',
+        action: () => handleQuickAction('combination'),
+        category: 'career' as const,
+      },
+      {
+        id: '4',
+        title: '✈ Отпуск',
+        icon: 'Plane',
+        action: () => handleQuickAction('vacation'),
+        category: 'career' as const,
+      },
+      {
+        id: '5',
+        title: 'Подать рапорт',
+        icon: 'FileText',
+        action: () => handleQuickAction('report'),
+        category: 'documentation' as const,
+      },
+      {
+        id: '6',
+        title: '▲ Подать жалобу',
+        icon: 'AlertTriangle',
+        action: () => handleQuickAction('complaint'),
+        category: 'documentation' as const,
+        variant: 'warning' as const,
+      },
+    ];
+  };
+
+  // Обработка состояний загрузки и ошибок
+  if (isLoading) {
+    return (
+      <Layout>
+        <DashboardSkeleton />
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <DashboardError error={error} />
+      </Layout>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Layout>
+        <DashboardError error={new Error('Данные не найдены')} />
+      </Layout>
+    );
+  }
+
+  // Преобразование данных для виджетов
+  const transformedData = transformDashboardData(data);
+  const isCandidateRole = isCandidate(data.user.role);
+  const isMemberRole = isMember(data.user.role);
+  const quickActions = createQuickActions(isCandidateRole);
+
+  return (
+    <Layout>
+      <div className="space-y-6">
+        {/* Role-based Dashboard */}
+        {isCandidateRole ? (
+          // Dashboard для кандидатов
+          <div className="space-y-6">
+            {/* Welcome Block */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-gray-900">
+                      Добро пожаловать, {data.user.firstName || "Пользователь"}!
+                    </h1>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Ваш статус: <span className="font-medium text-yellow-600">
+                        {data.user.role === "candidate" ? "Кандидат" : 
+                         data.user.role === "cadet_test" ? "Кадет на тестировании" : 
+                         data.user.role === "cadet_practice" ? "Кадет на практике" : "Кандидат"}
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-2">
+                      У вас осталось <span className="font-semibold text-primary">
+                        {data.user.attemptsLeft || 0} попыток
+                      </span> для подачи заявки в этом месяце.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      В ожидании
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Candidate Dashboard Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Application Status Widget */}
+              {transformedData.applicationStatus && (
+                <ApplicationStatusWidget {...transformedData.applicationStatus} />
+              )}
+
+              {/* Quick Actions Widget */}
+              <QuickActionsWidget actions={quickActions} />
+
+              {/* Next Steps Widget */}
+              {transformedData.nextSteps && (
+                <NextStepsWidget steps={transformedData.nextSteps} />
+              )}
+
+              {/* Feed Widget */}
+              <FeedWidget activities={transformedData.feed} />
+
+              {/* Announcements Widget */}
+              <AnnouncementsWidget announcements={transformedData.announcements} />
+
+              {/* Useful Links Widget */}
+              <UsefulLinksWidget links={transformedData.usefulLinks} />
+            </div>
+          </div>
+        ) : isMemberRole ? (
+          // Dashboard для участников сообщества
+          <div className="space-y-6">
+            {/* Member Dashboard Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Profile Widget */}
+              <ProfileWidget {...transformedData.profile} />
+
+              {/* Quick Actions Widget */}
+              <QuickActionsWidget actions={quickActions} />
+
+              {/* Useful Links Widget */}
+              <UsefulLinksWidget links={transformedData.usefulLinks} />
+
+              {/* Feed Widget */}
+              <FeedWidget activities={transformedData.feed} />
+
+              {/* Announcements Widget */}
+              <AnnouncementsWidget announcements={transformedData.announcements} />
+
+              {/* Statistics Widget */}
+              {transformedData.statistics && (
+                <StatisticsWidget statistics={transformedData.statistics} />
+              )}
+            </div>
+          </div>
+        ) : (
+          // Fallback для неизвестных ролей
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Неизвестная роль пользователя
+                </h3>
+                <p className="text-gray-600">
+                  Пожалуйста, обратитесь к администратору для настройки прав доступа.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </Layout>
+  );
 } 

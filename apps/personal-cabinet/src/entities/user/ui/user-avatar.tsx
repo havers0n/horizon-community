@@ -19,11 +19,11 @@ export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProp
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
   }
 
-  if (user.avatar) {
+  if (user.avatarUrl) {
     return (
       <img
-        src={user.avatar}
-        alt={`${user.firstName} ${user.lastName}`}
+        src={user.avatarUrl}
+        alt={`${user.firstName || ''} ${user.lastName || ''}`}
         className={`rounded-full object-cover ${sizeClasses[size]} ${className}`}
       />
     )

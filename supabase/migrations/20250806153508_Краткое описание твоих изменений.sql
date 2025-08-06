@@ -237,7 +237,7 @@ ALTER TYPE "public"."bolo_with_author" OWNER TO "postgres";
 
 CREATE TYPE "public"."character_with_profile" AS (
 	"id" "uuid",
-	"user_id" "uuid",
+	"owner_id" "uuid",
 	"first_name" "text",
 	"last_name" "text",
 	"date_of_birth" "date",
@@ -420,8 +420,7 @@ COMMENT ON COLUMN "common"."characters"."ssn" IS 'Уникальный номе�
 CREATE OR REPLACE FUNCTION "public"."create_new_character"("p_data" "jsonb") RETURNS SETOF "common"."characters"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'common', 'mdt'
-    AS $$
-BEGIN
+    AS $$BEGIN
   RETURN QUERY INSERT INTO common.characters (
     user_id, first_name, last_name, date_of_birth, gender, phone_number,
     address, occupation, ssn, licenses, medical_info, mugshot_url, flags
@@ -433,8 +432,7 @@ BEGIN
     (SELECT array_agg(value) FROM jsonb_array_elements_text(COALESCE(p_data->'flags', '[]'::jsonb)) AS t(value))
   )
   RETURNING *;
-END;
-$$;
+END;$$;
 
 
 ALTER FUNCTION "public"."create_new_character"("p_data" "jsonb") OWNER TO "postgres";
@@ -442,16 +440,14 @@ ALTER FUNCTION "public"."create_new_character"("p_data" "jsonb") OWNER TO "postg
 
 CREATE OR REPLACE FUNCTION "public"."create_new_character"("p_first_name" "text", "p_last_name" "text", "p_date_of_birth" "date", "p_ssn" "text") RETURNS SETOF "common"."characters"
     LANGUAGE "plpgsql"
-    AS $$
-DECLARE
+    AS $$DECLARE
   new_character common.characters;
 BEGIN
   INSERT INTO common.characters (user_id, first_name, last_name, date_of_birth, ssn)
   VALUES (auth.uid(), p_first_name, p_last_name, p_date_of_birth, p_ssn)
   RETURNING * INTO new_character;
   RETURN NEXT new_character;
-END;
-$$;
+END;$$;
 
 
 ALTER FUNCTION "public"."create_new_character"("p_first_name" "text", "p_last_name" "text", "p_date_of_birth" "date", "p_ssn" "text") OWNER TO "postgres";
@@ -1044,7 +1040,7 @@ CREATE OR REPLACE FUNCTION "public"."get_character_count_by_owner"("p_owner_id" 
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN (SELECT COUNT(*) FROM common.characters WHERE user_id = p_owner_id);
+  RETURN (SELECT COUNT(*) FROM common.characters WHERE owner_id = p_owner_id);
 END;
 $$;
 
@@ -1083,8 +1079,8 @@ CREATE OR REPLACE FUNCTION "public"."get_character_with_profile"("p_character_id
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN QUERY SELECT c.id, c.user_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
-  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.user_id = p.id WHERE c.id = p_character_id;
+  RETURN QUERY SELECT c.id, c.owner_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
+  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.owner_id = p.id WHERE c.id = p_character_id;
 END;
 $$;
 
@@ -1138,7 +1134,7 @@ CREATE OR REPLACE FUNCTION "public"."get_characters_with_filters"("p_owner_id" "
 BEGIN
   RETURN QUERY 
   SELECT * FROM common.characters 
-  WHERE (p_owner_id IS NULL OR user_id = p_owner_id)
+  WHERE (p_owner_id IS NULL OR owner_id = p_owner_id)
     AND (p_gender IS NULL OR gender = p_gender)
     AND (p_occupation IS NULL OR occupation = p_occupation)
   ORDER BY created_at DESC
@@ -1155,8 +1151,8 @@ CREATE OR REPLACE FUNCTION "public"."get_characters_with_profiles"("p_owner_id" 
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN QUERY SELECT c.id, c.user_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
-  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.user_id = p.id WHERE c.user_id = p_owner_id ORDER BY c.created_at DESC;
+  RETURN QUERY SELECT c.id, c.owner_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
+  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.owner_id = p.id WHERE c.owner_id = p_owner_id ORDER BY c.created_at DESC;
 END;
 $$;
 
@@ -1168,7 +1164,7 @@ CREATE OR REPLACE FUNCTION "public"."get_my_characters"() RETURNS SETOF "common"
     LANGUAGE "plpgsql"
     AS $$
 BEGIN
-  RETURN QUERY SELECT * FROM common.characters WHERE user_id = auth.uid();
+  RETURN QUERY SELECT * FROM common.characters WHERE owner_id = auth.uid();
 END;
 $$;
 
@@ -1181,7 +1177,7 @@ CREATE OR REPLACE FUNCTION "public"."get_my_characters"("p_user_id" "uuid") RETU
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN QUERY SELECT * FROM common.characters WHERE user_id = p_user_id ORDER BY created_at DESC;
+  RETURN QUERY SELECT * FROM common.characters WHERE owner_id = p_user_id ORDER BY created_at DESC;
 END;
 $$;
 
@@ -1419,7 +1415,7 @@ BEGIN
   IF (SELECT role FROM public.profiles WHERE id = auth.uid()) <> 'admin' THEN
     RAISE EXCEPTION 'Insufficient permissions: Only admins can transfer character ownership.';
   END IF;
-  UPDATE common.characters SET user_id = p_new_owner_id, updated_at = NOW() WHERE id = p_character_id;
+  UPDATE common.characters SET owner_id = p_new_owner_id, updated_at = NOW() WHERE id = p_character_id;
   RETURN FOUND;
 END;
 $$;
@@ -3066,11 +3062,31 @@ CREATE TABLE IF NOT EXISTS "public"."user_stats" (
     "user_id" "uuid" NOT NULL,
     "level" integer DEFAULT 1,
     "experience" integer DEFAULT 0,
-    "last_activity" timestamp with time zone
+    "last_activity" timestamp with time zone,
+    "reputation" numeric(3,1) DEFAULT 5.0,
+    "playtime_minutes" integer DEFAULT 0,
+    "warnings_game" integer DEFAULT 0,
+    "warnings_admin" integer DEFAULT 0
 );
 
 
 ALTER TABLE "public"."user_stats" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."user_stats"."reputation" IS 'User reputation score, e.g., 4.8 out of 5.0';
+
+
+
+COMMENT ON COLUMN "public"."user_stats"."playtime_minutes" IS 'Total gameplay time in minutes';
+
+
+
+COMMENT ON COLUMN "public"."user_stats"."warnings_game" IS 'Count of in-game rule violations';
+
+
+
+COMMENT ON COLUMN "public"."user_stats"."warnings_admin" IS 'Count of administrative or community rule violations';
+
 
 
 CREATE SEQUENCE IF NOT EXISTS "public"."user_stats_id_seq"
@@ -5168,6 +5184,7 @@ GRANT ALL ON FUNCTION "public"."create_new_call"("p_data" "jsonb") TO "service_r
 
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "common"."characters" TO "authenticated";
+GRANT ALL ON TABLE "common"."characters" TO "service_user";
 
 
 
@@ -5255,6 +5272,7 @@ GRANT ALL ON FUNCTION "public"."get_active_bolos_with_author"() TO "service_role
 
 
 
+GRANT ALL ON TABLE "mdt"."calls" TO "service_user";
 
 
 
@@ -5264,6 +5282,7 @@ GRANT ALL ON FUNCTION "public"."get_active_calls"() TO "service_role";
 
 
 
+GRANT ALL ON TABLE "mdt"."mdt_signals" TO "service_user";
 
 
 
@@ -5273,6 +5292,7 @@ GRANT ALL ON FUNCTION "public"."get_active_signals"() TO "service_role";
 
 
 
+GRANT ALL ON TABLE "mdt"."units_on_duty" TO "service_user";
 
 
 
@@ -5294,6 +5314,7 @@ GRANT ALL ON FUNCTION "public"."get_all_departments"() TO "service_role";
 
 
 
+GRANT ALL ON TABLE "mdt"."bolos" TO "service_user";
 
 
 
@@ -5453,6 +5474,7 @@ GRANT ALL ON FUNCTION "public"."get_units_by_user"("p_user_id" "uuid") TO "servi
 
 
 
+GRANT ALL ON TABLE "mdt"."notifications" TO "service_user";
 
 
 
@@ -5627,53 +5649,69 @@ GRANT ALL ON FUNCTION "public"."validate_character_data"() TO "service_role";
 
 
 
+GRANT ALL ON TABLE "common"."cargo_shipments" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."character_career_history" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."character_qualifications" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."companies" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."company_employees" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."departments" TO "service_user";
 GRANT SELECT ON TABLE "common"."departments" TO "anon";
 GRANT SELECT ON TABLE "common"."departments" TO "authenticated";
 
 
 
+GRANT ALL ON TABLE "common"."divisions" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."ems_profiles" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."impound_lots" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."impounded_vehicles" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."leo_profiles" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."pets" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."qualifications" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."ranks" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."units" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "common"."vehicles" TO "service_user";
 
 
 
@@ -5683,6 +5721,7 @@ GRANT ALL ON SEQUENCE "common"."vehicles_id_seq" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "common"."weapons" TO "service_user";
 
 
 
@@ -5782,39 +5821,51 @@ GRANT ALL ON SEQUENCE "forum"."forum_views_id_seq" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "mdt"."applications" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."complaints" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."ems_fd_reports" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."law_reports" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."mdt_signal_notifications" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."notebook_notes" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."report_participants" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."report_templates" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."support_tickets" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."test_results" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."test_sessions" TO "service_user";
 
 
 
+GRANT ALL ON TABLE "mdt"."tests" TO "service_user";
 
 
 
@@ -5945,10 +5996,12 @@ GRANT ALL ON SEQUENCE "public"."user_stats_id_seq" TO "service_role";
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "common" GRANT SELECT ON TABLES TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "common" GRANT ALL ON TABLES TO "service_user";
 
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "mdt" GRANT SELECT ON TABLES TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "mdt" GRANT ALL ON TABLES TO "service_user";
 
 
 

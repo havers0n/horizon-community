@@ -1,14 +1,9 @@
 // src/shared/api/api-client.ts
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { QueryClient } from '@tanstack/react-query';
 
-// Для управления сессией мы будем использовать специальный модуль, а не localStorage напрямую.
-// Это может быть простой объект или хук из entities/session.
-// Пока предположим, что у него есть такие методы.
-import { sessionApi } from '@/entities/session'; 
-
-// Эти типы лучше вынести в отдельный файл, например, src/shared/api/types.ts,
-// чтобы этот файл оставался чистым.
+// Типы для API ответов
 export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
@@ -25,7 +20,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   };
 }
 
-// Создаем типизированный API клиент
+// Типизированный API клиент
 interface TypedApiClient {
   get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
   post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
@@ -34,20 +29,54 @@ interface TypedApiClient {
   patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
 }
 
-// 1. Убираем класс. Создаем простой инстанс axios.
+// Утилита для получения токена из localStorage
+const getAccessToken = (): string | null => {
+  // Проверяем все возможные ключи токенов для совместимости
+  return localStorage.getItem('accessToken') || 
+         localStorage.getItem('access_token') || 
+         localStorage.getItem('authToken');
+};
+
+// Утилита для очистки сессии
+const clearSession = (): void => {
+  // Очищаем все возможные ключи токенов для совместимости
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('authUser');
+};
+
+// Создание axios инстанса с правильной базовой URL
+const getBaseUrl = (): string => {
+  let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  
+  // Если VITE_API_URL не содержит /api, добавляем его
+  if (baseUrl && !baseUrl.includes('/api')) {
+    baseUrl = `${baseUrl}/api`;
+  }
+  
+  // Логирование API конфигурации
+  console.log('🔧 [Personal Cabinet] API конфигурация:')
+  console.log('🔧 [Personal Cabinet] VITE_API_URL:', import.meta.env.VITE_API_URL ? '✅ Установлен' : '❌ Отсутствует')
+  console.log('🔧 [Personal Cabinet] Итоговый baseURL:', baseUrl)
+  
+  return baseUrl;
+};
+
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 секунд таймаут
 });
 
-// 2. Настраиваем интерцепторы на этом инстансе.
-// Request Interceptor
+// Request Interceptor - автоматическое добавление токена
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Декуплируем логику получения токена. Клиент не должен знать про localStorage.
-    const token = sessionApi.getAccessToken(); 
+    const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -56,51 +85,53 @@ axiosInstance.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// Response Interceptor
+// Response Interceptor - обработка ошибок и автоматическое обновление токена
 axiosInstance.interceptors.response.use(
-  // 3. ВОТ ГЛАВНОЕ УЛУЧШЕНИЕ:
-  // При успешном ответе мы сразу возвращаем `response.data`.
-  // Теперь в useQuery и useMutation нам не нужно будет писать `res.data`. Мы сразу получим полезную нагрузку.
   (response: AxiosResponse) => {
+    // Возвращаем только data из ответа
     return response.data;
   },
-  // Обработка ошибок
   async (error: AxiosError) => {
-    // Если это не ошибка от axios (например, ошибка в коде выше), просто пробрасываем ее
     if (!error.isAxiosError) {
       return Promise.reject(error);
     }
     
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-    // Логика обновления токена
+    // Логика обновления токена при 401 ошибке
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
+      
       try {
-        // Логику обновления токена тоже делегируем sessionApi
-        const newAccessToken = await sessionApi.refreshToken();
-        if (newAccessToken && originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          // Повторяем оригинальный запрос с новым токеном.
-          // Важно! Мы возвращаем результат вызова, а не просто вызываем.
-          // И мы используем apiClient, а не axios, чтобы снова пройти через интерцепторы.
-          return axiosInstance(originalRequest);
+        // Попытка обновления токена
+        const refreshToken = localStorage.getItem('refreshToken') || 
+                           localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          const response = await axios.post(`${getBaseUrl()}/auth/refresh`, {
+            refreshToken
+          });
+          
+          const { accessToken } = response.data;
+          if (accessToken) {
+            // Сохраняем токен во все возможные ключи для совместимости
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('authToken', accessToken);
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            }
+            return axiosInstance(originalRequest);
+          }
         }
-      } catch (refreshError: unknown) {
-        // Если обновление токена не удалось, выходим из системы.
-        sessionApi.clearSession();
-        // 4. ДЕКУПЛИРУЕМ РЕДИРЕКТ:
-        // Вместо window.location.href, мы отправляем кастомное событие.
-        // В корневом компоненте (App.tsx) можно повесить слушатель и сделать редирект там.
-        // Это позволяет API-слою не знать о роутинге.
+      } catch (refreshError) {
+        // Если обновление не удалось, очищаем сессию
+        clearSession();
         window.dispatchEvent(new Event('unauthorized'));
         return Promise.reject(refreshError);
       }
     }
     
-    // 5. УЛУЧШЕНИЕ ОБРАБОТКИ ОШИБОК:
-    // Если у бэкенда есть стандартный формат ошибок, извлекаем его.
-    // TanStack Query получит чистый объект ошибки, а не весь AxiosError.
+    // Возвращаем ошибку в стандартном формате
     if (error.response?.data) {
       return Promise.reject(error.response.data);
     }
@@ -109,16 +140,52 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// Создаем типизированный API клиент
+// Экспорт типизированного API клиента
 export const apiClient: TypedApiClient = axiosInstance;
 
-// Функция для загрузки файлов с типизированным прогрессом
+// QueryClient для TanStack Query
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 минут
+      gcTime: 10 * 60 * 1000, // 10 минут
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Утилита для создания query функций с обработкой 401 ошибок
+type QueryFunction<T> = ({ queryKey }: { queryKey: string[] }) => Promise<T>;
+type UnauthorizedBehavior = "returnNull" | "throw";
+
+export const createQueryFn = <T>(options: {
+  on401: UnauthorizedBehavior;
+}): QueryFunction<T> => {
+  return async ({ queryKey }) => {
+    const [_, url] = queryKey;
+    
+    try {
+      const response = await apiClient.get<T>(url);
+      return response;
+    } catch (error: any) {
+      if (error.status === 401 || error.statusCode === 401) {
+        if (options.on401 === "returnNull") return null as T;
+        throw new Error("Unauthorized");
+      }
+      throw error;
+    }
+  };
+};
+
+// Утилита для загрузки файлов с прогрессом
 export const uploadFileWithProgress = (
   file: File, 
   onProgress?: (progressEvent: { loaded: number; total: number }) => void
 ) => {
   const formData = new FormData();
   formData.append('file', file);
+  
   return apiClient.post('/files/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (progressEvent) => {
@@ -132,21 +199,25 @@ export const uploadFileWithProgress = (
   });
 };
 
-/*
-  ЧТО ДЕЛАТЬ С ОСТАЛЬНЫМИ МЕТОДАМИ? (uploadFile, downloadFile)
+// Универсальная функция для API запросов (для обратной совместимости)
+export async function apiRequest(
+  method: string,
+  url: string,
+  data?: unknown,
+): Promise<Response> {
+  const config: AxiosRequestConfig = {
+    method: method.toLowerCase() as any,
+    url,
+    data: data ? JSON.stringify(data) : undefined,
+  };
 
-  Они больше не являются частью клиента. Они становятся отдельными функциями
-  в своих собственных файлах, которые используют наш apiClient.
-
-  Пример: src/shared/api/file-api.ts
-
-  import { apiClient } from './api-client';
-
-  export const uploadFile = (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return apiClient.post('/files/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+  try {
+    const response = await axiosInstance(config);
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message || 'Network error');
   }
-*/
+}

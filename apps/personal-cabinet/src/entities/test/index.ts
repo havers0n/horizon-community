@@ -1,10 +1,10 @@
-// Re-export types from the centralized db-types package
-export type { Tests } from '@roleplay-identity/db-types'
-export type { TestResults } from '@roleplay-identity/db-types'
-export type { TestsInsert } from '@roleplay-identity/db-types'
-export type { TestResultsInsert } from '@roleplay-identity/db-types'
-export type { TestsUpdate } from '@roleplay-identity/db-types'
-export type { TestResultsUpdate } from '@roleplay-identity/db-types'
+// --- НОВЫЙ КОД (только для таблицы tests) ---
+import type { Database } from '@roleplay-identity/db-types'
+
+// Указываем схему `mdt` и таблицу `tests`
+export type Test = Database['mdt']['Tables']['tests']['Row']
+export type TestInsert = Database['mdt']['Tables']['tests']['Insert']
+export type TestUpdate = Database['mdt']['Tables']['tests']['Update']
 
 // Export any test-specific types or utilities
-export * from './model' 
+export * from './model'

@@ -1,4 +1,4 @@
-# Личный кабинет - RolePlay Identity
+# Личный кабинет - HorizonCommunity
 
 Второе приложение в монорепозитории, реализованное с использованием **FSD (Feature-Sliced Design)** и **Atomic React** архитектуры.
 

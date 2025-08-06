@@ -4,7 +4,7 @@ import type { Incident } from '../types';
 
 // IMPORTANT: This check is for the web environment and prevents errors.
 // In a real application, the API key should be handled securely on a backend.
-const API_KEY = process.env.API_KEY || "";
+const API_KEY = import.meta.env.VITE_API_KEY || "";
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const generateIncidentReport = async (incident: Incident): Promise<string> => {

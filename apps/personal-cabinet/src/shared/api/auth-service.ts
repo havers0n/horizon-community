@@ -41,7 +41,7 @@ export const register = (data: RegisterPayload): Promise<AuthResponse> => {
     id: uuidv4(), // Генерируем ID здесь
     email: data.email,
     username: data.username || `${data.first_name || 'User'} ${data.last_name || ''}`.trim(),
-    role: 'user', // Устанавливаем роль по умолчанию
+    role: 'citizen', // Устанавливаем роль по умолчанию
   };
   return apiClient.post<AuthResponse>(`${BASE_URL}/register`, newProfile);
 };

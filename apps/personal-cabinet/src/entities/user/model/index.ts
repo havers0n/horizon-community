@@ -14,6 +14,14 @@ export interface User {
   status?: string
   rank?: string
   isSupervisor?: boolean
+  // Новые поля из NoteTaker
+  department?: string
+  division?: string
+  isActive?: boolean
+  gameWarnings?: number
+  adminWarnings?: number
+  attemptsLeft?: number
+  profileImageUrl?: string
 }
 
 export interface Profile {
@@ -25,6 +33,22 @@ export interface Profile {
   bio?: string
   avatar?: string
   settings: UserSettings
+}
+
+export interface Activity {
+  id: string
+  title: string
+  type: string
+  status: string
+  createdAt?: string
+}
+
+export interface Announcement {
+  id: string
+  title: string
+  preview: string
+  priority: string
+  createdAt?: string
 }
 
 export interface UserSettings {
