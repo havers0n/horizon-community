@@ -1,6 +1,7 @@
 // src/core/services/ApplicationService.ts
 
-import { mdtClient } from '../lib/supabase';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { mdtSupabase } from '../lib/supabase';
 import type { Database } from '@roleplay-identity/db-types';
 import { AppError } from '../../utils/AppError';
 
@@ -9,41 +10,40 @@ type MDTApplication = Database['mdt']['Tables']['applications']['Row'];
 type MDTApplicationInsert = Database['mdt']['Tables']['applications']['Insert'];
 type MDTApplicationUpdate = Database['mdt']['Tables']['applications']['Update'];
 
+// ===== ENUM ТИПЫ =====
+type ApplicationStatus = Database['mdt']['Enums']['application_status'];
+
 // ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
 export interface CreateApplicationData {
   type: string;
-  authorUserId: string; // ✅ UUID как string
-  authorCharacterId: string; // ✅ UUID как string
+  author_user_id: string; // ✅ UUID как string
+  author_character_id: string; // ✅ UUID как string
   data?: any;
-  status?: 'pending' | 'approved' | 'rejected';
-  statusHistory?: any[];
+  status?: ApplicationStatus; // ✅ Используем ENUM тип
+  status_history?: any[];
 }
 
 export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 
 // ===== СОВРЕМЕННЫЙ APPLICATION SERVICE =====
 export class ApplicationService {
-  // ✅ Используем клиент для схемы 'mdt', где находится таблица applications
-  private supabase = mdtClient;
-
-  constructor() {
-    // Конструктор может быть пустым, так как supabase уже инициализирован
-  }
+  // ✅ Используем готовый клиент для схемы 'mdt'
+  private db = mdtSupabase;
 
   /**
    * Создать новую заявку
    */
   async createApplication(data: CreateApplicationData): Promise<MDTApplication> {
     try {
-      const { data: application, error } = await this.supabase
+      const { data: application, error } = await this.db
         .from('applications')
         .insert({
           type: data.type,
-          author_user_id: data.authorUserId,
-          author_character_id: data.authorCharacterId,
+          author_user_id: data.author_user_id,
+          author_character_id: data.author_character_id,
           data: data.data,
-          status: data.status || 'pending',
-          status_history: data.statusHistory || []
+          status: data.status || 'awaiting_interview', // ✅ Используем правильный ENUM
+          status_history: data.status_history || []
         })
         .select()
         .single();
@@ -65,7 +65,7 @@ export class ApplicationService {
    */
   async getApplicationById(id: string): Promise<MDTApplication | null> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .from('applications')
         .select('*')
         .eq('id', id)
@@ -92,13 +92,13 @@ export class ApplicationService {
       const updateData: any = {};
       
       if (data.type !== undefined) updateData.type = data.type;
-      if (data.authorUserId !== undefined) updateData.author_user_id = data.authorUserId;
-      if (data.authorCharacterId !== undefined) updateData.author_character_id = data.authorCharacterId;
+      if (data.author_user_id !== undefined) updateData.author_user_id = data.author_user_id;
+      if (data.author_character_id !== undefined) updateData.author_character_id = data.author_character_id;
       if (data.data !== undefined) updateData.data = data.data;
       if (data.status !== undefined) updateData.status = data.status;
-      if (data.statusHistory !== undefined) updateData.status_history = data.statusHistory;
+      if (data.status_history !== undefined) updateData.status_history = data.status_history;
 
-      const { data: application, error } = await this.supabase
+      const { data: application, error } = await this.db
         .from('applications')
         .update(updateData)
         .eq('id', id)
@@ -106,7 +106,7 @@ export class ApplicationService {
         .single();
 
       if (error) {
-        console.error('[ApplicationService] Error updating application:', error);
+        console.error(`[ApplicationService] Error updating application with id ${id}:`, error);
         throw new AppError('Не удалось обновить заявку', 500);
       }
 
@@ -122,13 +122,13 @@ export class ApplicationService {
    */
   async deleteApplication(id: string): Promise<boolean> {
     try {
-      const { error } = await this.supabase
+      const { error } = await this.db
         .from('applications')
         .delete()
         .eq('id', id);
 
       if (error) {
-        console.error('[ApplicationService] Error deleting application:', error);
+        console.error(`[ApplicationService] Error deleting application with id ${id}:`, error);
         throw new AppError('Не удалось удалить заявку', 500);
       }
 
@@ -142,17 +142,17 @@ export class ApplicationService {
   /**
    * Получить все заявки пользователя
    */
-  async getUserApplications(userId: string): Promise<MDTApplication[]> {
+  async getUserApplications(user_id: string): Promise<MDTApplication[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .from('applications')
         .select('*')
-        .eq('author_user_id', userId)
+        .eq('author_user_id', user_id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[ApplicationService] Error fetching user applications:', error);
-        throw new AppError('Не удалось получить заявки пользователя', 500);
+        console.error(`[ApplicationService] Error fetching applications for user ${user_id}:`, error);
+        throw new AppError('Ошибка при получении заявок пользователя', 500);
       }
 
       return data || [];
@@ -165,17 +165,17 @@ export class ApplicationService {
   /**
    * Получить заявки по статусу
    */
-  async getApplicationsByStatus(status: string): Promise<MDTApplication[]> {
+  async getApplicationsByStatus(status: ApplicationStatus): Promise<MDTApplication[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .from('applications')
         .select('*')
         .eq('status', status)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[ApplicationService] Error fetching applications by status:', error);
-        throw new AppError('Не удалось получить заявки по статусу', 500);
+        console.error(`[ApplicationService] Error fetching applications with status ${status}:`, error);
+        throw new AppError('Ошибка при получении заявок по статусу', 500);
       }
 
       return data || [];

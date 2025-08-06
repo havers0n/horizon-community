@@ -7,7 +7,7 @@ import type { ServicesContainer } from '../../types/services';
 // Импортируем фабричную функцию для v1 роутера
 import { createV1Router } from './v1';
 
-const mainRouter = Router();
+const mainRouter: Router = Router();
 
 // Health check для корневого API
 mainRouter.get('/health', (req, res) => {

@@ -1,12 +1,12 @@
 import request from 'supertest';
 import express from 'express';
-import { authenticateToken, requireAdmin } from '../../middleware/auth.middleware.js';
-import { storage } from '../../storage.js';
-import { cacheService } from '../../services/CacheService.js';
-import { logger } from '../../services/LoggerService.js';
+import { authenticateToken, requireAdmin } from '@/api/middleware/auth.middleware';
+import { storage } from '@/db/storage';
+import { cacheService } from '@/services/CacheService';
+import { logger } from '@/services/LoggerService';
 
 // Мокаем сервисы
-jest.mock('../../storage.js', () => ({
+jest.mock('@/db/storage', () => ({
   storage: {
     getCacheInfo: jest.fn(),
     invalidateAllCache: jest.fn(),
@@ -14,14 +14,14 @@ jest.mock('../../storage.js', () => ({
   }
 }));
 
-jest.mock('../../services/CacheService.js', () => ({
+jest.mock('@/services/CacheService', () => ({
   cacheService: {
     size: jest.fn(),
     clear: jest.fn()
   }
 }));
 
-jest.mock('../../services/LoggerService.js', () => ({
+jest.mock('@/services/LoggerService', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn()
@@ -29,7 +29,7 @@ jest.mock('../../services/LoggerService.js', () => ({
 }));
 
 // Мокаем middleware
-jest.mock('../../middleware/auth.middleware.js', () => ({
+jest.mock('@/api/middleware/auth.middleware', () => ({
   authenticateToken: jest.fn((req, res, next) => next()),
   requireAdmin: [jest.fn((req, res, next) => next())]
 }));

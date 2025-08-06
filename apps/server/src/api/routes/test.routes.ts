@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { Request, Response } from 'express';
 
-const router = Router();
+const router: Router = Router();
 
 // Простой тестовый endpoint с аутентификацией
 router.get('/test', authenticateToken, (req, res) => {

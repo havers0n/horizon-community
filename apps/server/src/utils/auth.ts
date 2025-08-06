@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { supabase } from '../core/lib/supabase.js';
+import { createSupabaseClient } from '../core/lib/supabase.js';
 import type { Database } from '@roleplay-identity/db-types';
 import type { User } from '@roleplay-identity/shared-schema';
 
@@ -66,7 +66,8 @@ export async function getAuthenticatedUser(req: AuthenticatedRequest): Promise<U
     console.log(`🔧 JWT user ID: ${user.id}`);
     
     // Получаем профиль из таблицы profiles
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const publicClient = createSupabaseClient('public');
+    const { data: profile, error: profileError } = await publicClient
       .from('profiles')
       .select('*')
       .eq('id', user.id)

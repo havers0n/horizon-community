@@ -2,6 +2,8 @@
 
 // ВРЕМЕННАЯ ЗАГЛУШКА - будет исправлена позже
 import type { Database } from '@roleplay-identity/db-types';
+import { mdtSupabase } from '../lib/supabase';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 type ReportTemplate = Database['mdt']['Tables']['report_templates']['Row'];
 type ReportTemplateInsert = Database['mdt']['Tables']['report_templates']['Insert'];
@@ -32,6 +34,7 @@ export interface TagStats {
 }
 
 export class ReportTemplateService {
+  private db = mdtSupabase;
   private TABLE_NAME = 'report_templates';
 
   async getReportTemplates(filters: ReportTemplateFilters): Promise<ReportTemplate[]> {

@@ -1,13 +1,16 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tests, TestsInsert, TestsUpdate, TestResults, TestSessions } from "@roleplay-identity/db-types";
-import { mdtClient } from "../lib/supabase";
+import type { Database } from "@roleplay-identity/db-types";
+import { mdtSupabase } from "../lib/supabase";
+
+// Создаем локальные типы-алиасы из глобального типа Database
+type Tests = Database['mdt']['Tables']['tests']['Row'];
+type TestsInsert = Database['mdt']['Tables']['tests']['Insert'];
+type TestsUpdate = Database['mdt']['Tables']['tests']['Update'];
+type TestResults = Database['mdt']['Tables']['test_results']['Row'];
+type TestSessions = Database['mdt']['Tables']['test_sessions']['Row'];
 
 export class TestService {
-  private supabase: any;
-
-  constructor() {
-    this.supabase = mdtClient;
-  }
+  private db = mdtSupabase;
 
   /**
    * Получить все тесты с статистикой
@@ -15,7 +18,7 @@ export class TestService {
   async getAllTestsWithStats(): Promise<any[]> {
     try {
       // Получаем все тесты
-      const { data: tests, error: testsError } = await this.supabase
+      const { data: tests, error: testsError } = await this.db
         .from("tests")
         .select("*")
         .order("id", { ascending: false });
@@ -30,7 +33,7 @@ export class TestService {
       // Получаем статистику для каждого теста
       const testsWithStats = await Promise.all(
         tests.map(async (test: any) => {
-          const { data: results, error: resultsError } = await this.supabase
+          const { data: results, error: resultsError } = await this.db
             .from("test_results")
             .select("*")
             .eq("test_id", test.id);
@@ -70,7 +73,7 @@ export class TestService {
    */
   async createTest(testData: TestsInsert): Promise<Tests> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .from("tests")
         .insert(testData)
         .select()
@@ -93,24 +96,22 @@ export class TestService {
    */
   async getTestById(testId: string): Promise<Tests | null> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .from("tests")
         .select("*")
         .eq("id", testId)
         .single();
 
       if (error) {
-        if (error.code === 'PGRST116') { // "Not a single row" - means not found
-          return null;
-        }
-        console.error(`Error fetching test with id ${testId}:`, error);
-        throw new Error("Ошибка при поиске теста.");
+        if (error.code === 'PGRST116') return null;
+        console.error("Error fetching test:", error);
+        throw new Error("Не удалось получить тест.");
       }
 
       return data as Tests;
     } catch (error) {
-      console.error("Error fetching test by ID:", error);
-      throw new Error("Ошибка при поиске теста.");
+      console.error("Error fetching test:", error);
+      throw new Error("Не удалось получить тест.");
     }
   }
 
@@ -119,7 +120,7 @@ export class TestService {
    */
   async updateTest(testId: string, updateData: TestsUpdate): Promise<Tests> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .from("tests")
         .update(updateData)
         .eq("id", testId)
@@ -127,7 +128,7 @@ export class TestService {
         .single();
 
       if (error || !data) {
-        console.error(`Error updating test with id ${testId}:`, error);
+        console.error("Error updating test:", error);
         throw new Error("Не удалось обновить тест.");
       }
 
@@ -143,72 +144,61 @@ export class TestService {
    */
   async deleteTest(testId: string): Promise<void> {
     try {
-      // Проверяем, есть ли активные сессии для этого теста
-      const { data: activeSessions, error: sessionsError } = await this.supabase
-        .from("test_sessions")
-        .select("*")
-        .eq("test_id", testId)
-        .eq("status", "in_progress");
+      // Сначала удаляем связанные результаты
+      const { error: resultsError } = await this.db
+        .from("test_results")
+        .delete()
+        .eq("test_id", testId);
 
-      if (sessionsError) {
-        console.error("Error checking active sessions:", sessionsError);
-        throw new Error("Ошибка при проверке активных сессий.");
+      if (resultsError) {
+        console.error("Error deleting test results:", resultsError);
+        throw new Error("Не удалось удалить результаты теста.");
       }
 
-      if (activeSessions && activeSessions.length > 0) {
-        throw new Error("Нельзя удалить тест с активными сессиями.");
-      }
-
-      // Удаляем тест
-      const { error: deleteError } = await this.supabase
+      // Затем удаляем сам тест
+      const { error } = await this.db
         .from("tests")
         .delete()
         .eq("id", testId);
 
-      if (deleteError) {
-        console.error(`Error deleting test with id ${testId}:`, deleteError);
+      if (error) {
+        console.error("Error deleting test:", error);
         throw new Error("Не удалось удалить тест.");
       }
     } catch (error) {
       console.error("Error deleting test:", error);
-      throw error;
+      throw new Error("Не удалось удалить тест.");
     }
   }
 
   /**
-   * Получить все результаты тестов с фильтрами
+   * Получить результаты тестов с фильтрами
    */
   async getTestResults(filters: { status?: string; testId?: string } = {}): Promise<any[]> {
     try {
-      const { status, testId } = filters;
-
-      let query = this.supabase
+      let query: any = this.db
         .from("test_results")
         .select(`
-          id,
-          score,
-          max_score,
-          percentage,
-          passed,
-          time_spent,
-          focus_lost_count,
-          warnings_count,
-          created_at,
-          status,
-          admin_comment,
-          user_id,
-          test_id,
-          profiles!test_results_user_id_fkey(username),
-          tests!test_results_test_id_fkey(title)
+          *,
+          tests (
+            id,
+            title,
+            description
+          ),
+          profiles (
+            id,
+            username,
+            email
+          )
         `)
         .order("created_at", { ascending: false });
 
-      if (status && status !== 'all') {
-        query = query.eq("status", status);
+      if (filters.status) {
+        query = query.eq("status", filters.status);
       }
 
-      if (testId) {
-        query = query.eq("test_id", testId);
+      if (filters.testId) {
+        query = query.eq("test_id", filters.testId);
       }
 
       const { data, error } = await query;
@@ -230,22 +220,27 @@ export class TestService {
    */
   async updateTestResultStatus(resultId: string, status: string, comment?: string): Promise<any> {
     try {
-      const { data, error } = await this.supabase
+      const updateData: any = { status };
+      if (comment) {
+        updateData.comment = comment;
+      }
+
+      const { data, error } = await this.db
         .from("test_results")
-        .update({ status, admin_comment: comment })
+        .update(updateData)
         .eq("id", resultId)
         .select()
         .single();
 
       if (error || !data) {
-        console.error(`Error updating test result with id ${resultId}:`, error);
+        console.error("Error updating test result status:", error);
         throw new Error("Не удалось обновить статус результата теста.");
       }
 
       return data;
     } catch (error) {
       console.error("Error updating test result status:", error);
-      throw error;
+      throw new Error("Не удалось обновить статус результата теста.");
     }
   }
 
@@ -254,58 +249,53 @@ export class TestService {
    */
   async getTestAnalytics(): Promise<any> {
     try {
-      // Общая статистика
-      const { count: totalTests } = await this.supabase
-        .from("tests")
-        .select("*", { count: "exact", head: true });
-
-      const { count: totalAttempts } = await this.supabase
+      // Получаем общую статистику
+      const { data: results, error: resultsError } = await this.db
         .from("test_results")
-        .select("*", { count: "exact", head: true });
+        .select("*");
 
-      const { count: totalPassed } = await this.supabase
-        .from("test_results")
-        .select("*", { count: "exact", head: true })
-        .eq("passed", true);
-
-      // Статистика по тестам - используем простой запрос вместо RPC
-      const { data: testStats, error: testStatsError } = await this.supabase
-        .from("tests")
-        .select(`
-          id,
-          title,
-          test_results(count)
-        `);
-
-      if (testStatsError) {
-        console.error("Error fetching test statistics:", testStatsError);
-        throw new Error("Не удалось получить статистику тестов.");
+      if (resultsError) {
+        console.error("Error fetching test results for analytics:", resultsError);
+        throw new Error("Не удалось получить данные для аналитики.");
       }
 
-      // Статистика по времени - используем простой запрос вместо RPC
-      const { data: timeStats, error: timeStatsError } = await this.supabase
-        .from("test_results")
-        .select("created_at");
+      const totalAttempts = results?.length || 0;
+      const passedAttempts = results?.filter((r: any) => r.passed).length || 0;
+      const overallPassRate = totalAttempts > 0 ? Math.round((passedAttempts / totalAttempts) * 100) : 0;
 
-      if (timeStatsError) {
-        console.error("Error fetching time statistics:", timeStatsError);
-        throw new Error("Не удалось получить временную статистику.");
+      // Получаем статистику по тестам
+      const { data: tests, error: testsError } = await this.db
+        .from("tests")
+        .select("*");
+
+      if (testsError) {
+        console.error("Error fetching tests for analytics:", testsError);
+        throw new Error("Не удалось получить данные тестов для аналитики.");
       }
+
+      const testStats = tests?.map((test: any) => {
+        const testResults = results?.filter((r: any) => r.test_id === test.id) || [];
+        const testAttempts = testResults.length;
+        const testPassed = testResults.filter((r: any) => r.passed).length;
+        const testPassRate = testAttempts > 0 ? Math.round((testPassed / testAttempts) * 100) : 0;
+
+        return {
+          testId: test.id,
+          testTitle: test.title,
+          attempts: testAttempts,
+          passed: testPassed,
+          passRate: testPassRate
+        };
+      }) || [];
 
       return {
-        overview: {
-          totalTests: totalTests || 0,
-          totalAttempts: totalAttempts || 0,
-          totalPassed: totalPassed || 0,
-          passRate: (totalAttempts || 0) > 0 
-            ? Math.round(((totalPassed || 0) / (totalAttempts || 0)) * 100) 
-            : 0
-        },
-        testStats: testStats || [],
-        timeStats: timeStats || []
+        totalAttempts,
+        passedAttempts,
+        overallPassRate,
+        testStats
       };
     } catch (error) {
-      console.error("Error fetching test analytics:", error);
+      console.error("Error getting test analytics:", error);
       throw new Error("Не удалось получить аналитику тестов.");
     }
   }

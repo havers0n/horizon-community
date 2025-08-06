@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { rateLimit } from 'express-rate-limit';
 
-const router: import('express').Router = Router();
+const router: Router = Router();
 
 // TODO: Временно закомментировано - нужно создать ForumService
 // и добавить методы в storage для работы с форумом

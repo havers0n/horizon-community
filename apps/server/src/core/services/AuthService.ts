@@ -1,9 +1,13 @@
 // apps/server/src/core/services/AuthService.ts
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'; // Import createClient for admin operations
-import { createSupabaseClient } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
-import type { Database, Profiles, ProfilesInsert } from '@roleplay-identity/db-types';
+import type { Database } from '@roleplay-identity/db-types';
+
+// Создаем локальные типы-алиасы из глобального типа Database
+type Profiles = Database['public']['Tables']['profiles']['Row'];
+type ProfilesInsert = Database['public']['Tables']['profiles']['Insert'];
 
 // --- ОТЛАДКА ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ---
 const keyForDebug = process.env.SUPABASE_SERVICE_ROLE_KEY || 'КЛЮЧ НЕ НАЙДЕН!';
@@ -25,8 +29,8 @@ export interface LoginData {
 }
 
 export class AuthService {
-  // ✅ CORRECTED: We only need a client for the 'public' schema to access profiles.
-  private supabasePublic: SupabaseClient<Database, 'public'>;
+  // ✅ Используем готовый клиент для схемы 'public'
+  private db = supabase;
   // ✅ We need a special, non-schema-typed admin client for user management.
   private supabaseAdmin: SupabaseClient;
 
@@ -35,9 +39,6 @@ export class AuthService {
     console.log('[AuthService] SUPABASE_URL:', process.env.SUPABASE_URL ? 'SET' : 'NOT SET');
     console.log('[AuthService] SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
     
-    // This client is for accessing our public.profiles table
-    this.supabasePublic = createSupabaseClient('public');
-
     // This special client is for auth.admin operations that require the service_role_key
     this.supabaseAdmin = createClient(
       process.env.SUPABASE_URL!,
@@ -103,36 +104,58 @@ export class AuthService {
   async loginUser(data: LoginData): Promise<{ profile: Profiles; session: any }> {
     const { email, password } = data;
 
-    // Any client can be used for standard auth operations like signInWithPassword
-    const { data: authData, error: authError } = await this.supabasePublic.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (authError || !authData.user) {
-      throw new AppError('Invalid email or password.', 401); // 401 Unauthorized
-    }
+    console.log('[AuthService] Starting user login for:', email);
 
-    const profile = await this.getUserProfile(authData.user.id);
-    
-    if (!profile) {
-      throw new AppError('User profile not found.', 404); // 404 Not Found
-    }
+    try {
+      // Use the admin client for login
+      const { data: authData, error: authError } = await this.supabaseAdmin.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    return { profile, session: authData.session };
+      if (authError) {
+        console.error('[AuthService] Login error:', authError);
+        throw new AppError('Invalid email or password.', 401);
+      }
+
+      const { user, session } = authData;
+      console.log('[AuthService] User logged in, ID:', user.id);
+
+      // Fetch the user profile
+      const profile = await this.getUserProfile(user.id);
+      
+      if (!profile) {
+        console.error('[AuthService] Profile not found for logged in user');
+        throw new AppError('User profile not found.', 500);
+      }
+
+      console.log('[AuthService] Login successful for:', email);
+      return { profile, session };
+    } catch (error) {
+      console.error('[AuthService] Login failed:', error);
+      throw error;
+    }
   }
 
   // ===== GET USER PROFILE =====
   async getUserProfile(userId: string): Promise<Profiles | null> {
-    const { data, error } = await this.supabasePublic
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await this.db
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error && error.code !== 'PGRST116') {
-        console.error(`[AuthService] Error fetching profile for ${userId}:`, error);
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        console.error('[AuthService] Error fetching user profile:', error);
+        throw new AppError('Error fetching user profile.', 500);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('[AuthService] Error in getUserProfile:', error);
+      throw error;
     }
-    return data;
   }
 }

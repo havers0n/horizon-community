@@ -11,6 +11,22 @@ import { fileURLToPath } from 'url';
 // Импортируем типы для DI
 import type { ServicesContainer } from './types/services';
 
+// --- СОЗДАЕМ ВСЕ СЕРВИСЫ В ОДНОМ МЕСТЕ ---
+import { AuthService } from './core/services/AuthService';
+import { CharacterService } from './core/services/CharacterService';
+import { ApplicationService } from './core/services/ApplicationService';
+import { SupportTicketService } from './core/services/SupportTicketService';
+import { Call911Service } from './core/services/Call911Service';
+import { ReportService } from './core/services/ReportService';
+import { ReportTemplateService } from './core/services/ReportTemplateService';
+import { MDTService } from './core/services/MDTService';
+import { RealTimeService } from './core/services/RealTimeService';
+import { TestService } from './core/services/TestService';
+import { PublicService } from './core/services/PublicService';
+import { LoggerService } from './core/services/LoggerService';
+import { CacheService } from './core/services/CacheService';
+import { FilledReportService } from './core/services/FilledReportService';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -32,43 +48,43 @@ app.use(cors({
 (async () => {
   // ===== ЭТАП 1: СОЗДАНИЕ КОНТЕЙНЕРА СЕРВИСОВ =====
   
-  // Импортируем все сервисы из централизованного файла
-  const {
-    authService,
-    characterService,
-    applicationService,
-    supportTicketService,
-    call911Service,
-    reportService,
-    mdtService,
-    reportTemplateService,
-    realTimeService,
-    testService,
-    publicService,
-    logger,
-    cacheService,
-    filledReportService
-  } = await import('./core/services/index.js');
+  // Создаем экземпляры всех сервисов
+  const authService = new AuthService();
+  const characterService = new CharacterService();
+  const applicationService = new ApplicationService();
+  const supportTicketService = new SupportTicketService();
+  const call911Service = new Call911Service();
+  const reportService = new ReportService();
+  const reportTemplateService = new ReportTemplateService();
+  const mdtService = new MDTService();
+  const realTimeService = new RealTimeService();
+  const testService = new TestService();
+  const publicService = new PublicService();
+  const logger = new LoggerService();
+  const cacheService = new CacheService();
 
-  // Создаем контейнер всех сервисов
+  // Создаем FilledReportService с зависимостями
+  const filledReportService = new FilledReportService(
+    reportService,
+    reportTemplateService
+  );
+
+  // Собираем их в контейнер
   const services: ServicesContainer = {
-    // Сервисы-экземпляры (уже созданные)
     authService,
     characterService,
     applicationService,
     supportTicketService,
     call911Service,
     reportService,
-    mdtService,
     reportTemplateService,
+    mdtService,
     realTimeService,
-    filledReportService,
-    
-    // Сервисы-классы (создаем экземпляры)
     testService,
     publicService,
     loggerService: logger,
     cacheService,
+    filledReportService,
   };
 
   // Передаем контейнер сервисов в registerRoutes

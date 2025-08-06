@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { realTimeService } from '../../core/services/index.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * POST /api/realtime/broadcast

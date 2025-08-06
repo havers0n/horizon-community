@@ -1,8 +1,10 @@
 // Настройка тестового окружения
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../../.env.test') });
 
 // Загружаем переменные окружения для тестов
-config({ path: '.env.test' });
+// config({ path: '.env.test' }); // This line is removed as per the new_code
 
 // Глобальные настройки для тестов
 process.env.NODE_ENV = 'test';
@@ -365,6 +367,46 @@ jest.mock('../src/core/services/LoggerService', () => ({
     timeSyncOperation: jest.fn((operation, fn) => fn()),
   })),
 }));
+
+// Мокаем CharacterService
+jest.mock('../src/core/services/CharacterService', () => ({
+  CharacterService: jest.fn().mockImplementation(() => ({
+    createCharacter: jest.fn(),
+    getCharacter: jest.fn(),
+    updateCharacter: jest.fn(),
+    deleteCharacter: jest.fn(),
+    getCharactersByUser: jest.fn(),
+    searchCharacters: jest.fn(),
+  })),
+}));
+
+// Мокаем ApplicationService
+jest.mock('../src/core/services/ApplicationService', () => ({
+  ApplicationService: jest.fn().mockImplementation(() => ({
+    createApplication: jest.fn(),
+    getApplication: jest.fn(),
+    updateApplication: jest.fn(),
+    deleteApplication: jest.fn(),
+    getApplicationsByUser: jest.fn(),
+    getApplicationsByStatus: jest.fn(),
+  })),
+}));
+
+// Мокаем ReportService
+jest.mock('../src/core/services/ReportService', () => ({
+  ReportService: jest.fn().mockImplementation(() => ({
+    createReport: jest.fn(),
+    getReport: jest.fn(),
+    updateReport: jest.fn(),
+    deleteReport: jest.fn(),
+    getReportsByAuthor: jest.fn(),
+    getReportsByType: jest.fn(),
+  })),
+}));
+
+
+
+
 
 // Глобальные хелперы для тестов
 global.testHelpers = {

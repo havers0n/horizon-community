@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 
-const router: import('express').Router = Router();
+const router: Router = Router();
 
 // Discord OAuth2 конфигурация
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;

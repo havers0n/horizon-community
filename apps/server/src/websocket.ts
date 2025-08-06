@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
-import { supabase } from './core/lib/supabase.js';
+import { createSupabaseClient } from './core/lib/supabase.js';
 
 // ===== ЛОКАЛЬНЫЕ ТИПЫ И КОНСТАНТЫ =====
 

@@ -30,8 +30,11 @@
       "@roleplay-identity/shared-types/*": ["libs/shared-types/src/*"],
       "@roleplay-identity/shared-utils": ["libs/shared-utils/src/index.ts"],
       "@roleplay-identity/shared-utils/*": ["libs/shared-utils/src/*"],
+      "@roleplay-identity/db-types": ["packages/db-types/src/index.ts"],
+      "@roleplay-identity/db-types/*": ["packages/db-types/src/*"],
       "@shared/ui-components": ["libs/ui-components/src/index.ts"],
-      "@shared/ui-components/*": ["libs/ui-components/src/*"]
+      "@shared/ui-components/*": ["libs/ui-components/src/*"],
+      "@/*": ["apps/server/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

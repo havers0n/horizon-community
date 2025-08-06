@@ -3,7 +3,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -12,18 +11,6 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
--- ---- ВОТ ИСПРАВЛЕНИЕ ----
--- Создаем кастомную роль, если она еще не существует.
--- Это гарантирует, что все последующие команды GRANT сработают.
-DO
-$$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'service_user') THEN
-      CREATE ROLE "service_user";
-   END IF;
-END
-$$;
--- -------------------------
 
 CREATE SCHEMA IF NOT EXISTS "common";
 
@@ -100,6 +87,134 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
+CREATE TYPE "common"."vehicle_insurance_status" AS ENUM (
+    'insured',
+    'uninsured',
+    'expired'
+);
+
+
+ALTER TYPE "common"."vehicle_insurance_status" OWNER TO "postgres";
+
+
+CREATE TYPE "common"."vehicle_registration_status" AS ENUM (
+    'registered',
+    'unregistered',
+    'expired',
+    'stolen'
+);
+
+
+ALTER TYPE "common"."vehicle_registration_status" OWNER TO "postgres";
+
+
+CREATE TYPE "common"."weapon_registration_status" AS ENUM (
+    'registered',
+    'unregistered',
+    'confiscated'
+);
+
+
+ALTER TYPE "common"."weapon_registration_status" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."application_status" AS ENUM (
+    'awaiting_interview',
+    'awaiting_test',
+    'awaiting_practice',
+    'accepted',
+    'rejected',
+    'on_hold'
+);
+
+
+ALTER TYPE "mdt"."application_status" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."bolo_priority" AS ENUM (
+    'low',
+    'normal',
+    'high'
+);
+
+
+ALTER TYPE "mdt"."bolo_priority" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."bolo_status" AS ENUM (
+    'active',
+    'inactive',
+    'resolved'
+);
+
+
+ALTER TYPE "mdt"."bolo_status" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."bolo_type" AS ENUM (
+    'person',
+    'vehicle'
+);
+
+
+ALTER TYPE "mdt"."bolo_type" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."call_priority" AS ENUM (
+    'low',
+    'medium',
+    'high',
+    'urgent'
+);
+
+
+ALTER TYPE "mdt"."call_priority" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."call_status" AS ENUM (
+    'pending',
+    'assigned',
+    'on_scene',
+    'resolved',
+    'cancelled'
+);
+
+
+ALTER TYPE "mdt"."call_status" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."call_type" AS ENUM (
+    '911_police',
+    '911_medical',
+    '911_fire',
+    'non_emergency'
+);
+
+
+ALTER TYPE "mdt"."call_type" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."complaint_status" AS ENUM (
+    'open',
+    'in_review',
+    'resolved',
+    'closed'
+);
+
+
+ALTER TYPE "mdt"."complaint_status" OWNER TO "postgres";
+
+
+CREATE TYPE "mdt"."support_ticket_status" AS ENUM (
+    'open',
+    'in_progress',
+    'closed'
+);
+
+
+ALTER TYPE "mdt"."support_ticket_status" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."bolo_with_author" AS (
 	"id" "uuid",
 	"type" "text",
@@ -122,7 +237,7 @@ ALTER TYPE "public"."bolo_with_author" OWNER TO "postgres";
 
 CREATE TYPE "public"."character_with_profile" AS (
 	"id" "uuid",
-	"owner_id" "uuid",
+	"user_id" "uuid",
 	"first_name" "text",
 	"last_name" "text",
 	"date_of_birth" "date",
@@ -145,6 +260,17 @@ CREATE TYPE "public"."character_with_profile" AS (
 
 
 ALTER TYPE "public"."character_with_profile" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."user_role" AS ENUM (
+    'citizen',
+    'candidate',
+    'staff',
+    'admin'
+);
+
+
+ALTER TYPE "public"."user_role" OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."create_new_application"("p_data" "jsonb") RETURNS "jsonb"
@@ -245,7 +371,7 @@ SET default_table_access_method = "heap";
 
 CREATE TABLE IF NOT EXISTS "common"."characters" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "owner_id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
     "first_name" "text" NOT NULL,
     "last_name" "text" NOT NULL,
     "date_of_birth" "date",
@@ -259,7 +385,16 @@ CREATE TABLE IF NOT EXISTS "common"."characters" (
     "mugshot_url" "text",
     "flags" "text"[],
     "created_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"()
+    "updated_at" timestamp with time zone DEFAULT "now"(),
+    "ethnicity" "text",
+    "height" "text",
+    "weight" "text",
+    "hair_color" "text",
+    "eye_color" "text",
+    "postal" "text",
+    "dead" boolean DEFAULT false,
+    "missing" boolean DEFAULT false,
+    "arrested" boolean DEFAULT false
 );
 
 
@@ -274,7 +409,7 @@ COMMENT ON COLUMN "common"."characters"."id" IS 'Уникальный ID пер�
 
 
 
-COMMENT ON COLUMN "common"."characters"."owner_id" IS 'ID владельца персонажа (ссылка на public.profiles)';
+COMMENT ON COLUMN "common"."characters"."user_id" IS 'ID владельца персонажа (ссылка на public.profiles)';
 
 
 
@@ -288,11 +423,11 @@ CREATE OR REPLACE FUNCTION "public"."create_new_character"("p_data" "jsonb") RET
     AS $$
 BEGIN
   RETURN QUERY INSERT INTO common.characters (
-    owner_id, first_name, last_name, date_of_birth, gender, phone_number,
+    user_id, first_name, last_name, date_of_birth, gender, phone_number,
     address, occupation, ssn, licenses, medical_info, mugshot_url, flags
   )
   VALUES (
-    (p_data->>'owner_id')::UUID, p_data->>'first_name', p_data->>'last_name', (p_data->>'date_of_birth')::DATE,
+    (p_data->>'user_id')::UUID, p_data->>'first_name', p_data->>'last_name', (p_data->>'date_of_birth')::DATE,
     p_data->>'gender', p_data->>'phone_number', p_data->>'address', p_data->>'occupation', p_data->>'ssn',
     p_data->'licenses', p_data->'medical_info', p_data->>'mugshot_url',
     (SELECT array_agg(value) FROM jsonb_array_elements_text(COALESCE(p_data->'flags', '[]'::jsonb)) AS t(value))
@@ -311,7 +446,7 @@ CREATE OR REPLACE FUNCTION "public"."create_new_character"("p_first_name" "text"
 DECLARE
   new_character common.characters;
 BEGIN
-  INSERT INTO common.characters (owner_id, first_name, last_name, date_of_birth, ssn)
+  INSERT INTO common.characters (user_id, first_name, last_name, date_of_birth, ssn)
   VALUES (auth.uid(), p_first_name, p_last_name, p_date_of_birth, p_ssn)
   RETURNING * INTO new_character;
   RETURN NEXT new_character;
@@ -660,9 +795,9 @@ CREATE TABLE IF NOT EXISTS "mdt"."calls" (
     "caller_phone" "text",
     "location" "text" NOT NULL,
     "description" "text" NOT NULL,
-    "type" "text" NOT NULL,
-    "priority" "text" DEFAULT 'low'::"text",
-    "status" "text" DEFAULT 'pending'::"text" NOT NULL,
+    "type" "mdt"."call_type" NOT NULL,
+    "priority" "mdt"."call_priority" DEFAULT 'low'::"mdt"."call_priority",
+    "status" "mdt"."call_status" DEFAULT 'pending'::"mdt"."call_status" NOT NULL,
     "assigned_units" "jsonb",
     "patient_info" "jsonb",
     "fire_info" "jsonb",
@@ -786,10 +921,10 @@ CREATE TABLE IF NOT EXISTS "mdt"."bolos" (
     "subject_description" "text",
     "vehicle_plate" "text",
     "vehicle_description" "text",
-    "type" "text" NOT NULL,
+    "type" "mdt"."bolo_type" NOT NULL,
     "reason" "text" NOT NULL,
-    "priority" "text" DEFAULT 'normal'::"text",
-    "status" "text" DEFAULT 'active'::"text",
+    "priority" "mdt"."bolo_priority" DEFAULT 'normal'::"mdt"."bolo_priority",
+    "status" "mdt"."bolo_status" DEFAULT 'active'::"mdt"."bolo_status",
     "location" "text",
     "created_at" timestamp with time zone DEFAULT "now"()
 );
@@ -909,7 +1044,7 @@ CREATE OR REPLACE FUNCTION "public"."get_character_count_by_owner"("p_owner_id" 
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN (SELECT COUNT(*) FROM common.characters WHERE owner_id = p_owner_id);
+  RETURN (SELECT COUNT(*) FROM common.characters WHERE user_id = p_owner_id);
 END;
 $$;
 
@@ -948,8 +1083,8 @@ CREATE OR REPLACE FUNCTION "public"."get_character_with_profile"("p_character_id
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN QUERY SELECT c.id, c.owner_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
-  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.owner_id = p.id WHERE c.id = p_character_id;
+  RETURN QUERY SELECT c.id, c.user_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
+  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.user_id = p.id WHERE c.id = p_character_id;
 END;
 $$;
 
@@ -1003,7 +1138,7 @@ CREATE OR REPLACE FUNCTION "public"."get_characters_with_filters"("p_owner_id" "
 BEGIN
   RETURN QUERY 
   SELECT * FROM common.characters 
-  WHERE (p_owner_id IS NULL OR owner_id = p_owner_id)
+  WHERE (p_owner_id IS NULL OR user_id = p_owner_id)
     AND (p_gender IS NULL OR gender = p_gender)
     AND (p_occupation IS NULL OR occupation = p_occupation)
   ORDER BY created_at DESC
@@ -1020,8 +1155,8 @@ CREATE OR REPLACE FUNCTION "public"."get_characters_with_profiles"("p_owner_id" 
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN QUERY SELECT c.id, c.owner_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
-  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.owner_id = p.id WHERE c.owner_id = p_owner_id ORDER BY c.created_at DESC;
+  RETURN QUERY SELECT c.id, c.user_id, c.first_name, c.last_name, c.date_of_birth, c.gender, c.phone_number, c.address, c.occupation, c.ssn, c.licenses, c.medical_info, c.mugshot_url, c.flags, c.created_at, c.updated_at, p.id as profile_id, p.username as profile_username, p.email as profile_email, p.role as profile_role
+  FROM common.characters AS c LEFT JOIN public.profiles AS p ON c.user_id = p.id WHERE c.user_id = p_owner_id ORDER BY c.created_at DESC;
 END;
 $$;
 
@@ -1033,7 +1168,7 @@ CREATE OR REPLACE FUNCTION "public"."get_my_characters"() RETURNS SETOF "common"
     LANGUAGE "plpgsql"
     AS $$
 BEGIN
-  RETURN QUERY SELECT * FROM common.characters WHERE owner_id = auth.uid();
+  RETURN QUERY SELECT * FROM common.characters WHERE user_id = auth.uid();
 END;
 $$;
 
@@ -1046,7 +1181,7 @@ CREATE OR REPLACE FUNCTION "public"."get_my_characters"("p_user_id" "uuid") RETU
     SET "search_path" TO 'public', 'common', 'mdt'
     AS $$
 BEGIN
-  RETURN QUERY SELECT * FROM common.characters WHERE owner_id = p_user_id ORDER BY created_at DESC;
+  RETURN QUERY SELECT * FROM common.characters WHERE user_id = p_user_id ORDER BY created_at DESC;
 END;
 $$;
 
@@ -1284,7 +1419,7 @@ BEGIN
   IF (SELECT role FROM public.profiles WHERE id = auth.uid()) <> 'admin' THEN
     RAISE EXCEPTION 'Insufficient permissions: Only admins can transfer character ownership.';
   END IF;
-  UPDATE common.characters SET owner_id = p_new_owner_id, updated_at = NOW() WHERE id = p_character_id;
+  UPDATE common.characters SET user_id = p_new_owner_id, updated_at = NOW() WHERE id = p_character_id;
   RETURN FOUND;
 END;
 $$;
@@ -2048,7 +2183,7 @@ COMMENT ON COLUMN "common"."leo_profiles"."status" IS 'Статус сотруд
 
 CREATE TABLE IF NOT EXISTS "common"."pets" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "owner_id" "uuid" NOT NULL,
+    "character_id" "uuid" NOT NULL,
     "name" "text" NOT NULL,
     "breed" "text",
     "color" "text",
@@ -2064,7 +2199,7 @@ COMMENT ON TABLE "common"."pets" IS 'Домашние животные, прин
 
 
 
-COMMENT ON COLUMN "common"."pets"."owner_id" IS 'Владелец животного (ссылка на common.characters)';
+COMMENT ON COLUMN "common"."pets"."character_id" IS 'Владелец животного (ссылка на common.characters)';
 
 
 
@@ -2138,13 +2273,13 @@ COMMENT ON COLUMN "common"."units"."department_id" IS 'Ссылка на род�
 
 CREATE TABLE IF NOT EXISTS "common"."vehicles" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "owner_id" "uuid" NOT NULL,
+    "character_id" "uuid" NOT NULL,
     "plate" "text" NOT NULL,
     "vin" "text",
     "model" "text",
     "color" "text",
-    "registration_status" "text",
-    "insurance_status" "text",
+    "registration_status" "common"."vehicle_registration_status",
+    "insurance_status" "common"."vehicle_insurance_status",
     "created_at" timestamp with time zone DEFAULT "now"()
 );
 
@@ -2165,10 +2300,10 @@ ALTER SEQUENCE "common"."vehicles_id_seq" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "common"."weapons" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "owner_id" "uuid" NOT NULL,
+    "character_id" "uuid" NOT NULL,
     "serial_number" "text" NOT NULL,
     "model" "text" NOT NULL,
-    "registration_status" "text" DEFAULT 'registered'::"text",
+    "registration_status" "common"."weapon_registration_status" DEFAULT 'registered'::"common"."weapon_registration_status",
     "created_at" timestamp with time zone DEFAULT "now"()
 );
 
@@ -2180,7 +2315,7 @@ COMMENT ON TABLE "common"."weapons" IS 'Оружие, зарегистриров
 
 
 
-COMMENT ON COLUMN "common"."weapons"."owner_id" IS 'Владелец оружия (ссылка на common.characters)';
+COMMENT ON COLUMN "common"."weapons"."character_id" IS 'Владелец оружия (ссылка на common.characters)';
 
 
 
@@ -2432,7 +2567,7 @@ CREATE TABLE IF NOT EXISTS "mdt"."applications" (
     "author_character_id" "uuid" NOT NULL,
     "reviewer_character_id" "uuid",
     "type" "text" NOT NULL,
-    "status" "text" DEFAULT 'pending'::"text" NOT NULL,
+    "status" "mdt"."application_status" DEFAULT 'awaiting_interview'::"mdt"."application_status" NOT NULL,
     "data" "jsonb",
     "result" "jsonb",
     "review_comment" "text",
@@ -2466,7 +2601,7 @@ CREATE TABLE IF NOT EXISTS "mdt"."complaints" (
     "author_user_id" "uuid" NOT NULL,
     "author_character_id" "uuid",
     "title" "text" NOT NULL,
-    "status" "text" DEFAULT 'open'::"text" NOT NULL,
+    "status" "mdt"."complaint_status" DEFAULT 'open'::"mdt"."complaint_status" NOT NULL,
     "incident_date" timestamp with time zone NOT NULL,
     "participants" "jsonb",
     "description" "text" NOT NULL,
@@ -2526,7 +2661,6 @@ CREATE TABLE IF NOT EXISTS "mdt"."law_reports" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "author_character_id" "uuid" NOT NULL,
     "call_id" "uuid",
-    "participants" "jsonb",
     "title" "text" NOT NULL,
     "incident_type" "text" NOT NULL,
     "incident_time" timestamp with time zone NOT NULL,
@@ -2581,6 +2715,33 @@ COMMENT ON COLUMN "mdt"."notebook_notes"."author_character_id" IS 'Персон�
 
 
 
+CREATE TABLE IF NOT EXISTS "mdt"."report_participants" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "report_id" "uuid" NOT NULL,
+    "character_id" "uuid" NOT NULL,
+    "role_in_report" "text"
+);
+
+
+ALTER TABLE "mdt"."report_participants" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "mdt"."report_participants" IS 'Связующая таблица для участников полицейских отчетов.';
+
+
+
+COMMENT ON COLUMN "mdt"."report_participants"."report_id" IS 'Ссылка на отчет (mdt.law_reports).';
+
+
+
+COMMENT ON COLUMN "mdt"."report_participants"."character_id" IS 'Ссылка на персонажа-участника (common.characters).';
+
+
+
+COMMENT ON COLUMN "mdt"."report_participants"."role_in_report" IS 'Роль персонажа в инциденте (свидетель, пострадавший, подозреваемый).';
+
+
+
 CREATE TABLE IF NOT EXISTS "mdt"."report_templates" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "department_id" "uuid",
@@ -2621,7 +2782,7 @@ CREATE TABLE IF NOT EXISTS "mdt"."support_tickets" (
     "author_user_id" "uuid" NOT NULL,
     "handler_user_id" "uuid",
     "title" "text" NOT NULL,
-    "status" "text" DEFAULT 'open'::"text" NOT NULL,
+    "status" "mdt"."support_ticket_status" DEFAULT 'open'::"mdt"."support_ticket_status" NOT NULL,
     "messages" "jsonb"[],
     "created_at" timestamp with time zone DEFAULT "now"(),
     "updated_at" timestamp with time zone DEFAULT "now"()
@@ -2771,55 +2932,6 @@ CREATE SEQUENCE IF NOT EXISTS "public"."call_attachments_id_seq"
 ALTER SEQUENCE "public"."call_attachments_id_seq" OWNER TO "postgres";
 
 
-CREATE TABLE IF NOT EXISTS "public"."characters" (
-    "id" integer NOT NULL,
-    "owner_id" "uuid" NOT NULL,
-    "first_name" "text" NOT NULL,
-    "last_name" "text" NOT NULL,
-    "date_of_birth" "date" NOT NULL,
-    "gender" "text",
-    "ethnicity" "text",
-    "height" "text",
-    "weight" "text",
-    "hair_color" "text",
-    "eye_color" "text",
-    "address" "text",
-    "phone_number" "text",
-    "postal" "text",
-    "occupation" "text",
-    "mugshot_url" "text",
-    "licenses" "jsonb" DEFAULT '{}'::"jsonb",
-    "medical_info" "jsonb" DEFAULT '{}'::"jsonb",
-    "flags" "text"[] DEFAULT '{}'::"text"[],
-    "address_flags" "text"[] DEFAULT '{}'::"text"[],
-    "dead" boolean DEFAULT false,
-    "missing" boolean DEFAULT false,
-    "arrested" boolean DEFAULT false,
-    "ssn" "text",
-    "created_at" timestamp without time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp without time zone DEFAULT "now"() NOT NULL
-);
-
-
-ALTER TABLE "public"."characters" OWNER TO "postgres";
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."characters_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE "public"."characters_id_seq" OWNER TO "postgres";
-
-
-ALTER SEQUENCE "public"."characters_id_seq" OWNED BY "public"."characters"."id";
-
-
-
 CREATE SEQUENCE IF NOT EXISTS "public"."filled_reports_id_seq"
     START WITH 1
     INCREMENT BY 1
@@ -2875,7 +2987,7 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "id" "uuid" NOT NULL,
     "email" "text",
     "username" "text",
-    "role" "text" DEFAULT 'citizen'::"text" NOT NULL,
+    "role" "public"."user_role" DEFAULT 'citizen'::"public"."user_role" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"()
 );
 
@@ -2997,10 +3109,6 @@ ALTER TABLE ONLY "forum"."forum_topics" ALTER COLUMN "id" SET DEFAULT "nextval"(
 
 
 ALTER TABLE ONLY "forum"."forum_views" ALTER COLUMN "id" SET DEFAULT "nextval"('"forum"."forum_views_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."characters" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."characters_id_seq"'::"regclass");
 
 
 
@@ -3224,6 +3332,11 @@ ALTER TABLE ONLY "mdt"."notifications"
 
 
 
+ALTER TABLE ONLY "mdt"."report_participants"
+    ADD CONSTRAINT "report_participants_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "mdt"."report_templates"
     ADD CONSTRAINT "report_templates_pkey" PRIMARY KEY ("id");
 
@@ -3254,6 +3367,11 @@ ALTER TABLE ONLY "mdt"."units_on_duty"
 
 
 
+ALTER TABLE ONLY "mdt"."report_participants"
+    ADD CONSTRAINT "uq_report_character" UNIQUE ("report_id", "character_id");
+
+
+
 ALTER TABLE ONLY "public"."achievements"
     ADD CONSTRAINT "achievements_name_key" UNIQUE ("name");
 
@@ -3271,11 +3389,6 @@ ALTER TABLE ONLY "public"."badges"
 
 ALTER TABLE ONLY "public"."badges"
     ADD CONSTRAINT "badges_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."characters"
-    ADD CONSTRAINT "characters_pkey" PRIMARY KEY ("id");
 
 
 
@@ -3359,7 +3472,7 @@ CREATE INDEX "idx_characters_name_search" ON "common"."characters" USING "btree"
 
 
 
-CREATE INDEX "idx_characters_owner_id" ON "common"."characters" USING "btree" ("owner_id");
+CREATE INDEX "idx_characters_owner_id" ON "common"."characters" USING "btree" ("user_id");
 
 
 
@@ -3431,7 +3544,7 @@ CREATE INDEX "idx_leo_profiles_rank_id" ON "common"."leo_profiles" USING "btree"
 
 
 
-CREATE INDEX "idx_pets_owner_id" ON "common"."pets" USING "btree" ("owner_id");
+CREATE INDEX "idx_pets_owner_id" ON "common"."pets" USING "btree" ("character_id");
 
 
 
@@ -3459,11 +3572,11 @@ CREATE UNIQUE INDEX "idx_units_department_id_name_unique" ON "common"."units" US
 
 
 
-CREATE INDEX "idx_vehicles_owner_id" ON "common"."vehicles" USING "btree" ("owner_id");
+CREATE INDEX "idx_vehicles_owner_id" ON "common"."vehicles" USING "btree" ("character_id");
 
 
 
-CREATE INDEX "idx_weapons_owner_id" ON "common"."weapons" USING "btree" ("owner_id");
+CREATE INDEX "idx_weapons_owner_id" ON "common"."weapons" USING "btree" ("character_id");
 
 
 
@@ -3643,22 +3756,6 @@ CREATE INDEX "test_sessions_user_id_idx" ON "mdt"."test_sessions" USING "btree" 
 
 
 
-CREATE INDEX "idx_characters_date_of_birth" ON "public"."characters" USING "btree" ("date_of_birth");
-
-
-
-CREATE INDEX "idx_characters_first_name" ON "public"."characters" USING "btree" ("first_name");
-
-
-
-CREATE INDEX "idx_characters_last_name" ON "public"."characters" USING "btree" ("last_name");
-
-
-
-CREATE INDEX "idx_characters_owner_id" ON "public"."characters" USING "btree" ("owner_id");
-
-
-
 CREATE INDEX "joint_positions_history_character_id_idx" ON "public"."joint_positions_history" USING "btree" ("character_id");
 
 
@@ -3719,10 +3816,6 @@ CREATE OR REPLACE TRIGGER "on_updated_at_support_tickets" BEFORE UPDATE ON "mdt"
 
 
 
-CREATE OR REPLACE TRIGGER "update_characters_updated_at" BEFORE UPDATE ON "public"."characters" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
 ALTER TABLE ONLY "common"."cargo_shipments"
     ADD CONSTRAINT "cargo_shipments_driver_character_id_fkey" FOREIGN KEY ("driver_character_id") REFERENCES "common"."characters"("id") ON DELETE SET NULL;
 
@@ -3779,7 +3872,7 @@ ALTER TABLE ONLY "common"."character_qualifications"
 
 
 ALTER TABLE ONLY "common"."characters"
-    ADD CONSTRAINT "characters_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
+    ADD CONSTRAINT "characters_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
 
 
 
@@ -3864,7 +3957,7 @@ ALTER TABLE ONLY "common"."leo_profiles"
 
 
 ALTER TABLE ONLY "common"."pets"
-    ADD CONSTRAINT "pets_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "common"."characters"("id") ON DELETE CASCADE;
+    ADD CONSTRAINT "pets_character_id_fkey" FOREIGN KEY ("character_id") REFERENCES "common"."characters"("id") ON DELETE CASCADE;
 
 
 
@@ -3889,12 +3982,12 @@ ALTER TABLE ONLY "common"."units"
 
 
 ALTER TABLE ONLY "common"."vehicles"
-    ADD CONSTRAINT "vehicles_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "common"."characters"("id") ON DELETE CASCADE;
+    ADD CONSTRAINT "vehicles_character_id_fkey" FOREIGN KEY ("character_id") REFERENCES "common"."characters"("id") ON DELETE CASCADE;
 
 
 
 ALTER TABLE ONLY "common"."weapons"
-    ADD CONSTRAINT "weapons_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "common"."characters"("id") ON DELETE CASCADE;
+    ADD CONSTRAINT "weapons_character_id_fkey" FOREIGN KEY ("character_id") REFERENCES "common"."characters"("id") ON DELETE CASCADE;
 
 
 
@@ -4000,6 +4093,16 @@ ALTER TABLE ONLY "mdt"."notebook_notes"
 
 ALTER TABLE ONLY "mdt"."notifications"
     ADD CONSTRAINT "notifications_recipient_user_id_fkey" FOREIGN KEY ("recipient_user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "mdt"."report_participants"
+    ADD CONSTRAINT "report_participants_character_id_fkey" FOREIGN KEY ("character_id") REFERENCES "common"."characters"("id");
+
+
+
+ALTER TABLE ONLY "mdt"."report_participants"
+    ADD CONSTRAINT "report_participants_report_id_fkey" FOREIGN KEY ("report_id") REFERENCES "mdt"."law_reports"("id") ON DELETE CASCADE;
 
 
 
@@ -4135,103 +4238,117 @@ ALTER TABLE ONLY "public"."user_stats"
 
 CREATE POLICY "Admins can manage all shipments" ON "common"."cargo_shipments" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage career history" ON "common"."character_career_history" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage character qualifications" ON "common"."character_qualifications" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage weapons" ON "common"."weapons" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all characters" ON "common"."characters" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all vehicles" ON "common"."vehicles" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins have full access to impounded vehicles" ON "common"."impounded_vehicles" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage departments" ON "common"."departments" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage divisions" ON "common"."divisions" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage ems profiles" ON "common"."ems_profiles" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage impound lots" ON "common"."impound_lots" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage leo profiles" ON "common"."leo_profiles" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage qualifications" ON "common"."qualifications" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage ranks" ON "common"."ranks" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins to manage units" ON "common"."units" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text")) WITH CHECK ((( SELECT "profiles"."role"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
@@ -4281,7 +4398,7 @@ CREATE POLICY "Authenticated users can view all pets" ON "common"."pets" FOR SEL
 
 CREATE POLICY "Company owner and employee can see entry" ON "common"."company_employees" FOR SELECT USING (((( SELECT "companies"."owner_id"
    FROM "common"."companies"
-  WHERE ("companies"."id" = "company_employees"."company_id")) = "auth"."uid"()) OR (( SELECT "characters"."owner_id"
+  WHERE ("companies"."id" = "company_employees"."company_id")) = "auth"."uid"()) OR (( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "company_employees"."character_id")) = "auth"."uid"())));
 
@@ -4293,9 +4410,9 @@ CREATE POLICY "Company owner can manage employees" ON "common"."company_employee
 
 
 
-CREATE POLICY "Driver can manage their own shipment" ON "common"."cargo_shipments" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Driver can manage their own shipment" ON "common"."cargo_shipments" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "cargo_shipments"."driver_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."owner_id"
+  WHERE ("characters"."id" = "cargo_shipments"."driver_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "cargo_shipments"."driver_character_id")) = "auth"."uid"()));
 
@@ -4328,67 +4445,55 @@ CREATE POLICY "LEO can view all vehicles" ON "common"."vehicles" FOR SELECT USIN
 
 
 
-CREATE POLICY "Owner can manage their own pets" ON "common"."pets" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Owner can manage their own pets" ON "common"."pets" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "pets"."owner_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."owner_id"
+  WHERE ("characters"."id" = "pets"."character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "pets"."owner_id")) = "auth"."uid"()));
+  WHERE ("characters"."id" = "pets"."character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Owner can manage their own vehicle" ON "common"."vehicles" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Owner can manage their own vehicle" ON "common"."vehicles" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "vehicles"."owner_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."owner_id"
+  WHERE ("characters"."id" = "vehicles"."character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "vehicles"."owner_id")) = "auth"."uid"()));
+  WHERE ("characters"."id" = "vehicles"."character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Owner can view their own weapons" ON "common"."weapons" FOR SELECT USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Owner can view their own weapons" ON "common"."weapons" FOR SELECT USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "characters"."owner_id")) = "auth"."uid"()));
+  WHERE ("characters"."id" = "characters"."user_id")) = "auth"."uid"()));
 
 
 
 CREATE POLICY "Service members and admins can see all qualifications" ON "common"."character_qualifications" FOR SELECT USING (((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text") OR (EXISTS ( SELECT 1
-   FROM "common"."leo_profiles"
-  WHERE ("leo_profiles"."id" = ( SELECT "units_on_duty"."character_id"
-           FROM "mdt"."units_on_duty"
-          WHERE ("units_on_duty"."user_id" = "auth"."uid"())
-         LIMIT 1)))) OR (EXISTS ( SELECT 1
-   FROM "common"."ems_profiles"
-  WHERE ("ems_profiles"."id" = ( SELECT "units_on_duty"."character_id"
-           FROM "mdt"."units_on_duty"
-          WHERE ("units_on_duty"."user_id" = "auth"."uid"())
-         LIMIT 1))))));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM "common"."characters" "c"
+  WHERE (("c"."user_id" = "auth"."uid"()) AND (("c"."id" IN ( SELECT "leo_profiles"."id"
+           FROM "common"."leo_profiles")) OR ("c"."id" IN ( SELECT "ems_profiles"."id"
+           FROM "common"."ems_profiles"))))))));
 
 
 
 CREATE POLICY "Service members and admins can view all career history" ON "common"."character_career_history" FOR SELECT USING (((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text") OR (EXISTS ( SELECT 1
-   FROM "common"."leo_profiles"
-  WHERE ("leo_profiles"."id" = ( SELECT "units_on_duty"."character_id"
-           FROM "mdt"."units_on_duty"
-          WHERE ("units_on_duty"."user_id" = "auth"."uid"())
-         LIMIT 1)))) OR (EXISTS ( SELECT 1
-   FROM "common"."ems_profiles"
-  WHERE ("ems_profiles"."id" = ( SELECT "units_on_duty"."character_id"
-           FROM "mdt"."units_on_duty"
-          WHERE ("units_on_duty"."user_id" = "auth"."uid"())
-         LIMIT 1))))));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM "common"."characters" "c"
+  WHERE (("c"."user_id" = "auth"."uid"()) AND (("c"."id" IN ( SELECT "leo_profiles"."id"
+           FROM "common"."leo_profiles")) OR ("c"."id" IN ( SELECT "ems_profiles"."id"
+           FROM "common"."ems_profiles"))))))));
 
 
 
-CREATE POLICY "User can view their own character career history" ON "common"."character_career_history" FOR SELECT USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "User can view their own character career history" ON "common"."character_career_history" FOR SELECT USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "character_career_history"."character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Users can manage their own characters" ON "common"."characters" USING (("auth"."uid"() = "owner_id")) WITH CHECK (("auth"."uid"() = "owner_id"));
+CREATE POLICY "Users can manage their own characters" ON "common"."characters" USING (("auth"."uid"() = "user_id")) WITH CHECK (("auth"."uid"() = "user_id"));
 
 
 
@@ -4396,17 +4501,17 @@ CREATE POLICY "Users can manage their own companies" ON "common"."companies" USI
 
 
 
-CREATE POLICY "Users can see their own qualifications" ON "common"."character_qualifications" FOR SELECT USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Users can see their own qualifications" ON "common"."character_qualifications" FOR SELECT USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "character_qualifications"."character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Vehicle owner can see their impounded vehicle" ON "common"."impounded_vehicles" FOR SELECT USING ((( SELECT "vehicles"."owner_id"
+CREATE POLICY "Vehicle owner can see their impounded vehicle" ON "common"."impounded_vehicles" FOR SELECT USING ((( SELECT "vehicles"."character_id" AS "owner_id"
    FROM "common"."vehicles"
   WHERE ("vehicles"."id" = "impounded_vehicles"."vehicle_id")) = ( SELECT "characters"."id"
    FROM "common"."characters"
-  WHERE ("characters"."owner_id" = "auth"."uid"())
+  WHERE ("characters"."user_id" = "auth"."uid"())
  LIMIT 1)));
 
 
@@ -4488,67 +4593,77 @@ ALTER TABLE "forum"."forum_views" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admins can manage all complaints" ON "mdt"."complaints" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage all support tickets" ON "mdt"."support_tickets" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage report templates" ON "mdt"."report_templates" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage tests" ON "mdt"."tests" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can see all results" ON "mdt"."test_results" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all EMS/FD reports" ON "mdt"."ems_fd_reports" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all applications" ON "mdt"."applications" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all notes" ON "mdt"."notebook_notes" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all notifications" ON "mdt"."notifications" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can view all reports" ON "mdt"."law_reports" FOR SELECT USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Allow admins full access to calls" ON "mdt"."calls" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
@@ -4572,12 +4687,15 @@ CREATE POLICY "Authenticated users can read BOLOs" ON "mdt"."bolos" FOR SELECT T
 
 CREATE POLICY "LEO and Admins can manage BOLOs" ON "mdt"."bolos" USING (((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text") OR (EXISTS ( SELECT 1
-   FROM "common"."leo_profiles"
-  WHERE ("leo_profiles"."id" = ( SELECT "units_on_duty"."character_id"
-           FROM "mdt"."units_on_duty"
-          WHERE ("units_on_duty"."user_id" = "auth"."uid"())
-         LIMIT 1))))));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM ("common"."characters" "c"
+     JOIN "common"."leo_profiles" "lp" ON (("c"."id" = "lp"."id")))
+  WHERE ("c"."user_id" = "auth"."uid"()))))) WITH CHECK (((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM ("common"."characters" "c"
+     JOIN "common"."leo_profiles" "lp" ON (("c"."id" = "lp"."id")))
+  WHERE ("c"."user_id" = "auth"."uid"())))));
 
 
 
@@ -4590,33 +4708,60 @@ CREATE POLICY "LEO can manage signals" ON "mdt"."mdt_signals" USING ((EXISTS ( S
 
 
 
-CREATE POLICY "Medics can manage their own reports" ON "mdt"."ems_fd_reports" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Medics can manage their own reports" ON "mdt"."ems_fd_reports" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "ems_fd_reports"."author_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."owner_id"
+  WHERE ("characters"."id" = "ems_fd_reports"."author_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "ems_fd_reports"."author_character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Officers can manage their own reports" ON "mdt"."law_reports" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Officers can manage their own reports" ON "mdt"."law_reports" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "law_reports"."author_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."owner_id"
+  WHERE ("characters"."id" = "law_reports"."author_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "law_reports"."author_character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Owner can manage their own notes" ON "mdt"."notebook_notes" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Owner can manage their own notes" ON "mdt"."notebook_notes" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
-  WHERE ("characters"."id" = "notebook_notes"."author_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."owner_id"
+  WHERE ("characters"."id" = "notebook_notes"."author_character_id")) = "auth"."uid"())) WITH CHECK ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "notebook_notes"."author_character_id")) = "auth"."uid"()));
 
 
 
-CREATE POLICY "Recipient can see their notifications" ON "mdt"."mdt_signal_notifications" USING ((( SELECT "characters"."owner_id"
+CREATE POLICY "Recipient can see their notifications" ON "mdt"."mdt_signal_notifications" USING ((( SELECT "characters"."user_id" AS "owner_id"
    FROM "common"."characters"
   WHERE ("characters"."id" = "mdt_signal_notifications"."recipient_character_id")) = "auth"."uid"()));
+
+
+
+CREATE POLICY "Report authors and admins can manage participants" ON "mdt"."report_participants" USING (((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM ("mdt"."law_reports" "lr"
+     JOIN "common"."characters" "c" ON (("lr"."author_character_id" = "c"."id")))
+  WHERE (("lr"."id" = "report_participants"."report_id") AND ("c"."user_id" = "auth"."uid"())))))) WITH CHECK (((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM ("mdt"."law_reports" "lr"
+     JOIN "common"."characters" "c" ON (("lr"."author_character_id" = "c"."id")))
+  WHERE (("lr"."id" = "report_participants"."report_id") AND ("c"."user_id" = "auth"."uid"()))))));
+
+
+
+CREATE POLICY "Service members and admins can view report participants" ON "mdt"."report_participants" FOR SELECT USING (((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role") OR (EXISTS ( SELECT 1
+   FROM ("common"."characters" "c"
+     JOIN "common"."leo_profiles" "lp" ON (("c"."id" = "lp"."id")))
+  WHERE ("c"."user_id" = "auth"."uid"()))) OR (EXISTS ( SELECT 1
+   FROM (("common"."characters" "c"
+     JOIN "common"."character_career_history" "h" ON (("c"."id" = "h"."character_id")))
+     JOIN "common"."divisions" "d" ON (("h"."division_id" = "d"."id")))
+  WHERE (("c"."user_id" = "auth"."uid"()) AND ("d"."name" ~~* 'Dispatch'::"text"))))));
 
 
 
@@ -4662,7 +4807,7 @@ CREATE POLICY "Users can manage their own on-duty status" ON "mdt"."units_on_dut
 
 
 
-CREATE POLICY "Users can update their own open tickets" ON "mdt"."support_tickets" FOR UPDATE USING ((("auth"."uid"() = "author_user_id") AND ("status" <> 'closed'::"text")));
+CREATE POLICY "Users can update their own open tickets" ON "mdt"."support_tickets" FOR UPDATE USING ((("author_user_id" = "auth"."uid"()) AND ("status" = 'open'::"mdt"."support_ticket_status"))) WITH CHECK (("author_user_id" = "auth"."uid"()));
 
 
 
@@ -4700,6 +4845,9 @@ ALTER TABLE "mdt"."notebook_notes" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "mdt"."notifications" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "mdt"."report_participants" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "mdt"."report_templates" ENABLE ROW LEVEL SECURITY;
 
 
@@ -4720,37 +4868,49 @@ ALTER TABLE "mdt"."units_on_duty" ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admins can manage achievements" ON "public"."achievements" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage badges" ON "public"."badges" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage joint position history" ON "public"."joint_positions_history" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage stats" ON "public"."user_stats" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage user achievements" ON "public"."user_achievements" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
 CREATE POLICY "Admins can manage user badges" ON "public"."user_badges" USING ((( SELECT "profiles"."role"
    FROM "public"."profiles"
-  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"text"));
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role")) WITH CHECK ((( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = "auth"."uid"())) = 'admin'::"public"."user_role"));
 
 
 
@@ -4782,23 +4942,7 @@ CREATE POLICY "User can see their own stats" ON "public"."user_stats" FOR SELECT
 
 
 
-CREATE POLICY "Users can create own characters" ON "public"."characters" FOR INSERT WITH CHECK ((("auth"."uid"())::"text" = ("owner_id")::"text"));
-
-
-
-CREATE POLICY "Users can delete own characters" ON "public"."characters" FOR DELETE USING ((("auth"."uid"())::"text" = ("owner_id")::"text"));
-
-
-
 CREATE POLICY "Users can manage their own profile." ON "public"."profiles" USING (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users can update own characters" ON "public"."characters" FOR UPDATE USING ((("auth"."uid"())::"text" = ("owner_id")::"text"));
-
-
-
-CREATE POLICY "Users can view own characters" ON "public"."characters" FOR SELECT USING ((("auth"."uid"())::"text" = ("owner_id")::"text"));
 
 
 
@@ -4806,9 +4950,6 @@ ALTER TABLE "public"."achievements" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."badges" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."characters" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."joint_positions_history" ENABLE ROW LEVEL SECURITY;
@@ -5027,7 +5168,6 @@ GRANT ALL ON FUNCTION "public"."create_new_call"("p_data" "jsonb") TO "service_r
 
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "common"."characters" TO "authenticated";
-GRANT ALL ON TABLE "common"."characters" TO "service_user";
 
 
 
@@ -5115,7 +5255,6 @@ GRANT ALL ON FUNCTION "public"."get_active_bolos_with_author"() TO "service_role
 
 
 
-GRANT ALL ON TABLE "mdt"."calls" TO "service_user";
 
 
 
@@ -5125,7 +5264,6 @@ GRANT ALL ON FUNCTION "public"."get_active_calls"() TO "service_role";
 
 
 
-GRANT ALL ON TABLE "mdt"."mdt_signals" TO "service_user";
 
 
 
@@ -5135,7 +5273,6 @@ GRANT ALL ON FUNCTION "public"."get_active_signals"() TO "service_role";
 
 
 
-GRANT ALL ON TABLE "mdt"."units_on_duty" TO "service_user";
 
 
 
@@ -5157,7 +5294,6 @@ GRANT ALL ON FUNCTION "public"."get_all_departments"() TO "service_role";
 
 
 
-GRANT ALL ON TABLE "mdt"."bolos" TO "service_user";
 
 
 
@@ -5317,7 +5453,6 @@ GRANT ALL ON FUNCTION "public"."get_units_by_user"("p_user_id" "uuid") TO "servi
 
 
 
-GRANT ALL ON TABLE "mdt"."notifications" TO "service_user";
 
 
 
@@ -5492,69 +5627,53 @@ GRANT ALL ON FUNCTION "public"."validate_character_data"() TO "service_role";
 
 
 
-GRANT ALL ON TABLE "common"."cargo_shipments" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."character_career_history" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."character_qualifications" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."companies" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."company_employees" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."departments" TO "service_user";
 GRANT SELECT ON TABLE "common"."departments" TO "anon";
 GRANT SELECT ON TABLE "common"."departments" TO "authenticated";
 
 
 
-GRANT ALL ON TABLE "common"."divisions" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."ems_profiles" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."impound_lots" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."impounded_vehicles" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."leo_profiles" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."pets" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."qualifications" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."ranks" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."units" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "common"."vehicles" TO "service_user";
 
 
 
@@ -5564,7 +5683,6 @@ GRANT ALL ON SEQUENCE "common"."vehicles_id_seq" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "common"."weapons" TO "service_user";
 
 
 
@@ -5664,47 +5782,39 @@ GRANT ALL ON SEQUENCE "forum"."forum_views_id_seq" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "mdt"."applications" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."complaints" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."ems_fd_reports" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."law_reports" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."mdt_signal_notifications" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."notebook_notes" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."report_templates" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."support_tickets" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."test_results" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."test_sessions" TO "service_user";
 
 
 
-GRANT ALL ON TABLE "mdt"."tests" TO "service_user";
+
+
+
 
 
 
@@ -5747,18 +5857,6 @@ GRANT ALL ON SEQUENCE "public"."call911_id_seq" TO "service_role";
 GRANT ALL ON SEQUENCE "public"."call_attachments_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."call_attachments_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."call_attachments_id_seq" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."characters" TO "anon";
-GRANT ALL ON TABLE "public"."characters" TO "authenticated";
-GRANT ALL ON TABLE "public"."characters" TO "service_role";
-
-
-
-GRANT ALL ON SEQUENCE "public"."characters_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."characters_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."characters_id_seq" TO "service_role";
 
 
 
@@ -5847,12 +5945,10 @@ GRANT ALL ON SEQUENCE "public"."user_stats_id_seq" TO "service_role";
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "common" GRANT SELECT ON TABLES TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "common" GRANT ALL ON TABLES TO "service_user";
 
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "mdt" GRANT SELECT ON TABLES TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "mdt" GRANT ALL ON TABLES TO "service_user";
 
 
 

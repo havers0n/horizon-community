@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
+import type { Database } from '@roleplay-identity/db-types';
 
 export interface PublicDepartment {
   id: string; // UUID в виде строки
@@ -10,14 +11,7 @@ export interface PublicDepartment {
 }
 
 export class PublicService {
-  private supabase;
-
-  constructor() {
-    this.supabase = createClient(
-      process.env.VITE_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-  }
+  private db = supabase;
 
   /**
    * Получает список всех департаментов через безопасную RPC функцию
@@ -27,7 +21,7 @@ export class PublicService {
     try {
       console.log('[PublicService] 🔍 Запрос списка департаментов через RPC функцию...');
       
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .rpc('get_all_departments');
 
       if (error) {
@@ -51,7 +45,7 @@ export class PublicService {
     try {
       console.log(`[PublicService] 🔍 Запрос департамента с ID ${id}...`);
       
-      const { data, error } = await this.supabase
+      const { data, error } = await this.db
         .rpc('get_all_departments');
 
       if (error) {
