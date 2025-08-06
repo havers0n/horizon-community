@@ -43,6 +43,12 @@
     "libs/*",
     "libs/*/*"
   ],
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^18.2.0",
+      "@types/react-dom": "^18.2.0"
+    }
+  },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "concurrently": "^8.2.2",

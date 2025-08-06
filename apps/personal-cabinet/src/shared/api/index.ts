@@ -6,4 +6,7 @@ export type { ApiResponse, PaginatedResponse } from './api-client'
 export * from './auth-service'
 
 // Applications Service
-export * from './applications-service' 
+export * from './applications-service'
+
+// Cabinet Service
+export * from './cabinet-service' 

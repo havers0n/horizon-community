@@ -1938,24 +1938,62 @@ export type Database = {
           },
         ]
       }
+      user_settings: {
+        Row: {
+          email_notifications_enabled: boolean | null
+          theme: string | null
+          user_id: string
+        }
+        Insert: {
+          email_notifications_enabled?: boolean | null
+          theme?: string | null
+          user_id: string
+        }
+        Update: {
+          email_notifications_enabled?: boolean | null
+          theme?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_stats: {
         Row: {
           experience: number | null
           last_activity: string | null
           level: number | null
+          playtime_minutes: number | null
+          reputation: number | null
           user_id: string
+          warnings_admin: number | null
+          warnings_game: number | null
         }
         Insert: {
           experience?: number | null
           last_activity?: string | null
           level?: number | null
+          playtime_minutes?: number | null
+          reputation?: number | null
           user_id: string
+          warnings_admin?: number | null
+          warnings_game?: number | null
         }
         Update: {
           experience?: number | null
           last_activity?: string | null
           level?: number | null
+          playtime_minutes?: number | null
+          reputation?: number | null
           user_id?: string
+          warnings_admin?: number | null
+          warnings_game?: number | null
         }
         Relationships: [
           {

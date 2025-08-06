@@ -75,17 +75,14 @@ export function createAuthRoutes(services: ServicesContainer) {
       const result = await authService.loginUser({ email, password });
 
       res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        data: {
-          user: {
-            id: result.profile.id,
-            username: result.profile.username,
-            email: result.profile.email,
-            role: result.profile.role
-          },
-          session: result.session
-        }
+        user: {
+          id: result.profile.id,
+          username: result.profile.username,
+          email: result.profile.email,
+          role: result.profile.role
+        },
+        access_token: result.session.access_token,
+        refresh_token: result.session.refresh_token
       });
     } catch (error) {
       if (error instanceof AppError) {
@@ -148,14 +145,11 @@ export function createAuthRoutes(services: ServicesContainer) {
       }
 
       res.status(200).json({
-        success: true,
-        data: {
-          id: profile.id,
-          username: profile.username,
-          email: profile.email,
-          role: profile.role,
-          created_at: profile.created_at
-        }
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        role: profile.role,
+        created_at: profile.created_at
       });
     } catch (error) {
       console.error('[AuthRoutes] Get profile error:', error);
@@ -263,17 +257,14 @@ router.post('/login', async (req, res) => {
     const result = await authService.loginUser({ email, password });
 
     res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        user: {
-          id: result.profile.id,
-          username: result.profile.username,
-          email: result.profile.email,
-          role: result.profile.role
-        },
-        session: result.session
-      }
+      user: {
+        id: result.profile.id,
+        username: result.profile.username,
+        email: result.profile.email,
+        role: result.profile.role
+      },
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token
     });
   } catch (error) {
     if (error instanceof AppError) {
@@ -307,14 +298,11 @@ router.get('/me', authenticateToken, async (req, res) => {
     }
 
     res.status(200).json({
-      success: true,
-      data: {
-        id: profile.id,
-        username: profile.username,
-        email: profile.email,
-        role: profile.role,
-        created_at: profile.created_at
-      }
+      id: profile.id,
+      username: profile.username,
+      email: profile.email,
+      role: profile.role,
+      created_at: profile.created_at
     });
   } catch (error) {
     console.error('[AuthRoutes] Get profile error:', error);

@@ -2,79 +2,81 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button, Input, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Textarea } from '@shared/ui'
+import { useCabinet } from '@shared/hooks'
+import { useEffect } from 'react'
 
 const profileSchema = z.object({
-  firstName: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
-  lastName: z.string().min(2, 'Фамилия должна содержать минимум 2 символа'),
-  phone: z.string().optional(),
+  username: z.string().min(2, 'Имя пользователя должно содержать минимум 2 символа'),
   bio: z.string().max(500, 'Биография не должна превышать 500 символов').optional(),
+  avatar_url: z.string().url('Должна быть валидная ссылка').optional().or(z.literal('')),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
 
 export function ProfileForm() {
+  const { profile, profileLoading, updateProfile, updateProfileLoading } = useCabinet()
+
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      phone: '',
+      username: '',
       bio: '',
+      avatar_url: '',
     },
   })
 
+  // Заполняем форму данными профиля при загрузке
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        username: profile.username || '',
+        bio: '', // Убираем profile.bio, так как его нет в схеме
+        avatar_url: '', // Убираем profile.avatar_url, так как его нет в схеме
+      })
+    }
+  }, [profile, form])
+
   const onSubmit = (data: ProfileFormData) => {
-    console.log('Profile data:', data)
-    // Здесь будет логика сохранения профиля
+    updateProfile(data)
   }
 
   return (
     <div className="flex-1">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Имя</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Иван" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Фамилия</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Петров" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Телефон</FormLabel>
-                <FormControl>
-                  <Input placeholder="+7 (999) 123-45-67" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {profileLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <>
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Имя пользователя</FormLabel>
+                    <FormControl>
+                      <Input placeholder="ivan_petrov" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="avatar_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ссылка на аватар</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/avatar.jpg" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
           
           <FormField
             control={form.control}
@@ -94,7 +96,11 @@ export function ProfileForm() {
             )}
           />
           
-          <Button type="submit">Сохранить изменения</Button>
+              <Button type="submit" disabled={updateProfileLoading}>
+                {updateProfileLoading ? 'Сохранение...' : 'Сохранить изменения'}
+              </Button>
+            </>
+          )}
         </form>
       </Form>
     </div>

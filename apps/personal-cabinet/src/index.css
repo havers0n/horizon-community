@@ -4,60 +4,71 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Светлая тема - HorizonCommunity */
+    --background: 0 0% 100%; /* #FFFFFF */
+    --foreground: 220 13% 10%; /* #1e2a3a */
+    --card: 45 20% 96%; /* #f5f3f0 */
+    --card-foreground: 220 13% 10%; /* #1e2a3a */
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 220 13% 10%; /* #1e2a3a */
+    --primary: 45 65% 67%; /* #c6a96b - золото */
+    --primary-foreground: 220 13% 10%; /* #1e2a3a */
+    --secondary: 45 20% 96%; /* #f5f3f0 */
+    --secondary-foreground: 220 13% 10%; /* #1e2a3a */
+    --muted: 45 20% 96%; /* #f5f3f0 */
+    --muted-foreground: 220 13% 28%; /* #718096 */
+    --accent: 45 65% 67%; /* #c6a96b */
+    --accent-foreground: 220 13% 10%; /* #1e2a3a */
+    --destructive: 0 68% 68%; /* #E57373 */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+    --border: 45 20% 89%; /* #e8e5e0 */
+    --input: 45 20% 89%; /* #e8e5e0 */
+    --ring: 45 65% 67%; /* #c6a96b */
     --radius: 0.5rem;
-    --success: 142.1 76.2% 36.3%;
-    --success-foreground: 355.7 100% 97.3%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 48 96% 89%;
-    --info: 199 89% 48%;
-    --info-foreground: 210 40% 98%;
+    
+    /* Расширенная цветовая палитра для светлой темы */
+    --success: 142 52% 65%; /* #81C784 */
+    --success-foreground: 142 76% 36%; /* #2E7D32 */
+    --warning: 45 65% 67%; /* #c6a96b */
+    --warning-foreground: 220 13% 10%; /* #1e2a3a */
+    --info: 199 89% 48%; /* #42A5F5 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
+    
+    /* Градиенты для светлой темы */
+    --gradient-primary: linear-gradient(135deg, #c6a96b 0%, #b89d5a 100%);
+    --gradient-secondary: linear-gradient(135deg, #f5f3f0 0%, #e8e5e0 100%);
+    --gradient-success: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+    --gradient-warning: linear-gradient(135deg, #c6a96b 0%, #b89d5a 100%);
+    --gradient-error: linear-gradient(135deg, #E57373 0%, #EF5350 100%);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Темная тема - HorizonCommunity */
+    --background: 220 13% 10%; /* #1e2a3a */
+    --foreground: 45 20% 96%; /* #f5f3f0 */
+    --card: 220 13% 15%; /* #2c3d42 */
+    --card-foreground: 45 20% 96%; /* #f5f3f0 */
+    --popover: 220 13% 10%; /* #1e2a3a */
+    --popover-foreground: 45 20% 96%; /* #f5f3f0 */
+    --primary: 45 65% 67%; /* #c6a96b */
+    --primary-foreground: 220 13% 10%; /* #1e2a3a */
+    --secondary: 220 13% 15%; /* #2c3d42 */
+    --secondary-foreground: 45 20% 96%; /* #f5f3f0 */
+    --muted: 220 13% 15%; /* #2c3d42 */
+    --muted-foreground: 220 13% 60%; /* #718096 */
+    --accent: 220 13% 15%; /* #2c3d42 */
+    --accent-foreground: 45 20% 96%; /* #f5f3f0 */
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --destructive-foreground: 45 20% 96%; /* #f5f3f0 */
+    --border: 220 13% 15%; /* #2c3d42 */
+    --input: 220 13% 15%; /* #2c3d42 */
+    --ring: 45 65% 67%; /* #c6a96b */
     --success: 142.1 70.6% 45.3%;
     --success-foreground: 144.9 80.4% 10%;
-    --warning: 38 95% 60%;
-    --warning-foreground: 48 96% 89%;
+    --warning: 45 65% 67%; /* #c6a96b */
+    --warning-foreground: 220 13% 10%; /* #1e2a3a */
     --info: 199 89% 48%;
-    --info-foreground: 210 40% 98%;
+    --info-foreground: 45 20% 96%; /* #f5f3f0 */
   }
 }
 
@@ -136,12 +147,28 @@
     @apply animate-progress-fill;
   }
 
+  .horizon-accent {
+    @apply text-horizon-400 border-horizon-400;
+  }
+
+  .horizon-accent:hover {
+    @apply bg-horizon-50 text-horizon-600 border-horizon-600;
+  }
+
   .gold-accent {
     @apply text-gold-400 border-gold-400;
   }
 
   .gold-accent:hover {
     @apply bg-gold-50 text-gold-600 border-gold-600;
+  }
+
+  .card-horizon {
+    @apply border-horizon-200 bg-gradient-to-br from-horizon-50 to-white;
+  }
+
+  .card-horizon:hover {
+    @apply border-horizon-300 shadow-horizon;
   }
 
   .card-gold {
@@ -232,12 +259,28 @@
     @apply bg-primary text-primary-foreground;
   }
 
+  .btn-horizon {
+    @apply bg-horizon-400 hover:bg-horizon-500 text-white border-horizon-400;
+  }
+
+  .btn-horizon-outline {
+    @apply border-horizon-400 text-horizon-600 hover:bg-horizon-50;
+  }
+
   .btn-gold {
     @apply bg-gold-400 hover:bg-gold-500 text-white border-gold-400;
   }
 
   .btn-gold-outline {
     @apply border-gold-400 text-gold-600 hover:bg-gold-50;
+  }
+
+  .input-horizon {
+    @apply border-horizon-200 focus:border-horizon-400 focus:ring-horizon-400;
+  }
+
+  .select-horizon {
+    @apply border-horizon-200 focus:border-horizon-400;
   }
 
   .input-gold {
@@ -326,6 +369,30 @@
 
   .department-card-animate:hover {
     @apply scale-105 shadow-2xl;
+  }
+
+  /* Стили для главной страницы */
+  .hero-bg {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1605106702734-205df224ecce?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .department-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  .gallery-item:hover .gallery-overlay {
+    opacity: 1;
+  }
+
+  .bg-gray-750 {
+    background-color: rgb(55 65 81);
   }
 
   .checkbox-gold {

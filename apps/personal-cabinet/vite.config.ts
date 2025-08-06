@@ -22,6 +22,13 @@ export default defineConfig({
   server: {
     port: 3001,
     host: true,
+    hmr: {
+      port: 3001,
+      host: 'localhost'
+    },
+    watch: {
+      usePolling: true
+    }
   },
   build: {
     outDir: '../../dist/apps/personal-cabinet',

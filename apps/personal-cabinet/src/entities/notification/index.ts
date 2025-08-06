@@ -1,7 +1,10 @@
-// Re-export types from the centralized db-types package
-export type { Notifications } from '@roleplay-identity/db-types'
-export type { NotificationsInsert } from '@roleplay-identity/db-types'
-export type { NotificationsUpdate } from '@roleplay-identity/db-types'
+// --- НОВЫЙ КОД (100% правильный) ---
+import type { Database } from '@roleplay-identity/db-types'
+
+// Указываем правильную схему `mdt` и имя таблицы `notifications`
+export type Notification = Database['mdt']['Tables']['notifications']['Row']
+export type NotificationInsert = Database['mdt']['Tables']['notifications']['Insert']
+export type NotificationUpdate = Database['mdt']['Tables']['notifications']['Update']
 
 // Export any notification-specific types or utilities
-export * from './model' 
+export * from './model'

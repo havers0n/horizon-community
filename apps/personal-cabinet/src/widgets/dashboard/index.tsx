@@ -39,4 +39,14 @@ export function DashboardWidget() {
       </div>
     </div>
   )
-} 
+}
+
+// Экспорт всех виджетов дашборда
+export { ProfileWidget } from './ui/profile-widget';
+export { FeedWidget } from './ui/feed-widget';
+export { QuickActionsWidget } from './ui/quick-actions-widget';
+export { AnnouncementsWidget } from './ui/announcements-widget';
+export { UsefulLinksWidget } from './ui/useful-links-widget';
+export { StatisticsWidget } from './ui/statistics-widget';
+export { ApplicationStatusWidget } from './ui/application-status-widget';
+export { NextStepsWidget } from './ui/next-steps-widget'; 

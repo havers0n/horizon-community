@@ -4,6 +4,7 @@ import type { Request } from 'express';
 // Импортируем типы сервисов
 import type { AuthService } from '../core/services/AuthService';
 import type { CharacterService } from '../core/services/CharacterService';
+import type { ApplicationService } from '../core/services/ApplicationService';
 import type { SupportTicketService } from '../core/services/SupportTicketService';
 import type { Call911Service } from '../core/services/Call911Service';
 import type { ReportService } from '../core/services/ReportService';
@@ -15,6 +16,7 @@ import type { PublicService } from '../core/services/PublicService';
 import type { LoggerService } from '../core/services/LoggerService';
 import type { CacheService } from '../core/services/CacheService';
 import type { FilledReportService } from '../core/services/FilledReportService';
+import type { CabinetService } from '../core/services/CabinetService';
 
 
 /**
@@ -25,6 +27,7 @@ export interface ServicesContainer {
   // Сервисы-экземпляры
   authService: AuthService;
   characterService: CharacterService;
+  applicationService: ApplicationService;
   supportTicketService: SupportTicketService;
   call911Service: Call911Service;
   reportService: ReportService;
@@ -32,13 +35,13 @@ export interface ServicesContainer {
   realTimeService: RealTimeService;
   
   // Сервисы-классы (экземпляры)
-  applicationService: any; // This will be replaced with ApplicationService
   mdtService: MDTService;
   testService: TestService;
   publicService: PublicService;
   loggerService: LoggerService;
   cacheService: CacheService;
   filledReportService: FilledReportService;
+  cabinetService: CabinetService;
 }
 
 /**

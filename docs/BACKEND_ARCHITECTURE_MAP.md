@@ -72,9 +72,7 @@ apps/server/src/
 ### 🔄 СЕРВИСЫ, ТРЕБУЮЩИЕ АДАПТАЦИИ
 ```typescript
 // Нужно создать:
-├── 🔄 ForumService.ts         # ❌ ОТСУТСТВУЕТ - Для forum.ts
-├── 🔄 DiscordService.ts       # ❌ ОТСУТСТВУЕТ - Для discord.ts
-└── 🔄 RealtimeService.ts      # 🔄 АДАПТАЦИЯ - Обновить под новые типы
+├── 🔄 RealtimeService.ts      # 🔄 АДАПТАЦИЯ - Обновить под новые типы
 ```
 
 ### 🎯 DI-КОНТЕЙНЕР (РАБОТАЕТ)
@@ -128,7 +126,7 @@ export function createV1Router(services: ServicesContainer): Router {
 ### ❌ СТАРАЯ АРХИТЕКТУРА (К УДАЛЕНИЮ)
 ```typescript
 // apps/server/src/api/routes/
-├── ❌ auth.ts                 # 373 строки - Создает свой AuthService
+├── ✅ auth.ts                 # 373 строки - ✅ Уже мигрирован в v1
 ├── ❌ forum.ts                # 585 строк - Прямые запросы к БД
 ├── ❌ discord.ts              # 199 строк - Нет сервисного слоя
 ├── ❌ public.ts               # 113 строк - Старый импорт сервиса
@@ -156,14 +154,13 @@ export async function registerRoutes(app: Express, services: ServicesContainer) 
 
 ### 🚨 КРИТИЧНО (Неделя 1)
 ```typescript
-// 1. Создать недостающие сервисы
-├── ForumService.ts            # Для forum.ts
-├── DiscordService.ts          # Для discord.ts
-└── Обновить RealtimeService.ts # Адаптация под новые типы
+// 1. Обновить RealtimeService.ts
+├── Адаптация под новые типы из db-types
+└── Использование RPC функций
 
-// 2. Мигрировать auth.ts в v1
-├── Создать createAuthRoutes(services)
-├── Перенести в routes/v1/auth.ts
+// 2. Мигрировать forum.ts в v1
+├── Создать createForumRoutes(services)
+├── Перенести в routes/v1/forum.ts
 └── Обновить v1/index.ts
 ```
 
@@ -333,14 +330,14 @@ export async function registerRoutes(app: Express, services: ServicesContainer) 
 - [x] Аутентификация и авторизация
 
 ### 🔄 В ПРОЦЕССЕ
-- [ ] Создание ForumService
-- [ ] Создание DiscordService
-- [ ] Миграция auth.ts в v1
+- [x] ✅ Auth роуты уже мигрированы (есть createAuthRoutes)
+- [ ] Миграция forum.ts в v1
 - [ ] Миграция public.ts в v1
+- [ ] Миграция discord.ts в v1
 
 ### ❌ ОСТАЛОСЬ
-- [ ] Миграция discord.ts в v1
 - [ ] Миграция forum.ts в v1
+- [ ] Миграция discord.ts в v1
 - [ ] Миграция realtime.ts в v1
 - [ ] Обновление главного роутера
 - [ ] Удаление старых файлов
@@ -386,18 +383,18 @@ apps/server/src/api/routes/
 
 ## 📊 МЕТРИКИ ПРОГРЕССА
 
-### 📈 Текущий прогресс: 30%
+### 📈 Текущий прогресс: 45%
 - ✅ DI-контейнер: 100%
 - ✅ Типы: 100%
 - ✅ Тестовая среда: 100%
-- 🔄 Роуты: 15%
-- ❌ Сервисы: 85%
+- 🔄 Роуты: 25%
+- ❌ Сервисы: 95%
 - ❌ Документация: 0%
 
 ### 🎯 Целевые метрики
-- **Неделя 1**: 45% (создание сервисов + auth)
-- **Неделя 2**: 65% (public + discord)
-- **Неделя 3**: 85% (forum + realtime)
+- **Неделя 1**: 60% (forum + public)
+- **Неделя 2**: 75% (discord + realtime)
+- **Неделя 3**: 90% (тесты + документация)
 - **Неделя 4**: 100% (завершение + очистка)
 
 ---

@@ -6,7 +6,8 @@ import { TooltipProvider } from '@/shared/ui/tooltip'
 import { AuthProvider } from '@/features/auth'
 import { ThemeProvider } from '@/features/theme'
 import { ProtectedRoute } from '@/shared/ui/protected-route'
-import { queryClient } from '@/shared/lib/queryClient'
+// import { ConnectionStatus } from '@/shared/ui/connection-status'
+import { queryClient } from '@/shared/lib'
 
 // Lazy loaded pages
 const Homepage = React.lazy(() => import('@/pages/homepage'))
@@ -22,6 +23,7 @@ const Tests = React.lazy(() => import('@/pages/tests'))
 const Support = React.lazy(() => import('@/pages/support'))
 const AdminPanel = React.lazy(() => import('@/pages/admin'))
 const FAQ = React.lazy(() => import('@/pages/faq'))
+const Gallery = React.lazy(() => import('@/pages/gallery'))
 const NotFound = React.lazy(() => import('@/pages/not-found'))
 
 // Loading component
@@ -32,6 +34,10 @@ const LoadingSpinner = () => (
 )
 
 function App() {
+  // Логирование инициализации приложения
+  console.log('✅ [Personal Cabinet] Приложение инициализировано')
+  console.log('✅ [Personal Cabinet] Все провайдеры подключены')
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -43,6 +49,7 @@ function App() {
                   {/* Public routes */}
                   <Route path="/" element={<Homepage />} />
                   <Route path="/faq" element={<FAQ />} />
+                  <Route path="/gallery" element={<Gallery />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
 
@@ -64,6 +71,7 @@ function App() {
                 </Routes>
               </React.Suspense>
               <Toaster />
+              {/* <ConnectionStatus /> */}
             </Router>
           </TooltipProvider>
         </AuthProvider>

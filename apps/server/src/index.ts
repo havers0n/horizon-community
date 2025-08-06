@@ -26,6 +26,8 @@ import { PublicService } from './core/services/PublicService';
 import { LoggerService } from './core/services/LoggerService';
 import { CacheService } from './core/services/CacheService';
 import { FilledReportService } from './core/services/FilledReportService';
+import { CabinetService } from './core/services/CabinetService';
+import { supabase } from './core/lib/supabase';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,6 +71,13 @@ app.use(cors({
     reportTemplateService
   );
 
+  // Создаем CabinetService с зависимостями
+  const cabinetService = new CabinetService(
+    supabase, // Передаем клиент Supabase
+    applicationService,
+    reportService
+  );
+
   // Собираем их в контейнер
   const services: ServicesContainer = {
     authService,
@@ -85,6 +94,7 @@ app.use(cors({
     loggerService: logger,
     cacheService,
     filledReportService,
+    cabinetService,
   };
 
   // Передаем контейнер сервисов в registerRoutes

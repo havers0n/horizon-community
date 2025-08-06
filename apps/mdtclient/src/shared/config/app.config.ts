@@ -7,14 +7,14 @@ export const APP_CONFIG = {
   
   // API конфигурация
   api: {
-    baseUrl: process.env.VITE_API_BASE_URL || 'http://localhost:5000',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
     timeout: 10000,
   },
   
   // Supabase конфигурация
   supabase: {
-    url: process.env.VITE_SUPABASE_URL,
-    anonKey: process.env.VITE_SUPABASE_ANON_KEY,
+    url: import.meta.env.VITE_SUPABASE_URL,
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
   },
   
   // Локализация

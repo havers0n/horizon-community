@@ -2,9 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { AuthContextType, RegisterPayload } from '../model'
 import { AuthAPI } from '../api'
 import { setAuthState, clearAuthState, getAuthState } from '@/shared/lib/auth'
-import type { Database } from '@roleplay-identity/db-types'
-
-type Profiles = Database['public']['Tables']['profiles']['Row']
+import { User, normalizeUser } from '@/entities/user'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -13,7 +11,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<Profiles | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -24,7 +22,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Проверяем токен через API
           try {
             const userData = await AuthAPI.getCurrentUser()
-            setUser(userData)
+            setUser(normalizeUser(userData))
           } catch (error) {
             console.error('Token validation failed:', error)
             clearAuthState()
@@ -50,7 +48,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (userData && access_token) {
         setAuthState(userData, access_token)
-        setUser(userData)
+        setUser(normalizeUser(userData))
       } else {
         throw new Error('Invalid response format')
       }
@@ -69,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (userData && access_token) {
         setAuthState(userData, access_token)
-        setUser(userData)
+        setUser(normalizeUser(userData))
       } else {
         throw new Error('Invalid response format')
       }

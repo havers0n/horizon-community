@@ -91,9 +91,9 @@
 │  │   СУЩЕСТВУЮЩИЕ  │    │   НОВЫЕ         │                │
 │  │   СЕРВИСЫ       │    │   СЕРВИСЫ       │                │
 │  │                 │    │                 │                │
-│  │ ✅ AuthService  │    │ 🔄 ForumService │                │
-│  │ ✅ CharacterS.  │    │ 🔄 DiscordS.    │                │
-│  │ ✅ ReportS.     │    │ 🔄 RealtimeS.   │                │
+│  │ ✅ AuthService  │    │ 🔄 RealtimeS.   │                │
+│  │ ✅ CharacterS.  │    │                 │                │
+│  │ ✅ ReportS.     │    │                 │                │
 │  │ ✅ PublicS.     │    │                 │                │
 │  └─────────────────┘    └─────────────────┘                │
 │                                                             │
@@ -103,8 +103,6 @@
 │  │  const services = {                                    │ │
 │  │    authService: new AuthService(),                     │ │
 │  │    characterService: new CharacterService(),           │ │
-│  │    forumService: new ForumService(),                   │ │
-│  │    discordService: new DiscordService(),               │ │
 │  │    realTimeService: new RealTimeService(),             │ │
 │  │  };                                                    │ │
 │  └─────────────────────────────────────────────────────────┘ │
@@ -121,11 +119,11 @@
 │  │   СТАРЫЕ РОУТЫ  │    │   НОВЫЕ V1      │                │
 │  │   (К УДАЛЕНИЮ)  │    │   РОУТЫ         │                │
 │  │                 │    │                 │                │
-│  │ ❌ auth.ts      │    │ ✅ auth.ts      │                │
-│  │ ❌ forum.ts     │    │ ✅ forum.ts     │                │
-│  │ ❌ discord.ts   │    │ ✅ discord.ts   │                │
-│  │ ❌ public.ts    │    │ ✅ public.ts    │                │
-│  │ ❌ realtime.ts  │    │ ✅ realtime.ts  │                │
+│  │ ✅ auth.ts      │    │ ✅ forum.ts     │                │
+│  │ ❌ forum.ts     │    │ ✅ discord.ts   │                │
+│  │ ❌ discord.ts   │    │ ✅ public.ts    │                │
+│  │ ❌ public.ts    │    │ ✅ realtime.ts  │                │
+│  │ ❌ realtime.ts  │    │                 │                │
 │  └─────────────────┘    └─────────────────┘                │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────────┐ │
@@ -151,11 +149,10 @@
 │  │   УДАЛЯЕМ      │    │   ОБНОВЛЯЕМ     │                │
 │  │   СТАРЫЕ ФАЙЛЫ │    │   КОНФИГУРАЦИИ  │                │
 │  │                 │    │                 │                │
-│  │ ❌ auth.ts      │    │ ✅ v1/index.ts  │                │
-│  │ ❌ forum.ts     │    │ ✅ main router  │                │
-│  │ ❌ discord.ts   │    │ ✅ tests        │                │
-│  │ ❌ public.ts    │    │ ✅ docs         │                │
-│  │ ❌ realtime.ts  │    │                 │                │
+│  │ ❌ forum.ts     │    │ ✅ v1/index.ts  │                │
+│  │ ❌ discord.ts   │    │ ✅ main router  │                │
+│  │ ❌ public.ts    │    │ ✅ tests        │                │
+│  │ ❌ realtime.ts  │    │ ✅ docs         │                │
 │  └─────────────────┘    └─────────────────┘                │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────────┐ │
@@ -270,9 +267,9 @@
 - **v1 роутер**: 15% - Только characters.ts готов
 
 ### 🔄 В ПРОЦЕССЕ (20%)
-- **Auth роуты**: 50% - Есть фабричная функция, нужно перенести в v1
+- **Auth роуты**: 100% - ✅ Уже мигрированы в v1
 - **Public роуты**: 30% - Старый импорт, нужно DI
-- **Сервисы**: 85% - Нужны ForumService и DiscordService
+- **Сервисы**: 95% - Нужно только обновить RealtimeService
 
 ### ❌ НЕ РАБОТАЕТ (50%)
 - **Forum роуты**: 0% - Прямые запросы к БД, нет сервиса

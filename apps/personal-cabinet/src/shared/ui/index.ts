@@ -16,6 +16,9 @@ export * from './page-layout'
 export * from './protected-route'
 export * from './toaster'
 export * from './use-toast'
+export * from './layout'
+export * from './status-badge'
+export * from './department-card'
 
 // New UI components
 export * from './accordion'

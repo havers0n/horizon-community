@@ -46,3 +46,19 @@ export const mdtSupabase = createClient<Database, 'mdt'>(supabaseUrl, supabaseSe
   }
 });
 console.log('[DEBUG] Создан клиент mdtSupabase (mdt схема)');
+
+/**
+ * Создает и возвращает новый экземпляр Supabase клиента для указанной схемы.
+ * @param schema - Имя схемы базы данных ('public', 'mdt', 'common', и т.д.).
+ */
+export function createSupabaseClient(schema: string) {
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    db: {
+      schema: schema,
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
