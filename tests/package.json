@@ -1,42 +1,56 @@
 {
-  "name": "wc-test",
-  "version": "0.1.0",
-  "private": true,
+  "name": "roleplay-identity-tests",
+  "version": "1.0.0",
+  "description": "Тестирование API эндпоинтов системы тестирования RolePlay Identity",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 8855",
-    "lint": "next lint"
+    "start": "next start",
+    "lint": "next lint",
+    "test:api": "node run-api-tests.js",
+    "test:postman": "node run-postman-tests.js",
+    "test:newman": "newman run postman-collection.json -e postman-environment.json",
+    "test:all": "npm run test:api && npm run test:postman",
+    "install:newman": "npm install -g newman",
+    "setup": "npm install && npm run install:newman"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.0.8",
-    "@chakra-ui/react": "^2.2.8",
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
-    "@fortawesome/fontawesome-svg-core": "^6.1.2",
-    "@fortawesome/free-solid-svg-icons": "^6.1.2",
-    "@fortawesome/react-fontawesome": "^0.2.0",
-    "@prisma/client": "^5.2.0",
-    "axios": "^0.27.2",
-    "cookie": "^0.5.0",
-    "discord.js": "^14.5.0",
-    "formidable": "^2.0.1",
-    "formik": "^2.2.9",
-    "framer-motion": "^7.1.1",
-    "image-validator": "^1.2.1",
+    "next": "14.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "prisma": "^5.0.0",
+    "@prisma/client": "^5.0.0",
     "moment": "^2.29.4",
-    "next": "12.2.5",
-    "prisma": "^5.2.0",
-    "react": "18.2.0",
-    "react-color": "^2.19.3",
-    "react-colorful": "^5.6.1",
-    "react-countdown": "^2.3.2",
-    "react-dom": "18.2.0",
-    "react-icons": "^4.4.0",
-    "uuid": "^9.0.0"
+    "discord.js": "^14.0.0"
   },
   "devDependencies": {
-    "eslint": "8.22.0",
-    "eslint-config-next": "12.2.5"
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "mocha": "^10.2.0",
+    "chai": "^4.3.7",
+    "axios": "^1.6.0",
+    "newman": "^6.0.0",
+    "newman-reporter-html": "^1.0.5"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "postman",
+    "newman",
+    "mocha",
+    "chai",
+    "roleplay",
+    "identity"
+  ],
+  "author": "RolePlay Identity Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

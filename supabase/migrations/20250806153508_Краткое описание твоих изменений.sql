@@ -6060,3 +6060,48 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 
 
 RESET ALL;
+
+-- Расширение таблицы tests для поддержки новой функциональности
+ALTER TABLE "mdt"."tests" 
+ADD COLUMN IF NOT EXISTS "is_active" boolean DEFAULT true,
+ADD COLUMN IF NOT EXISTS "time_limit" integer DEFAULT 1200,
+ADD COLUMN IF NOT EXISTS "passing_score" integer DEFAULT 85,
+ADD COLUMN IF NOT EXISTS "required_application_type" text,
+ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now(),
+ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now();
+
+-- Расширение таблицы test_sessions для поддержки новой функциональности
+ALTER TABLE "mdt"."test_sessions" 
+ADD COLUMN IF NOT EXISTS "time_limit" integer DEFAULT 1200,
+ADD COLUMN IF NOT EXISTS "violation_reason" text,
+ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now(),
+ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now();
+
+-- Расширение таблицы test_results для поддержки новой функциональности
+ALTER TABLE "mdt"."test_results" 
+ADD COLUMN IF NOT EXISTS "time_taken" integer,
+ADD COLUMN IF NOT EXISTS "status" text DEFAULT 'completed',
+ADD COLUMN IF NOT EXISTS "comment" text,
+ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now();
+
+-- Создание индексов для оптимизации запросов
+CREATE INDEX IF NOT EXISTS "idx_tests_is_active" ON "mdt"."tests" ("is_active");
+CREATE INDEX IF NOT EXISTS "idx_tests_required_application_type" ON "mdt"."tests" ("required_application_type");
+CREATE INDEX IF NOT EXISTS "idx_test_sessions_user_id" ON "mdt"."test_sessions" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_test_sessions_status" ON "mdt"."test_sessions" ("status");
+CREATE INDEX IF NOT EXISTS "idx_test_results_user_id" ON "mdt"."test_results" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_test_results_test_id" ON "mdt"."test_results" ("test_id");
+CREATE INDEX IF NOT EXISTS "idx_test_results_passed" ON "mdt"."test_results" ("passed");
+
+-- Создание триггеров для автоматического обновления updated_at
+CREATE OR REPLACE TRIGGER "on_updated_at_tests" 
+BEFORE UPDATE ON "mdt"."tests" 
+FOR EACH ROW EXECUTE FUNCTION "public"."handle_updated_at"();
+
+CREATE OR REPLACE TRIGGER "on_updated_at_test_sessions" 
+BEFORE UPDATE ON "mdt"."test_sessions" 
+FOR EACH ROW EXECUTE FUNCTION "public"."handle_updated_at"();
+
+CREATE OR REPLACE TRIGGER "on_updated_at_test_results" 
+BEFORE UPDATE ON "mdt"."test_results" 
+FOR EACH ROW EXECUTE FUNCTION "public"."handle_updated_at"();
