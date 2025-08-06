@@ -35,9 +35,9 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
   const documentationActions = actions.filter(action => action.category === 'documentation');
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-gray-800 border-gray-600">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-gray-900">
+        <CardTitle className="text-lg font-semibold text-gray-100">
           Быстрые действия
         </CardTitle>
       </CardHeader>
@@ -45,7 +45,7 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
         {/* Career Actions */}
         {careerActions.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+            <h4 className="text-sm font-medium text-gray-300 uppercase tracking-wide">
               Карьера
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -55,9 +55,9 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
                   variant="outline"
                   size="sm"
                   onClick={action.action}
-                  className="h-auto p-3 flex flex-col items-center space-y-1 text-xs"
+                  className="h-auto p-3 flex flex-col items-center space-y-1 text-xs bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-gray-200"
                 >
-                  <div className="text-gray-600">
+                  <div className="text-gray-400">
                     {getActionIcon(action.icon)}
                   </div>
                   <span className="text-center">{action.title}</span>
@@ -70,7 +70,7 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
         {/* Documentation Actions */}
         {documentationActions.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+            <h4 className="text-sm font-medium text-gray-300 uppercase tracking-wide">
               Документация
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -82,11 +82,11 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
                   onClick={action.action}
                   className={`h-auto p-3 flex flex-col items-center space-y-1 text-xs ${
                     action.variant === 'warning' 
-                      ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' 
-                      : ''
+                      ? 'bg-red-900 border-red-700 text-red-200 hover:bg-red-800' 
+                      : 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-gray-200'
                   }`}
                 >
-                  <div className={action.variant === 'warning' ? 'text-red-600' : 'text-gray-600'}>
+                  <div className={action.variant === 'warning' ? 'text-red-300' : 'text-gray-400'}>
                     {getActionIcon(action.icon)}
                   </div>
                   <span className="text-center">{action.title}</span>
@@ -99,10 +99,10 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
         {/* Empty State */}
         {actions.length === 0 && (
           <div className="text-center py-8">
-            <div className="text-gray-400 mb-2">
+            <div className="text-gray-500 mb-2">
               <FileText className="w-8 h-8 mx-auto" />
             </div>
-            <p className="text-sm text-gray-500">Нет доступных действий</p>
+            <p className="text-sm text-gray-400">Нет доступных действий</p>
           </div>
         )}
       </CardContent>

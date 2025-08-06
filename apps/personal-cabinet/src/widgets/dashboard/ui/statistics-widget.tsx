@@ -32,9 +32,9 @@ export const StatisticsWidget: React.FC<StatisticsWidgetProps> = ({ statistics }
   ];
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-gray-800 border-gray-600">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-gray-900">
+        <CardTitle className="text-lg font-semibold text-gray-100">
           Ваша статистика
         </CardTitle>
       </CardHeader>
@@ -43,21 +43,21 @@ export const StatisticsWidget: React.FC<StatisticsWidgetProps> = ({ statistics }
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="bg-gray-50 rounded-lg p-4 flex flex-col items-center justify-center space-y-2"
+              className="bg-gray-700 rounded-lg p-4 flex flex-col items-center justify-center space-y-2"
             >
               {/* Icon */}
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <div className="text-gray-600">
+              <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center shadow-sm">
+                <div className="text-gray-300">
                   {getStatIcon(stat.icon)}
                 </div>
               </div>
               
               {/* Value */}
               <div className="text-center">
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-lg font-semibold text-gray-100">
                   {stat.value}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   {stat.title}
                 </p>
               </div>

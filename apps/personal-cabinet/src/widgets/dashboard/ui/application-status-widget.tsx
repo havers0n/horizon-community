@@ -18,24 +18,24 @@ export const ApplicationStatusWidget: React.FC<ApplicationStatusWidgetProps> = (
   const getStatusIcon = () => {
     switch (status) {
       case 'approved':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-green-400" />;
       case 'rejected':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-red-400" />;
       case 'pending':
       default:
-        return <Clock className="w-5 h-5 text-yellow-600" />;
+        return <Clock className="w-5 h-5 text-yellow-400" />;
     }
   };
 
   const getStatusColor = () => {
     switch (status) {
       case 'approved':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-900 text-green-200 border-green-700';
       case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-900 text-red-200 border-red-700';
       case 'pending':
       default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-yellow-900 text-yellow-200 border-yellow-700';
     }
   };
 
@@ -52,9 +52,9 @@ export const ApplicationStatusWidget: React.FC<ApplicationStatusWidgetProps> = (
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-gray-800 border-gray-600">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-gray-900">
+        <CardTitle className="text-lg font-semibold text-gray-100">
           Статус заявки
         </CardTitle>
       </CardHeader>
@@ -63,7 +63,7 @@ export const ApplicationStatusWidget: React.FC<ApplicationStatusWidgetProps> = (
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {getStatusIcon()}
-            <span className="text-sm font-medium text-gray-700">Статус заявки</span>
+            <span className="text-sm font-medium text-gray-300">Статус заявки</span>
           </div>
           <Badge className={getStatusColor()}>
             {getStatusText()}
@@ -73,41 +73,29 @@ export const ApplicationStatusWidget: React.FC<ApplicationStatusWidgetProps> = (
         {/* Statistics Grid */}
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-full bg-blue-900 flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-6 h-6 text-blue-400" />
             </div>
-            <p className="text-lg font-semibold text-gray-900">{applicationsCount}</p>
-            <p className="text-xs text-gray-500">Заявок</p>
+            <p className="text-lg font-semibold text-gray-100">{applicationsCount}</p>
+            <p className="text-xs text-gray-400">Заявок</p>
           </div>
           
           <div className="text-center">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-full bg-green-900 flex items-center justify-center mx-auto mb-2">
+              <CheckCircle className="w-6 h-6 text-green-400" />
             </div>
-            <p className="text-lg font-semibold text-gray-900">{testsPassed}</p>
-            <p className="text-xs text-gray-500">Тестов пройдено</p>
+            <p className="text-lg font-semibold text-gray-100">{testsPassed}</p>
+            <p className="text-xs text-gray-400">Тестов пройдено</p>
           </div>
           
           <div className="text-center">
-            <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-2">
-              <Clock className="w-6 h-6 text-yellow-600" />
+            <div className="w-12 h-12 rounded-full bg-yellow-900 flex items-center justify-center mx-auto mb-2">
+              <Clock className="w-6 h-6 text-yellow-400" />
             </div>
-            <p className="text-lg font-semibold text-gray-900">{attemptsLeft}</p>
-            <p className="text-xs text-gray-500">Попыток осталось</p>
+            <p className="text-lg font-semibold text-gray-100">{attemptsLeft}</p>
+            <p className="text-xs text-gray-400">Попыток осталось</p>
           </div>
         </div>
-
-        {/* Warning for low attempts */}
-        {attemptsLeft <= 1 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-yellow-600" />
-              <p className="text-sm text-yellow-800">
-                У вас осталось мало попыток. Будьте внимательны при подаче заявки.
-              </p>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -79,6 +79,117 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Принудительно применяем темную тему для всего приложения */
+  html {
+    @apply dark;
+  }
+  
+  /* Исправляем цвета для темной темы */
+  .dark {
+    color-scheme: dark;
+  }
+  
+  /* Переопределяем цвета для виджетов в темной теме */
+  .dark .text-gray-900 {
+    @apply text-gray-100;
+  }
+  
+  .dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+  
+  .dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+  
+  .dark .bg-gray-50 {
+    @apply bg-gray-800;
+  }
+  
+  .dark .bg-gray-100 {
+    @apply bg-gray-700;
+  }
+  
+  .dark .bg-white {
+    @apply bg-gray-800;
+  }
+  
+  .dark .hover\:bg-gray-50:hover {
+    @apply hover:bg-gray-700;
+  }
+  
+  .dark .border-gray-200 {
+    @apply border-gray-600;
+  }
+  
+  .dark .bg-green-100 {
+    @apply bg-green-900;
+  }
+  
+  .dark .text-green-800 {
+    @apply text-green-200;
+  }
+  
+  .dark .border-green-200 {
+    @apply border-green-700;
+  }
+  
+  .dark .bg-yellow-100 {
+    @apply bg-yellow-900;
+  }
+  
+  .dark .text-yellow-800 {
+    @apply text-yellow-200;
+  }
+  
+  .dark .border-yellow-200 {
+    @apply border-yellow-700;
+  }
+  
+  .dark .bg-red-100 {
+    @apply bg-red-900;
+  }
+  
+  .dark .text-red-800 {
+    @apply text-red-200;
+  }
+  
+  .dark .border-red-200 {
+    @apply border-red-700;
+  }
+  
+  .dark .bg-blue-100 {
+    @apply bg-blue-900;
+  }
+  
+  .dark .text-blue-800 {
+    @apply text-blue-200;
+  }
+  
+  .dark .border-blue-200 {
+    @apply border-blue-700;
+  }
+  
+  .dark .text-blue-600 {
+    @apply text-blue-400;
+  }
+  
+  .dark .hover\:text-blue-700:hover {
+    @apply hover:text-blue-300;
+  }
+  
+  .dark .bg-gray-200 {
+    @apply bg-gray-600;
+  }
+  
+  .dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+  
+  .dark .shadow-sm {
+    @apply shadow-gray-900;
+  }
 }
 
 /* Дополнительные стили для соответствия client приложению */
@@ -116,23 +227,23 @@
   }
 
   .btn-gradient-primary {
-    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70;
+    @apply bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700;
   }
 
   .btn-gradient-success {
-    @apply bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70;
+    @apply bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700;
   }
 
   .btn-gradient-warning {
-    @apply bg-gradient-to-r from-warning to-warning/80 hover:from-warning/90 hover:to-warning/70;
+    @apply bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700;
   }
 
   .btn-gradient-error {
-    @apply bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70;
+    @apply bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700;
   }
 
   .focus-ring {
-    @apply focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply focus:ring-2 focus:ring-gold-500 focus:ring-offset-2;
   }
 
   .modal-enter {
@@ -148,87 +259,87 @@
   }
 
   .horizon-accent {
-    @apply text-horizon-400 border-horizon-400;
+    @apply bg-gradient-to-r from-horizon-500 to-horizon-600 text-white;
   }
 
   .horizon-accent:hover {
-    @apply bg-horizon-50 text-horizon-600 border-horizon-600;
+    @apply from-horizon-600 to-horizon-700;
   }
 
   .gold-accent {
-    @apply text-gold-400 border-gold-400;
+    @apply bg-gradient-to-r from-gold-500 to-gold-600 text-white;
   }
 
   .gold-accent:hover {
-    @apply bg-gold-50 text-gold-600 border-gold-600;
+    @apply from-gold-600 to-gold-700;
   }
 
   .card-horizon {
-    @apply border-horizon-200 bg-gradient-to-br from-horizon-50 to-white;
+    @apply bg-white border border-gray-200 shadow-sm;
   }
 
   .card-horizon:hover {
-    @apply border-horizon-300 shadow-horizon;
+    @apply shadow-md border-gray-300;
   }
 
   .card-gold {
-    @apply border-gold-200 bg-gradient-to-br from-gold-50 to-white;
+    @apply bg-white border border-gold-200 shadow-sm;
   }
 
   .card-gold:hover {
-    @apply border-gold-300 shadow-gold;
+    @apply shadow-md border-gold-300;
   }
 
   .department-card {
-    @apply rounded-lg p-6 transition-all duration-300;
+    @apply bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200;
   }
 
   .department-card.pd {
-    @apply bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200;
+    @apply from-blue-50 to-blue-100 border-blue-200;
   }
 
   .department-card.sahp {
-    @apply bg-gradient-to-br from-green-50 to-green-100 border-green-200;
+    @apply from-yellow-50 to-yellow-100 border-yellow-200;
   }
 
   .department-card.sams {
-    @apply bg-gradient-to-br from-red-50 to-red-100 border-red-200;
+    @apply from-green-50 to-green-100 border-green-200;
   }
 
   .department-card.safr {
-    @apply bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200;
+    @apply from-red-50 to-red-100 border-red-200;
   }
 
   .department-card.dd {
-    @apply bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200;
+    @apply from-purple-50 to-purple-100 border-purple-200;
   }
 
   .department-card.cd {
-    @apply bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200;
+    @apply from-gray-50 to-gray-100 border-gray-200;
   }
 
   .status-badge {
-    @apply px-2 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
   .status-badge.approved {
-    @apply bg-success/20 text-success border border-success/30;
+    @apply bg-green-100 text-green-800 border border-green-200;
   }
 
   .status-badge.rejected {
-    @apply bg-destructive/20 text-destructive border border-destructive/30;
+    @apply bg-red-100 text-red-800 border border-red-200;
   }
 
   .status-badge.pending {
-    @apply bg-warning/20 text-warning border border-warning/30;
+    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
   }
 
   .action-button {
-    @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
+    @apply inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gold-600 hover:bg-gold-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500;
   }
 
   .notification-item {
-    @apply p-4 border rounded-lg hover:shadow-md transition-all duration-200;
+    @apply flex items-start space-x-3 p-4 hover:bg-gray-50 transition-colors;
   }
 
   .form-field {
@@ -236,107 +347,107 @@
   }
 
   .skeleton {
-    @apply animate-pulse bg-muted rounded;
+    @apply animate-pulse bg-gray-200 rounded;
   }
 
   .table-row {
-    @apply hover:bg-muted/50 transition-colors duration-150;
+    @apply hover:bg-gray-50 transition-colors;
   }
 
   .modal-overlay {
-    @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
   }
 
   .modal-content {
-    @apply bg-background border rounded-lg shadow-xl;
+    @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4;
   }
 
   .nav-item {
-    @apply px-3 py-2 rounded-md transition-colors duration-200;
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100;
   }
 
   .nav-item.active {
-    @apply bg-primary text-primary-foreground;
+    @apply bg-gold-100 text-gold-900;
   }
 
   .btn-horizon {
-    @apply bg-horizon-400 hover:bg-horizon-500 text-white border-horizon-400;
+    @apply bg-horizon-600 text-white hover:bg-horizon-700 focus:ring-horizon-500;
   }
 
   .btn-horizon-outline {
-    @apply border-horizon-400 text-horizon-600 hover:bg-horizon-50;
+    @apply border-horizon-300 text-horizon-700 hover:bg-horizon-50;
   }
 
   .btn-gold {
-    @apply bg-gold-400 hover:bg-gold-500 text-white border-gold-400;
+    @apply bg-gold-600 text-white hover:bg-gold-700 focus:ring-gold-500;
   }
 
   .btn-gold-outline {
-    @apply border-gold-400 text-gold-600 hover:bg-gold-50;
+    @apply border-gold-300 text-gold-700 hover:bg-gold-50;
   }
 
   .input-horizon {
-    @apply border-horizon-200 focus:border-horizon-400 focus:ring-horizon-400;
+    @apply border-horizon-300 focus:ring-horizon-500 focus:border-horizon-500;
   }
 
   .select-horizon {
-    @apply border-horizon-200 focus:border-horizon-400;
+    @apply border-horizon-300 focus:ring-horizon-500 focus:border-horizon-500;
   }
 
   .input-gold {
-    @apply border-gold-200 focus:border-gold-400 focus:ring-gold-400;
+    @apply border-gold-300 focus:ring-gold-500 focus:border-gold-500;
   }
 
   .select-gold {
-    @apply border-gold-200 focus:border-gold-400;
+    @apply border-gold-300 focus:ring-gold-500 focus:border-gold-500;
   }
 
   .department-card-pd {
-    @apply bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-blue-300;
+    @apply from-blue-900/20 via-blue-800/30 to-blue-700/40 border-blue-600;
   }
 
   .department-card-pd:hover {
-    @apply shadow-lg transform -translate-y-1;
+    @apply from-blue-800/30 via-blue-700/40 to-blue-600/50;
   }
 
   .department-card-sahp {
-    @apply bg-gradient-to-br from-green-50 via-green-100 to-green-200 border-green-300;
+    @apply from-yellow-900/20 via-yellow-800/30 to-yellow-700/40 border-yellow-600;
   }
 
   .department-card-sahp:hover {
-    @apply shadow-lg transform -translate-y-1;
+    @apply from-yellow-800/30 via-yellow-700/40 to-yellow-600/50;
   }
 
   .department-card-sams {
-    @apply bg-gradient-to-br from-red-50 via-red-100 to-red-200 border-red-300;
+    @apply from-green-900/20 via-green-800/30 to-green-700/40 border-green-600;
   }
 
   .department-card-sams:hover {
-    @apply shadow-lg transform -translate-y-1;
+    @apply from-green-800/30 via-green-700/40 to-green-600/50;
   }
 
   .department-card-safr {
-    @apply bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-orange-300;
+    @apply from-red-900/20 via-red-800/30 to-red-700/40 border-red-600;
   }
 
   .department-card-safr:hover {
-    @apply shadow-lg transform -translate-y-1;
+    @apply from-red-800/30 via-red-700/40 to-red-600/50;
   }
 
   .department-card-dd {
-    @apply bg-gradient-to-br from-purple-50 via-purple-100 to-purple-200 border-purple-300;
+    @apply from-purple-900/20 via-purple-800/30 to-purple-700/40 border-purple-600;
   }
 
   .department-card-dd:hover {
-    @apply shadow-lg transform -translate-y-1;
+    @apply from-purple-800/30 via-purple-700/40 to-purple-600/50;
   }
 
   .department-card-cd {
-    @apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 border-gray-300;
+    @apply from-gray-900/20 via-gray-800/30 to-gray-700/40 border-gray-600;
   }
 
   .department-card-cd:hover {
-    @apply shadow-lg transform -translate-y-1;
+    @apply from-gray-800/30 via-gray-700/40 to-gray-600/50;
   }
 
   .dark .department-card-pd {
@@ -344,15 +455,15 @@
   }
 
   .dark .department-card-sahp {
-    @apply from-green-900/20 via-green-800/30 to-green-700/40 border-green-600;
+    @apply from-yellow-900/20 via-yellow-800/30 to-yellow-700/40 border-yellow-600;
   }
 
   .dark .department-card-sams {
-    @apply from-red-900/20 via-red-800/30 to-red-700/40 border-red-600;
+    @apply from-green-900/20 via-green-800/30 to-green-700/40 border-green-600;
   }
 
   .dark .department-card-safr {
-    @apply from-orange-900/20 via-orange-800/30 to-orange-700/40 border-orange-600;
+    @apply from-red-900/20 via-red-800/30 to-red-700/40 border-red-600;
   }
 
   .dark .department-card-dd {
@@ -447,28 +558,36 @@
 @keyframes loadingDots {
   0%, 20% {
     color: rgba(0, 0, 0, 0);
-    text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
+    text-shadow:
+      0.25em 0 0 rgba(0, 0, 0, 0),
+      0.5em 0 0 rgba(0, 0, 0, 0);
   }
   40% {
-    color: black;
-    text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
+    color: rgba(0, 0, 0, 0);
+    text-shadow:
+      0.25em 0 0 rgba(0, 0, 0, 0),
+      0.5em 0 0 rgba(0, 0, 0, 0);
   }
   60% {
-    text-shadow: 0.25em 0 0 black, 0.5em 0 0 rgba(0, 0, 0, 0);
+    text-shadow:
+      0.25em 0 0 rgba(0, 0, 0, 0),
+      0.5em 0 0 rgba(0, 0, 0, 0);
   }
   80%, 100% {
-    text-shadow: 0.25em 0 0 black, 0.5em 0 0 black;
+    text-shadow:
+      0.25em 0 0 rgba(0, 0, 0, 0),
+      0.5em 0 0 rgba(0, 0, 0, 0);
   }
 }
 
 @keyframes modalEnter {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-10px);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
