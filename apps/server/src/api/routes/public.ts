@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { publicService } from '../../core/services/index.js';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route GET /api/public/departments

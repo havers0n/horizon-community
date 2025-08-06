@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "node --watch --import tsx src/index.ts",
     "dev:test": "tsx test-server.ts",
     "dev:nx": "nx serve server",
     "build": "tsc -p tsconfig.build.json",
@@ -21,7 +21,7 @@
     "test:components": "jest tests/components/",
     "test:security": "jest tests/security/",
     "test:performance": "jest tests/performance/",
-    "test:e2e": "playwright test",
+    "test:e2e": "jest",
     "test:load": "jest tests/performance/load.test.ts",
     "test:regression": "jest tests/regression/",
     "test:all": "npm run test:api && npm run test:components && npm run test:security && npm run test:performance",

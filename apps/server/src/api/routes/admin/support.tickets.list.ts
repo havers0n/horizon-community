@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware';
 
-const router: import('express').Router = Router();
+const router: Router = Router();
 
 // Middleware: Проверка JWT и роли
 

@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { getCADWebSocket } from '../../websocket';
 
-const router = Router();
+const router: Router = Router();
 
 // Простой кэш для тестирования
 const eventCache = new Map<string, any[]>();

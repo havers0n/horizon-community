@@ -16,6 +16,7 @@ import type { LoggerService } from '../core/services/LoggerService';
 import type { CacheService } from '../core/services/CacheService';
 import type { FilledReportService } from '../core/services/FilledReportService';
 
+
 /**
  * Интерфейс для контейнера всех сервисов
  * Теперь все сервисы - это экземпляры, а не классы

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { supabase } from '../../core/lib/supabase.js';
+import { supabase, commonSupabase } from '../../core/lib/supabase'; // <-- Импортируем нужные клиенты
 import type { Database } from '@roleplay-identity/db-types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -11,8 +11,8 @@ export interface AuthenticatedUser {
   id: string;
   email: string | null;
   username: string | null;
-  role: string;
-  createdAt: string | null;
+  role: Database['public']['Enums']['user_role'];
+  created_at: string | null;
   user_metadata?: {
     cadToken?: string;
     apiToken?: string;
@@ -49,8 +49,10 @@ async function getUserProfile(userId: string): Promise<Profile | null> {
 
 async function getUserCharacters(userId: string): Promise<Character[]> {
   try {
-    const { data: characters, error } = await supabase
-      .rpc('get_characters_with_filters', { p_owner_id: userId });
+    const { data: characters, error } = await commonSupabase
+      .from('characters')
+      .select('*')
+      .eq('user_id', userId);
 
     if (error) {
       console.error('[AuthMiddleware] Error getting user characters:', error);
@@ -71,11 +73,17 @@ export async function authenticateToken(
   res: Response,
   next: NextFunction
 ): Promise<void> {
+  console.log('--- AUTH MIDDLEWARE START ---'); // ШПИОН №1
+
   try {
     const authHeader = req.headers.authorization;
+    console.log('Authorization Header:', authHeader); // ШПИОН №2: Что пришло в заголовке?
+
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    console.log('Extracted Token:', token); // ШПИОН №3: Смогли ли мы извлечь токен?
 
     if (!token) {
+      console.log('No token found, sending 401.'); // ШПИОН №4
       res.status(401).json({
         success: false,
         error: 'Access token required'
@@ -84,9 +92,14 @@ export async function authenticateToken(
     }
 
     // Верифицируем токен через Supabase
+    console.log('Created Supabase client, calling getUser...'); // ШПИОН №4.5
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
+    console.log('Supabase getUser Error:', error); // ШПИОН №5: Была ли ошибка от Supabase?
+    console.log('Supabase getUser Data:', user);  // ШПИОН №6: Что Supabase вернул в качестве юзера?
+
     if (error || !user) {
+      console.log('Token verification failed, sending 401.'); // ШПИОН №7
       console.error('[AuthMiddleware] Token verification failed:', error);
       res.status(401).json({
         success: false,
@@ -96,8 +109,12 @@ export async function authenticateToken(
     }
 
     // Получаем профиль пользователя
+    console.log('Getting user profile for ID:', user.id); // ШПИОН №8
     const profile = await getUserProfile(user.id);
+    console.log('User Profile:', profile); // ШПИОН №9: Что получили из профиля?
+
     if (!profile) {
+      console.log('User profile not found, sending 401.'); // ШПИОН №10
       res.status(401).json({
         success: false,
         error: 'User profile not found'
@@ -111,15 +128,17 @@ export async function authenticateToken(
       email: user.email,
       username: profile.username,
       role: profile.role,
-      createdAt: profile.created_at,
+      created_at: profile.created_at,
       user_metadata: user.user_metadata
     };
+    console.log('Created AuthenticatedUser:', authenticatedUser); // ШПИОН №11: Что создали?
 
     // Приводим req к AuthenticatedRequest и добавляем пользователя
     (req as AuthenticatedRequest).user = authenticatedUser;
+    console.log('Authentication SUCCESS, calling next()'); // ШПИОН №12
     next();
   } catch (error) {
-    console.error('[AuthMiddleware] Authentication error:', error);
+    console.error('[AuthMiddleware] CRITICAL ERROR:', error); // ШПИОН №13
     res.status(500).json({
       success: false,
       error: 'Authentication failed'
@@ -129,7 +148,7 @@ export async function authenticateToken(
 
 // ===== MIDDLEWARE ДЛЯ ПРОВЕРКИ РОЛИ =====
 
-export function requireRole(requiredRole: string) {
+export function requireRole(requiredRole: Database['public']['Enums']['user_role']) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -151,7 +170,7 @@ export function requireRole(requiredRole: string) {
   };
 }
 
-export function requireAnyRole(requiredRoles: string[]) {
+export function requireAnyRole(requiredRoles: Database['public']['Enums']['user_role'][]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -309,8 +328,8 @@ export async function requireCharacter(
         data: {
           characters: characters.map(char => ({
             id: char.id,
-            firstName: char.first_name,
-            lastName: char.last_name
+            first_name: char.first_name,
+            last_name: char.last_name
           }))
         }
       });
@@ -382,12 +401,12 @@ export const verifyJWT = authenticateToken;
 
 // Старые комбинированные middleware для обратной совместимости
 export const requireAdmin = requireRole('admin');
-export const requireSupervisor = requireRole('supervisor');
-export const requireMember = requireRole('member');
+export const requireSupervisor = requireRole('staff');
+export const requireMember = requireRole('citizen');
 export const requireCandidate = requireRole('candidate');
 
 // Middleware для проверки нескольких ролей
-export const requireAdminOrSupervisor = requireAnyRole(['admin', 'supervisor']);
+export const requireAdminOrSupervisor = requireAnyRole(['admin', 'staff']);
 
 // Универсальный middleware аутентификации (для обратной совместимости)
 export async function authenticateAny(
@@ -411,7 +430,7 @@ export async function authenticateAny(
               email: user.email,
               username: profile.username,
               role: profile.role,
-              createdAt: profile.created_at,
+              created_at: profile.created_at,
               user_metadata: user.user_metadata
             };
             return next();
@@ -449,7 +468,7 @@ export async function authenticateAny(
 }
 
 // Дополнительные middleware для обратной совместимости
-export function requireExactRole(role: string) {
+export function requireExactRole(role: Database['public']['Enums']['user_role']) {
   return requireRole(role);
 }
 
@@ -500,6 +519,6 @@ export function requireActiveStatus(req: AuthenticatedRequest, res: Response, ne
 
 // Старые комбинированные массивы middleware (для обратной совместимости)
 export const requireAdminWithAuth = [authenticateToken, requireRole('admin')];
-export const requireSupervisorWithAuth = [authenticateToken, requireRole('supervisor')];
-export const requireMemberWithAuth = [authenticateToken, requireRole('member')];
+export const requireSupervisorWithAuth = [authenticateToken, requireRole('staff')];
+export const requireMemberWithAuth = [authenticateToken, requireRole('citizen')];
 export const requireCandidateWithAuth = [authenticateToken, requireRole('candidate')]; 

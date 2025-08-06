@@ -55,8 +55,14 @@ describe('Application API', () => {
         type: 'entry',
         author_user_id: 'user123',
         author_character_id: 'char456',
-        status: 'pending',
-        created_at: new Date().toISOString()
+        status: 'awaiting_interview',
+        created_at: new Date().toISOString(),
+        updated_at: null,
+        data: null,
+        result: null,
+        review_comment: null,
+        reviewer_character_id: null,
+        status_history: []
       };
 
       (mockApplicationService.createApplication as jest.Mock).mockResolvedValue(mockApplication);
@@ -65,15 +71,15 @@ describe('Application API', () => {
         .post('/api/applications')
         .send({
           type: 'entry',
-          authorUserId: 'user123',
-          authorCharacterId: 'char456'
+          author_user_id: 'user123',
+          author_character_id: 'char456'
         })
         .expect(200);
 
       expect(mockApplicationService.createApplication).toHaveBeenCalledWith({
         type: 'entry',
-        authorUserId: 'user123',
-        authorCharacterId: 'char456'
+        author_user_id: 'user123',
+        author_character_id: 'char456'
       });
       expect(response.body).toEqual(mockApplication);
     });
@@ -86,8 +92,14 @@ describe('Application API', () => {
         type: 'entry',
         author_user_id: 'user123',
         author_character_id: 'char456',
-        status: 'pending',
-        created_at: new Date().toISOString()
+        status: 'awaiting_interview',
+        created_at: new Date().toISOString(),
+        updated_at: null,
+        data: null,
+        result: null,
+        review_comment: null,
+        reviewer_character_id: null,
+        status_history: []
       };
 
       (mockApplicationService.getApplicationById as jest.Mock).mockResolvedValue(mockApplication);

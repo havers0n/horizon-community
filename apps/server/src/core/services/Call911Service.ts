@@ -1,37 +1,31 @@
 // apps/server/src/core/services/Call911Service.ts
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { createSupabaseClient } from '../lib/supabase';
+import { mdtSupabase } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
 
-// ПРАВИЛО 2: ✅ Импортируем ВСЕ типы напрямую из db-types
-import type {
-  Database,
-  MDTCalls,
-  MDTCallsInsert,
-  MDTCallsUpdate,
-  UnitsOnDuty,
-  UnitsOnDutyInsert,
-  UnitsOnDutyUpdate
-} from '@roleplay-identity/db-types';
+// Импортируем только Database и создаем локальные типы-алиасы
+import type { Database } from '@roleplay-identity/db-types';
+
+// Создаем локальные типы-алиасы из глобального типа Database
+type MDTCalls = Database['mdt']['Tables']['calls']['Row'];
+type MDTCallsInsert = Database['mdt']['Tables']['calls']['Insert'];
+type MDTCallsUpdate = Database['mdt']['Tables']['calls']['Update'];
+type UnitsOnDuty = Database['mdt']['Tables']['units_on_duty']['Row'];
+type UnitsOnDutyInsert = Database['mdt']['Tables']['units_on_duty']['Insert'];
+type UnitsOnDutyUpdate = Database['mdt']['Tables']['units_on_duty']['Update'];
 
 export class Call911Service {
-  // ✅ Явно указываем, что клиент работает с таблицами из схемы 'mdt'
-  private supabase: any; 
-
-  constructor() {
-    // ✅ Создаем клиент для конкретной схемы
-    this.supabase = createSupabaseClient('public');
-  }
+  private db = mdtSupabase;
 
   // ===== ОСНОВНЫЕ ОПЕРАЦИИ С ВЫЗОВАМИ =====
 
   public async getActiveCalls(): Promise<MDTCalls[]> {
     // ✅ Обращаемся к таблице 'calls' внутри схемы 'mdt'
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('calls')
       .select('*')
-      .in('status', ['pending', 'assigned', 'en_route', 'on_scene'])
+      .in('status', ['pending', 'assigned', 'on_scene'])
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -42,7 +36,7 @@ export class Call911Service {
   }
 
   public async findCallById(id: string): Promise<MDTCalls | null> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('calls')
       .select('*')
       .eq('id', id)
@@ -57,7 +51,7 @@ export class Call911Service {
   }
   
   public async createCall(callData: MDTCallsInsert): Promise<MDTCalls> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('calls')
       .insert(callData)
       .select()
@@ -71,7 +65,7 @@ export class Call911Service {
   }
 
   public async updateCall(id: string, callData: MDTCallsUpdate): Promise<MDTCalls> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('calls')
       .update(callData)
       .eq('id', id)
@@ -88,7 +82,7 @@ export class Call911Service {
   // ===== ОПЕРАЦИИ С ЮНИТАМИ =====
 
   public async getActiveUnits(): Promise<UnitsOnDuty[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('units_on_duty')
       .select('*');
 
@@ -100,21 +94,21 @@ export class Call911Service {
   }
   
   public async createUnit(unitData: UnitsOnDutyInsert): Promise<UnitsOnDuty> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('units_on_duty')
       .insert(unitData)
       .select()
       .single();
 
     if (error || !data) {
-        console.error('[Call911Service] Error creating unit:', error);
-        throw new AppError("Не удалось создать юнит.", 500);
+      console.error('[Call911Service] Error creating unit:', error);
+      throw new AppError('Не удалось создать юнит.', 500);
     }
     return data;
   }
-  
+
   public async updateUnit(unitId: string, unitData: UnitsOnDutyUpdate): Promise<UnitsOnDuty> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('units_on_duty')
       .update(unitData)
       .eq('id', unitId)
@@ -122,11 +116,9 @@ export class Call911Service {
       .single();
 
     if (error || !data) {
-        console.error(`[Call911Service] Error updating unit ${unitId}:`, error);
-        throw new AppError("Не удалось обновить юнит.", 500);
+      console.error(`[Call911Service] Error updating unit ${unitId}:`, error);
+      throw new AppError('Не удалось обновить юнит.', 500);
     }
     return data;
   }
-
-  // ... (здесь должны быть остальные методы из старого файла, но они уже написаны по этому же принципу)
 }

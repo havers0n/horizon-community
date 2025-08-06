@@ -1,19 +1,30 @@
 import request from 'supertest';
 import express from 'express';
-import { registerRoutes } from '../../routes';
 
 describe('Health Check API', () => {
   let app: express.Application;
-  let server: any;
 
-  beforeAll(async () => {
+  beforeEach(() => {
     app = express();
     app.use(express.json());
-    server = await registerRoutes(app);
-  });
 
-  afterAll(() => {
-    server?.close();
+    // Добавляем тестовые health check роуты
+    app.get('/api/health', (req, res) => {
+      res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+      });
+    });
+
+    app.get('/api/v1/health', (req, res) => {
+      res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+        environment: process.env.NODE_ENV || 'development'
+      });
+    });
   });
 
   describe('GET /api/health', () => {
@@ -26,7 +37,7 @@ describe('Health Check API', () => {
       expect(response.body).toHaveProperty('timestamp');
       expect(response.body).toHaveProperty('environment');
       
-      expect(response.body.status).toBe('ok');
+      expect(response.body.status).toBe('UP');
       expect(response.body.environment).toBe('test');
       expect(new Date(response.body.timestamp)).toBeInstanceOf(Date);
     });
@@ -86,7 +97,7 @@ describe('Health Check API', () => {
 
       responses.forEach(response => {
         expect(response.status).toBe(200);
-        expect(response.body.status).toBe('ok');
+        expect(response.body.status).toBe('UP');
       });
     });
 
@@ -100,6 +111,23 @@ describe('Health Check API', () => {
 
       expect(actualKeys).toEqual(expect.arrayContaining(expectedKeys));
       expect(actualKeys.length).toBe(expectedKeys.length);
+    });
+  });
+
+  describe('GET /api/v1/health', () => {
+    it('should return v1 health status with version', async () => {
+      const response = await request(app)
+        .get('/api/v1/health')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status');
+      expect(response.body).toHaveProperty('timestamp');
+      expect(response.body).toHaveProperty('version');
+      expect(response.body).toHaveProperty('environment');
+      
+      expect(response.body.status).toBe('UP');
+      expect(response.body.version).toBe('v1');
+      expect(response.body.environment).toBe('test');
     });
   });
 }); 

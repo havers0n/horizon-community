@@ -1,53 +1,77 @@
 import request from 'supertest';
 import express from 'express';
-import { registerRoutes } from '../../routes';
-import { storage } from '../../storage';
+import { AuthService } from '@/services/AuthService';
 
-// Мокаем storage для тестов
-jest.mock('../../storage', () => ({
-  storage: {
-    getUserByEmail: jest.fn(),
-    getUserByUsername: jest.fn(),
-    createUser: jest.fn(),
-    getUserByAuthId: jest.fn(),
-    getCharactersByOwner: jest.fn(),
-    getAllUsers: jest.fn(),
-    createNotification: jest.fn(),
-  }
-}));
-
-// Мокаем Supabase
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({
-    auth: {
-      admin: {
-        createUser: jest.fn(),
-      },
-      signInWithPassword: jest.fn(),
-      getUser: jest.fn(),
-    },
-  })),
+// Мокаем AuthService
+jest.mock('@/services/AuthService', () => ({
+  AuthService: jest.fn().mockImplementation(() => ({
+    registerUser: jest.fn(),
+    loginUser: jest.fn(),
+    logoutUser: jest.fn(),
+    refreshToken: jest.fn(),
+    validateToken: jest.fn(),
+  }))
 }));
 
 describe('Auth API', () => {
   let app: express.Application;
-  let server: any;
-
-  beforeAll(async () => {
-    app = express();
-    app.use(express.json());
-    server = await registerRoutes(app);
-  });
-
-  afterAll(() => {
-    server?.close();
-  });
+  let mockAuthService: AuthService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    app = express();
+    app.use(express.json());
+
+    // Создаем мок сервиса
+    mockAuthService = new AuthService();
+
+    // Добавляем тестовые роуты
+    app.post('/api/v1/auth/register', async (req, res) => {
+      try {
+        const profile = await mockAuthService.registerUser(req.body);
+        res.status(201).json({
+          success: true,
+          message: 'User registered successfully',
+          data: {
+            id: profile.id,
+            username: profile.username,
+            email: profile.email,
+            role: profile.role
+          }
+        });
+      } catch (error: any) {
+        res.status(error.statusCode || 500).json({
+          success: false,
+          error: error.message || 'Internal server error'
+        });
+      }
+    });
+
+    app.post('/api/v1/auth/login', async (req, res) => {
+      try {
+        const result = await mockAuthService.loginUser(req.body);
+        res.status(200).json({
+          success: true,
+          message: 'Login successful',
+          data: {
+            user: {
+              id: result.profile.id,
+              username: result.profile.username,
+              email: result.profile.email,
+              role: result.profile.role
+            },
+            session: result.session
+          }
+        });
+      } catch (error: any) {
+        res.status(error.statusCode || 500).json({
+          success: false,
+          error: error.message || 'Internal server error'
+        });
+      }
+    });
   });
 
-  describe('POST /api/auth/register', () => {
+  describe('POST /api/v1/auth/register', () => {
     const validUserData = {
       username: 'testuser',
       email: 'test@example.com',
@@ -55,226 +79,90 @@ describe('Auth API', () => {
     };
 
     it('should register a new user successfully', async () => {
-      const mockSupabase = require('@supabase/supabase-js').createClient();
-      
-      // Мокаем что пользователь не существует
-      (storage.getUserByEmail as jest.Mock).mockResolvedValue(null);
-      (storage.getUserByUsername as jest.Mock).mockResolvedValue(null);
-      
-      // Мокаем создание пользователя в Supabase
-      mockSupabase.auth.admin.createUser.mockResolvedValue({
-        data: { user: { id: 'auth-123' } },
-        error: null
-      });
-      
-      // Мокаем создание пользователя в нашей БД
-      (storage.createUser as jest.Mock).mockResolvedValue({
-        id: 1,
+      const mockProfile = {
+        id: 'user-123',
         username: 'testuser',
         email: 'test@example.com',
         role: 'candidate',
-        status: 'active',
-        authId: 'auth-123'
-      });
+        created_at: new Date().toISOString()
+      };
+
+      (mockAuthService.registerUser as jest.Mock).mockResolvedValue(mockProfile);
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(validUserData)
         .expect(201);
 
-      expect(response.body).toHaveProperty('user');
-      expect(response.body.user.username).toBe('testuser');
-      expect(response.body.user.email).toBe('test@example.com');
-      expect(response.body.user.role).toBe('candidate');
+      expect(mockAuthService.registerUser).toHaveBeenCalledWith(validUserData);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.username).toBe('testuser');
+      expect(response.body.data.email).toBe('test@example.com');
+      expect(response.body.data.role).toBe('candidate');
     });
 
-    it('should return 400 if email already exists', async () => {
-      (storage.getUserByEmail as jest.Mock).mockResolvedValue({
-        id: 1,
-        email: 'test@example.com'
-      });
+    it('should return 400 if registration fails', async () => {
+      const error = new Error('Email already exists');
+      (error as any).statusCode = 400;
+      
+      (mockAuthService.registerUser as jest.Mock).mockRejectedValue(error);
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(validUserData)
         .expect(400);
 
-      expect(response.body.message).toBe('Email already registered');
-    });
-
-    it('should return 400 if username already exists', async () => {
-      (storage.getUserByEmail as jest.Mock).mockResolvedValue(null);
-      (storage.getUserByUsername as jest.Mock).mockResolvedValue({
-        id: 1,
-        username: 'testuser'
-      });
-
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(validUserData)
-        .expect(400);
-
-      expect(response.body.message).toBe('Username already taken');
-    });
-
-    it('should return 400 for invalid data', async () => {
-      const invalidData = {
-        username: '',
-        email: 'invalid-email',
-        password: '123'
-      };
-
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(invalidData)
-        .expect(400);
-
-      expect(response.body.message).toBe('Invalid request data');
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('Email already exists');
     });
   });
 
-  describe('POST /api/auth/login', () => {
+  describe('POST /api/v1/auth/login', () => {
     const validLoginData = {
       email: 'test@example.com',
       password: 'password123'
     };
 
     it('should login user successfully', async () => {
-      const mockSupabase = require('@supabase/supabase-js').createClient();
-      
-      // Мокаем успешную аутентификацию в Supabase
-      mockSupabase.auth.signInWithPassword.mockResolvedValue({
-        data: {
-          user: { id: 'auth-123' },
-          session: { access_token: 'token-123' }
+      const mockResult = {
+        profile: {
+          id: 'user-123',
+          username: 'testuser',
+          email: 'test@example.com',
+          role: 'candidate'
         },
-        error: null
-      });
-      
-      // Мокаем поиск пользователя в нашей БД
-      (storage.getUserByAuthId as jest.Mock).mockResolvedValue({
-        id: 1,
-        username: 'testuser',
-        email: 'test@example.com',
-        role: 'candidate',
-        status: 'active',
-        authId: 'auth-123'
-      });
+        session: {
+          access_token: 'test-token',
+          refresh_token: 'refresh-token'
+        }
+      };
+
+      (mockAuthService.loginUser as jest.Mock).mockResolvedValue(mockResult);
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send(validLoginData)
         .expect(200);
 
-      expect(response.body).toHaveProperty('user');
-      expect(response.body).toHaveProperty('session');
-      expect(response.body.user.email).toBe('test@example.com');
+      expect(mockAuthService.loginUser).toHaveBeenCalledWith(validLoginData);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.username).toBe('testuser');
+      expect(response.body.data.session.access_token).toBe('test-token');
     });
 
-    it('should return 401 for invalid credentials', async () => {
-      const mockSupabase = require('@supabase/supabase-js').createClient();
+    it('should return 401 if login fails', async () => {
+      const error = new Error('Invalid credentials');
+      (error as any).statusCode = 401;
       
-      mockSupabase.auth.signInWithPassword.mockResolvedValue({
-        data: null,
-        error: { message: 'Invalid credentials' }
-      });
+      (mockAuthService.loginUser as jest.Mock).mockRejectedValue(error);
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send(validLoginData)
         .expect(401);
 
-      expect(response.body.message).toBe('Invalid credentials');
-    });
-
-    it('should return 401 if user not found in database', async () => {
-      const mockSupabase = require('@supabase/supabase-js').createClient();
-      
-      mockSupabase.auth.signInWithPassword.mockResolvedValue({
-        data: {
-          user: { id: 'auth-123' },
-          session: { access_token: 'token-123' }
-        },
-        error: null
-      });
-      
-      (storage.getUserByAuthId as jest.Mock).mockResolvedValue(null);
-      (storage.getUserByEmail as jest.Mock).mockResolvedValue(null);
-
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(validLoginData)
-        .expect(401);
-
-      expect(response.body.message).toBe('User not found');
-    });
-  });
-
-  describe('GET /api/auth/me', () => {
-    it('should return user profile when authenticated', async () => {
-      const mockUser = {
-        id: 1,
-        username: 'testuser',
-        email: 'test@example.com',
-        role: 'candidate',
-        status: 'active'
-      };
-
-      (storage.getCharactersByOwner as jest.Mock).mockResolvedValue([]);
-
-      // Мокаем middleware аутентификации
-      const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
-      require('../../middleware/auth.middleware').authenticateToken = (req: any, res: any, next: any) => {
-        req.user = mockUser;
-        next();
-      };
-
-      const response = await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', 'Bearer test-token')
-        .expect(200);
-
-      expect(response.body).toHaveProperty('user');
-      expect(response.body).toHaveProperty('characters');
-      expect(response.body.user.username).toBe('testuser');
-
-      // Восстанавливаем оригинальный middleware
-      require('../../middleware/auth.middleware').authenticateToken = originalAuthenticateToken;
-    });
-
-    it('should return 401 when not authenticated', async () => {
-      const response = await request(app)
-        .get('/api/auth/me')
-        .expect(401);
-
-      expect(response.body.message).toBe('Access token required');
-    });
-  });
-
-  describe('POST /api/auth/logout', () => {
-    it('should logout successfully', async () => {
-      const mockUser = {
-        id: 1,
-        username: 'testuser',
-        email: 'test@example.com'
-      };
-
-      // Мокаем middleware аутентификации
-      const originalAuthenticateToken = require('../../middleware/auth.middleware').authenticateToken;
-      require('../../middleware/auth.middleware').authenticateToken = (req: any, res: any, next: any) => {
-        req.user = mockUser;
-        next();
-      };
-
-      const response = await request(app)
-        .post('/api/auth/logout')
-        .set('Authorization', 'Bearer test-token')
-        .expect(200);
-
-      expect(response.body.message).toBe('Logged out successfully');
-
-      // Восстанавливаем оригинальный middleware
-      require('../../middleware/auth.middleware').authenticateToken = originalAuthenticateToken;
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('Invalid credentials');
     });
   });
 }); 

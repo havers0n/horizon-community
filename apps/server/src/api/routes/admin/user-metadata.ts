@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createSupabaseClient } from '../../lib/supabase';
 
-const adminRouter = Router();
+const adminRouter: Router = Router();
 
 // POST /api/admin/user-metadata/fix
 adminRouter.post('/fix', async (req, res) => {

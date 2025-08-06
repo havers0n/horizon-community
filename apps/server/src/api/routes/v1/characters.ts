@@ -2,31 +2,40 @@
 
 import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware';
-import { characterService } from '../../../core/services/index.js';
+// Мы больше не импортируем готовый сервис. Роутер получит его как аргумент.
 import { AppError } from '../../../utils/AppError';
 import { z } from 'zod';
 import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
 import { validateRequest } from '../../../utils/validation';
 import type { ServicesContainer } from '../../../types/services';
+import type { Database } from '@roleplay-identity/db-types';
 
 // ✅ Полный импорт всех необходимых типов из db-types
-import type {
-  CharactersInsert,
-  CharactersUpdate,
-  LeoProfilesInsert,
-  LeoProfilesUpdate,
-  EmsProfilesInsert,
-  EmsProfilesUpdate,
-} from '@roleplay-identity/db-types';
+type CharactersInsert = Database['common']['Tables']['characters']['Insert'];
+type CharactersUpdate = Database['common']['Tables']['characters']['Update'];
+type LeoProfilesInsert = Database['common']['Tables']['leo_profiles']['Insert'];
+type LeoProfilesUpdate = Database['common']['Tables']['leo_profiles']['Update'];
+type EmsProfilesInsert = Database['common']['Tables']['ems_profiles']['Insert'];
+type EmsProfilesUpdate = Database['common']['Tables']['ems_profiles']['Update'];
+
+// ===== ENUM ТИПЫ ДЛЯ ВАЛИДАЦИИ =====
+const UserRoleEnum = z.enum(['citizen', 'candidate', 'staff', 'admin']);
+const ApplicationStatusEnum = z.enum(['awaiting_interview', 'awaiting_test', 'awaiting_practice', 'accepted', 'rejected', 'on_hold']);
+const BoloTypeEnum = z.enum(['person', 'vehicle']);
+const BoloPriorityEnum = z.enum(['low', 'normal', 'high']);
+const BoloStatusEnum = z.enum(['active', 'inactive', 'resolved']);
+const CallPriorityEnum = z.enum(['low', 'medium', 'high', 'urgent']);
+const CallStatusEnum = z.enum(['pending', 'assigned', 'on_scene', 'resolved', 'cancelled']);
+const CallTypeEnum = z.enum(['911_police', '911_medical', '911_fire', 'non_emergency']);
 
 // --- Zod Schemas ---
 const IdParamSchema = z.object({
   id: z.string().uuid('Неверный формат ID'),
 });
 
-// Схема для создания персонажа. owner_id теперь обязателен.
+// Схема для создания персонажа. user_id теперь обязателен.
 const CharacterCreateSchema = z.object({
-  owner_id: z.string().uuid(), // ✅ ИСПРАВЛЕНО
+  user_id: z.string().uuid(), // ✅ ИСПРАВЛЕНО: используем user_id из БД
   first_name: z.string().min(1, 'Имя обязательно'),
   last_name: z.string().min(1, 'Фамилия обязательна'),
   date_of_birth: z.string().datetime({ message: 'Неверный формат даты' }).optional().nullable(),
@@ -37,7 +46,7 @@ const CharacterCreateSchema = z.object({
   mugshot_url: z.string().url('Неверный URL-адрес для фото').optional().nullable(),
 });
 
-const CharacterUpdateSchema = CharacterCreateSchema.omit({ owner_id: true }).partial(); // ✅ ИСПРАВЛЕНО
+const CharacterUpdateSchema = CharacterCreateSchema.omit({ user_id: true }).partial(); // ✅ ИСПРАВЛЕНО
 
 const LeoProfileCreateSchema = z.object({
   department_id: z.string().uuid('Неверный формат ID департамента'),
@@ -59,8 +68,8 @@ const EmsProfileUpdateSchema = EmsProfileCreateSchema.partial();
 /**
  * Фабричная функция для создания роутера персонажей с внедренными сервисами
  */
-export function createCharacterRoutes(services: ServicesContainer) {
-  const router = Router();
+export function createCharacterRoutes(services: ServicesContainer): Router {
+  const router: Router = Router();
   const { characterService } = services;
 
   // === ОСНОВНЫЕ РОУТЫ ПЕРСОНАЖЕЙ ===
@@ -75,7 +84,7 @@ export function createCharacterRoutes(services: ServicesContainer) {
     async (req: AuthenticatedRequest, res, next) => {
       try {
         // Проверка, что пользователь создает персонажа для себя, а не для кого-то другого
-        if (req.user?.id !== req.body.owner_id) { // ✅ ИСПРАВЛЕНО
+        if (req.user?.id !== req.body.user_id) { // ✅ ИСПРАВЛЕНО
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
 
@@ -133,7 +142,7 @@ export function createCharacterRoutes(services: ServicesContainer) {
       try {
         // Проверка на владение персонажем перед обновлением
         const character = await characterService.getCharacterById(req.params.id);
-        if (!character || character.owner_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
+        if (!character || character.user_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
 
@@ -158,12 +167,12 @@ export function createCharacterRoutes(services: ServicesContainer) {
       try {
         // Проверка на владение персонажем перед удалением
         const character = await characterService.getCharacterById(req.params.id);
-        if (!character || character.owner_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
+        if (!character || character.user_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
         
-        // await characterService.deleteCharacter(req.params.id);
-        res.status(200).json({ success: true, message: 'Персонаж успешно удален (метод не реализован)' });
+        await characterService.deleteCharacter(req.params.id);
+        res.status(200).json({ success: true, message: 'Персонаж успешно удален' });
       } catch (error) {
         next(error);
       }
@@ -186,10 +195,10 @@ export function createCharacterRoutes(services: ServicesContainer) {
       try {
         const data: LeoProfilesInsert = {
           ...req.body,
-          character_id: req.params.id,
+          id: req.params.id, // character_id теперь равен id персонажа
         };
-        // const newProfile = await characterService.createLeoProfile(data);
-        res.status(201).json({ success: true, message: 'Профиль LEO создан (метод не реализован)', data });
+        const newProfile = await characterService.createLeoProfile(data);
+        res.status(201).json({ success: true, data: newProfile });
       } catch (error) {
         next(error);
       }
@@ -205,8 +214,8 @@ export function createCharacterRoutes(services: ServicesContainer) {
     validateRequest({ params: IdParamSchema, body: LeoProfileUpdateSchema }),
     async (req, res, next) => {
       try {
-        // const updatedProfile = await characterService.updateLeoProfile(req.params.id, req.body as LeoProfilesUpdate);
-        res.json({ success: true, message: 'Профиль LEO обновлен (метод не реализован)', data: req.body });
+        const updatedProfile = await characterService.updateLeoProfile(req.params.id, req.body as LeoProfilesUpdate);
+        res.json({ success: true, data: updatedProfile });
       } catch (error) {
         next(error);
       }

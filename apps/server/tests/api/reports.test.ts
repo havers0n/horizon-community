@@ -1,10 +1,10 @@
 import request from 'supertest';
 import express from 'express';
-import { registerRoutes } from '../../routes';
-import { storage } from '../../storage';
+import { registerRoutes } from '@/api/routes';
+import { storage } from '@/db/storage';
 
 // Мокаем storage для тестов
-jest.mock('../../storage', () => ({
+jest.mock('@/db/storage', () => ({
   storage: {
     getReportsByUser: jest.fn(),
     createReport: jest.fn(),
