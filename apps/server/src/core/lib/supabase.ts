@@ -43,9 +43,24 @@ export const mdtSupabase = createClient<Database, 'mdt'>(supabaseUrl, supabaseSe
   },
   db: {
     schema: 'mdt'
+  },
+  global: {
+    headers: {
+      'X-Schema': 'mdt'
+    }
   }
 });
 console.log('[DEBUG] Создан клиент mdtSupabase (mdt схема)');
+
+// --- ДОБАВЛЯЕМ ОТЛАДОЧНУЮ ИНФОРМАЦИЮ ---
+(supabase as any).__SCHEMA = 'PUBLIC';
+(commonSupabase as any).__SCHEMA = 'COMMON';
+(mdtSupabase as any).__SCHEMA = 'MDT';
+
+console.log('[DEBUG] Supabase clients have been tagged with schema names.');
+console.log('[DEBUG] supabase.__SCHEMA:', (supabase as any).__SCHEMA);
+console.log('[DEBUG] commonSupabase.__SCHEMA:', (commonSupabase as any).__SCHEMA);
+console.log('[DEBUG] mdtSupabase.__SCHEMA:', (mdtSupabase as any).__SCHEMA);
 
 /**
  * Создает и возвращает новый экземпляр Supabase клиента для указанной схемы.

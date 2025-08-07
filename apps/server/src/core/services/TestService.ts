@@ -1,6 +1,5 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@roleplay-identity/db-types";
-import { mdtSupabase } from "../lib/supabase";
+import { supabase, mdtSupabase } from "../lib/supabase";
 import { AppError } from "../../utils/AppError";
 
 // Создаем локальные типы-алиасы из глобального типа Database
@@ -33,6 +32,13 @@ interface TestResult {
 
 export class TestService {
   private db = mdtSupabase;
+
+  constructor() {
+    // --- ДОБАВЛЯЕМ ОТЛАДОЧНУЮ ИНФОРМАЦИЮ ---
+    console.log(`[DEBUG] TestService INSTANCE CREATED. It will use a client for schema: ${(this.db as any).__SCHEMA}`);
+    console.log(`[DEBUG] TestService constructor - this.db type:`, typeof this.db);
+    console.log(`[DEBUG] TestService constructor - this.db has __SCHEMA:`, !!(this.db as any).__SCHEMA);
+  }
 
   /**
    * Получить все тесты с статистикой
@@ -96,7 +102,7 @@ export class TestService {
    */
   async getAvailableTestsForUser(userId: string): Promise<any[]> {
     try {
-      // Получаем одобренные заявки пользователя
+      // Получаем одобренные заявки пользователя из схемы mdt
       const { data: applications, error: appsError } = await this.db
         .from('applications')
         .select('type, status')
@@ -108,7 +114,7 @@ export class TestService {
         throw new AppError('Не удалось получить данные о заявках пользователя', 500);
       }
 
-      // Получаем все активные тесты
+      // Получаем все активные тесты из схемы mdt
       const { data: tests, error: testsError } = await this.db
         .from('tests')
         .select('*')
@@ -383,21 +389,30 @@ export class TestService {
    */
   async createTest(testData: TestsInsert): Promise<Tests> {
     try {
-      const { data, error } = await this.db
-        .from("tests")
-        .insert(testData)
-        .select()
-        .single();
+      console.log(`[DEBUG] Calling RPC 'create_new_test' with data...`);
+      console.log(`[DEBUG] createTest - payload:`, JSON.stringify(testData, null, 2));
 
-      if (error || !data) {
-        console.error("Error creating test:", error);
-        throw new Error("Не удалось создать тест.");
+      const { data, error } = await supabase.rpc('create_new_test', {
+        p_test_data: testData as unknown as Record<string, unknown>
+      });
+
+      if (error) {
+        console.error('[TestService] Error creating test via RPC:', error);
+        throw new AppError('Не удалось создать тест через RPC.', 500);
       }
 
-      return data as Tests;
+      const created = Array.isArray(data) ? data[0] : data;
+      if (!created) {
+        console.error('[TestService] RPC returned empty result for create_new_test');
+        throw new AppError('Пустой ответ при создании теста через RPC.', 500);
+      }
+
+      console.log('[DEBUG] RPC call successful, test created:', created);
+      return created as Tests;
     } catch (error) {
-      console.error("Error creating test:", error);
-      throw new Error("Не удалось создать тест.");
+      console.error("[TestService] Error in createTest:", error);
+      if (error instanceof AppError) throw error;
+      throw new AppError('Не удалось создать тест через RPC.', 500);
     }
   }
 
