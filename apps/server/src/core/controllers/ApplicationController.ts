@@ -1,9 +1,13 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { ApplicationService } from '../services/ApplicationService';
+import type { TestService } from '../services/TestService';
 import { AppError } from '../../utils/AppError';
 
 export class ApplicationController {
-  constructor(private applicationService: ApplicationService) {}
+  constructor(
+    private applicationService: ApplicationService,
+    private testService: TestService
+  ) {}
 
   async createApplication(req: Request, res: Response, next: NextFunction) {
     try {
@@ -65,6 +69,32 @@ export class ApplicationController {
       // Простое обновление статуса
       const updatedApplication = await this.applicationService.updateApplication(id, { status });
       res.status(200).json(updatedApplication);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createTestSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      // @ts-ignore
+      const userId = req.user.id;
+      const { id: applicationId } = req.params;
+
+      const application = await this.applicationService.getApplicationById(applicationId);
+
+      if (!application) {
+        throw new AppError('Заявка не найдена', 404);
+      }
+
+      // @ts-ignore
+      if (!application.test_id) {
+        throw new AppError('Для этой заявки не назначено тестирование', 400);
+      }
+
+      // @ts-ignore
+      const testSession = await this.testService.startSession(userId, application.test_id);
+
+      res.status(201).json(testSession);
     } catch (error) {
       next(error);
     }

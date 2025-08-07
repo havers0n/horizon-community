@@ -30,8 +30,8 @@ const updateStatusBodySchema = z.object({
 
 export function createApplicationRoutes(services: ServicesContainer): Router {
   const router = Router();
-  const { applicationService } = services;
-  const applicationController = new ApplicationController(applicationService);
+  const { applicationService, testService } = services;
+  const applicationController = new ApplicationController(applicationService, testService);
 
   /**
    * POST /api/v1/applications
@@ -61,6 +61,16 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
     '/:id/status',
     validateRequest({ params: paramsSchema, body: updateStatusBodySchema }),
     (req, res, next) => applicationController.updateApplicationStatus(req, res, next)
+  );
+
+  /**
+   * POST /api/v1/applications/:id/test-session
+   * Создать сессию тестирования для заявки
+   */
+  router.post(
+    '/:id/test-session',
+    validateRequest({ params: paramsSchema }),
+    (req, res, next) => applicationController.createTestSession(req, res, next)
   );
 
   return router;

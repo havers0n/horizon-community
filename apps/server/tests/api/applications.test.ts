@@ -83,6 +83,24 @@ describe('Application API (/api/v1/applications)', () => {
     });
   });
 
+  describe('POST /:id/test-session', () => {
+    it('should create a test session for an application', async () => {
+      const mockApplication = { id: MOCK_APPLICATION_ID, test_id: 'test-123' };
+      const mockTestSession = { sessionId: 'session-abc', questions: [] };
+
+      (services.applicationService.getApplicationById as jest.Mock).mockResolvedValue(mockApplication);
+      (services.testService.startSession as jest.Mock).mockResolvedValue(mockTestSession);
+
+      const response = await request(app)
+        .post(`/api/v1/applications/${MOCK_APPLICATION_ID}/test-session`)
+        .expect(201);
+
+      expect(services.applicationService.getApplicationById).toHaveBeenCalledWith(MOCK_APPLICATION_ID);
+      expect(services.testService.startSession).toHaveBeenCalledWith(MOCK_USER_ID, 'test-123');
+      expect(response.body).toEqual(mockTestSession);
+    });
+  });
+
   describe('Application Limits', () => {
     it('should return 429 when creating more than 3 applications per month', async () => {
         const applicationsThisMonth = [
