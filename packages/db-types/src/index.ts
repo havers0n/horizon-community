@@ -24,7 +24,7 @@ export type Database = {
           id: string
           notes: string | null
           origin: string
-          status: string
+          status_id: string
           vehicle_id: string | null
           weight: number | null
           weight_unit: string | null
@@ -38,7 +38,7 @@ export type Database = {
           id?: string
           notes?: string | null
           origin: string
-          status?: string
+          status_id: string
           vehicle_id?: string | null
           weight?: number | null
           weight_unit?: string | null
@@ -52,7 +52,7 @@ export type Database = {
           id?: string
           notes?: string | null
           origin?: string
-          status?: string
+          status_id?: string
           vehicle_id?: string | null
           weight?: number | null
           weight_unit?: string | null
@@ -63,6 +63,13 @@ export type Database = {
             columns: ["driver_character_id"]
             isOneToOne: false
             referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cargo_shipments_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
             referencedColumns: ["id"]
           },
           {
@@ -159,6 +166,196 @@ export type Database = {
           },
         ]
       }
+      character_career_history_default: {
+        Row: {
+          action_type: string
+          approved_by_character_id: string | null
+          character_id: string
+          created_at: string | null
+          department_id: string | null
+          division_id: string | null
+          effective_date: string
+          id: string
+          rank_id: string | null
+          reason: string | null
+          unit_id: string | null
+        }
+        Insert: {
+          action_type: string
+          approved_by_character_id?: string | null
+          character_id: string
+          created_at?: string | null
+          department_id?: string | null
+          division_id?: string | null
+          effective_date: string
+          id?: string
+          rank_id?: string | null
+          reason?: string | null
+          unit_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          approved_by_character_id?: string | null
+          character_id?: string
+          created_at?: string | null
+          department_id?: string | null
+          division_id?: string | null
+          effective_date?: string
+          id?: string
+          rank_id?: string | null
+          reason?: string | null
+          unit_id?: string | null
+        }
+        Relationships: []
+      }
+      character_career_history_y2024: {
+        Row: {
+          action_type: string
+          approved_by_character_id: string | null
+          character_id: string
+          created_at: string | null
+          department_id: string | null
+          division_id: string | null
+          effective_date: string
+          id: string
+          rank_id: string | null
+          reason: string | null
+          unit_id: string | null
+        }
+        Insert: {
+          action_type: string
+          approved_by_character_id?: string | null
+          character_id: string
+          created_at?: string | null
+          department_id?: string | null
+          division_id?: string | null
+          effective_date: string
+          id?: string
+          rank_id?: string | null
+          reason?: string | null
+          unit_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          approved_by_character_id?: string | null
+          character_id?: string
+          created_at?: string | null
+          department_id?: string | null
+          division_id?: string | null
+          effective_date?: string
+          id?: string
+          rank_id?: string | null
+          reason?: string | null
+          unit_id?: string | null
+        }
+        Relationships: []
+      }
+      character_career_history_y2025: {
+        Row: {
+          action_type: string
+          approved_by_character_id: string | null
+          character_id: string
+          created_at: string | null
+          department_id: string | null
+          division_id: string | null
+          effective_date: string
+          id: string
+          rank_id: string | null
+          reason: string | null
+          unit_id: string | null
+        }
+        Insert: {
+          action_type: string
+          approved_by_character_id?: string | null
+          character_id: string
+          created_at?: string | null
+          department_id?: string | null
+          division_id?: string | null
+          effective_date: string
+          id?: string
+          rank_id?: string | null
+          reason?: string | null
+          unit_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          approved_by_character_id?: string | null
+          character_id?: string
+          created_at?: string | null
+          department_id?: string | null
+          division_id?: string | null
+          effective_date?: string
+          id?: string
+          rank_id?: string | null
+          reason?: string | null
+          unit_id?: string | null
+        }
+        Relationships: []
+      }
+      character_licenses: {
+        Row: {
+          character_id: string
+          expires_at: string | null
+          id: string
+          issued_at: string
+          type: string
+        }
+        Insert: {
+          character_id: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          type: string
+        }
+        Update: {
+          character_id?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_licenses_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      character_medical_records: {
+        Row: {
+          character_id: string
+          details: string
+          id: string
+          record_type: string
+          recorded_at: string | null
+        }
+        Insert: {
+          character_id: string
+          details: string
+          id?: string
+          record_type: string
+          recorded_at?: string | null
+        }
+        Update: {
+          character_id?: string
+          details?: string
+          id?: string
+          record_type?: string
+          recorded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_medical_records_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       character_qualifications: {
         Row: {
           character_id: string
@@ -222,13 +419,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -249,13 +445,12 @@ export type Database = {
           eye_color?: string | null
           first_name: string
           flags?: string[] | null
+          full_name?: string | null
           gender?: string | null
           hair_color?: string | null
           height?: string | null
           id?: string
           last_name: string
-          licenses?: Json | null
-          medical_info?: Json | null
           missing?: boolean | null
           mugshot_url?: string | null
           occupation?: string | null
@@ -276,13 +471,12 @@ export type Database = {
           eye_color?: string | null
           first_name?: string
           flags?: string[] | null
+          full_name?: string | null
           gender?: string | null
           hair_color?: string | null
           height?: string | null
           id?: string
           last_name?: string
-          licenses?: Json | null
-          medical_info?: Json | null
           missing?: boolean | null
           mugshot_url?: string | null
           occupation?: string | null
@@ -348,7 +542,7 @@ export type Database = {
           id: string
           position: string | null
           salary: number | null
-          status: string | null
+          status_id: string
         }
         Insert: {
           character_id: string
@@ -357,7 +551,7 @@ export type Database = {
           id?: string
           position?: string | null
           salary?: number | null
-          status?: string | null
+          status_id: string
         }
         Update: {
           character_id?: string
@@ -366,7 +560,7 @@ export type Database = {
           id?: string
           position?: string | null
           salary?: number | null
-          status?: string | null
+          status_id?: string
         }
         Relationships: [
           {
@@ -381,6 +575,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_employees_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -453,65 +654,6 @@ export type Database = {
           },
         ]
       }
-      ems_profiles: {
-        Row: {
-          created_at: string | null
-          department_id: string
-          division_id: string | null
-          id: string
-          rank_id: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          department_id: string
-          division_id?: string | null
-          id: string
-          rank_id: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          department_id?: string
-          division_id?: string | null
-          id?: string
-          rank_id?: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ems_profiles_department_id_fkey"
-            columns: ["department_id"]
-            isOneToOne: false
-            referencedRelation: "departments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ems_profiles_division_id_fkey"
-            columns: ["division_id"]
-            isOneToOne: false
-            referencedRelation: "divisions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ems_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ems_profiles_rank_id_fkey"
-            columns: ["rank_id"]
-            isOneToOne: false
-            referencedRelation: "ranks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       impound_lots: {
         Row: {
           address: string | null
@@ -552,7 +694,7 @@ export type Database = {
           photos: string[] | null
           release_date: string | null
           release_officer_id: string | null
-          status: string
+          status_id: string
           vehicle_id: string
         }
         Insert: {
@@ -567,7 +709,7 @@ export type Database = {
           photos?: string[] | null
           release_date?: string | null
           release_officer_id?: string | null
-          status?: string
+          status_id: string
           vehicle_id: string
         }
         Update: {
@@ -582,7 +724,7 @@ export type Database = {
           photos?: string[] | null
           release_date?: string | null
           release_officer_id?: string | null
-          status?: string
+          status_id?: string
           vehicle_id?: string
         }
         Relationships: [
@@ -608,6 +750,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "impounded_vehicles_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "impounded_vehicles_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
@@ -616,73 +765,188 @@ export type Database = {
           },
         ]
       }
-      leo_profiles: {
+      leaves: {
         Row: {
-          badge_number: string | null
-          callsign: string | null
-          callsign2: string | null
-          created_at: string | null
-          department_id: string
-          division_id: string | null
+          approved_by_character_id: string | null
+          character_id: string
+          created_at: string
+          end_date: string
           id: string
-          rank_id: string
-          status: string | null
-          updated_at: string | null
+          reason: string | null
+          start_date: string
+          user_id: string
         }
         Insert: {
-          badge_number?: string | null
-          callsign?: string | null
-          callsign2?: string | null
-          created_at?: string | null
-          department_id: string
-          division_id?: string | null
-          id: string
-          rank_id: string
-          status?: string | null
-          updated_at?: string | null
+          approved_by_character_id?: string | null
+          character_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          start_date: string
+          user_id: string
         }
         Update: {
-          badge_number?: string | null
-          callsign?: string | null
-          callsign2?: string | null
-          created_at?: string | null
-          department_id?: string
-          division_id?: string | null
+          approved_by_character_id?: string | null
+          character_id?: string
+          created_at?: string
+          end_date?: string
           id?: string
-          rank_id?: string
-          status?: string | null
-          updated_at?: string | null
+          reason?: string | null
+          start_date?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "leo_profiles_department_id_fkey"
+            foreignKeyName: "leaves_approved_by_character_id_fkey"
+            columns: ["approved_by_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaves_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memberships: {
+        Row: {
+          active_character_id: string | null
+          badge_number: string | null
+          callsign: string | null
+          department_id: string
+          division_id: string | null
+          ended_at: string | null
+          id: string
+          is_primary: boolean
+          practice_hours: number
+          rank_id: string | null
+          started_at: string
+          status_id: string
+          trainings_completed: number
+          user_id: string
+        }
+        Insert: {
+          active_character_id?: string | null
+          badge_number?: string | null
+          callsign?: string | null
+          department_id: string
+          division_id?: string | null
+          ended_at?: string | null
+          id?: string
+          is_primary?: boolean
+          practice_hours?: number
+          rank_id?: string | null
+          started_at?: string
+          status_id: string
+          trainings_completed?: number
+          user_id: string
+        }
+        Update: {
+          active_character_id?: string | null
+          badge_number?: string | null
+          callsign?: string | null
+          department_id?: string
+          division_id?: string | null
+          ended_at?: string | null
+          id?: string
+          is_primary?: boolean
+          practice_hours?: number
+          rank_id?: string | null
+          started_at?: string
+          status_id?: string
+          trainings_completed?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_character_id_fkey"
+            columns: ["active_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memberships_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "leo_profiles_division_id_fkey"
+            foreignKeyName: "memberships_division_id_fkey"
             columns: ["division_id"]
             isOneToOne: false
             referencedRelation: "divisions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "leo_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "leo_profiles_rank_id_fkey"
+            foreignKeyName: "memberships_rank_id_fkey"
             columns: ["rank_id"]
             isOneToOne: false
             referencedRelation: "ranks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "memberships_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      penal_codes: {
+        Row: {
+          category: string | null
+          code_section: string
+          description: string | null
+          fine_amount: number | null
+          id: string
+          jail_time_months: number | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          code_section: string
+          description?: string | null
+          fine_amount?: number | null
+          id?: string
+          jail_time_months?: number | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          code_section?: string
+          description?: string | null
+          fine_amount?: number | null
+          id?: string
+          jail_time_months?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          code: string
+          description: string | null
+          id: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          id?: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          id?: string
+        }
+        Relationships: []
       }
       pets: {
         Row: {
@@ -802,6 +1066,160 @@ export type Database = {
           },
         ]
       }
+      role_assignments: {
+        Row: {
+          created_at: string
+          granted_by_user_id: string | null
+          id: string
+          role_id: string
+          scope_id: string | null
+          scope_type: Database["common"]["Enums"]["scope_type"]
+          subject_type: string
+          user_id: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          created_at?: string
+          granted_by_user_id?: string | null
+          id?: string
+          role_id: string
+          scope_id?: string | null
+          scope_type?: Database["common"]["Enums"]["scope_type"]
+          subject_type?: string
+          user_id: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          created_at?: string
+          granted_by_user_id?: string | null
+          id?: string
+          role_id?: string
+          scope_id?: string | null
+          scope_type?: Database["common"]["Enums"]["scope_type"]
+          subject_type?: string
+          user_id?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_assignments_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      status_kinds: {
+        Row: {
+          code: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      statuses: {
+        Row: {
+          code: string
+          id: string
+          is_active: boolean
+          is_terminal: boolean
+          kind_id: string
+          name: string
+          order_index: number
+        }
+        Insert: {
+          code: string
+          id?: string
+          is_active?: boolean
+          is_terminal?: boolean
+          kind_id: string
+          name: string
+          order_index?: number
+        }
+        Update: {
+          code?: string
+          id?: string
+          is_active?: boolean
+          is_terminal?: boolean
+          kind_id?: string
+          name?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statuses_kind_id_fkey"
+            columns: ["kind_id"]
+            isOneToOne: false
+            referencedRelation: "status_kinds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           created_at: string | null
@@ -843,14 +1261,10 @@ export type Database = {
           color: string | null
           created_at: string | null
           id: string
-          insurance_status:
-            | Database["common"]["Enums"]["vehicle_insurance_status"]
-            | null
+          insurance_status_id: string
           model: string | null
           plate: string
-          registration_status:
-            | Database["common"]["Enums"]["vehicle_registration_status"]
-            | null
+          registration_status_id: string
           vin: string | null
         }
         Insert: {
@@ -858,14 +1272,10 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           id?: string
-          insurance_status?:
-            | Database["common"]["Enums"]["vehicle_insurance_status"]
-            | null
+          insurance_status_id: string
           model?: string | null
           plate: string
-          registration_status?:
-            | Database["common"]["Enums"]["vehicle_registration_status"]
-            | null
+          registration_status_id: string
           vin?: string | null
         }
         Update: {
@@ -873,14 +1283,10 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           id?: string
-          insurance_status?:
-            | Database["common"]["Enums"]["vehicle_insurance_status"]
-            | null
+          insurance_status_id?: string
           model?: string | null
           plate?: string
-          registration_status?:
-            | Database["common"]["Enums"]["vehicle_registration_status"]
-            | null
+          registration_status_id?: string
           vin?: string | null
         }
         Relationships: [
@@ -891,6 +1297,20 @@ export type Database = {
             referencedRelation: "characters"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vehicles_insurance_status_id_fkey"
+            columns: ["insurance_status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_registration_status_id_fkey"
+            columns: ["registration_status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
         ]
       }
       weapons: {
@@ -899,9 +1319,7 @@ export type Database = {
           created_at: string | null
           id: string
           model: string
-          registration_status:
-            | Database["common"]["Enums"]["weapon_registration_status"]
-            | null
+          registration_status_id: string
           serial_number: string
         }
         Insert: {
@@ -909,9 +1327,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           model: string
-          registration_status?:
-            | Database["common"]["Enums"]["weapon_registration_status"]
-            | null
+          registration_status_id: string
           serial_number: string
         }
         Update: {
@@ -919,9 +1335,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           model?: string
-          registration_status?:
-            | Database["common"]["Enums"]["weapon_registration_status"]
-            | null
+          registration_status_id?: string
           serial_number?: string
         }
         Relationships: [
@@ -932,16 +1346,95 @@ export type Database = {
             referencedRelation: "characters"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "weapons_registration_status_id_fkey"
+            columns: ["registration_status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      v_character_licenses: {
+        Row: {
+          character_id: string | null
+          expires_at: string | null
+          id: string | null
+          is_valid: boolean | null
+          issued_at: string | null
+          type: string | null
+        }
+        Insert: {
+          character_id?: string | null
+          expires_at?: string | null
+          id?: string | null
+          is_valid?: never
+          issued_at?: string | null
+          type?: string | null
+        }
+        Update: {
+          character_id?: string | null
+          expires_at?: string | null
+          id?: string | null
+          is_valid?: never
+          issued_at?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_licenses_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_effective_permissions: {
+        Row: {
+          permission_code: string | null
+          scope_id: string | null
+          scope_type: Database["common"]["Enums"]["scope_type"] | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_effective_roles: {
+        Row: {
+          role_id: string | null
+          role_name: string | null
+          scope_id: string | null
+          scope_type: Database["common"]["Enums"]["scope_type"] | null
+          subject_type: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_assignments_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      has_permission: {
+        Args: {
+          p_user_id: string
+          p_code: string
+          p_scope_type: Database["common"]["Enums"]["scope_type"]
+          p_scope_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      request_status: "pending" | "approved" | "rejected" | "withdrawn"
+      scope_type: "system" | "department" | "division" | "unit"
       vehicle_insurance_status: "insured" | "uninsured" | "expired"
       vehicle_registration_status:
         | "registered"
@@ -954,75 +1447,32 @@ export type Database = {
       [_ in never]: never
     }
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   mdt: {
     Tables: {
-      applications: {
+      application_status_history: {
         Row: {
-          author_character_id: string
-          author_user_id: string
-          created_at: string | null
-          data: Json | null
+          application_id: string
+          changed_by_user_id: string | null
+          comment: string | null
+          created_at: string
           id: string
-          result: Json | null
-          review_comment: string | null
-          reviewer_character_id: string | null
-          status: Database["mdt"]["Enums"]["application_status"]
-          status_history: Json[] | null
-          type: string
-          updated_at: string | null
+          status_id: string
         }
         Insert: {
-          author_character_id: string
-          author_user_id: string
-          created_at?: string | null
-          data?: Json | null
+          application_id: string
+          changed_by_user_id?: string | null
+          comment?: string | null
+          created_at?: string
           id?: string
-          result?: Json | null
-          review_comment?: string | null
-          reviewer_character_id?: string | null
-          status?: Database["mdt"]["Enums"]["application_status"]
-          status_history?: Json[] | null
-          type: string
-          updated_at?: string | null
+          status_id: string
         }
         Update: {
-          author_character_id?: string
-          author_user_id?: string
-          created_at?: string | null
-          data?: Json | null
+          application_id?: string
+          changed_by_user_id?: string | null
+          comment?: string | null
+          created_at?: string
           id?: string
-          result?: Json | null
-          review_comment?: string | null
-          reviewer_character_id?: string | null
-          status?: Database["mdt"]["Enums"]["application_status"]
-          status_history?: Json[] | null
-          type?: string
-          updated_at?: string | null
+          status_id?: string
         }
         Relationships: []
       }
@@ -1032,12 +1482,12 @@ export type Database = {
           created_at: string | null
           id: string
           location: string | null
-          priority: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id: string
           reason: string
-          status: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id: string
           subject_description: string | null
           subject_name: string | null
-          type: Database["mdt"]["Enums"]["bolo_type"]
+          type_id: string
           vehicle_description: string | null
           vehicle_plate: string | null
         }
@@ -1046,12 +1496,12 @@ export type Database = {
           created_at?: string | null
           id?: string
           location?: string | null
-          priority?: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id: string
           reason: string
-          status?: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id: string
           subject_description?: string | null
           subject_name?: string | null
-          type: Database["mdt"]["Enums"]["bolo_type"]
+          type_id: string
           vehicle_description?: string | null
           vehicle_plate?: string | null
         }
@@ -1060,20 +1510,76 @@ export type Database = {
           created_at?: string | null
           id?: string
           location?: string | null
-          priority?: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id?: string
           reason?: string
-          status?: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id?: string
           subject_description?: string | null
           subject_name?: string | null
-          type?: Database["mdt"]["Enums"]["bolo_type"]
+          type_id?: string
           vehicle_description?: string | null
           vehicle_plate?: string | null
         }
         Relationships: []
       }
+      cadet_progress: {
+        Row: {
+          membership_id: string
+          practice_minutes: number
+          trainings_completed: number
+          updated_at: string | null
+        }
+        Insert: {
+          membership_id: string
+          practice_minutes?: number
+          trainings_completed?: number
+          updated_at?: string | null
+        }
+        Update: {
+          membership_id?: string
+          practice_minutes?: number
+          trainings_completed?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      call_assignments: {
+        Row: {
+          assigned_at: string | null
+          call_id: string
+          id: string
+          unit_on_duty_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          call_id: string
+          id?: string
+          unit_on_duty_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          call_id?: string
+          id?: string
+          unit_on_duty_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_assignments_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_assignments_unit_on_duty_id_fkey"
+            columns: ["unit_on_duty_id"]
+            isOneToOne: false
+            referencedRelation: "units_on_duty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calls: {
         Row: {
-          assigned_units: Json | null
           attachments: Json | null
           caller_name: string | null
           caller_phone: string | null
@@ -1083,13 +1589,12 @@ export type Database = {
           id: string
           location: string
           patient_info: Json | null
-          priority: Database["mdt"]["Enums"]["call_priority"] | null
-          status: Database["mdt"]["Enums"]["call_status"]
-          type: Database["mdt"]["Enums"]["call_type"]
+          priority_id: string
+          status_id: string
+          type_id: string
           updated_at: string | null
         }
         Insert: {
-          assigned_units?: Json | null
           attachments?: Json | null
           caller_name?: string | null
           caller_phone?: string | null
@@ -1099,13 +1604,12 @@ export type Database = {
           id?: string
           location: string
           patient_info?: Json | null
-          priority?: Database["mdt"]["Enums"]["call_priority"] | null
-          status?: Database["mdt"]["Enums"]["call_status"]
-          type: Database["mdt"]["Enums"]["call_type"]
+          priority_id: string
+          status_id: string
+          type_id: string
           updated_at?: string | null
         }
         Update: {
-          assigned_units?: Json | null
           attachments?: Json | null
           caller_name?: string | null
           caller_phone?: string | null
@@ -1115,9 +1619,9 @@ export type Database = {
           id?: string
           location?: string
           patient_info?: Json | null
-          priority?: Database["mdt"]["Enums"]["call_priority"] | null
-          status?: Database["mdt"]["Enums"]["call_status"]
-          type?: Database["mdt"]["Enums"]["call_type"]
+          priority_id?: string
+          status_id?: string
+          type_id?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -1132,7 +1636,7 @@ export type Database = {
           id: string
           incident_date: string
           participants: Json | null
-          status: Database["mdt"]["Enums"]["complaint_status"]
+          status_id: string
           title: string
           updated_at: string | null
         }
@@ -1145,7 +1649,7 @@ export type Database = {
           id?: string
           incident_date: string
           participants?: Json | null
-          status?: Database["mdt"]["Enums"]["complaint_status"]
+          status_id: string
           title: string
           updated_at?: string | null
         }
@@ -1158,126 +1662,134 @@ export type Database = {
           id?: string
           incident_date?: string
           participants?: Json | null
-          status?: Database["mdt"]["Enums"]["complaint_status"]
+          status_id?: string
           title?: string
           updated_at?: string | null
         }
         Relationships: []
       }
-      ems_fd_reports: {
+      duty_logs: {
         Row: {
-          author_character_id: string
-          call_id: string | null
-          created_at: string | null
-          description: string
-          fire_details: Json | null
+          character_id: string
+          department_id: string
+          duration_minutes: number | null
+          end_time: string | null
           id: string
-          incident_location: string
-          incident_time: string
-          incident_type: string
+          start_time: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          character_id: string
+          department_id: string
+          duration_minutes?: number | null
+          end_time?: string | null
+          id?: string
+          start_time: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          character_id?: string
+          department_id?: string
+          duration_minutes?: number | null
+          end_time?: string | null
+          id?: string
+          start_time?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ems_reports: {
+        Row: {
+          id: string
           medications_administered: Json | null
           outcome: string | null
           patients: Json | null
-          title: string
           treatment_provided: string | null
-          updated_at: string | null
           vital_signs: Json | null
         }
         Insert: {
-          author_character_id: string
-          call_id?: string | null
-          created_at?: string | null
-          description: string
-          fire_details?: Json | null
-          id?: string
-          incident_location: string
-          incident_time: string
-          incident_type: string
+          id: string
           medications_administered?: Json | null
           outcome?: string | null
           patients?: Json | null
-          title: string
           treatment_provided?: string | null
-          updated_at?: string | null
           vital_signs?: Json | null
         }
         Update: {
-          author_character_id?: string
-          call_id?: string | null
-          created_at?: string | null
-          description?: string
-          fire_details?: Json | null
           id?: string
-          incident_location?: string
-          incident_time?: string
-          incident_type?: string
           medications_administered?: Json | null
           outcome?: string | null
           patients?: Json | null
-          title?: string
           treatment_provided?: string | null
-          updated_at?: string | null
           vital_signs?: Json | null
         }
         Relationships: [
           {
-            foreignKeyName: "ems_fd_reports_call_id_fkey"
-            columns: ["call_id"]
-            isOneToOne: false
-            referencedRelation: "calls"
+            foreignKeyName: "ems_reports_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fd_reports: {
+        Row: {
+          fatalities_count: number | null
+          fire_details: Json | null
+          id: string
+          injuries_count: number | null
+          outcome: string | null
+          structural_damage: string | null
+        }
+        Insert: {
+          fatalities_count?: number | null
+          fire_details?: Json | null
+          id: string
+          injuries_count?: number | null
+          outcome?: string | null
+          structural_damage?: string | null
+        }
+        Update: {
+          fatalities_count?: number | null
+          fire_details?: Json | null
+          id?: string
+          injuries_count?: number | null
+          outcome?: string | null
+          structural_damage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fd_reports_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "reports"
             referencedColumns: ["id"]
           },
         ]
       }
       law_reports: {
         Row: {
-          author_character_id: string
-          call_id: string | null
-          created_at: string | null
-          description: string
           id: string
-          incident_location: string
-          incident_time: string
-          incident_type: string
-          penal_codes: Json | null
           seized_items: Json | null
-          title: string
-          updated_at: string | null
         }
         Insert: {
-          author_character_id: string
-          call_id?: string | null
-          created_at?: string | null
-          description: string
-          id?: string
-          incident_location: string
-          incident_time: string
-          incident_type: string
-          penal_codes?: Json | null
+          id: string
           seized_items?: Json | null
-          title: string
-          updated_at?: string | null
         }
         Update: {
-          author_character_id?: string
-          call_id?: string | null
-          created_at?: string | null
-          description?: string
           id?: string
-          incident_location?: string
-          incident_time?: string
-          incident_type?: string
-          penal_codes?: Json | null
           seized_items?: Json | null
-          title?: string
-          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "law_reports_call_id_fkey"
-            columns: ["call_id"]
-            isOneToOne: false
-            referencedRelation: "calls"
+            foreignKeyName: "law_reports_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "reports"
             referencedColumns: ["id"]
           },
         ]
@@ -1324,9 +1836,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           location: string | null
-          priority: string | null
+          priority_id: string | null
           title: string
-          type: string | null
+          type_id: string | null
         }
         Insert: {
           author_character_id?: string | null
@@ -1337,9 +1849,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           location?: string | null
-          priority?: string | null
+          priority_id?: string | null
           title: string
-          type?: string | null
+          type_id?: string | null
         }
         Update: {
           author_character_id?: string | null
@@ -1350,9 +1862,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           location?: string | null
-          priority?: string | null
+          priority_id?: string | null
           title?: string
-          type?: string | null
+          type_id?: string | null
         }
         Relationships: []
       }
@@ -1389,32 +1901,46 @@ export type Database = {
         }
         Relationships: []
       }
-      notifications: {
+      report_files: {
         Row: {
-          content: string
-          created_at: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size_bytes: number | null
           id: string
-          is_read: boolean
-          link: string | null
-          recipient_user_id: string
+          mime_type: string | null
+          report_id: string
+          uploader_user_id: string
         }
         Insert: {
-          content: string
-          created_at?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size_bytes?: number | null
           id?: string
-          is_read?: boolean
-          link?: string | null
-          recipient_user_id: string
+          mime_type?: string | null
+          report_id: string
+          uploader_user_id: string
         }
         Update: {
-          content?: string
-          created_at?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number | null
           id?: string
-          is_read?: boolean
-          link?: string | null
-          recipient_user_id?: string
+          mime_type?: string | null
+          report_id?: string
+          uploader_user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "report_files_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       report_participants: {
         Row: {
@@ -1440,7 +1966,63 @@ export type Database = {
             foreignKeyName: "report_participants_report_id_fkey"
             columns: ["report_id"]
             isOneToOne: false
-            referencedRelation: "law_reports"
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_penal_codes: {
+        Row: {
+          notes: string | null
+          penal_code_id: string
+          report_id: string
+        }
+        Insert: {
+          notes?: string | null
+          penal_code_id: string
+          report_id: string
+        }
+        Update: {
+          notes?: string | null
+          penal_code_id?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_penal_codes_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_template_tags: {
+        Row: {
+          tag_id: string
+          template_id: string
+        }
+        Insert: {
+          tag_id: string
+          template_id: string
+        }
+        Update: {
+          tag_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_template_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_template_tags_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -1456,7 +2038,6 @@ export type Database = {
           instructions: string | null
           is_active: boolean | null
           purpose: string | null
-          tags: string[] | null
           title: string
           updated_at: string | null
         }
@@ -1470,7 +2051,6 @@ export type Database = {
           instructions?: string | null
           is_active?: boolean | null
           purpose?: string | null
-          tags?: string[] | null
           title: string
           updated_at?: string | null
         }
@@ -1484,210 +2064,82 @@ export type Database = {
           instructions?: string | null
           is_active?: boolean | null
           purpose?: string | null
-          tags?: string[] | null
           title?: string
           updated_at?: string | null
         }
         Relationships: []
       }
-      support_tickets: {
+      reports: {
         Row: {
+          author_character_id: string
           author_user_id: string
-          created_at: string | null
-          handler_user_id: string | null
+          call_id: string | null
+          created_at: string
+          department_id: string | null
           id: string
-          messages: Json[] | null
-          status: Database["mdt"]["Enums"]["support_ticket_status"]
-          title: string
+          incident_location: string | null
+          incident_time: string | null
+          reviewer_character_id: string | null
+          reviewer_comment: string | null
+          status_id: string
+          title: string | null
+          type_id: string | null
           updated_at: string | null
         }
         Insert: {
+          author_character_id: string
           author_user_id: string
-          created_at?: string | null
-          handler_user_id?: string | null
+          call_id?: string | null
+          created_at?: string
+          department_id?: string | null
           id?: string
-          messages?: Json[] | null
-          status?: Database["mdt"]["Enums"]["support_ticket_status"]
-          title: string
+          incident_location?: string | null
+          incident_time?: string | null
+          reviewer_character_id?: string | null
+          reviewer_comment?: string | null
+          status_id: string
+          title?: string | null
+          type_id?: string | null
           updated_at?: string | null
         }
         Update: {
+          author_character_id?: string
           author_user_id?: string
-          created_at?: string | null
-          handler_user_id?: string | null
+          call_id?: string | null
+          created_at?: string
+          department_id?: string | null
           id?: string
-          messages?: Json[] | null
-          status?: Database["mdt"]["Enums"]["support_ticket_status"]
-          title?: string
+          incident_location?: string | null
+          incident_time?: string | null
+          reviewer_character_id?: string | null
+          reviewer_comment?: string | null
+          status_id?: string
+          title?: string | null
+          type_id?: string | null
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      test_results: {
-        Row: {
-          answers: Json | null
-          comment: string | null
-          created_at: string | null
-          id: string
-          max_score: number | null
-          passed: boolean | null
-          percentage: number | null
-          score: number | null
-          session_id: string
-          status: string | null
-          test_id: string
-          time_spent_seconds: number | null
-          time_taken: number | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          answers?: Json | null
-          comment?: string | null
-          created_at?: string | null
-          id?: string
-          max_score?: number | null
-          passed?: boolean | null
-          percentage?: number | null
-          score?: number | null
-          session_id: string
-          status?: string | null
-          test_id: string
-          time_spent_seconds?: number | null
-          time_taken?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          answers?: Json | null
-          comment?: string | null
-          created_at?: string | null
-          id?: string
-          max_score?: number | null
-          passed?: boolean | null
-          percentage?: number | null
-          score?: number | null
-          session_id?: string
-          status?: string | null
-          test_id?: string
-          time_spent_seconds?: number | null
-          time_taken?: number | null
-          updated_at?: string | null
-          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "test_results_session_id_fkey"
-            columns: ["session_id"]
+            foreignKeyName: "reports_call_id_fkey"
+            columns: ["call_id"]
             isOneToOne: false
-            referencedRelation: "test_sessions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_results_test_id_fkey"
-            columns: ["test_id"]
-            isOneToOne: false
-            referencedRelation: "tests"
+            referencedRelation: "calls"
             referencedColumns: ["id"]
           },
         ]
       }
-      test_sessions: {
+      tags: {
         Row: {
-          application_id: string | null
-          created_at: string | null
-          end_time: string | null
           id: string
-          start_time: string | null
-          status: string
-          test_id: string
-          time_limit: number | null
-          updated_at: string | null
-          user_id: string
-          violation_reason: string | null
+          name: string
         }
         Insert: {
-          application_id?: string | null
-          created_at?: string | null
-          end_time?: string | null
           id?: string
-          start_time?: string | null
-          status: string
-          test_id: string
-          time_limit?: number | null
-          updated_at?: string | null
-          user_id: string
-          violation_reason?: string | null
+          name: string
         }
         Update: {
-          application_id?: string | null
-          created_at?: string | null
-          end_time?: string | null
           id?: string
-          start_time?: string | null
-          status?: string
-          test_id?: string
-          time_limit?: number | null
-          updated_at?: string | null
-          user_id?: string
-          violation_reason?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "test_sessions_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "test_sessions_test_id_fkey"
-            columns: ["test_id"]
-            isOneToOne: false
-            referencedRelation: "tests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tests: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          duration_minutes: number | null
-          id: string
-          is_active: boolean | null
-          passing_score: number | null
-          questions: Json | null
-          required_application_type: string | null
-          time_limit: number | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          is_active?: boolean | null
-          passing_score?: number | null
-          questions?: Json | null
-          required_application_type?: string | null
-          time_limit?: number | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          is_active?: boolean | null
-          passing_score?: number | null
-          questions?: Json | null
-          required_application_type?: string | null
-          time_limit?: number | null
-          title?: string
-          updated_at?: string | null
+          name?: string
         }
         Relationships: []
       }
@@ -1700,7 +2152,7 @@ export type Database = {
           id: string
           last_update: string | null
           location: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }
@@ -1712,7 +2164,7 @@ export type Database = {
           id?: string
           last_update?: string | null
           location?: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }
@@ -1724,7 +2176,7 @@ export type Database = {
           id?: string
           last_update?: string | null
           location?: Json | null
-          status?: string
+          status_id?: string
           unit_number?: string
           user_id?: string
         }
@@ -1743,7 +2195,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_on_duty_member: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       application_status:
@@ -1753,6 +2208,9 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "on_hold"
+        | "awaiting_interview_time"
+        | "in_training"
+        | "completed"
       bolo_priority: "low" | "normal" | "high"
       bolo_status: "active" | "inactive" | "resolved"
       bolo_type: "person" | "vehicle"
@@ -1765,7 +2223,10 @@ export type Database = {
         | "cancelled"
       call_type: "911_police" | "911_medical" | "911_fire" | "non_emergency"
       complaint_status: "open" | "in_review" | "resolved" | "closed"
+      report_status: "draft" | "submitted" | "approved" | "rejected"
+      request_status: "pending" | "in_review" | "approved" | "rejected"
       support_ticket_status: "open" | "in_progress" | "closed"
+      test_question_type: "single_choice" | "multiple_choice" | "text_input"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1824,6 +2285,104 @@ export type Database = {
         }
         Relationships: []
       }
+      doc_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_internal: boolean
+          parent_category_id: string | null
+          sort_order: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_internal?: boolean
+          parent_category_id?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_internal?: boolean
+          parent_category_id?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "doc_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          author_user_id: string | null
+          category_id: string
+          content: Json
+          created_at: string
+          id: string
+          is_internal: boolean
+          is_published: boolean
+          slug: string
+          title: string
+          updated_at: string | null
+          version: number
+        }
+        Insert: {
+          author_user_id?: string | null
+          category_id: string
+          content: Json
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          is_published?: boolean
+          slug: string
+          title: string
+          updated_at?: string | null
+          version?: number
+        }
+        Update: {
+          author_user_id?: string | null
+          category_id?: string
+          content?: Json
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          is_published?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "doc_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       joint_positions_history: {
         Row: {
           approved_by_character_id: string | null
@@ -1835,7 +2394,7 @@ export type Database = {
           reason: string | null
           secondary_department_id: string
           start_date: string | null
-          status: string | null
+          status_id: string
           user_id: string
         }
         Insert: {
@@ -1848,7 +2407,7 @@ export type Database = {
           reason?: string | null
           secondary_department_id: string
           start_date?: string | null
-          status?: string | null
+          status_id: string
           user_id: string
         }
         Update: {
@@ -1861,7 +2420,7 @@ export type Database = {
           reason?: string | null
           secondary_department_id?: string
           start_date?: string | null
-          status?: string | null
+          status_id?: string
           user_id?: string
         }
         Relationships: [
@@ -1879,21 +2438,18 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
-          role: Database["public"]["Enums"]["user_role"]
           username: string | null
         }
         Insert: {
           created_at?: string | null
           email?: string | null
           id: string
-          role?: Database["public"]["Enums"]["user_role"]
           username?: string | null
         }
         Update: {
           created_at?: string | null
           email?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
           username?: string | null
         }
         Relationships: []
@@ -2083,13 +2639,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2115,6 +2670,10 @@ export type Database = {
       }
       create_new_signal: {
         Args: { p_data: Json }
+        Returns: Json
+      }
+      create_new_test: {
+        Args: { p_test_data: Json }
         Returns: Json
       }
       create_new_unit_on_duty: {
@@ -2152,7 +2711,6 @@ export type Database = {
       get_active_calls: {
         Args: Record<PropertyKey, never>
         Returns: {
-          assigned_units: Json | null
           attachments: Json | null
           caller_name: string | null
           caller_phone: string | null
@@ -2162,9 +2720,9 @@ export type Database = {
           id: string
           location: string
           patient_info: Json | null
-          priority: Database["mdt"]["Enums"]["call_priority"] | null
-          status: Database["mdt"]["Enums"]["call_status"]
-          type: Database["mdt"]["Enums"]["call_type"]
+          priority_id: string
+          status_id: string
+          type_id: string
           updated_at: string | null
         }[]
       }
@@ -2179,9 +2737,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           location: string | null
-          priority: string | null
+          priority_id: string | null
           title: string
-          type: string | null
+          type_id: string | null
         }[]
       }
       get_active_units: {
@@ -2194,7 +2752,7 @@ export type Database = {
           id: string
           last_update: string | null
           location: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }[]
@@ -2211,13 +2769,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2247,12 +2804,12 @@ export type Database = {
           created_at: string | null
           id: string
           location: string | null
-          priority: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id: string
           reason: string
-          status: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id: string
           subject_description: string | null
           subject_name: string | null
-          type: Database["mdt"]["Enums"]["bolo_type"]
+          type_id: string
           vehicle_description: string | null
           vehicle_plate: string | null
         }[]
@@ -2264,12 +2821,12 @@ export type Database = {
           created_at: string | null
           id: string
           location: string | null
-          priority: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id: string
           reason: string
-          status: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id: string
           subject_description: string | null
           subject_name: string | null
-          type: Database["mdt"]["Enums"]["bolo_type"]
+          type_id: string
           vehicle_description: string | null
           vehicle_plate: string | null
         }[]
@@ -2281,12 +2838,12 @@ export type Database = {
           created_at: string | null
           id: string
           location: string | null
-          priority: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id: string
           reason: string
-          status: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id: string
           subject_description: string | null
           subject_name: string | null
-          type: Database["mdt"]["Enums"]["bolo_type"]
+          type_id: string
           vehicle_description: string | null
           vehicle_plate: string | null
         }[]
@@ -2298,12 +2855,12 @@ export type Database = {
           created_at: string | null
           id: string
           location: string | null
-          priority: Database["mdt"]["Enums"]["bolo_priority"] | null
+          priority_id: string
           reason: string
-          status: Database["mdt"]["Enums"]["bolo_status"] | null
+          status_id: string
           subject_description: string | null
           subject_name: string | null
-          type: Database["mdt"]["Enums"]["bolo_type"]
+          type_id: string
           vehicle_description: string | null
           vehicle_plate: string | null
         }[]
@@ -2311,7 +2868,6 @@ export type Database = {
       get_call_by_id: {
         Args: { p_call_id: string }
         Returns: {
-          assigned_units: Json | null
           attachments: Json | null
           caller_name: string | null
           caller_phone: string | null
@@ -2321,16 +2877,15 @@ export type Database = {
           id: string
           location: string
           patient_info: Json | null
-          priority: Database["mdt"]["Enums"]["call_priority"] | null
-          status: Database["mdt"]["Enums"]["call_status"]
-          type: Database["mdt"]["Enums"]["call_type"]
+          priority_id: string
+          status_id: string
+          type_id: string
           updated_at: string | null
         }[]
       }
       get_calls_by_status: {
         Args: { p_status: string }
         Returns: {
-          assigned_units: Json | null
           attachments: Json | null
           caller_name: string | null
           caller_phone: string | null
@@ -2340,16 +2895,15 @@ export type Database = {
           id: string
           location: string
           patient_info: Json | null
-          priority: Database["mdt"]["Enums"]["call_priority"] | null
-          status: Database["mdt"]["Enums"]["call_status"]
-          type: Database["mdt"]["Enums"]["call_type"]
+          priority_id: string
+          status_id: string
+          type_id: string
           updated_at: string | null
         }[]
       }
       get_calls_by_type: {
         Args: { p_type: string }
         Returns: {
-          assigned_units: Json | null
           attachments: Json | null
           caller_name: string | null
           caller_phone: string | null
@@ -2359,9 +2913,9 @@ export type Database = {
           id: string
           location: string
           patient_info: Json | null
-          priority: Database["mdt"]["Enums"]["call_priority"] | null
-          status: Database["mdt"]["Enums"]["call_status"]
-          type: Database["mdt"]["Enums"]["call_type"]
+          priority_id: string
+          status_id: string
+          type_id: string
           updated_at: string | null
         }[]
       }
@@ -2377,13 +2931,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2431,13 +2984,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2461,13 +3013,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2491,13 +3042,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2527,13 +3077,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2561,13 +3110,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2590,9 +3138,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           location: string | null
-          priority: string | null
+          priority_id: string | null
           title: string
-          type: string | null
+          type_id: string | null
         }[]
       }
       get_unit_by_id: {
@@ -2605,7 +3153,7 @@ export type Database = {
           id: string
           last_update: string | null
           location: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }[]
@@ -2620,7 +3168,7 @@ export type Database = {
           id: string
           last_update: string | null
           location: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }[]
@@ -2635,7 +3183,7 @@ export type Database = {
           id: string
           last_update: string | null
           location: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }[]
@@ -2650,7 +3198,7 @@ export type Database = {
           id: string
           last_update: string | null
           location: Json | null
-          status: string
+          status_id: string
           unit_number: string
           user_id: string
         }[]
@@ -2677,7 +3225,35 @@ export type Database = {
           recipient_user_id: string
         }[]
       }
+      get_user_permissions: {
+        Args: { p_user_id: string }
+        Returns: string[]
+      }
+      gtrgm_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
       is_guest_candidate: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_system_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -2705,13 +3281,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2722,6 +3297,18 @@ export type Database = {
           user_id: string
           weight: string | null
         }[]
+      }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
       }
       transfer_character_ownership: {
         Args: { p_character_id: string; p_new_owner_id: string }
@@ -2751,13 +3338,12 @@ export type Database = {
           eye_color: string | null
           first_name: string
           flags: string[] | null
+          full_name: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
           id: string
           last_name: string
-          licenses: Json | null
-          medical_info: Json | null
           missing: boolean | null
           mugshot_url: string | null
           occupation: string | null
@@ -2794,7 +3380,7 @@ export type Database = {
       }
     }
     Enums: {
-      user_role: "citizen" | "candidate" | "staff" | "admin"
+      [_ in never]: never
     }
     CompositeTypes: {
       bolo_with_author: {
@@ -2834,6 +3420,379 @@ export type Database = {
         profile_email: string | null
         profile_role: string | null
       }
+    }
+  }
+  system: {
+    Tables: {
+      applications: {
+        Row: {
+          author_character_id: string | null
+          author_user_id: string
+          created_at: string
+          data: Json | null
+          id: string
+          review_comment: string | null
+          reviewer_user_id: string | null
+          status_id: string
+          target_department_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          author_character_id?: string | null
+          author_user_id: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          review_comment?: string | null
+          reviewer_user_id?: string | null
+          status_id: string
+          target_department_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          author_character_id?: string | null
+          author_user_id?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          review_comment?: string | null
+          reviewer_user_id?: string | null
+          status_id?: string
+          target_department_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_read: boolean
+          link: string | null
+          recipient_user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          recipient_user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          recipient_user_id?: string
+        }
+        Relationships: []
+      }
+      support_ticket_messages: {
+        Row: {
+          attachment_url: string | null
+          author_user_id: string
+          content: string | null
+          created_at: string
+          id: string
+          ticket_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          author_user_id: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          ticket_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          author_user_id?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          author_user_id: string
+          created_at: string | null
+          handler_user_id: string | null
+          id: string
+          status_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_user_id: string
+          created_at?: string | null
+          handler_user_id?: string | null
+          id?: string
+          status_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_user_id?: string
+          created_at?: string | null
+          handler_user_id?: string | null
+          id?: string
+          status_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      test_question_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          option_text: string
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_text: string
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_text?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "test_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_questions: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          question_text: string
+          question_type: string
+          test_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          question_text: string
+          question_type?: string
+          test_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          question_text?: string
+          question_type?: string
+          test_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_questions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_results: {
+        Row: {
+          answers: Json | null
+          created_at: string | null
+          id: string
+          max_score: number | null
+          passed: boolean | null
+          percentage: number | null
+          score: number | null
+          session_id: string
+          test_id: string
+          time_spent_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string | null
+          id?: string
+          max_score?: number | null
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          session_id: string
+          test_id: string
+          time_spent_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string | null
+          id?: string
+          max_score?: number | null
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          session_id?: string
+          test_id?: string
+          time_spent_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_results_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "test_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_results_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_sessions: {
+        Row: {
+          application_id: string | null
+          end_time: string | null
+          focus_losses_count: number
+          id: string
+          start_time: string | null
+          status_id: string
+          test_id: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          end_time?: string | null
+          focus_losses_count?: number
+          id?: string
+          start_time?: string | null
+          status_id: string
+          test_id: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          end_time?: string | null
+          focus_losses_count?: number
+          id?: string
+          start_time?: string | null
+          status_id?: string
+          test_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_sessions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_sessions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "my_applications_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_sessions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tests: {
+        Row: {
+          created_by_user_id: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          max_focus_losses: number
+          passing_score_percent: number
+          title: string
+        }
+        Insert: {
+          created_by_user_id?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          max_focus_losses?: number
+          passing_score_percent?: number
+          title: string
+        }
+        Update: {
+          created_by_user_id?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          max_focus_losses?: number
+          passing_score_percent?: number
+          title?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      my_applications_view: {
+        Row: {
+          created_at: string | null
+          department_name: string | null
+          details: Json | null
+          id: string | null
+          status_code: string | null
+          status_name: string | null
+          type: string | null
+          type_name: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
@@ -2958,6 +3917,8 @@ export type CompositeTypes<
 export const Constants = {
   common: {
     Enums: {
+      request_status: ["pending", "approved", "rejected", "withdrawn"],
+      scope_type: ["system", "department", "division", "unit"],
       vehicle_insurance_status: ["insured", "uninsured", "expired"],
       vehicle_registration_status: [
         "registered",
@@ -2968,9 +3929,6 @@ export const Constants = {
       weapon_registration_status: ["registered", "unregistered", "confiscated"],
     },
   },
-  graphql_public: {
-    Enums: {},
-  },
   mdt: {
     Enums: {
       application_status: [
@@ -2980,6 +3938,9 @@ export const Constants = {
         "accepted",
         "rejected",
         "on_hold",
+        "awaiting_interview_time",
+        "in_training",
+        "completed",
       ],
       bolo_priority: ["low", "normal", "high"],
       bolo_status: ["active", "inactive", "resolved"],
@@ -2988,12 +3949,16 @@ export const Constants = {
       call_status: ["pending", "assigned", "on_scene", "resolved", "cancelled"],
       call_type: ["911_police", "911_medical", "911_fire", "non_emergency"],
       complaint_status: ["open", "in_review", "resolved", "closed"],
+      report_status: ["draft", "submitted", "approved", "rejected"],
+      request_status: ["pending", "in_review", "approved", "rejected"],
       support_ticket_status: ["open", "in_progress", "closed"],
+      test_question_type: ["single_choice", "multiple_choice", "text_input"],
     },
   },
   public: {
-    Enums: {
-      user_role: ["citizen", "candidate", "staff", "admin"],
-    },
+    Enums: {},
+  },
+  system: {
+    Enums: {},
   },
 } as const
