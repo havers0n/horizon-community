@@ -1,57 +1,29 @@
 import { systemSupabase } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
+import type { Database } from '@roleplay-identity/db-types';
 
-// Временные интерфейсы до обновления типизации Database['system']
-interface SystemTestRow {
-  id: string;
-  title: string;
-  description?: string | null;
-  is_active?: boolean | null;
-  time_limit?: number | null; // секунды
-  passing_score?: number | null; // проценты (0-100)
-  max_focus_losses?: number | null;
-  created_at?: string;
-  updated_at?: string;
-}
+// Типы для схемы system
+type SystemTest = Database['system']['Tables']['tests']['Row'];
+type SystemTestInsert = Database['system']['Tables']['tests']['Insert'];
+type SystemTestUpdate = Database['system']['Tables']['tests']['Update'];
 
-interface CreateTestData {
-  title: string;
-  description?: string | null;
-  is_active?: boolean | null;
-  time_limit?: number | null;
-  passing_score?: number | null;
-  max_focus_losses?: number | null;
-}
+type SystemTestQuestion = Database['system']['Tables']['test_questions']['Row'];
+type SystemTestQuestionInsert = Database['system']['Tables']['test_questions']['Insert'];
 
-interface UpdateTestData extends Partial<CreateTestData> {}
-
-interface CreateQuestionData {
-  text: string;
-  type: 'single_choice' | 'multiple_choice' | 'text_input';
-  order_index?: number | null;
-}
-
-interface CreateOptionData {
-  text: string;
-  is_correct: boolean;
-  order_index?: number | null;
-}
+type SystemTestQuestionOption = Database['system']['Tables']['test_question_options']['Row'];
+type SystemTestQuestionOptionInsert = Database['system']['Tables']['test_question_options']['Insert'];
 
 export class TestAdminService {
-  private db = systemSupabase as any;
+  private db = systemSupabase;
 
   /**
    * Создать новый тест
    */
-  async createTest(_userId: string, testData: CreateTestData): Promise<SystemTestRow> {
+  async createTest(userId: string, testData: Omit<SystemTestInsert, 'created_by_user_id'>): Promise<SystemTest> {
     try {
-      const payload = {
-        title: testData.title,
-        description: testData.description ?? null,
-        is_active: testData.is_active ?? true,
-        time_limit: testData.time_limit ?? null,
-        passing_score: testData.passing_score ?? 85,
-        max_focus_losses: testData.max_focus_losses ?? 0,
+      const payload: SystemTestInsert = {
+        ...testData,
+        created_by_user_id: userId,
       };
 
       const { data, error } = await this.db
@@ -63,7 +35,7 @@ export class TestAdminService {
       if (error || !data) {
         throw new AppError('Не удалось создать тест', 500);
       }
-      return data as SystemTestRow;
+      return data as SystemTest;
     } catch (error) {
       console.error('[TestAdminService] Error in createTest:', error);
       throw error;
@@ -73,19 +45,11 @@ export class TestAdminService {
   /**
    * Обновить тест
    */
-  async updateTest(testId: string, testData: UpdateTestData): Promise<SystemTestRow> {
+  async updateTest(testId: string, testData: SystemTestUpdate): Promise<SystemTest> {
     try {
-      const update: any = {};
-      if (testData.title !== undefined) update.title = testData.title;
-      if (testData.description !== undefined) update.description = testData.description;
-      if (testData.is_active !== undefined) update.is_active = testData.is_active;
-      if (testData.time_limit !== undefined) update.time_limit = testData.time_limit;
-      if (testData.passing_score !== undefined) update.passing_score = testData.passing_score;
-      if (testData.max_focus_losses !== undefined) update.max_focus_losses = testData.max_focus_losses;
-
       const { data, error } = await this.db
         .from('tests')
-        .update(update)
+        .update(testData)
         .eq('id', testId)
         .select('*')
         .single();
@@ -93,7 +57,7 @@ export class TestAdminService {
       if (error || !data) {
         throw new AppError('Не удалось обновить тест', 500);
       }
-      return data as SystemTestRow;
+      return data as SystemTest;
     } catch (error) {
       console.error('[TestAdminService] Error in updateTest:', error);
       throw error;
@@ -103,13 +67,11 @@ export class TestAdminService {
   /**
    * Добавить вопрос к тесту
    */
-  async addQuestionToTest(testId: string, questionData: CreateQuestionData) {
+  async addQuestionToTest(testId: string, questionData: Omit<SystemTestQuestionInsert, 'test_id'>): Promise<SystemTestQuestion> {
     try {
-      const payload = {
+      const payload: SystemTestQuestionInsert = {
+        ...questionData,
         test_id: testId,
-        text: questionData.text,
-        type: questionData.type,
-        order_index: questionData.order_index ?? null,
       };
 
       const { data, error } = await this.db
@@ -121,7 +83,7 @@ export class TestAdminService {
       if (error || !data) {
         throw new AppError('Не удалось создать вопрос для теста', 500);
       }
-      return data;
+      return data as SystemTestQuestion;
     } catch (error) {
       console.error('[TestAdminService] Error in addQuestionToTest:', error);
       throw error;
@@ -131,13 +93,11 @@ export class TestAdminService {
   /**
    * Добавить опцию к вопросу
    */
-  async addOptionToQuestion(questionId: string, optionData: CreateOptionData) {
+  async addOptionToQuestion(questionId: string, optionData: Omit<SystemTestQuestionOptionInsert, 'question_id'>): Promise<SystemTestQuestionOption> {
     try {
-      const payload = {
+      const payload: SystemTestQuestionOptionInsert = {
+        ...optionData,
         question_id: questionId,
-        text: optionData.text,
-        is_correct: optionData.is_correct,
-        order_index: optionData.order_index ?? null,
       };
 
       const { data, error } = await this.db
@@ -149,7 +109,7 @@ export class TestAdminService {
       if (error || !data) {
         throw new AppError('Не удалось создать опцию вопроса', 500);
       }
-      return data;
+      return data as SystemTestQuestionOption;
     } catch (error) {
       console.error('[TestAdminService] Error in addOptionToQuestion:', error);
       throw error;
@@ -159,7 +119,10 @@ export class TestAdminService {
   /**
    * Получить тест с вопросами и опциями
    */
-  async getTestWithDetails(testId: string) {
+  async getTestWithDetails(testId: string): Promise<{
+    test: SystemTest;
+    questions: Array<SystemTestQuestion & { options: SystemTestQuestionOption[] }>;
+  }> {
     try {
       const { data: test, error: tErr } = await this.db
         .from('tests')
@@ -172,36 +135,35 @@ export class TestAdminService {
 
       const { data: questions, error: qErr } = await this.db
         .from('test_questions')
-        .select('id, text, type, order_index')
+        .select('id, question_text, question_type, order_index, test_id, created_at')
         .eq('test_id', testId)
         .order('order_index', { ascending: true });
       if (qErr) {
         throw new AppError('Не удалось получить вопросы теста', 500);
       }
 
-      const qIds = (questions || []).map((q: any) => q.id);
+      const qIds = (questions || []).map((q) => q.id);
       const { data: options, error: oErr } = await this.db
         .from('test_question_options')
-        .select('id, question_id, text, is_correct, order_index')
-        .in('question_id', qIds.length ? qIds : ['00000000-0000-0000-0000-000000000000'])
-        .order('order_index', { ascending: true });
+        .select('id, question_id, option_text, is_correct, created_at')
+        .in('question_id', qIds.length ? qIds : ['00000000-0000-0000-0000-000000000000']);
       if (oErr) {
         throw new AppError('Не удалось получить варианты ответов', 500);
       }
 
-      const questionIdToOptions: Record<string, any[]> = {};
+      const optionsByQuestion = new Map<string, SystemTestQuestionOption[]>();
       for (const opt of options || []) {
-        if (!questionIdToOptions[opt.question_id]) questionIdToOptions[opt.question_id] = [];
-        questionIdToOptions[opt.question_id].push(opt);
+        const arr = optionsByQuestion.get(opt.question_id) || [];
+        arr.push(opt as SystemTestQuestionOption);
+        optionsByQuestion.set(opt.question_id, arr);
       }
 
-      return {
-        ...test,
-        questions: (questions || []).map((q: any) => ({
-          ...q,
-          options: questionIdToOptions[q.id] || [],
-        })),
-      };
+      const questionsWithOptions = (questions || []).map((q) => ({
+        ...(q as SystemTestQuestion),
+        options: optionsByQuestion.get(q.id) || [],
+      }));
+
+      return { test: test as SystemTest, questions: questionsWithOptions };
     } catch (error) {
       console.error('[TestAdminService] Error in getTestWithDetails:', error);
       throw error;
