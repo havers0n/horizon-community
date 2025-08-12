@@ -2,10 +2,8 @@ import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware';
 import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
 import { SupportTicketService } from '../../../core/services/SupportTicketService';
-import type { Database } from '@roleplay-identity/db-types';
-
-// Создаем локальный тип-алиас из глобального типа Database
-type SupportTickets = Database['mdt']['Tables']['support_tickets']['Row'];
+// Временное отключение типов support_tickets — таблица отсутствует в схеме
+type SupportTickets = never;
 
 const router: Router = Router();
 

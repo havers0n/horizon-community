@@ -87,11 +87,12 @@ export class ApplicationController {
       }
 
       // @ts-ignore
-      if (!application.test_id) {
+      if (!application.data?.test_id) {
         throw new AppError('Для этой заявки не назначено тестирование', 400);
       }
 
-      const testSession = await this.testSessionService.startTestSession(userId, application.test_id, applicationId);
+      const testId = (application.data as any)?.test_id;
+      const testSession = await this.testSessionService.startTestSession(userId, testId, applicationId);
 
       res.status(201).json(testSession);
     } catch (error) {

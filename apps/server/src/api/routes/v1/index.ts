@@ -104,7 +104,8 @@ export function createV1Router(services: ServicesContainer): Router {
       }
 
       // Определяем роль пользователя
-      const userRole = profile.role;
+      // В актуальной схеме public.profiles поле role отсутствует; используем citizen по умолчанию
+      const userRole = ((profile as any).role ?? 'citizen') as string;
       const isCandidate = ['candidate', 'cadet_test', 'cadet_practice'].includes(userRole);
 
       // Базовые данные для всех ролей
@@ -113,7 +114,7 @@ export function createV1Router(services: ServicesContainer): Router {
           id: profile.id,
           email: profile.email,
           username: profile.username,
-          role: profile.role,
+          role: userRole,
           avatarUrl: null, // Будет заполнено из character
           firstName: null,
           lastName: null,

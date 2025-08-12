@@ -12,7 +12,8 @@
   "include": [
     "src/**/*.ts",
     "../../libs/shared/schema/src/**/*.ts",
-    "../../packages/db-types/src/**/*.ts"
+    "../../packages/db-types/src/**/*.ts",
+    "../../libs/shared-types/src/**/*.ts"
   ],
   "exclude": [
     "node_modules", 

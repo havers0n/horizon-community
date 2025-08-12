@@ -55,7 +55,7 @@ console.log('[DEBUG] Создан клиент mdtSupabase (mdt схема)');
 // --- ДОБАВЛЕН КЛИЕНТ ДЛЯ system СХЕМЫ ---
 // Важно: типы для схемы `system` появятся после регенерации db-types.
 // До этого момента используем безопасное приведение типов.
-export const systemSupabase = (createClient as any)(supabaseUrl, supabaseServiceKey, {
+export const systemSupabase = createClient<Database, 'system'>(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,

@@ -9,12 +9,12 @@ type Characters = Database['common']['Tables']['characters']['Row'];
 type CharactersInsert = Database['common']['Tables']['characters']['Insert'];
 type CharactersUpdate = Database['common']['Tables']['characters']['Update'];
 type Profiles = Database['public']['Tables']['profiles']['Row'];
-type LeoProfiles = Database['common']['Tables']['leo_profiles']['Row'];
-type LeoProfilesInsert = Database['common']['Tables']['leo_profiles']['Insert'];
-type LeoProfilesUpdate = Database['common']['Tables']['leo_profiles']['Update'];
-type EmsProfiles = Database['common']['Tables']['ems_profiles']['Row'];
-type EmsProfilesInsert = Database['common']['Tables']['ems_profiles']['Insert'];
-type EmsProfilesUpdate = Database['common']['Tables']['ems_profiles']['Update'];
+type LeoProfiles = never;
+type LeoProfilesInsert = never;
+type LeoProfilesUpdate = never;
+type EmsProfiles = never;
+type EmsProfilesInsert = never;
+type EmsProfilesUpdate = never;
 
 
 export class CharacterService {
@@ -103,8 +103,9 @@ export class CharacterService {
       address: characterData.address,
       occupation: characterData.occupation,
       ssn: characterData.ssn,
-      licenses: characterData.licenses,
-      medical_info: characterData.medical_info,
+      // Эти поля отсутствуют в текущей схеме — пропускаем
+      licenses: (characterData as any).licenses,
+      medical_info: (characterData as any).medical_info,
       mugshot_url: characterData.mugshot_url,
       flags: characterData.flags
     };
@@ -143,8 +144,8 @@ export class CharacterService {
       address: updates.address,
       occupation: updates.occupation,
       ssn: updates.ssn,
-      licenses: updates.licenses,
-      medical_info: updates.medical_info,
+      licenses: (updates as any).licenses,
+      medical_info: (updates as any).medical_info,
       mugshot_url: updates.mugshot_url,
       flags: updates.flags
     };

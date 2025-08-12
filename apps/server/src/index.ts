@@ -66,6 +66,7 @@ app.use(cors({
   // Новые строго-типизированные сервисы тестов
   const testAdminService = new TestAdminService();
   const testSessionService = new TestSessionService();
+  const departmentService = new (await import('./core/services/DepartmentService')).DepartmentService();
   const publicService = new PublicService();
   const logger = new LoggerService();
   const cacheService = new CacheService();
@@ -102,6 +103,7 @@ app.use(cors({
     cacheService,
     filledReportService,
     cabinetService,
+    departmentService,
   };
 
   // Передаем контейнер сервисов в registerRoutes

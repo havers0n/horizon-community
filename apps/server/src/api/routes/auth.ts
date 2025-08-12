@@ -37,7 +37,7 @@ export function createAuthRoutes(services: ServicesContainer) {
           id: profile.id,
           username: profile.username,
           email: profile.email,
-          role: profile.role
+          role: (profile as any).role ?? 'citizen'
         }
       });
     } catch (error) {
@@ -79,7 +79,7 @@ export function createAuthRoutes(services: ServicesContainer) {
           id: result.profile.id,
           username: result.profile.username,
           email: result.profile.email,
-          role: result.profile.role
+          role: (result.profile as any).role ?? 'citizen'
         },
         access_token: result.session.access_token,
         refresh_token: result.session.refresh_token
@@ -148,7 +148,7 @@ export function createAuthRoutes(services: ServicesContainer) {
         id: profile.id,
         username: profile.username,
         email: profile.email,
-        role: profile.role,
+        role: (profile as any).role ?? 'citizen',
         created_at: profile.created_at
       });
     } catch (error) {
@@ -219,7 +219,7 @@ router.post('/register', async (req, res) => {
         id: profile.id,
         username: profile.username,
         email: profile.email,
-        role: profile.role
+        role: (profile as any).role ?? 'citizen'
       }
     });
   } catch (error) {
@@ -261,7 +261,7 @@ router.post('/login', async (req, res) => {
         id: result.profile.id,
         username: result.profile.username,
         email: result.profile.email,
-        role: result.profile.role
+        role: (result.profile as any).role ?? 'citizen'
       },
       access_token: result.session.access_token,
       refresh_token: result.session.refresh_token
@@ -301,7 +301,7 @@ router.get('/me', authenticateToken, async (req, res) => {
       id: profile.id,
       username: profile.username,
       email: profile.email,
-      role: profile.role,
+      role: (profile as any).role ?? 'citizen',
       created_at: profile.created_at
     });
   } catch (error) {

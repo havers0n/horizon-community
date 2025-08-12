@@ -13,10 +13,12 @@ import type { Database } from '@roleplay-identity/db-types';
 // ✅ Полный импорт всех необходимых типов из db-types
 type CharactersInsert = Database['common']['Tables']['characters']['Insert'];
 type CharactersUpdate = Database['common']['Tables']['characters']['Update'];
-type LeoProfilesInsert = Database['common']['Tables']['leo_profiles']['Insert'];
-type LeoProfilesUpdate = Database['common']['Tables']['leo_profiles']['Update'];
-type EmsProfilesInsert = Database['common']['Tables']['ems_profiles']['Insert'];
-type EmsProfilesUpdate = Database['common']['Tables']['ems_profiles']['Update'];
+// Примечание: таблицы leo_profiles/ems_profiles отсутствуют в актуальной схеме.
+// Оставляем только базовые типы персонажей, профильные роуты ниже закомментируем до появления схем.
+type LeoProfilesInsert = never;
+type LeoProfilesUpdate = never;
+type EmsProfilesInsert = never;
+type EmsProfilesUpdate = never;
 
 // ===== ENUM ТИПЫ ДЛЯ ВАЛИДАЦИИ =====
 const UserRoleEnum = z.enum(['citizen', 'candidate', 'staff', 'admin']);
@@ -188,42 +190,42 @@ export function createCharacterRoutes(services: ServicesContainer): Router {
    * POST /api/v1/characters/:id/profiles/leo
    * Создать LEO профиль для персонажа.
    */
-  router.post('/:id/profiles/leo',
-    requireRole('admin'),
-    validateRequest({ params: IdParamSchema, body: LeoProfileCreateSchema }),
-    async (req, res, next) => {
-      try {
-        const data: LeoProfilesInsert = {
-          ...req.body,
-          id: req.params.id, // character_id теперь равен id персонажа
-        };
-        const newProfile = await characterService.createLeoProfile(data);
-        res.status(201).json({ success: true, data: newProfile });
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
+  // Профили LEO временно отключены до появления таблиц в схеме
+  // router.post('/:id/profiles/leo',
+  //   requireRole('admin'),
+  //   validateRequest({ params: IdParamSchema, body: LeoProfileCreateSchema }),
+  //   async (req, res, next) => {
+  //     try {
+  //       const data: LeoProfilesInsert = {
+  //         ...req.body,
+  //         id: req.params.id,
+  //       };
+  //       const newProfile = await characterService.createLeoProfile(data);
+  //       res.status(201).json({ success: true, data: newProfile });
+  //     } catch (error) {
+  //       next(error);
+  //     }
+  //   }
+  // );
 
   /**
    * PUT /api/v1/characters/:id/profiles/leo
    * Обновить LEO профиль персонажа.
    */
-  router.put('/:id/profiles/leo',
-    requireRole('admin'),
-    validateRequest({ params: IdParamSchema, body: LeoProfileUpdateSchema }),
-    async (req, res, next) => {
-      try {
-        const updatedProfile = await characterService.updateLeoProfile(req.params.id, req.body as LeoProfilesUpdate);
-        res.json({ success: true, data: updatedProfile });
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
+  // router.put('/:id/profiles/leo',
+  //   requireRole('admin'),
+  //   validateRequest({ params: IdParamSchema, body: LeoProfileUpdateSchema }),
+  //   async (req, res, next) => {
+  //     try {
+  //       const updatedProfile = await characterService.updateLeoProfile(req.params.id, req.body as LeoProfilesUpdate);
+  //       res.json({ success: true, data: updatedProfile });
+  //     } catch (error) {
+  //       next(error);
+  //     }
+  //   }
+  // );
 
-  // ... Аналогичные роуты для EMS
-  // POST, PUT, DELETE для /:id/profiles/ems
+  // Аналогичные роуты для EMS временно отключены до появления таблиц в схеме
 
   return router;
 }

@@ -78,8 +78,8 @@ router.get('/stats', authenticateToken, (req: Request, res: Response) => {
       success: true,
       cache: stats,
       websocket: {
-        connectedClients: wsServer ? wsServer.getStats().connectedClients : 0,
-        totalEvents: wsServer ? wsServer.getStats().totalEvents : 0
+        connectedClients: (wsServer && (wsServer as any).getStats) ? (wsServer as any).getStats().totalClients ?? 0 : 0,
+        totalEvents: (wsServer && (wsServer as any).getStats) ? (wsServer as any).getStats().totalEvents ?? 0 : 0
       },
       timestamp: Date.now()
     });

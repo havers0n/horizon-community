@@ -174,12 +174,13 @@ export class CabinetService {
     // Получаем объявления
     const announcements = await this.getAnnouncements();
 
-    // Определяем роль пользователя
-    const isCandidate = ['candidate', 'cadet_test', 'cadet_practice'].includes(typedProfile.role);
+    // Определяем роль пользователя (в текущей public.profiles нет поля role)
+    const role = (typedProfile as any).role ?? 'citizen';
+    const isCandidate = ['candidate', 'cadet_test', 'cadet_practice'].includes(role);
 
     // Базовые данные для всех ролей
     const baseData: DashboardData = {
-      user: this.formatUserProfile(typedProfile, character),
+      user: this.formatUserProfile(typedProfile, character, role),
       activities,
       announcements,
       usefulLinks: this.getUsefulLinks(),
@@ -548,12 +549,12 @@ export class CabinetService {
   /**
    * Форматировать профиль пользователя
    */
-  private formatUserProfile(profile: ProfileWithStats, character: Character | null): DashboardData['user'] {
+  private formatUserProfile(profile: ProfileWithStats, character: Character | null, role: string): DashboardData['user'] {
     return {
       id: profile.id,
       email: profile.email,
       username: profile.username,
-      role: profile.role,
+      role,
       avatarUrl: null,
       firstName: character?.first_name || null,
       lastName: character?.last_name || null,

@@ -1,17 +1,17 @@
 // src/core/services/ApplicationService.ts
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { mdtSupabase } from '../lib/supabase';
+import { systemSupabase } from '../lib/supabase';
 import type { Database } from '@roleplay-identity/db-types';
 import { AppError } from '../../utils/AppError';
 
-// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
-type MDTApplication = Database['mdt']['Tables']['applications']['Row'];
-type MDTApplicationInsert = Database['mdt']['Tables']['applications']['Insert'];
-type MDTApplicationUpdate = Database['mdt']['Tables']['applications']['Update'];
+// ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА (system схема) =====
+type SystemApplication = Database['system']['Tables']['applications']['Row'];
+type SystemApplicationInsert = Database['system']['Tables']['applications']['Insert'];
+type SystemApplicationUpdate = Database['system']['Tables']['applications']['Update'];
 
-// ===== ENUM ТИПЫ =====
-type ApplicationStatus = Database['mdt']['Enums']['application_status'];
+// Статус в system схеме хранится как строковый идентификатор
+type ApplicationStatus = string;
 
 // ===== ИНТЕРФЕЙСЫ ДЛЯ ВАЛИДАЦИИ =====
 export interface CreateApplicationData {
@@ -19,21 +19,20 @@ export interface CreateApplicationData {
   author_user_id: string; // ✅ UUID как string
   author_character_id: string; // ✅ UUID как string
   data?: any;
-  status?: ApplicationStatus; // ✅ Используем ENUM тип
-  status_history?: any[];
+  status?: ApplicationStatus; // Идентификатор статуса
 }
 
 export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 
 // ===== СОВРЕМЕННЫЙ APPLICATION SERVICE =====
 export class ApplicationService {
-  // ✅ Используем готовый клиент для схемы 'mdt'
-  private db = mdtSupabase;
+  // ✅ Используем клиент для схемы 'system'
+  private db = systemSupabase as unknown as SupabaseClient<Database, 'system'>;
 
   /**
    * Создать новую заявку
    */
-  async createApplication(data: CreateApplicationData): Promise<MDTApplication> {
+  async createApplication(data: CreateApplicationData): Promise<SystemApplication> {
     try {
       const { data: application, error } = await this.db
         .from('applications')
@@ -41,10 +40,10 @@ export class ApplicationService {
           type: data.type,
           author_user_id: data.author_user_id,
           author_character_id: data.author_character_id,
-          data: data.data,
-          status: data.status || 'awaiting_interview', // ✅ Используем правильный ENUM
-          status_history: data.status_history || []
-        })
+          data: (data.data ?? null) as any,
+          status_id: (data.status || 'awaiting_review') as any,
+          target_department_id: (data as any).target_department_id || 'general'
+        } as any)
         .select()
         .single();
 
@@ -63,7 +62,7 @@ export class ApplicationService {
   /**
    * Получить заявку по ID
    */
-  async getApplicationById(id: string): Promise<MDTApplication | null> {
+  async getApplicationById(id: string): Promise<SystemApplication | null> {
     try {
       const { data, error } = await this.db
         .from('applications')
@@ -87,7 +86,7 @@ export class ApplicationService {
   /**
    * Обновить заявку
    */
-  async updateApplication(id: string, data: UpdateApplicationData): Promise<MDTApplication> {
+  async updateApplication(id: string, data: UpdateApplicationData): Promise<SystemApplication> {
     try {
       const updateData: any = {};
       
@@ -95,8 +94,7 @@ export class ApplicationService {
       if (data.author_user_id !== undefined) updateData.author_user_id = data.author_user_id;
       if (data.author_character_id !== undefined) updateData.author_character_id = data.author_character_id;
       if (data.data !== undefined) updateData.data = data.data;
-      if (data.status !== undefined) updateData.status = data.status;
-      if (data.status_history !== undefined) updateData.status_history = data.status_history;
+      if (data.status !== undefined) updateData.status_id = data.status;
 
       const { data: application, error } = await this.db
         .from('applications')
@@ -142,7 +140,7 @@ export class ApplicationService {
   /**
    * Получить все заявки пользователя
    */
-  async getUserApplications(user_id: string): Promise<MDTApplication[]> {
+  async getUserApplications(user_id: string): Promise<SystemApplication[]> {
     try {
       const { data, error } = await this.db
         .from('applications')
@@ -165,12 +163,12 @@ export class ApplicationService {
   /**
    * Получить заявки по статусу
    */
-  async getApplicationsByStatus(status: ApplicationStatus): Promise<MDTApplication[]> {
+  async getApplicationsByStatus(status: ApplicationStatus): Promise<SystemApplication[]> {
     try {
       const { data, error } = await this.db
         .from('applications')
         .select('*')
-        .eq('status', status)
+        .eq('status_id', status)
         .order('created_at', { ascending: false });
 
       if (error) {

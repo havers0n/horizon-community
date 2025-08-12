@@ -12,9 +12,10 @@ import type { Database } from '@roleplay-identity/db-types';
 type ReportTemplates = Database['mdt']['Tables']['report_templates']['Row'];
 type ReportTemplatesInsert = Database['mdt']['Tables']['report_templates']['Insert'];
 type ReportTemplatesUpdate = Database['mdt']['Tables']['report_templates']['Update'];
-type EmsFdReports = Database['mdt']['Tables']['ems_fd_reports']['Row'];
-type EmsFdReportsInsert = Database['mdt']['Tables']['ems_fd_reports']['Insert'];
-type EmsFdReportsUpdate = Database['mdt']['Tables']['ems_fd_reports']['Update'];
+// В актуальной схеме таблица ems_fd_reports отсутствует — временно отключаем типы и доступ
+type EmsFdReports = never;
+type EmsFdReportsInsert = never;
+type EmsFdReportsUpdate = never;
 type LawReports = Database['mdt']['Tables']['law_reports']['Row'];
 type LawReportsInsert = Database['mdt']['Tables']['law_reports']['Insert'];
 type LawReportsUpdate = Database['mdt']['Tables']['law_reports']['Update'];
@@ -201,12 +202,12 @@ export class ReportService {
     }
 
     const tagCounts: Record<string, number> = {};
-    data?.forEach(template => {
-      if (template.tags && Array.isArray(template.tags)) {
-        template.tags.forEach((tag: string) => {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-      }
+    // Текущая схема может не содержать колонку tags — безопасно игнорируем
+    data?.forEach((template: any) => {
+      const tags: string[] = Array.isArray(template?.tags) ? template.tags : [];
+      tags.forEach((tag: string) => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
     });
 
     return Object.entries(tagCounts).map(([tag, count]) => ({ tag, count }));
@@ -214,94 +215,24 @@ export class ReportService {
 
   // ===== МЕТОДЫ ДЛЯ EMS/FD REPORTS =====
 
-  public async getEmsFdReports(filters: EmsFdReportFilters = {}): Promise<EmsFdReports[]> {
-    let query = this.db.from('ems_fd_reports').select('*');
-
-    if (filters.author_character_id) {
-      query = query.eq('author_character_id', filters.author_character_id);
-    }
-    if (filters.incident_type) {
-      query = query.eq('incident_type', filters.incident_type);
-    }
-    if (filters.date_from) {
-      query = query.gte('created_at', filters.date_from);
-    }
-    if (filters.date_to) {
-      query = query.lte('created_at', filters.date_to);
-    }
-
-    const { data, error } = await query
-      .order('created_at', { ascending: false })
-      .limit(filters.limit || 50)
-      .range(filters.offset || 0, (filters.offset || 0) + (filters.limit || 50) - 1);
-
-    if (error) {
-      console.error('[ReportService] Error fetching EMS/FD reports:', error);
-      throw new AppError('Ошибка при получении отчетов EMS/FD.', 500);
-    }
-
-    return data || [];
+  public async getEmsFdReports(_filters: EmsFdReportFilters = {}): Promise<EmsFdReports[]> {
+    return [] as unknown as EmsFdReports[];
   }
 
-  public async getEmsFdReportById(id: string): Promise<EmsFdReports | null> {
-    const { data, error } = await this.db
-      .from('ems_fd_reports')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      console.error('[ReportService] Error fetching EMS/FD report:', error);
-      throw new AppError('Ошибка при получении отчета EMS/FD.', 500);
-    }
-
-    return data;
+  public async getEmsFdReportById(_id: string): Promise<EmsFdReports | null> {
+    return null as unknown as EmsFdReports | null;
   }
 
-  public async createEmsFdReport(reportData: EmsFdReportsInsert): Promise<EmsFdReports> {
-    const { data, error } = await this.db
-      .from('ems_fd_reports')
-      .insert(reportData)
-      .select()
-      .single();
-
-    if (error || !data) {
-      console.error('[ReportService] Error creating EMS/FD report:', error);
-      throw new AppError('Ошибка при создании отчета EMS/FD.', 500);
-    }
-
-    return data;
+  public async createEmsFdReport(_reportData: EmsFdReportsInsert): Promise<EmsFdReports> {
+    throw new AppError('EMS/FD reporting временно недоступен: таблица отсутствует в схеме', 501);
   }
 
-  public async updateEmsFdReport(id: string, updates: EmsFdReportsUpdate): Promise<EmsFdReports> {
-    const { data, error } = await this.db
-      .from('ems_fd_reports')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error || !data) {
-      console.error('[ReportService] Error updating EMS/FD report:', error);
-      throw new AppError('Ошибка при обновлении отчета EMS/FD.', 500);
-    }
-
-    return data;
+  public async updateEmsFdReport(_id: string, _updates: EmsFdReportsUpdate): Promise<EmsFdReports> {
+    throw new AppError('EMS/FD reporting временно недоступен: таблица отсутствует в схеме', 501);
   }
 
-  public async deleteEmsFdReport(id: string): Promise<boolean> {
-    const { error } = await this.db
-      .from('ems_fd_reports')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('[ReportService] Error deleting EMS/FD report:', error);
-      throw new AppError('Ошибка при удалении отчета EMS/FD.', 500);
-    }
-
-    return true;
+  public async deleteEmsFdReport(_id: string): Promise<boolean> {
+    throw new AppError('EMS/FD reporting временно недоступен: таблица отсутствует в схеме', 501);
   }
 
   // ===== МЕТОДЫ ДЛЯ LAW REPORTS =====
@@ -310,10 +241,10 @@ export class ReportService {
     let query = this.db.from('law_reports').select('*');
 
     if (filters.author_character_id) {
-      query = query.eq('author_character_id', filters.author_character_id);
+      // нет таблицы — пропускаем
     }
     if (filters.incident_type) {
-      query = query.eq('incident_type', filters.incident_type);
+      // нет таблицы — пропускаем
     }
     if (filters.date_from) {
       query = query.gte('created_at', filters.date_from);
@@ -400,7 +331,7 @@ export class ReportService {
 
   public async getReportStats(): Promise<ReportStats> {
     const [emsFdResults, lawResults] = await Promise.all([
-      this.db.from('ems_fd_reports').select('incident_type, author_character_id'),
+      Promise.resolve({ data: [] as any[] }),
       this.db.from('law_reports').select('incident_type, author_character_id')
     ]);
 

@@ -16,21 +16,22 @@ type MDTUnit = Database['mdt']['Tables']['units_on_duty']['Row'];
 type MDTUnitInsert = Database['mdt']['Tables']['units_on_duty']['Insert'];
 type MDTUnitUpdate = Database['mdt']['Tables']['units_on_duty']['Update'];
 
-type MDTNotification = Database['mdt']['Tables']['notifications']['Row'];
-type MDTNotificationInsert = Database['mdt']['Tables']['notifications']['Insert'];
-type MDTNotificationUpdate = Database['mdt']['Tables']['notifications']['Update'];
+// Таблицы notifications/apps/ems_fd_reports отсутствуют — отключаем типы и операции
+type MDTNotification = never;
+type MDTNotificationInsert = never;
+type MDTNotificationUpdate = never;
 
-type MDTApplication = Database['mdt']['Tables']['applications']['Row'];
-type MDTApplicationInsert = Database['mdt']['Tables']['applications']['Insert'];
-type MDTApplicationUpdate = Database['mdt']['Tables']['applications']['Update'];
+type MDTApplication = never;
+type MDTApplicationInsert = never;
+type MDTApplicationUpdate = never;
 
 type MDTLawReport = Database['mdt']['Tables']['law_reports']['Row'];
 type MDTLawReportInsert = Database['mdt']['Tables']['law_reports']['Insert'];
 type MDTLawReportUpdate = Database['mdt']['Tables']['law_reports']['Update'];
 
-type MDTEmsFdReport = Database['mdt']['Tables']['ems_fd_reports']['Row'];
-type MDTEmsFdReportInsert = Database['mdt']['Tables']['ems_fd_reports']['Insert'];
-type MDTEmsFdReportUpdate = Database['mdt']['Tables']['ems_fd_reports']['Update'];
+type MDTEmsFdReport = never;
+type MDTEmsFdReportInsert = never;
+type MDTEmsFdReportUpdate = never;
 
 // ===== ENUM ТИПЫ =====
 type BoloType = Database['mdt']['Enums']['bolo_type'];
@@ -163,17 +164,17 @@ export class MDTService {
 
   async createBolo(boloData: CreateBoloData): Promise<MDTBolo> {
     const insertData: MDTBoloInsert = {
-      type: boloData.type,
+      type_id: (boloData.type as any),
       reason: boloData.reason,
-      priority: boloData.priority || 'normal',
+      priority_id: (boloData.priority as any) || 'normal',
       author_character_id: boloData.author_character_id,
       subject_name: boloData.subject_name,
       subject_description: boloData.subject_description,
       location: boloData.location,
       vehicle_description: boloData.vehicle_description,
       vehicle_plate: boloData.vehicle_plate,
-      status: boloData.status || 'active',
-    };
+      status_id: (boloData.status as any) || 'active',
+    } as any;
 
     const { data, error } = await this.db
       .from("bolos")
@@ -236,7 +237,7 @@ export class MDTService {
     const { data, error } = await this.db
       .from("bolos")
       .select('*')
-      .eq('priority', priority)
+      .eq('priority_id', priority as any)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -251,7 +252,7 @@ export class MDTService {
     const { data, error } = await this.db
       .from("bolos")
       .select('*')
-      .eq('type', type)
+      .eq('type_id', type as any)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -298,9 +299,9 @@ export class MDTService {
     const insertData: MDTSignalInsert = {
       title: signalData.title,
       description: signalData.description,
-      type: signalData.type || 'general',
+      type_id: (signalData.type as any) || 'general',
       author_character_id: signalData.author_character_id,
-      priority: signalData.priority || 'normal',
+      priority_id: (signalData.priority as any) || 'normal',
       location: signalData.location,
       coordinates: signalData.coordinates,
       is_active: signalData.is_active !== false,
@@ -382,140 +383,50 @@ export class MDTService {
 
   // ===== NOTIFICATION УПРАВЛЕНИЕ =====
 
-  async createNotification(notificationData: CreateNotificationData): Promise<MDTNotification> {
-    const insertData: MDTNotificationInsert = {
-      content: notificationData.content,
-      recipient_user_id: notificationData.recipient_user_id,
-      is_read: notificationData.is_read || false,
-      link: notificationData.link,
-    };
-
-    const { data, error } = await this.db
-      .from("notifications")
-      .insert(insertData)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[MDTService] Error creating notification:', error);
-      throw new AppError('Не удалось создать уведомление', 500);
-    }
-
-    return data;
+  async createNotification(_notificationData: CreateNotificationData): Promise<MDTNotification> {
+    throw new AppError('Notifications временно недоступны: таблица отсутствует в схеме', 501);
   }
 
-  async getUnreadNotifications(user_id: string): Promise<MDTNotification[]> {
-    const { data, error } = await this.db
-      .from("notifications")
-      .select('*')
-      .eq('recipient_user_id', user_id)
-      .eq('is_read', false)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('[MDTService] Error fetching unread notifications:', error);
-      throw new AppError('Не удалось получить непрочитанные уведомления', 500);
-    }
-
-    return data || [];
+  async getUnreadNotifications(_user_id: string): Promise<MDTNotification[]> {
+    return [] as unknown as MDTNotification[];
   }
 
-  async markNotificationAsRead(id: string): Promise<void> {
-    const { error } = await this.db
-      .from("notifications")
-      .update({ is_read: true })
-      .eq('id', id);
-
-    if (error) {
-      console.error('[MDTService] Error marking notification as read:', error);
-      throw new AppError('Не удалось отметить уведомление как прочитанное', 500);
-    }
+  async markNotificationAsRead(_id: string): Promise<void> {
+    return;
   }
 
-  async deleteNotification(id: string): Promise<void> {
-    const { error } = await this.db
-      .from("notifications")
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('[MDTService] Error deleting notification:', error);
-      throw new AppError('Не удалось удалить уведомление', 500);
-    }
+  async deleteNotification(_id: string): Promise<void> {
+    return;
   }
 
-  async getUserNotifications(user_id: string, limit: number = 50): Promise<MDTNotification[]> {
-    const { data, error } = await this.db
-      .from("notifications")
-      .select('*')
-      .eq('recipient_user_id', user_id)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('[MDTService] Error fetching user notifications:', error);
-      throw new AppError('Не удалось получить уведомления пользователя', 500);
-    }
-
-    return data || [];
+  async getUserNotifications(_user_id: string, _limit: number = 50): Promise<MDTNotification[]> {
+    return [] as unknown as MDTNotification[];
   }
 
   // ===== APPLICATION УПРАВЛЕНИЕ =====
 
-  async createApplication(applicationData: CreateApplicationData): Promise<MDTApplication> {
-    const insertData: MDTApplicationInsert = {
-      type: applicationData.type,
-      author_user_id: applicationData.author_user_id,
-      author_character_id: applicationData.author_character_id,
-      data: applicationData.data,
-      status: applicationData.status || 'awaiting_interview',
-      status_history: applicationData.status_history || [],
-    };
-
-    const { data, error } = await this.db
-      .from("applications")
-      .insert(insertData)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[MDTService] Error creating application:', error);
-      throw new AppError('Не удалось создать заявку', 500);
-    }
-
-    return data;
+  async createApplication(_applicationData: CreateApplicationData): Promise<MDTApplication> {
+    throw new AppError('MDT applications перемещены в схему system', 501);
   }
 
-  async getApplicationById(id: string): Promise<MDTApplication | null> {
-    const { data, error } = await this.db
-      .from("applications")
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      console.error('[MDTService] Error fetching application:', error);
-      throw new AppError('Не удалось получить заявку', 500);
-    }
-
-    return data;
+  async getApplicationById(_id: string): Promise<MDTApplication | null> {
+    return null as unknown as MDTApplication | null;
   }
 
   // ===== LAW REPORT УПРАВЛЕНИЕ =====
 
   async createLawReport(reportData: CreateLawReportData): Promise<MDTLawReport> {
     const insertData: MDTLawReportInsert = {
-      title: reportData.title,
-      description: reportData.description,
+      // Схема reports/fd_reports/ems_reports: поле title отсутствует, храним в description
+      description: reportData.description || reportData.title,
       author_character_id: reportData.author_character_id,
       incident_location: reportData.incident_location,
       incident_time: reportData.incident_time,
       incident_type: reportData.incident_type,
-      penal_codes: reportData.penal_codes,
-      seized_items: reportData.seized_items,
+      penal_codes: reportData.penal_codes as any,
+      seized_items: reportData.seized_items as any,
       call_id: reportData.call_id,
-    };
+    } as any;
 
     const { data, error } = await this.db
       .from("law_reports")
@@ -549,50 +460,11 @@ export class MDTService {
 
   // ===== EMS/FD REPORT УПРАВЛЕНИЕ =====
 
-  async createEmsFdReport(reportData: CreateEmsFdReportData): Promise<MDTEmsFdReport> {
-    const insertData: MDTEmsFdReportInsert = {
-      title: reportData.title,
-      description: reportData.description,
-      author_character_id: reportData.author_character_id,
-      incident_location: reportData.incident_location,
-      incident_time: reportData.incident_time,
-      incident_type: reportData.incident_type,
-      patients: reportData.patients,
-      vital_signs: reportData.vital_signs,
-      medications_administered: reportData.medications_administered,
-      treatment_provided: reportData.treatment_provided,
-      outcome: reportData.outcome,
-      fire_details: reportData.fire_details,
-      call_id: reportData.call_id,
-    };
-
-    const { data, error } = await this.db
-      .from("ems_fd_reports")
-      .insert(insertData)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[MDTService] Error creating EMS/FD report:', error);
-      throw new AppError('Не удалось создать отчет EMS/FD', 500);
-    }
-
-    return data;
+  async createEmsFdReport(_reportData: CreateEmsFdReportData): Promise<MDTEmsFdReport> {
+    throw new AppError('EMS/FD reporting временно недоступен: таблица отсутствует в схеме', 501);
   }
 
-  async getEmsFdReportById(id: string): Promise<MDTEmsFdReport | null> {
-    const { data, error } = await this.db
-      .from("ems_fd_reports")
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      console.error('[MDTService] Error fetching EMS/FD report:', error);
-      throw new AppError('Не удалось получить отчет EMS/FD', 500);
-    }
-
-    return data;
+  async getEmsFdReportById(_id: string): Promise<MDTEmsFdReport | null> {
+    return null as unknown as MDTEmsFdReport | null;
   }
 } 

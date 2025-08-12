@@ -22,10 +22,10 @@ export class Call911Service {
 
   public async getActiveCalls(): Promise<MDTCalls[]> {
     // ✅ Обращаемся к таблице 'calls' внутри схемы 'mdt'
-    const { data, error } = await this.db
+    const { data, error } = await (this.db as any)
       .from('calls')
       .select('*')
-      .in('status', ['pending', 'assigned', 'on_scene'])
+      .in('status_id', ['pending', 'assigned', 'on_scene'])
       .order('created_at', { ascending: false });
 
     if (error) {

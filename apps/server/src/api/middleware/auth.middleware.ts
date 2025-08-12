@@ -11,7 +11,7 @@ export interface AuthenticatedUser {
   id: string;
   email: string | null;
   username: string | null;
-  role: Database['public']['Enums']['user_role'];
+  role: string; // В актуальной схеме нет enum user_role в public
   created_at: string | null;
   user_metadata?: {
     cadToken?: string;
@@ -127,7 +127,7 @@ export async function authenticateToken(
       id: user.id,
       email: user.email,
       username: profile.username,
-      role: profile.role,
+      role: (profile as any).role ?? 'citizen',
       created_at: profile.created_at,
       user_metadata: user.user_metadata
     };
@@ -148,7 +148,7 @@ export async function authenticateToken(
 
 // ===== MIDDLEWARE ДЛЯ ПРОВЕРКИ РОЛИ =====
 
-export function requireRole(requiredRole: Database['public']['Enums']['user_role']) {
+export function requireRole(requiredRole: string) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -170,7 +170,7 @@ export function requireRole(requiredRole: Database['public']['Enums']['user_role
   };
 }
 
-export function requireAnyRole(requiredRoles: Database['public']['Enums']['user_role'][]) {
+export function requireAnyRole(requiredRoles: string[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -429,7 +429,7 @@ export async function authenticateAny(
               id: user.id,
               email: user.email,
               username: profile.username,
-              role: profile.role,
+              role: (profile as any).role ?? 'citizen',
               created_at: profile.created_at,
               user_metadata: user.user_metadata
             };
@@ -468,7 +468,7 @@ export async function authenticateAny(
 }
 
 // Дополнительные middleware для обратной совместимости
-export function requireExactRole(role: Database['public']['Enums']['user_role']) {
+export function requireExactRole(role: string) {
   return requireRole(role);
 }
 

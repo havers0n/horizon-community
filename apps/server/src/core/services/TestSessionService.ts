@@ -1,13 +1,13 @@
 import { systemSupabase } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
-import type { Tables, TablesInsert } from '@roleplay-identity/db-types';
+import type { Database } from '@roleplay-identity/db-types';
 
 // Типы для схемы system
-export type SystemTest = Tables<'tests', { schema: 'system' }>;
-export type SystemTestQuestion = Tables<'test_questions', { schema: 'system' }>;
-export type SystemTestQuestionOption = Tables<'test_question_options', { schema: 'system' }>;
-export type SystemTestSession = Tables<'test_sessions', { schema: 'system' }>;
-export type SystemTestResultInsert = TablesInsert<'test_results', { schema: 'system' }>;
+export type SystemTest = Database['system']['Tables']['tests']['Row'];
+export type SystemTestQuestion = Database['system']['Tables']['test_questions']['Row'];
+export type SystemTestQuestionOption = Database['system']['Tables']['test_question_options']['Row'];
+export type SystemTestSession = Database['system']['Tables']['test_sessions']['Row'];
+export type SystemTestResultInsert = Database['system']['Tables']['test_results']['Insert'];
 
 export type UserAnswer = {
   questionId: string;
@@ -35,7 +35,7 @@ export class TestSessionService {
 
       // 2) Создаем сессию
       const now = new Date().toISOString();
-      const sessionPayload: TablesInsert<'test_sessions', { schema: 'system' }> = {
+      const sessionPayload: Database['system']['Tables']['test_sessions']['Insert'] = {
         user_id: userId,
         test_id: testId,
         application_id: applicationId ?? null,
