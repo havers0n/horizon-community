@@ -26,8 +26,12 @@ export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 
 // ===== СОВРЕМЕННЫЙ APPLICATION SERVICE =====
 export class ApplicationService {
-  // ✅ Используем клиент для схемы 'system'
-  private db = systemSupabase as unknown as SupabaseClient<Database, 'system'>;
+  // ✅ Пер-запросный клиент для схемы 'system'. ВРЕМЕННЫЙ fallback для обратной совместимости с DI
+  private readonly db: SupabaseClient<Database, 'system'>;
+
+  constructor(systemDb?: SupabaseClient<Database, 'system'>) {
+    this.db = systemDb ?? (systemSupabase as unknown as SupabaseClient<Database, 'system'>);
+  }
 
   /**
    * Создать новую заявку
@@ -71,7 +75,7 @@ export class ApplicationService {
         .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null;
+        if ((error as any).code === 'PGRST116') return null;
         console.error(`[ApplicationService] Error fetching application with id ${id}:`, error);
         throw new AppError('Ошибка при поиске заявки', 500);
       }

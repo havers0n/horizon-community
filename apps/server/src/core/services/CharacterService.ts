@@ -1,7 +1,7 @@
 // apps/server/src/core/services/CharacterService.ts
 
 import { AppError } from '../../utils/AppError';
-import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@roleplay-identity/db-types';
 
 // ===== ТИПЫ ИЗ ЕДИНОГО ИСТОЧНИКА =====
@@ -18,33 +18,18 @@ type EmsProfilesUpdate = never;
 
 
 export class CharacterService {
-  // Конструктор не нужен
+  constructor(
+    private readonly commonDb: SupabaseClient<Database, 'common'>,
+    private readonly publicDb: SupabaseClient<Database>
+  ) {}
 
   // ===========================================
   // ОСНОВНЫЕ ОПЕРАЦИИ С ПЕРСОНАЖАМИ
   // ===========================================
 
   public async getCharactersByUserId(userId: string): Promise<Characters[]> {
-    console.log('[DEBUG] CharacterService.getCharactersByUserId - Используем RPC функцию get_my_characters');
-    
-    // Создаем НОВЫЙ клиент прямо здесь
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
-    console.log('[DEBUG] Создан свежий клиент с URL:', supabaseUrl);
-    console.log('[DEBUG] Используем RPC функцию get_my_characters');
-    console.log('[DEBUG] Ищем персонажей для пользователя:', userId);
-    
-    // Используем RPC функцию для доступа к схеме common
-    const { data, error } = await freshSupabase
-      .rpc('get_my_characters', { p_user_id: userId });
+    // Используем RPC функцию через пер-запросный клиент (RLS)
+    const { data, error } = await this.commonDb.rpc('get_my_characters', { p_user_id: userId });
 
     if (error) {
       console.error(`[CharacterService] Error fetching characters for user ${userId}:`, error);
@@ -56,20 +41,7 @@ export class CharacterService {
   }
   
   public async getCharacterById(id: string): Promise<Characters | null> {
-    console.log('[DEBUG] CharacterService.getCharacterById - Используем RPC функцию get_character_by_id');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
-    const { data, error } = await freshSupabase
-      .rpc('get_character_by_id', { p_character_id: id });
+    const { data, error } = await this.commonDb.rpc('get_character_by_id', { p_character_id: id });
 
     if (error) {
       console.error(`[CharacterService] Error fetching character ${id}:`, error);
@@ -80,18 +52,6 @@ export class CharacterService {
   }
   
   public async createCharacter(characterData: CharactersInsert): Promise<Characters> {
-    console.log('[DEBUG] CharacterService.createCharacter - Используем RPC функцию create_new_character');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
     // Преобразуем данные для RPC функции
     const rpcData = {
       user_id: characterData.user_id, // Используем user_id, как в реальной базе данных
@@ -110,9 +70,8 @@ export class CharacterService {
       flags: characterData.flags
     };
     
-    const { data, error } = await freshSupabase
-      .rpc('create_new_character', { p_data: rpcData });
-      
+    const { data, error } = await this.commonDb.rpc('create_new_character', { p_data: rpcData });
+        
     if (error || !data || data.length === 0) {
       console.error('[CharacterService] Error creating character:', error);
       throw new AppError('Не удалось создать персонажа.', 500);
@@ -121,18 +80,6 @@ export class CharacterService {
   }
   
   public async updateCharacter(id: string, updates: CharactersUpdate): Promise<Characters> {
-    console.log('[DEBUG] CharacterService.updateCharacter - Используем RPC функцию update_character');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
     // Преобразуем данные для RPC функции
     const rpcData = {
       user_id: updates.user_id, // Оставляем как есть, функция сама обработает
@@ -150,8 +97,7 @@ export class CharacterService {
       flags: updates.flags
     };
     
-    const { data, error } = await freshSupabase
-      .rpc('update_character', { p_character_id: id, p_updates: rpcData });
+    const { data, error } = await this.commonDb.rpc('update_character', { p_character_id: id, p_updates: rpcData });
 
     if (error || !data || data.length === 0) {
       console.error(`[CharacterService] Error updating character ${id}:`, error);
@@ -164,20 +110,7 @@ export class CharacterService {
    * ✅ ДОБАВЛЕН МЕТОД: Удалить персонажа
    */
   public async deleteCharacter(id: string): Promise<void> {
-    console.log('[DEBUG] CharacterService.deleteCharacter - Используем RPC функцию delete_character');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
-    const { error } = await freshSupabase
-      .rpc('delete_character', { p_character_id: id });
+    const { error } = await this.commonDb.rpc('delete_character', { p_character_id: id });
 
     if (error) {
       console.error(`[CharacterService] Error deleting character ${id}:`, error);
@@ -194,17 +127,6 @@ export class CharacterService {
    */
   public async createLeoProfile(data: LeoProfilesInsert): Promise<LeoProfiles> {
     console.log('[DEBUG] CharacterService.createLeoProfile - Используем RPC функцию');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
     // Используем SQL запрос для создания LEO профиля
     // TODO: Создать RPC функцию для создания LEO профиля
     console.log('[DEBUG] TODO: Создать RPC функцию для создания LEO профиля');
@@ -216,17 +138,6 @@ export class CharacterService {
    */
   public async updateLeoProfile(characterId: string, data: LeoProfilesUpdate): Promise<LeoProfiles> {
     console.log('[DEBUG] CharacterService.updateLeoProfile - Используем RPC функцию');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
     // TODO: Создать RPC функцию для обновления LEO профиля
     console.log('[DEBUG] TODO: Создать RPC функцию для обновления LEO профиля');
     throw new AppError('Функция обновления LEO профиля пока не реализована.', 501);
@@ -241,17 +152,6 @@ export class CharacterService {
    */
   public async createEmsProfile(data: EmsProfilesInsert): Promise<EmsProfiles> {
     console.log('[DEBUG] CharacterService.createEmsProfile - Используем RPC функцию');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
     // TODO: Создать RPC функцию для создания EMS профиля
     console.log('[DEBUG] TODO: Создать RPC функцию для создания EMS профиля');
     throw new AppError('Функция создания EMS профиля пока не реализована.', 501);
@@ -262,17 +162,6 @@ export class CharacterService {
    */
   public async updateEmsProfile(characterId: string, data: EmsProfilesUpdate): Promise<EmsProfiles> {
     console.log('[DEBUG] CharacterService.updateEmsProfile - Используем RPC функцию');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
     // TODO: Создать RPC функцию для обновления EMS профиля
     console.log('[DEBUG] TODO: Создать RPC функцию для обновления EMS профиля');
     throw new AppError('Функция обновления EMS профиля пока не реализована.', 501);
@@ -284,25 +173,14 @@ export class CharacterService {
   
   public async getProfileByUserId(userId: string): Promise<Profiles | null> {
     console.log('[DEBUG] CharacterService.getProfileByUserId - Используем схему public');
-    
-    const supabaseUrl = process.env.SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const freshSupabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-    
-    const { data, error } = await freshSupabase
+    const { data, error } = await this.publicDb
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
     
     if (error) {
-        if (error.code === 'PGRST116') return null;
+        if ((error as any).code === 'PGRST116') return null;
         console.error(`[CharacterService] Error fetching profile for user ${userId}:`, error);
         throw new AppError('Ошибка при получении профиля.', 500);
     }
