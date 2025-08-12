@@ -30,8 +30,8 @@ const updateStatusBodySchema = z.object({
 
 export function createApplicationRoutes(services: ServicesContainer): Router {
   const router = Router();
-  const { applicationService, testService } = services;
-  const applicationController = new ApplicationController(applicationService, testService);
+  const { applicationService, testSessionService } = services;
+  const applicationController = new ApplicationController(applicationService, testSessionService);
 
   /**
    * POST /api/v1/applications

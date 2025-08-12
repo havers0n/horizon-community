@@ -1,12 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { ApplicationService } from '../services/ApplicationService';
-import type { TestService } from '../services/TestService';
+import type { TestSessionService } from '../services/TestSessionService';
 import { AppError } from '../../utils/AppError';
 
 export class ApplicationController {
   constructor(
     private applicationService: ApplicationService,
-    private testService: TestService
+    private testSessionService: TestSessionService
   ) {}
 
   async createApplication(req: Request, res: Response, next: NextFunction) {
@@ -91,8 +91,7 @@ export class ApplicationController {
         throw new AppError('Для этой заявки не назначено тестирование', 400);
       }
 
-      // @ts-ignore
-      const testSession = await this.testService.startSession(userId, application.test_id);
+      const testSession = await this.testSessionService.startTestSession(userId, application.test_id, applicationId);
 
       res.status(201).json(testSession);
     } catch (error) {

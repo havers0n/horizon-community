@@ -11,7 +11,6 @@ import type { ReportService } from '../core/services/ReportService';
 import type { ReportTemplateService } from '../core/services/ReportTemplateService';
 import type { MDTService } from '../core/services/MDTService';
 import type { RealTimeService } from '../core/services/RealTimeService';
-import type { TestService } from '../core/services/TestService';
 import type { PublicService } from '../core/services/PublicService';
 import type { LoggerService } from '../core/services/LoggerService';
 import type { CacheService } from '../core/services/CacheService';
@@ -38,7 +37,6 @@ export interface ServicesContainer {
   
   // Сервисы-классы (экземпляры)
   mdtService: MDTService;
-  testService: TestService;
   publicService: PublicService;
   loggerService: LoggerService;
   cacheService: CacheService;

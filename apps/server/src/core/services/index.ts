@@ -12,7 +12,6 @@ export { RealTimeService } from './RealTimeService';
 export { ApplicationService } from './ApplicationService';
 export { Call911Service } from './Call911Service';
 export { MDTService } from './MDTService';
-export { TestService } from './TestService';
 export { SupportTicketService } from './SupportTicketService';
 export { FilledReportService } from './FilledReportService';
 export { ReportTemplateService } from './ReportTemplateService';

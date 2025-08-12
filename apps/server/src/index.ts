@@ -21,7 +21,9 @@ import { ReportService } from './core/services/ReportService';
 import { ReportTemplateService } from './core/services/ReportTemplateService';
 import { MDTService } from './core/services/MDTService';
 import { RealTimeService } from './core/services/RealTimeService';
-import { TestService } from './core/services/TestService';
+// import { TestService } from './core/services/TestService';
+import { TestAdminService } from './core/services/TestAdminService';
+import { TestSessionService } from './core/services/TestSessionService';
 import { PublicService } from './core/services/PublicService';
 import { LoggerService } from './core/services/LoggerService';
 import { CacheService } from './core/services/CacheService';
@@ -60,7 +62,10 @@ app.use(cors({
   const reportTemplateService = new ReportTemplateService();
   const mdtService = new MDTService();
   const realTimeService = new RealTimeService();
-  const testService = new TestService();
+  // const testService = new TestService();
+  // Новые строго-типизированные сервисы тестов
+  const testAdminService = new TestAdminService();
+  const testSessionService = new TestSessionService();
   const publicService = new PublicService();
   const logger = new LoggerService();
   const cacheService = new CacheService();
@@ -89,7 +94,9 @@ app.use(cors({
     reportTemplateService,
     mdtService,
     realTimeService,
-    testService,
+    // testService,
+    testAdminService,
+    testSessionService,
     publicService,
     loggerService: logger,
     cacheService,

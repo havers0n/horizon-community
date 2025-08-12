@@ -89,14 +89,14 @@ describe('Application API (/api/v1/applications)', () => {
       const mockTestSession = { sessionId: 'session-abc', questions: [] };
 
       (services.applicationService.getApplicationById as jest.Mock).mockResolvedValue(mockApplication);
-      (services.testService.startSession as jest.Mock).mockResolvedValue(mockTestSession);
+      (services.testSessionService.startTestSession as jest.Mock).mockResolvedValue(mockTestSession);
 
       const response = await request(app)
         .post(`/api/v1/applications/${MOCK_APPLICATION_ID}/test-session`)
         .expect(201);
 
       expect(services.applicationService.getApplicationById).toHaveBeenCalledWith(MOCK_APPLICATION_ID);
-      expect(services.testService.startSession).toHaveBeenCalledWith(MOCK_USER_ID, 'test-123');
+      expect(services.testSessionService.startTestSession).toHaveBeenCalledWith(MOCK_USER_ID, 'test-123', MOCK_APPLICATION_ID);
       expect(response.body).toEqual(mockTestSession);
     });
   });

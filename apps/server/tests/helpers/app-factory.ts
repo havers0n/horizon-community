@@ -6,7 +6,8 @@ import { CabinetService } from '../../src/core/services/CabinetService';
 import { CharacterService } from '../../src/core/services/CharacterService';
 import { LoggerService } from '../../src/core/services/LoggerService';
 import { ReportService } from '../../src/core/services/ReportService';
-import { TestService } from '../../src/core/services/TestService';
+import { TestAdminService } from '../../src/core/services/TestAdminService';
+import { TestSessionService } from '../../src/core/services/TestSessionService';
 import { PublicService } from '../../src/core/services/PublicService';
 import { ReportTemplateService } from '../../src/core/services/ReportTemplateService';
 import { RealTimeService } from '../../src/core/services/RealTimeService';
@@ -28,7 +29,8 @@ jest.mock('../../src/core/services/CabinetService');
 jest.mock('../../src/core/services/CharacterService');
 jest.mock('../../src/core/services/LoggerService');
 jest.mock('../../src/core/services/ReportService');
-jest.mock('../../src/core/services/TestService');
+jest.mock('../../src/core/services/TestAdminService');
+jest.mock('../../src/core/services/TestSessionService');
 jest.mock('../../src/core/services/PublicService');
 jest.mock('../../src/core/services/ReportTemplateService');
 jest.mock('../../src/core/services/RealTimeService');
@@ -58,7 +60,8 @@ export function createTestApp() {
     cabinetService: new CabinetService(mockSupabaseClient, applicationService, reportService) as jest.Mocked<CabinetService>,
     characterService: new CharacterService() as jest.Mocked<CharacterService>,
     loggerService: new LoggerService() as jest.Mocked<LoggerService>,
-    testService: new TestService() as jest.Mocked<TestService>,
+    testAdminService: new TestAdminService() as jest.Mocked<TestAdminService>,
+    testSessionService: new TestSessionService() as jest.Mocked<TestSessionService>,
     publicService: new PublicService() as jest.Mocked<PublicService>,
     realTimeService: new RealTimeService() as jest.Mocked<RealTimeService>,
     mdtService: new MDTService() as jest.Mocked<MDTService>,
