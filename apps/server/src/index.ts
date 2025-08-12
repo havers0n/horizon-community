@@ -1,7 +1,7 @@
 import 'dotenv/config'; // Убедись, что эта строка есть и она первая
 
 import express, { type Request, type Response, type NextFunction } from "express";
-import cors from "cors";
+import { securityMiddleware } from "./api/middleware/security.middleware";
 import { registerRoutes } from "./api/routes";
 import { log, serveStatic } from "./production";
 import path from "path";
@@ -19,14 +19,8 @@ const app: import('express').Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS - стандартная реализация с помощью библиотеки cors
-app.use(cors({
-  origin: "*", // Разрешаем запросы от всех источников (включая FiveM)
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "X-CAD-Token"],
-  credentials: true, // Специальные заголовки для FiveM
-  maxAge: 86400 // Access-Control-Max-Age: 86400
-}));
+// Глобальные меры безопасности (Helmet, строгий CORS, rate limiting, валидация/санитизация)
+app.use(securityMiddleware);
 
 (async () => {
   // Регистрируем роуты (все зависимости создаются на каждый запрос)

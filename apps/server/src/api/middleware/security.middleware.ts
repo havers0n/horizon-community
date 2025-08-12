@@ -56,20 +56,31 @@ export const boloCreateRateLimiter = rateLimit({
 // ===== CORS CONFIGURATION =====
 
 /**
- * CORS конфигурация для production
+ * Список разрешённых доменов читается из переменной окружения ALLOWED_ORIGINS
+ * в формате CSV: "https://app.example.com,https://admin.example.com"
+ */
+const allowedOrigins: string[] = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+/**
+ * CORS конфигурация. В production требуем явный origin и совпадение со списком.
+ * В non-production допускаем отсутствие origin (запросы без браузера, локальные пробы).
  */
 export const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        'https://your-domain.com',
-        'https://www.your-domain.com',
-        // Добавьте ваши домены
-      ]
-    : [
-        'http://localhost:3000',
-        'http://localhost:3000',
-        'http://localhost:5000'
-      ],
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin) {
+      if (process.env.NODE_ENV === 'production') {
+        return callback(new Error('CORS: Origin header is required'));
+      }
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
