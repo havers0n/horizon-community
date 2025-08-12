@@ -1,7 +1,6 @@
-import { systemSupabase } from '../lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../../utils/AppError';
 import type { Database } from '@roleplay-identity/db-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Типы для схемы system
 export type SystemTest = Database['system']['Tables']['tests']['Row'];
@@ -18,9 +17,8 @@ export type UserAnswer = {
 export class TestSessionService {
   private readonly db: SupabaseClient<Database, 'system'>;
 
-  constructor(systemDb?: SupabaseClient<Database, 'system'>) {
-    // Временный fallback для обратной совместимости с существующими вызовами
-    this.db = (systemDb ?? (systemSupabase as unknown as SupabaseClient<Database, 'system'>));
+  constructor(systemDb: SupabaseClient<Database, 'system'>) {
+    this.db = systemDb;
   }
 
   /**

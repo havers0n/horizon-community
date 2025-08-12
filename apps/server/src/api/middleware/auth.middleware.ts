@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { supabase, commonSupabase } from '../../core/lib/supabase'; // <-- Импортируем нужные клиенты
+import { supabase } from '../../core/lib/supabase';
 import type { Database } from '@roleplay-identity/db-types';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
@@ -355,8 +355,15 @@ export async function requireCharacter(
       return;
     }
 
-    // Получаем персонажей пользователя через пер-запросный клиент (fallback на глобальный, если отсутствует)
-    const commonDb = (req as any).supabase?.common ?? commonSupabase;
+    // Получаем персонажей пользователя строго через пер-запросный клиент
+    const commonDb = (req as any).supabase?.common;
+    if (!commonDb) {
+      res.status(500).json({
+        success: false,
+        error: 'Server configuration error: missing per-request Supabase client',
+      });
+      return;
+    }
     const characters = await getUserCharacters(req.user.id, commonDb as SupabaseClient<Database, 'common'>);
     
     if (characters.length === 0) {

@@ -1,7 +1,6 @@
 // src/core/services/ApplicationService.ts
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { systemSupabase } from '../lib/supabase';
 import type { Database } from '@roleplay-identity/db-types';
 import { AppError } from '../../utils/AppError';
 
@@ -26,11 +25,11 @@ export interface UpdateApplicationData extends Partial<CreateApplicationData> {}
 
 // ===== СОВРЕМЕННЫЙ APPLICATION SERVICE =====
 export class ApplicationService {
-  // ✅ Пер-запросный клиент для схемы 'system'. ВРЕМЕННЫЙ fallback для обратной совместимости с DI
+  // ✅ Пер-запросный клиент для схемы 'system'.
   private readonly db: SupabaseClient<Database, 'system'>;
 
-  constructor(systemDb?: SupabaseClient<Database, 'system'>) {
-    this.db = systemDb ?? (systemSupabase as unknown as SupabaseClient<Database, 'system'>);
+  constructor(systemDb: SupabaseClient<Database, 'system'>) {
+    this.db = systemDb;
   }
 
   /**

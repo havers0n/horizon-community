@@ -1,13 +1,12 @@
-import { mdtSupabase } from '../lib/supabase';
-import { AppError } from '../../utils/AppError';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { AppError } from '../../utils/AppError';
 import type { Database } from '@roleplay-identity/db-types';
 
 export class DepartmentService {
   private readonly db: SupabaseClient<Database, 'mdt'>;
 
-  constructor(mdtDb?: SupabaseClient<Database, 'mdt'>) {
-    this.db = (mdtDb ?? (mdtSupabase as unknown as SupabaseClient<Database, 'mdt'>));
+  constructor(mdtDb: SupabaseClient<Database, 'mdt'>) {
+    this.db = mdtDb;
   }
 
   async getAllDepartments() {

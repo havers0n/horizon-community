@@ -3,14 +3,14 @@ import { authenticateToken } from '../../middleware/auth.middleware';
 import { TestSessionService } from '../../../core/services/TestSessionService';
 
 const router: Router = Router();
-const testSessionService = new TestSessionService();
 
 // POST /api/v1/test-sessions
 router.post('/', authenticateToken, async (req: any, res) => {
   try {
     const userId: string = req.user.id;
     const { testId, applicationId } = req.body;
-    const result = await testSessionService.startTestSession(userId, testId, applicationId);
+    const service = new TestSessionService(req.supabase!.system);
+    const result = await service.startTestSession(userId, testId, applicationId);
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
     console.error('[TestSessionsRoutes] startTestSession error:', error);
@@ -23,7 +23,8 @@ router.post('/:id/focus-loss', authenticateToken, async (req: any, res) => {
   try {
     const userId: string = req.user.id;
     const sessionId: string = req.params.id;
-    const result = await testSessionService.recordFocusLoss(sessionId, userId);
+    const service = new TestSessionService(req.supabase!.system);
+    const result = await service.recordFocusLoss(sessionId, userId);
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
     console.error('[TestSessionsRoutes] recordFocusLoss error:', error);
@@ -37,7 +38,8 @@ router.post('/:id/submit', authenticateToken, async (req: any, res) => {
     const userId: string = req.user.id;
     const sessionId: string = req.params.id;
     const { answers } = req.body;
-    const result = await testSessionService.submitTest(sessionId, userId, answers);
+    const service = new TestSessionService(req.supabase!.system);
+    const result = await service.submitTest(sessionId, userId, answers);
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
     console.error('[TestSessionsRoutes] submitTest error:', error);

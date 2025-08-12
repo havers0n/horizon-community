@@ -1,4 +1,4 @@
-import { systemSupabase } from '../lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../../utils/AppError';
 import type { Database } from '@roleplay-identity/db-types';
 
@@ -14,7 +14,11 @@ type SystemTestQuestionOption = Database['system']['Tables']['test_question_opti
 type SystemTestQuestionOptionInsert = Database['system']['Tables']['test_question_options']['Insert'];
 
 export class TestAdminService {
-  private db = systemSupabase;
+  private readonly db: SupabaseClient<Database, 'system'>;
+
+  constructor(systemDb: SupabaseClient<Database, 'system'>) {
+    this.db = systemDb;
+  }
 
   /**
    * Создать новый тест

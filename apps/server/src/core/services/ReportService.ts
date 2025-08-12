@@ -1,7 +1,6 @@
 // apps/server/src/core/services/ReportService.ts
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { mdtSupabase } from '../lib/supabase';
 // ✅✅✅ ИСПРАВЛЕННЫЙ ПУТЬ
 import { AppError } from '../../utils/AppError';
 
@@ -73,8 +72,8 @@ export interface ReportStats {
 export class ReportService {
   private readonly db: SupabaseClient<Database, 'mdt'>;
 
-  constructor(mdtDb?: SupabaseClient<Database, 'mdt'>) {
-    this.db = (mdtDb ?? (mdtSupabase as unknown as SupabaseClient<Database, 'mdt'>));
+  constructor(mdtDb: SupabaseClient<Database, 'mdt'>) {
+    this.db = mdtDb;
   }
 
   // ===== МЕТОДЫ ДЛЯ REPORT TEMPLATES =====

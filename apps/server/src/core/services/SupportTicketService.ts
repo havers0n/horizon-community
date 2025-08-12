@@ -3,7 +3,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 // Импортируем только Database и создаем локальные типы-алиасы
 import type { Database } from '@roleplay-identity/db-types';
-import { systemSupabase } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
 
 // Создаем локальные типы-алиасы из глобального типа Database
@@ -23,8 +22,8 @@ export interface TicketMessage {
 export class SupportTicketService {
   private readonly db: SupabaseClient<Database, 'system'>;
 
-  constructor(systemDb?: SupabaseClient<Database, 'system'>) {
-    this.db = (systemDb ?? (systemSupabase as unknown as SupabaseClient<Database, 'system'>));
+  constructor(systemDb: SupabaseClient<Database, 'system'>) {
+    this.db = systemDb;
   }
 
   public async getTicketById(_ticketId: string): Promise<SupportTickets | null> {
