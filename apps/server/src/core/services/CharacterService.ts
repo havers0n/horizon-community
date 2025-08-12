@@ -16,7 +16,6 @@ type EmsProfiles = never;
 type EmsProfilesInsert = never;
 type EmsProfilesUpdate = never;
 
-
 export class CharacterService {
   constructor(
     private readonly commonDb: SupabaseClient<Database, 'common'>,
@@ -28,27 +27,27 @@ export class CharacterService {
   // ===========================================
 
   public async getCharactersByUserId(userId: string): Promise<Characters[]> {
-    // Используем RPC функцию через пер-запросный клиент (RLS)
-    const { data, error } = await this.commonDb.rpc('get_my_characters', { p_user_id: userId });
+    // Типы db-types для rpc пока не описывают наши функции; приводим к any
+    const { data, error } = await (this.commonDb as any).rpc('get_my_characters', { p_user_id: userId });
 
     if (error) {
       console.error(`[CharacterService] Error fetching characters for user ${userId}:`, error);
       throw new AppError('Ошибка при получении персонажей.', 500);
     }
-    
-    console.log('[DEBUG] Получено персонажей:', data?.length || 0);
-    return data || [];
+
+    const list = (data || []) as Characters[];
+    return Array.isArray(list) ? list : [];
   }
   
   public async getCharacterById(id: string): Promise<Characters | null> {
-    const { data, error } = await this.commonDb.rpc('get_character_by_id', { p_character_id: id });
+    const { data, error } = await (this.commonDb as any).rpc('get_character_by_id', { p_character_id: id });
 
     if (error) {
       console.error(`[CharacterService] Error fetching character ${id}:`, error);
       throw new AppError('Ошибка при получении персонажа.', 500);
     }
-    
-    return data?.[0] || null;
+    const list = (data || []) as Characters[];
+    return Array.isArray(list) && list.length > 0 ? list[0] : null;
   }
   
   public async createCharacter(characterData: CharactersInsert): Promise<Characters> {
@@ -70,13 +69,17 @@ export class CharacterService {
       flags: characterData.flags
     };
     
-    const { data, error } = await this.commonDb.rpc('create_new_character', { p_data: rpcData });
+    const { data, error } = await (this.commonDb as any).rpc('create_new_character', { p_data: rpcData });
         
-    if (error || !data || data.length === 0) {
+    if (error) {
       console.error('[CharacterService] Error creating character:', error);
       throw new AppError('Не удалось создать персонажа.', 500);
     }
-    return data[0];
+    const list = (data || []) as Characters[];
+    if (!Array.isArray(list) || list.length === 0) {
+      throw new AppError('Не удалось создать персонажа.', 500);
+    }
+    return list[0];
   }
   
   public async updateCharacter(id: string, updates: CharactersUpdate): Promise<Characters> {
@@ -97,20 +100,24 @@ export class CharacterService {
       flags: updates.flags
     };
     
-    const { data, error } = await this.commonDb.rpc('update_character', { p_character_id: id, p_updates: rpcData });
+    const { data, error } = await (this.commonDb as any).rpc('update_character', { p_character_id: id, p_updates: rpcData });
 
-    if (error || !data || data.length === 0) {
+    if (error) {
       console.error(`[CharacterService] Error updating character ${id}:`, error);
       throw new AppError('Не удалось обновить персонажа.', 500);
     }
-    return data[0];
+    const list = (data || []) as Characters[];
+    if (!Array.isArray(list) || list.length === 0) {
+      throw new AppError('Не удалось обновить персонажа.', 500);
+    }
+    return list[0];
   }
 
   /**
    * ✅ ДОБАВЛЕН МЕТОД: Удалить персонажа
    */
   public async deleteCharacter(id: string): Promise<void> {
-    const { error } = await this.commonDb.rpc('delete_character', { p_character_id: id });
+    const { error } = await (this.commonDb as any).rpc('delete_character', { p_character_id: id });
 
     if (error) {
       console.error(`[CharacterService] Error deleting character ${id}:`, error);
@@ -184,6 +191,6 @@ export class CharacterService {
         console.error(`[CharacterService] Error fetching profile for user ${userId}:`, error);
         throw new AppError('Ошибка при получении профиля.', 500);
     }
-    return data;
+    return data as Profiles;
   }
 }

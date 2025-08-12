@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import type { ServicesContainer } from '../../../types/services';
 import { createCharacterRoutes } from './characters';
 import { createCabinetRoutes } from './cabinet';
 import { createApplicationRoutes } from './applications';
@@ -10,46 +9,49 @@ import { createAuthRoutes } from '../auth'; // <-- Импортируем фаб
 import { authenticateToken } from '../../middleware/auth.middleware';
 import testSessionsRoutes from './test-sessions.routes';
 import adminRouter from '../admin';
+import { CabinetService } from '../../../core/services/CabinetService';
+import { ApplicationService } from '../../../core/services/ApplicationService';
+import { ReportService } from '../../../core/services/ReportService';
 
 // Временные заглушки для остальных роутов
 // TODO: Преобразовать все роуты в фабричные функции
-const createAdminRoutes = (services: ServicesContainer) => {
+const createAdminRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'Admin routes - TODO: implement DI' }));
   return router;
 };
 
-const createReportTemplatesRoutes = (services: ServicesContainer) => {
+const createReportTemplatesRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'Report templates routes - TODO: implement DI' }));
   return router;
 };
 
-const createEmsFdReportsRoutes = (services: ServicesContainer) => {
+const createEmsFdReportsRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'EMS/FD reports routes - TODO: implement DI' }));
   return router;
 };
 
-const createLawReportsRoutes = (services: ServicesContainer) => {
+const createLawReportsRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'Law reports routes - TODO: implement DI' }));
   return router;
 };
 
-const createDiscordRoutes = (services: ServicesContainer) => {
+const createDiscordRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'Discord routes - TODO: implement DI' }));
   return router;
 };
 
-const createForumRoutes = (services: ServicesContainer) => {
+const createForumRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'Forum routes - TODO: implement DI' }));
   return router;
 };
 
-const createRealtimeRoutes = (services: ServicesContainer) => {
+const createRealtimeRoutes = () => {
   const router: Router = Router();
   router.get('/health', (req, res) => res.json({ status: 'Realtime routes - TODO: implement DI' }));
   return router;
@@ -59,12 +61,12 @@ const createRealtimeRoutes = (services: ServicesContainer) => {
  * Фабричная функция для создания v1 роутера с внедренными сервисами
  * Разделяет публичные и защищенные маршруты
  */
-export function createV1Router(services: ServicesContainer): Router {
+export function createV1Router(): Router {
   const router: Router = Router();
 
   // --- ШАГ 1: РЕГИСТРИСТРИРУЕМ ПУБЛИЧНЫЕ РОУТЫ ---
   // Роуты аутентификации (register, login, verify) должны быть доступны всем
-  router.use('/auth', createAuthRoutes(services));
+  router.use('/auth', createAuthRoutes());
 
   // Health check endpoint (публичный)
   router.get('/health', (req, res) => {
@@ -90,8 +92,12 @@ export function createV1Router(services: ServicesContainer): Router {
    */
   router.get('/dashboard-data', async (req, res) => {
     try {
-      const { cabinetService } = services;
       const userId = req.user.id;
+      const cabinetService = new CabinetService(
+        req.supabase!.public,
+        new ApplicationService(req.supabase!.system),
+        new ReportService(req.supabase!.mdt)
+      );
       
       // Получаем профиль пользователя для определения роли
       const profile = await cabinetService.getUserProfile(userId);
@@ -333,19 +339,19 @@ export function createV1Router(services: ServicesContainer): Router {
 
   // Подключаем новые админские роуты, включая admin/tests
   router.use('/admin', adminRouter);
-  router.use('/characters', createCharacterRoutes(services));
-  router.use('/cabinet', createCabinetRoutes(services));
-  router.use('/applications', createApplicationRoutes(services));
-  router.use('/departments', createDepartmentRoutes(services));
+  router.use('/characters', createCharacterRoutes({} as any));
+  router.use('/cabinet', createCabinetRoutes({} as any));
+  router.use('/applications', createApplicationRoutes({} as any));
+  router.use('/departments', createDepartmentRoutes({} as any));
   // Старые роуты тестов удалены в пользу новых сервисов и маршрутов
   // router.use('/tests', createTestRoutes(services));
   router.use('/test-sessions', testSessionsRoutes);
-  router.use('/report-templates', createReportTemplatesRoutes(services));
-  router.use('/ems-fd-reports', createEmsFdReportsRoutes(services));
-  router.use('/law-reports', createLawReportsRoutes(services));
-  router.use('/discord', createDiscordRoutes(services));
-  router.use('/forum', createForumRoutes(services));
-  router.use('/realtime', createRealtimeRoutes(services));
+  router.use('/report-templates', createReportTemplatesRoutes());
+  router.use('/ems-fd-reports', createEmsFdReportsRoutes());
+  router.use('/law-reports', createLawReportsRoutes());
+  router.use('/discord', createDiscordRoutes());
+  router.use('/forum', createForumRoutes());
+  router.use('/realtime', createRealtimeRoutes());
 
   return router;
 }

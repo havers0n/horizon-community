@@ -24,7 +24,7 @@ export async function registerRoutes(app: Express): Promise<HttpServer> {
   });
 
   // Создаем v1 роутер с внедренными сервисами
-  const v1Router = createV1Router({} as any);
+  const v1Router = createV1Router();
   
   // Регистрируем все v1 маршруты
   mainRouter.use('/v1', v1Router);
