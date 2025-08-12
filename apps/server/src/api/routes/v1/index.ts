@@ -5,9 +5,11 @@ import { createCabinetRoutes } from './cabinet';
 import { createApplicationRoutes } from './applications';
 import { createDepartmentRoutes } from './departments';
 import { createAuthRoutes } from '../auth'; // <-- Импортируем фабричную функцию для auth роутов
-import { createTestRoutes } from './tests';
+// Удаляем старые тестовые роуты на основе TestController/TestService
+// import { createTestRoutes } from './tests';
 import { authenticateToken } from '../../middleware/auth.middleware';
 import testSessionsRoutes from './test-sessions.routes';
+import adminRouter from '../admin';
 
 // Временные заглушки для остальных роутов
 // TODO: Преобразовать все роуты в фабричные функции
@@ -328,12 +330,14 @@ export function createV1Router(services: ServicesContainer): Router {
     }
   });
 
-  router.use('/admin', createAdminRoutes(services));
+  // Подключаем новые админские роуты, включая admin/tests
+  router.use('/admin', adminRouter);
   router.use('/characters', createCharacterRoutes(services));
   router.use('/cabinet', createCabinetRoutes(services));
   router.use('/applications', createApplicationRoutes(services));
   router.use('/departments', createDepartmentRoutes(services));
-  router.use('/tests', createTestRoutes(services));
+  // Старые роуты тестов удалены в пользу новых сервисов и маршрутов
+  // router.use('/tests', createTestRoutes(services));
   router.use('/test-sessions', testSessionsRoutes);
   router.use('/report-templates', createReportTemplatesRoutes(services));
   router.use('/ems-fd-reports', createEmsFdReportsRoutes(services));

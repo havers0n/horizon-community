@@ -18,7 +18,8 @@ import type { CacheService } from '../core/services/CacheService';
 import type { FilledReportService } from '../core/services/FilledReportService';
 import type { CabinetService } from '../core/services/CabinetService';
 import type { DepartmentService } from '../core/services/DepartmentService';
-
+import type { TestAdminService } from '../core/services/TestAdminService';
+import type { TestSessionService } from '../core/services/TestSessionService';
 
 /**
  * Интерфейс для контейнера всех сервисов
@@ -44,6 +45,9 @@ export interface ServicesContainer {
   filledReportService: FilledReportService;
   cabinetService: CabinetService;
   departmentService: DepartmentService;
+  // Новые строго-типизированные сервисы тестов
+  testAdminService: TestAdminService;
+  testSessionService: TestSessionService;
 }
 
 /**
