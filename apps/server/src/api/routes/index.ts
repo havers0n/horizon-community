@@ -14,7 +14,7 @@ mainRouter.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP' });
 });
 
-export async function registerRoutes(app: Express, services: ServicesContainer): Promise<HttpServer> {
+export async function registerRoutes(app: Express): Promise<HttpServer> {
   const server = createServer(app);
   const io = new Server(server, {
     cors: {
@@ -24,7 +24,7 @@ export async function registerRoutes(app: Express, services: ServicesContainer):
   });
 
   // Создаем v1 роутер с внедренными сервисами
-  const v1Router = createV1Router(services);
+  const v1Router = createV1Router({} as any);
   
   // Регистрируем все v1 маршруты
   mainRouter.use('/v1', v1Router);

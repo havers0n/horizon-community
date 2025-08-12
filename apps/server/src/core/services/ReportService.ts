@@ -71,7 +71,11 @@ export interface ReportStats {
 }
 
 export class ReportService {
-  private db = mdtSupabase;
+  private readonly db: SupabaseClient<Database, 'mdt'>;
+
+  constructor(mdtDb?: SupabaseClient<Database, 'mdt'>) {
+    this.db = (mdtDb ?? (mdtSupabase as unknown as SupabaseClient<Database, 'mdt'>));
+  }
 
   // ===== МЕТОДЫ ДЛЯ REPORT TEMPLATES =====
 

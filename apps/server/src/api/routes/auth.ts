@@ -3,12 +3,11 @@ import { authenticateToken } from '../middleware/auth.middleware';
 import { AuthService } from '../../core/services/AuthService';
 import { registerSchema, loginSchema } from '@roleplay-identity/shared-schema';
 import { AppError } from '../../utils/AppError';
-import type { ServicesContainer } from '../../types/services';
 
 // ===== ФАБРИЧНАЯ ФУНКЦИЯ ДЛЯ СОЗДАНИЯ AUTH РОУТОВ =====
-export function createAuthRoutes(services: ServicesContainer) {
+export function createAuthRoutes() {
   const router: Router = Router();
-  const { authService } = services; // ✅ Используем внедренный сервис из контейнера
+  const authService = new AuthService();
 
   // ===== ПУБЛИЧНЫЕ РОУТЫ (доступны без аутентификации) =====
   

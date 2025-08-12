@@ -8,28 +8,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
 
-// Импортируем типы для DI
-import type { ServicesContainer } from './types/services';
-
-// --- СОЗДАЕМ ВСЕ СЕРВИСЫ В ОДНОМ МЕСТЕ ---
-import { AuthService } from './core/services/AuthService';
-import { CharacterService } from './core/services/CharacterService';
-import { ApplicationService } from './core/services/ApplicationService';
-import { SupportTicketService } from './core/services/SupportTicketService';
-import { Call911Service } from './core/services/Call911Service';
-import { ReportService } from './core/services/ReportService';
-import { ReportTemplateService } from './core/services/ReportTemplateService';
-import { MDTService } from './core/services/MDTService';
-import { RealTimeService } from './core/services/RealTimeService';
-// import { TestService } from './core/services/TestService';
-import { TestAdminService } from './core/services/TestAdminService';
-import { TestSessionService } from './core/services/TestSessionService';
-import { PublicService } from './core/services/PublicService';
-import { LoggerService } from './core/services/LoggerService';
-import { CacheService } from './core/services/CacheService';
-import { FilledReportService } from './core/services/FilledReportService';
-import { CabinetService } from './core/services/CabinetService';
-import { supabase } from './core/lib/supabase';
+// Глобальные сервисы не требуются для HTTP-обработчиков в RLS-first архитектуре
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,64 +29,8 @@ app.use(cors({
 }));
 
 (async () => {
-  // ===== ЭТАП 1: СОЗДАНИЕ КОНТЕЙНЕРА СЕРВИСОВ =====
-  
-  // Создаем экземпляры всех сервисов
-  const authService = new AuthService();
-  const characterService = new CharacterService();
-  const applicationService = new ApplicationService();
-  const supportTicketService = new SupportTicketService();
-  const call911Service = new Call911Service();
-  const reportService = new ReportService();
-  const reportTemplateService = new ReportTemplateService();
-  const mdtService = new MDTService();
-  const realTimeService = new RealTimeService();
-  // const testService = new TestService();
-  // Новые строго-типизированные сервисы тестов
-  const testAdminService = new TestAdminService();
-  const testSessionService = new TestSessionService();
-  const departmentService = new (await import('./core/services/DepartmentService')).DepartmentService();
-  const publicService = new PublicService();
-  const logger = new LoggerService();
-  const cacheService = new CacheService();
-
-  // Создаем FilledReportService с зависимостями
-  const filledReportService = new FilledReportService(
-    reportService,
-    reportTemplateService
-  );
-
-  // Создаем CabinetService с зависимостями
-  const cabinetService = new CabinetService(
-    supabase, // Передаем клиент Supabase
-    applicationService,
-    reportService
-  );
-
-  // Собираем их в контейнер
-  const services: ServicesContainer = {
-    authService,
-    characterService,
-    applicationService,
-    supportTicketService,
-    call911Service,
-    reportService,
-    reportTemplateService,
-    mdtService,
-    realTimeService,
-    // testService,
-    testAdminService,
-    testSessionService,
-    publicService,
-    loggerService: logger,
-    cacheService,
-    filledReportService,
-    cabinetService,
-    departmentService,
-  };
-
-  // Передаем контейнер сервисов в registerRoutes
-  const server = await registerRoutes(app, services);
+  // Регистрируем роуты (все зависимости создаются на каждый запрос)
+  const server = await registerRoutes(app);
 
   // Graceful shutdown
   process.on('SIGINT', () => {
