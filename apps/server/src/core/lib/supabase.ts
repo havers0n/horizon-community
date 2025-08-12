@@ -52,19 +52,41 @@ export const mdtSupabase = createClient<Database, 'mdt'>(supabaseUrl, supabaseSe
 });
 console.log('[DEBUG] Создан клиент mdtSupabase (mdt схема)');
 
+// --- ДОБАВЛЕН КЛИЕНТ ДЛЯ system СХЕМЫ ---
+// Важно: типы для схемы `system` появятся после регенерации db-types.
+// До этого момента используем безопасное приведение типов.
+export const systemSupabase = (createClient as any)(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+  db: {
+    schema: 'system'
+  },
+  global: {
+    headers: {
+      'X-Schema': 'system'
+    }
+  }
+});
+console.log('[DEBUG] Создан клиент systemSupabase (system схема)');
+
 // --- ДОБАВЛЯЕМ ОТЛАДОЧНУЮ ИНФОРМАЦИЮ ---
 (supabase as any).__SCHEMA = 'PUBLIC';
 (commonSupabase as any).__SCHEMA = 'COMMON';
 (mdtSupabase as any).__SCHEMA = 'MDT';
+// помечаем client для system
+(systemSupabase as any).__SCHEMA = 'SYSTEM';
 
 console.log('[DEBUG] Supabase clients have been tagged with schema names.');
 console.log('[DEBUG] supabase.__SCHEMA:', (supabase as any).__SCHEMA);
 console.log('[DEBUG] commonSupabase.__SCHEMA:', (commonSupabase as any).__SCHEMA);
 console.log('[DEBUG] mdtSupabase.__SCHEMA:', (mdtSupabase as any).__SCHEMA);
+console.log('[DEBUG] systemSupabase.__SCHEMA:', (systemSupabase as any).__SCHEMA);
 
 /**
  * Создает и возвращает новый экземпляр Supabase клиента для указанной схемы.
- * @param schema - Имя схемы базы данных ('public', 'mdt', 'common', и т.д.).
+ * @param schema - Имя схемы базы данных ('public', 'mdt', 'common', 'system', и т.д.).
  */
 export function createSupabaseClient(schema: string) {
   return createClient(supabaseUrl, supabaseServiceKey, {

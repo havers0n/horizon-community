@@ -7,6 +7,7 @@ import { createDepartmentRoutes } from './departments';
 import { createAuthRoutes } from '../auth'; // <-- Импортируем фабричную функцию для auth роутов
 import { createTestRoutes } from './tests';
 import { authenticateToken } from '../../middleware/auth.middleware';
+import testSessionsRoutes from './test-sessions.routes';
 
 // Временные заглушки для остальных роутов
 // TODO: Преобразовать все роуты в фабричные функции
@@ -333,6 +334,7 @@ export function createV1Router(services: ServicesContainer): Router {
   router.use('/applications', createApplicationRoutes(services));
   router.use('/departments', createDepartmentRoutes(services));
   router.use('/tests', createTestRoutes(services));
+  router.use('/test-sessions', testSessionsRoutes);
   router.use('/report-templates', createReportTemplatesRoutes(services));
   router.use('/ems-fd-reports', createEmsFdReportsRoutes(services));
   router.use('/law-reports', createLawReportsRoutes(services));
