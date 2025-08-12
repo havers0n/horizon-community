@@ -26,7 +26,7 @@ interface Application {
   type: 'leave' | 'transfer' | 'promotion' | 'other'
   title: string
   description: string
-  status: 'pending' | 'approved' | 'rejected' | 'in_review'
+  status: 'pending' | 'approved' | 'rejected' | 'in_review' | 'awaiting_test'
   priority: 'low' | 'medium' | 'high'
   submittedAt: Date
   updatedAt: Date
@@ -129,6 +129,8 @@ const ApplicationDetails: React.FC = () => {
         return <Badge variant="destructive">Отклонено</Badge>
       case 'in_review':
         return <Badge variant="outline">На рассмотрении</Badge>
+      case 'awaiting_test':
+        return <Badge variant="warning">На тестировании</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -421,6 +423,11 @@ const ApplicationDetails: React.FC = () => {
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Добавить комментарий
                 </Button>
+                {application.status === 'awaiting_test' && (
+                  <Button className="w-full" onClick={() => navigate(`/applications/${application.id}/test`, { state: { testId: (application as any).details?.test_id } })}>
+                    Начать тест
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

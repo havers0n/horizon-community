@@ -14,10 +14,13 @@ export class ApplicationController {
       // @ts-ignore
       const userId = req.user.id;
       // @ts-ignore
-      const characterId = req.user.characterId;
+      const characterId = (req.user as any).characterId as string | undefined;
 
-      if (!characterId) {
-        throw new AppError('Character ID не найден в токене', 400);
+      const applicationType = (req.body?.type as string) || '';
+
+      // Требуем characterId только для заявок не типа 'entry'
+      if (applicationType !== 'entry' && !characterId) {
+        return next(new AppError('A character ID is required for this application type', 400));
       }
 
       // --- Логика проверки лимитов ---
@@ -38,10 +41,10 @@ export class ApplicationController {
       const applicationData = {
         ...req.body,
         author_user_id: userId,
-        author_character_id: characterId,
+        author_character_id: applicationType === 'entry' ? null : characterId,
       };
 
-      const application = await this.applicationService.createApplication(applicationData);
+      const application = await this.applicationService.createApplication(applicationData as any);
       res.status(201).json(application);
     } catch (error) {
       next(error);

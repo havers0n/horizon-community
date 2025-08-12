@@ -190,6 +190,87 @@ export async function authenticateToken(
 
     // Приводим req к AuthenticatedRequest и добавляем пользователя
     (req as AuthenticatedRequest).user = authenticatedUser;
+
+    // --- Построение сессии авторизации (roles, permissions, statuses) ---
+    try {
+      const supa = (req as any).supabase;
+      const userId = authenticatedUser.id;
+
+      // Роли
+      const rolesPromise = supa.common
+        .from('v_effective_roles' as any)
+        .select('role')
+        .eq('user_id', userId);
+
+      // Пермишены: RPC предпочтительно, иначе view
+      const permissionsViaRpcPromise = (supa.common.rpc as any)?.('get_user_permissions', { p_user_id: userId });
+      const permissionsViaViewPromise = supa.common
+        .from('v_effective_permissions' as any)
+        .select('permission')
+        .eq('user_id', userId);
+
+      // Статусы: memberships -> statuses
+      const membershipsPromise = supa.common
+        .from('memberships' as any)
+        .select('status_id')
+        .eq('user_id', userId);
+
+      const [rolesRes, permsRpcRes, permsViewRes, membershipsRes] = await Promise.all([
+        rolesPromise,
+        permissionsViaRpcPromise?.catch(() => null) ?? Promise.resolve(null),
+        permissionsViaViewPromise,
+        membershipsPromise,
+      ]);
+
+      if (rolesRes.error) {
+        res.status(500).json({ success: false, error: rolesRes.error.message });
+        return;
+      }
+      if (membershipsRes.error) {
+        res.status(500).json({ success: false, error: membershipsRes.error.message });
+        return;
+      }
+      if (permsRpcRes && (permsRpcRes as any).error) {
+        res.status(500).json({ success: false, error: (permsRpcRes as any).error.message });
+        return;
+      }
+      if (permsViewRes.error) {
+        res.status(500).json({ success: false, error: permsViewRes.error.message });
+        return;
+      }
+
+      const roles = (rolesRes.data || []).map((r: any) => r.role).filter(Boolean);
+      const permissions = Array.isArray(permsRpcRes?.data)
+        ? (permsRpcRes!.data as string[])
+        : ((permsViewRes.data || []).map((p: any) => p.permission).filter(Boolean));
+
+      const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
+      let statuses: string[] = [];
+      if (statusIds.length > 0) {
+        const statusesRes = await supa.common
+          .from('statuses' as any)
+          .select('code, id')
+          .in('id', statusIds as any);
+        if (statusesRes.error) {
+          res.status(500).json({ success: false, error: statusesRes.error.message });
+          return;
+        }
+        statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
+      }
+
+      const unique = (arr: string[]) => Array.from(new Set(arr));
+      (req as any).session = {
+        user: { id: userId, username: authenticatedUser.username },
+        roles: unique(roles),
+        permissions: unique(permissions),
+        statuses: unique(statuses),
+      };
+    } catch (sessionError) {
+      console.error('[AuthMiddleware] Failed to build auth session:', sessionError);
+      res.status(500).json({ success: false, error: 'Failed to build auth session' });
+      return;
+    }
+
     console.log('Authentication SUCCESS, calling next()'); // ШПИОН №12
     next();
   } catch (error) {
@@ -547,9 +628,9 @@ export function requirePermission(permission: string) {
       return;
     }
 
-    // Проверяем разрешения из user_metadata
-    const userPermissions = req.user.user_metadata?.permissions || [];
-    if (!userPermissions.includes(permission)) {
+    // Проверяем разрешения из сессии, собранной в authenticateToken
+    const sessionPermissions: string[] = ((req as any).session?.permissions ?? []) as string[];
+    if (!Array.isArray(sessionPermissions) || !sessionPermissions.includes(permission)) {
       res.status(403).json({
         success: false,
         error: `Permission '${permission}' required`
@@ -560,30 +641,3 @@ export function requirePermission(permission: string) {
     next();
   };
 }
-
-export function requireActiveStatus(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
-  if (!req.user) {
-    res.status(401).json({
-      success: false,
-      error: 'Authentication required'
-    });
-    return;
-  }
-
-  const userStatus = req.user.user_metadata?.status || 'active';
-  if (userStatus !== 'active') {
-    res.status(403).json({
-      success: false,
-      error: 'Account is not active'
-    });
-    return;
-  }
-
-  next();
-}
-
-// Старые комбинированные массивы middleware (для обратной совместимости)
-export const requireAdminWithAuth = [authenticateToken, requireRole('admin')];
-export const requireSupervisorWithAuth = [authenticateToken, requireRole('staff')];
-export const requireMemberWithAuth = [authenticateToken, requireRole('citizen')];
-export const requireCandidateWithAuth = [authenticateToken, requireRole('candidate')]; 

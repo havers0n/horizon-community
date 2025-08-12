@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
+import { Link } from 'react-router-dom'
 
 export default function AdminPanelPage() {
   return (
@@ -60,6 +61,7 @@ export default function AdminPanelPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
+                <Button asChild className="w-full"><Link to="/admin/applications">Заявки кандидатов</Link></Button>
                 <Button className="w-full">Просмотр всех пользователей</Button>
                 <Button variant="outline" className="w-full">Добавить пользователя</Button>
                 <Button variant="outline" className="w-full">Массовые операции</Button>
@@ -124,8 +126,8 @@ export default function AdminPanelPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button className="w-full">Шаблоны отчетов</Button>
-                <Button variant="outline" className="w-full">Тесты и экзамены</Button>
+                <Button asChild className="w-full"><Link to="/admin/tests">Тесты и экзамены</Link></Button>
+                <Button variant="outline" className="w-full">Шаблоны отчетов</Button>
                 <Button variant="outline" className="w-full">Документация</Button>
               </div>
             </CardContent>

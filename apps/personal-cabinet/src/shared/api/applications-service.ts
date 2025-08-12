@@ -54,27 +54,22 @@ export const getApplicationById = (id: string): Promise<Applications> => {
 export const createApplication = (
   data: CreateApplicationPayload
 ): Promise<Applications> => {
-  const formData = new FormData();
   const { attachments_files, ...applicationData } = data;
-  
-  // Создаем полную запись для вставки
-  const fullApplicationData: ApplicationsInsert = {
-    ...applicationData,
-    id: uuidv4(), // Генерируем ID
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-  
-  Object.entries(fullApplicationData).forEach(([key, value]) => {
+
+  // Если нет файлов, отправляем JSON
+  if (!attachments_files || attachments_files.length === 0) {
+    return apiClient.post<Applications>(BASE_URL, applicationData);
+  }
+
+  // Если есть файлы — используем multipart/form-data
+  const formData = new FormData();
+  Object.entries(applicationData).forEach(([key, value]) => {
     if (value != null) {
       formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
     }
   });
-  
-  if (attachments_files) {
-    attachments_files.forEach((file: File) => formData.append('attachments', file));
-  }
-  
+  attachments_files.forEach((file: File) => formData.append('attachments', file));
+
   return apiClient.post<Applications>(BASE_URL, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
@@ -84,11 +79,7 @@ export const updateApplication = (
   id: string,
   data: UpdateApplicationData
 ): Promise<Applications> => {
-  const updateData = {
-    ...data,
-    updated_at: new Date().toISOString(),
-  };
-  return apiClient.put<Applications>(`${BASE_URL}/${id}`, updateData);
+  return apiClient.put<Applications>(`${BASE_URL}/${id}`, data);
 };
 
 export const deleteApplication = (id: string): Promise<void> => {
@@ -113,10 +104,5 @@ export const addCommentToApplication = (
   id: string,
   commentData: CommentsInsert
 ): Promise<Comments> => {
-  const fullCommentData = {
-    ...commentData,
-    id: uuidv4(),
-    created_at: new Date().toISOString(),
-  };
-  return apiClient.post<Comments>(`${BASE_URL}/${id}/comments`, fullCommentData);
+  return apiClient.post<Comments>(`${BASE_URL}/${id}/comments`, commentData);
 };

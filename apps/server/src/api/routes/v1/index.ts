@@ -86,6 +86,104 @@ export function createV1Router(): Router {
   // --- ШАГ 3: РЕГИСТРИСТРИРУЕМ ЗАЩИЩЕННЫЕ РОУТЫ ---
   
   /**
+   * GET /api/v1/auth/me/session
+   * Возвращает сессию пользователя с динамическими ролями, пермишенами и статусами.
+   * Источники данных:
+   *  - Роли: common.v_effective_roles (по user_id)
+   *  - Пермишены: common.v_effective_permissions или rpc.get_user_permissions(p_user_id)
+   *  - Статусы: join common.memberships -> common.statuses по пользователю
+   */
+  router.get('/auth/me/session', async (req, res) => {
+    try {
+      const userId = req.user?.id as string | undefined;
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+
+      const supa = req.supabase!;
+
+      // Роли из представления v_effective_roles
+      const rolesPromise = supa.common
+        .from('v_effective_roles' as any)
+        .select('role')
+        .eq('user_id', userId);
+
+      // Пермишены через RPC (если доступен) с fall-back на представление
+      const permissionsViaRpcPromise = (supa.common.rpc as any)?.('get_user_permissions', { p_user_id: userId });
+      const permissionsViaViewPromise = supa.common
+        .from('v_effective_permissions' as any)
+        .select('permission')
+        .eq('user_id', userId);
+
+      // Статусы через memberships -> statuses
+      const membershipsPromise = supa.common
+        .from('memberships' as any)
+        .select('status_id')
+        .eq('user_id', userId);
+
+      const [rolesRes, permsRpcRes, permsViewRes, membershipsRes] = await Promise.all([
+        rolesPromise,
+        permissionsViaRpcPromise?.catch(() => null) ?? Promise.resolve(null),
+        permissionsViaViewPromise,
+        membershipsPromise,
+      ]);
+
+      if (rolesRes.error) {
+        return res.status(500).json({ success: false, error: rolesRes.error.message });
+      }
+      if (membershipsRes.error) {
+        return res.status(500).json({ success: false, error: membershipsRes.error.message });
+      }
+      if (permsRpcRes && (permsRpcRes as any).error) {
+        return res.status(500).json({ success: false, error: (permsRpcRes as any).error.message });
+      }
+      if (permsViewRes.error) {
+        return res.status(500).json({ success: false, error: permsViewRes.error.message });
+      }
+
+      const roles = (rolesRes.data || []).map((r: any) => r.role).filter(Boolean);
+
+      // Если RPC вернул массив строк — используем его; иначе соберем из view
+      const permissions = Array.isArray(permsRpcRes?.data)
+        ? (permsRpcRes!.data as string[])
+        : ((permsViewRes.data || []).map((p: any) => p.permission).filter(Boolean));
+
+      // Получить коды статусов по status_id
+      const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
+      let statuses: string[] = [];
+      if (statusIds.length > 0) {
+        const statusesRes = await supa.common
+          .from('statuses' as any)
+          .select('code, id')
+          .in('id', statusIds as any);
+        if (statusesRes.error) {
+          return res.status(500).json({ success: false, error: statusesRes.error.message });
+        }
+        statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
+      }
+
+      // Уникализируем
+      const unique = (arr: string[]) => Array.from(new Set(arr));
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          user: {
+            id: userId,
+            username: req.user?.username ?? null,
+          },
+          roles: unique(roles),
+          permissions: unique(permissions),
+          statuses: unique(statuses),
+        },
+      });
+    } catch (error) {
+      console.error('Error building session:', error);
+      return res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Internal server error' });
+    }
+  });
+
+  /**
    * GET /api/v1/dashboard-data
    * Единый эндпоинт для получения всех данных дашборда
    * Возвращает структурированные данные в зависимости от роли пользователя
@@ -95,7 +193,7 @@ export function createV1Router(): Router {
       const userId = req.user.id;
       const cabinetService = new CabinetService(
         req.supabase!.public,
-        new ApplicationService(req.supabase!.system),
+        new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public }),
         new ReportService(req.supabase!.mdt)
       );
       

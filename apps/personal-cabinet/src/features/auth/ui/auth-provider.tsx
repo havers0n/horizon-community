@@ -18,7 +18,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const checkAuth = async () => {
       try {
         const authState = getAuthState()
-        if (authState.token && authState.user) {
+        if (authState.accessToken && authState.user) {
           // Проверяем токен через API
           try {
             const userData = await AuthAPI.getCurrentUser()
@@ -44,10 +44,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await AuthAPI.signIn({ email, password })
       
       // Новый API возвращает данные напрямую
-      const { user: userData, access_token } = response
+      const { user: userData, access_token, refresh_token } = response
       
-      if (userData && access_token) {
-        setAuthState(userData, access_token)
+      if (userData && access_token && refresh_token) {
+        setAuthState(userData, access_token, refresh_token)
         setUser(normalizeUser(userData))
       } else {
         throw new Error('Invalid response format')
@@ -63,10 +63,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await AuthAPI.signUp(data)
       
       // Новый API возвращает данные напрямую
-      const { user: userData, access_token } = response
+      const { user: userData, access_token, refresh_token } = response
       
-      if (userData && access_token) {
-        setAuthState(userData, access_token)
+      if (userData && access_token && refresh_token) {
+        setAuthState(userData, access_token, refresh_token)
         setUser(normalizeUser(userData))
       } else {
         throw new Error('Invalid response format')

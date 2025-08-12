@@ -37,13 +37,8 @@ export const login = (credentials: LoginCredentials): Promise<AuthResponse> => {
 };
 
 export const register = (data: RegisterPayload): Promise<AuthResponse> => {
-  const newProfile: ProfilesInsert = {
-    id: uuidv4(), // Генерируем ID здесь
-    email: data.email,
-    username: data.username || `${data.first_name || 'User'} ${data.last_name || ''}`.trim(),
-    role: 'citizen', // Устанавливаем роль по умолчанию
-  };
-  return apiClient.post<AuthResponse>(`${BASE_URL}/register`, newProfile);
+  // Отправляем ровно то, что ожидает бэкенд. ID и профиль создаёт сервер.
+  return apiClient.post<AuthResponse>(`${BASE_URL}/register`, data);
 };
 
 export const logout = (): Promise<void> => {
@@ -66,19 +61,21 @@ export const updateProfile = (data: ProfilesUpdate): Promise<Profiles> => {
 
 // --- ХЕЛПЕРЫ ДЛЯ TOKEN MANAGEMENT ---
 export const setTokens = (access_token: string, refresh_token: string): void => {
-  localStorage.setItem('access_token', access_token);
-  localStorage.setItem('refresh_token', refresh_token);
+  localStorage.setItem('accessToken', access_token);
+  localStorage.setItem('refreshToken', refresh_token);
 };
 
 export const getAccessToken = (): string | null => {
-  return localStorage.getItem('access_token');
+  return localStorage.getItem('accessToken') || localStorage.getItem('access_token');
 };
 
 export const getRefreshToken = (): string | null => {
-  return localStorage.getItem('refresh_token');
+  return localStorage.getItem('refreshToken') || localStorage.getItem('refresh_token');
 };
 
 export const clearTokens = (): void => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
 };

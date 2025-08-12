@@ -50,18 +50,15 @@ const clearSession = (): void => {
 
 // Создание axios инстанса с правильной базовой URL
 const getBaseUrl = (): string => {
-  let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  
-  // Если VITE_API_URL не содержит /api, добавляем его
-  if (baseUrl && !baseUrl.includes('/api')) {
-    baseUrl = `${baseUrl}/api`;
-  }
-  
+  const rootUrl = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:5000';
+  const normalizedRoot = rootUrl.replace(/\/+$/, '');
+  const baseUrl = `${normalizedRoot}/api/v1`;
+
   // Логирование API конфигурации
-  console.log('🔧 [Personal Cabinet] API конфигурация:')
-  console.log('🔧 [Personal Cabinet] VITE_API_URL:', import.meta.env.VITE_API_URL ? '✅ Установлен' : '❌ Отсутствует')
-  console.log('🔧 [Personal Cabinet] Итоговый baseURL:', baseUrl)
-  
+  console.log('🔧 [Personal Cabinet] API конфигурация:');
+  console.log('🔧 [Personal Cabinet] VITE_API_URL:', import.meta.env.VITE_API_URL ? '✅ Установлен' : '❌ Отсутствует');
+  console.log('🔧 [Personal Cabinet] Итоговый baseURL:', baseUrl);
+
   return baseUrl;
 };
 
@@ -108,15 +105,13 @@ axiosInstance.interceptors.response.use(
                            localStorage.getItem('refresh_token');
         if (refreshToken) {
           const response = await axios.post(`${getBaseUrl()}/auth/refresh`, {
-            refreshToken
+            refresh_token: refreshToken
           });
           
-          const { accessToken } = response.data;
+          const accessToken = (response.data && (response.data.accessToken || response.data.access_token));
           if (accessToken) {
-            // Сохраняем токен во все возможные ключи для совместимости
+            // Сохраняем токен в единый ключ для консистентности
             localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('access_token', accessToken);
-            localStorage.setItem('authToken', accessToken);
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             }

@@ -42,7 +42,7 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
     '/',
     validateRequest({ body: createApplicationBodySchema }),
     (req: AuthenticatedRequest, res, next) => {
-      const applicationService = new ApplicationService(req.supabase!.system);
+      const applicationService = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
       const testSessionService = new TestSessionService(req.supabase!.system);
       const controller = new ApplicationController(applicationService, testSessionService);
       return controller.createApplication(req, res, next);
@@ -57,7 +57,7 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
     '/:id',
     validateRequest({ params: paramsSchema }),
     (req: AuthenticatedRequest, res, next) => {
-      const applicationService = new ApplicationService(req.supabase!.system);
+      const applicationService = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
       const testSessionService = new TestSessionService(req.supabase!.system);
       const controller = new ApplicationController(applicationService, testSessionService);
       return controller.getApplicationById(req, res, next);
@@ -72,7 +72,7 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
     '/:id/status',
     validateRequest({ params: paramsSchema, body: updateStatusBodySchema }),
     (req: AuthenticatedRequest, res, next) => {
-      const applicationService = new ApplicationService(req.supabase!.system);
+      const applicationService = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
       const testSessionService = new TestSessionService(req.supabase!.system);
       const controller = new ApplicationController(applicationService, testSessionService);
       return controller.updateApplicationStatus(req, res, next);
@@ -87,7 +87,7 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
     '/:id/test-session',
     validateRequest({ params: paramsSchema }),
     (req: AuthenticatedRequest, res, next) => {
-      const applicationService = new ApplicationService(req.supabase!.system);
+      const applicationService = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
       const testSessionService = new TestSessionService(req.supabase!.system);
       const controller = new ApplicationController(applicationService, testSessionService);
       return controller.createTestSession(req, res, next);

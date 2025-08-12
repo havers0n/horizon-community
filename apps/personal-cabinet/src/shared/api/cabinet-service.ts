@@ -47,7 +47,7 @@ export const cabinetApi = {
 
   // Заявки пользователя
   getApplications: () => 
-    apiClient.get<ApiResponse<Application[]>>('/cabinet/applications'),
+    apiClient.get<ApiResponse<Application[]>>('/applications/my'),
 
   // Департаменты пользователя
   getDepartments: () => 
