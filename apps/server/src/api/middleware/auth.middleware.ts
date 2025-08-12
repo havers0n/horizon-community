@@ -1,6 +1,43 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase, commonSupabase } from '../../core/lib/supabase'; // <-- Импортируем нужные клиенты
 import type { Database } from '@roleplay-identity/db-types';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+// Создает пер-запросные клиенты Supabase под токен пользователя (RLS-first)
+function createUserSupabaseClients(accessToken: string) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY for user-scoped clients');
+  }
+
+  const commonOptions = {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  } as const;
+
+  const publicClient = createClient<Database>(supabaseUrl, supabaseAnonKey, commonOptions);
+  const commonClient = createClient<Database, 'common'>(supabaseUrl, supabaseAnonKey, {
+    ...commonOptions,
+    db: { schema: 'common' },
+  });
+  const mdtClient = createClient<Database, 'mdt'>(supabaseUrl, supabaseAnonKey, {
+    ...commonOptions,
+    db: { schema: 'mdt' },
+  });
+  const systemClient = createClient<Database, 'system'>(supabaseUrl, supabaseAnonKey, {
+    ...commonOptions,
+    db: { schema: 'system' },
+  });
+
+  return {
+    public: publicClient,
+    common: commonClient,
+    mdt: mdtClient,
+    system: systemClient,
+  } as const;
+}
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type Character = Database['common']['Tables']['characters']['Row'];
@@ -27,9 +64,12 @@ export interface AuthenticatedRequest extends Request {
 
 // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 
-async function getUserProfile(userId: string): Promise<Profile | null> {
+async function getUserProfile(
+  userId: string,
+  publicDb: SupabaseClient<Database>
+): Promise<Profile | null> {
   try {
-    const { data: profile, error } = await supabase
+    const { data: profile, error } = await publicDb
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -47,9 +87,12 @@ async function getUserProfile(userId: string): Promise<Profile | null> {
   }
 }
 
-async function getUserCharacters(userId: string): Promise<Character[]> {
+async function getUserCharacters(
+  userId: string,
+  commonDb: SupabaseClient<Database, 'common'>
+): Promise<Character[]> {
   try {
-    const { data: characters, error } = await commonSupabase
+    const { data: characters, error } = await commonDb
       .from('characters')
       .select('*')
       .eq('user_id', userId);
@@ -108,9 +151,21 @@ export async function authenticateToken(
       return;
     }
 
+    // Создаем пер-запросные клиенты под токен пользователя (RLS)
+    let userClients: ReturnType<typeof createUserSupabaseClients>;
+    try {
+      userClients = createUserSupabaseClients(token);
+      // Прикрепляем к запросу
+      (req as any).supabase = userClients;
+    } catch (e) {
+      console.error('[AuthMiddleware] Failed to create user-scoped Supabase clients:', e);
+      res.status(500).json({ success: false, error: 'Server configuration error' });
+      return;
+    }
+
     // Получаем профиль пользователя
     console.log('Getting user profile for ID:', user.id); // ШПИОН №8
-    const profile = await getUserProfile(user.id);
+    const profile = await getUserProfile(user.id, (req as any).supabase.public);
     console.log('User Profile:', profile); // ШПИОН №9: Что получили из профиля?
 
     if (!profile) {
@@ -300,8 +355,9 @@ export async function requireCharacter(
       return;
     }
 
-    // Получаем персонажей пользователя
-    const characters = await getUserCharacters(req.user.id);
+    // Получаем персонажей пользователя через пер-запросный клиент (fallback на глобальный, если отсутствует)
+    const commonDb = (req as any).supabase?.common ?? commonSupabase;
+    const characters = await getUserCharacters(req.user.id, commonDb as SupabaseClient<Database, 'common'>);
     
     if (characters.length === 0) {
       res.status(403).json({
@@ -423,7 +479,8 @@ export async function authenticateAny(
       try {
         const { data: { user }, error } = await supabase.auth.getUser(jwtToken);
         if (!error && user) {
-          const profile = await getUserProfile(user.id);
+          const userClients = createUserSupabaseClients(jwtToken);
+          const profile = await getUserProfile(user.id, userClients.public);
           if (profile) {
             req.user = {
               id: user.id,
@@ -433,6 +490,7 @@ export async function authenticateAny(
               created_at: profile.created_at,
               user_metadata: user.user_metadata
             };
+            (req as any).supabase = userClients;
             return next();
           }
         }
