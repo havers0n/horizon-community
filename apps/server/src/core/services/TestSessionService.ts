@@ -1,6 +1,7 @@
 import { systemSupabase } from '../lib/supabase';
 import { AppError } from '../../utils/AppError';
 import type { Database } from '@roleplay-identity/db-types';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Типы для схемы system
 export type SystemTest = Database['system']['Tables']['tests']['Row'];
@@ -15,7 +16,12 @@ export type UserAnswer = {
 };
 
 export class TestSessionService {
-  private db = systemSupabase;
+  private readonly db: SupabaseClient<Database, 'system'>;
+
+  constructor(systemDb?: SupabaseClient<Database, 'system'>) {
+    // Временный fallback для обратной совместимости с существующими вызовами
+    this.db = (systemDb ?? (systemSupabase as unknown as SupabaseClient<Database, 'system'>));
+  }
 
   /**
    * Запустить сессию теста: создает запись в system.test_sessions и возвращает вопросы без флага is_correct

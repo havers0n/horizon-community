@@ -9,6 +9,7 @@ import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
 import { validateRequest } from '../../../utils/validation';
 import type { ServicesContainer } from '../../../types/services';
 import type { Database } from '@roleplay-identity/db-types';
+import { CharacterService } from '../../../core/services/CharacterService';
 
 // ✅ Полный импорт всех необходимых типов из db-types
 type CharactersInsert = Database['common']['Tables']['characters']['Insert'];
@@ -72,7 +73,6 @@ const EmsProfileUpdateSchema = EmsProfileCreateSchema.partial();
  */
 export function createCharacterRoutes(services: ServicesContainer): Router {
   const router: Router = Router();
-  const { characterService } = services;
 
   // === ОСНОВНЫЕ РОУТЫ ПЕРСОНАЖЕЙ ===
 
@@ -89,7 +89,7 @@ export function createCharacterRoutes(services: ServicesContainer): Router {
         if (req.user?.id !== req.body.user_id) { // ✅ ИСПРАВЛЕНО
           return res.status(403).json({ success: false, error: 'Доступ запрещен' });
         }
-
+        const characterService = new CharacterService(req.supabase!.common, req.supabase!.public);
         const newCharacter = await characterService.createCharacter(req.body as CharactersInsert);
         res.status(201).json({ success: true, data: newCharacter });
       } catch (error) {
@@ -106,6 +106,7 @@ export function createCharacterRoutes(services: ServicesContainer): Router {
     requireRole('citizen'),
     async (req: AuthenticatedRequest, res, next) => {
       try {
+        const characterService = new CharacterService(req.supabase!.common, req.supabase!.public);
         const characters = await characterService.getCharactersByUserId(req.user!.id);
         res.json({ success: true, data: characters });
       } catch (error) {
@@ -122,6 +123,7 @@ export function createCharacterRoutes(services: ServicesContainer): Router {
     validateRequest({ params: IdParamSchema }),
     async (req, res, next) => {
       try {
+        const characterService = new CharacterService((req as AuthenticatedRequest).supabase!.common, (req as AuthenticatedRequest).supabase!.public);
         const character = await characterService.getCharacterById(req.params.id);
         if (!character) {
           return res.status(404).json({ success: false, error: 'Персонаж не найден' });
@@ -142,6 +144,7 @@ export function createCharacterRoutes(services: ServicesContainer): Router {
     validateRequest({ params: IdParamSchema, body: CharacterUpdateSchema }),
     async (req: AuthenticatedRequest, res, next) => {
       try {
+        const characterService = new CharacterService(req.supabase!.common, req.supabase!.public);
         // Проверка на владение персонажем перед обновлением
         const character = await characterService.getCharacterById(req.params.id);
         if (!character || character.user_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО
@@ -167,6 +170,7 @@ export function createCharacterRoutes(services: ServicesContainer): Router {
     validateRequest({ params: IdParamSchema }),
     async (req: AuthenticatedRequest, res, next) => {
       try {
+        const characterService = new CharacterService(req.supabase!.common, req.supabase!.public);
         // Проверка на владение персонажем перед удалением
         const character = await characterService.getCharacterById(req.params.id);
         if (!character || character.user_id !== req.user!.id) { // ✅ ИСПРАВЛЕНО

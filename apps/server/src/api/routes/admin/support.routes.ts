@@ -7,9 +7,6 @@ type SupportTickets = never;
 
 const router: Router = Router();
 
-// Инициализация сервиса
-const supportTicketService = new SupportTicketService();
-
 // POST /api/admin/support/tickets/:ticketId/reply
 router.post('/tickets/:ticketId/reply', authenticateToken, requireRole('admin'), async (req: AuthenticatedRequest, res) => {
   try {
@@ -25,6 +22,7 @@ router.post('/tickets/:ticketId/reply', authenticateToken, requireRole('admin'),
     }
 
     // ✅ Сервисный слой: вся бизнес-логика в сервисе
+    const supportTicketService = new SupportTicketService(req.supabase!.system);
     const updatedTicket = await supportTicketService.replyToTicket(
       ticketId,
       userId,

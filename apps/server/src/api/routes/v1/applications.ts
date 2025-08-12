@@ -3,6 +3,9 @@ import { z } from 'zod';
 import type { ServicesContainer } from '../../../types/services';
 import { validateRequest } from '../../../utils/validation';
 import { ApplicationController } from '../../../core/controllers/ApplicationController';
+import { ApplicationService } from '../../../core/services/ApplicationService';
+import { TestSessionService } from '../../../core/services/TestSessionService';
+import type { AuthenticatedRequest } from '../../middleware/auth.middleware';
 
 // Схема для ТЕЛА запроса на создание заявки
 const createApplicationBodySchema = z.object({
@@ -30,8 +33,6 @@ const updateStatusBodySchema = z.object({
 
 export function createApplicationRoutes(services: ServicesContainer): Router {
   const router = Router();
-  const { applicationService, testSessionService } = services;
-  const applicationController = new ApplicationController(applicationService, testSessionService);
 
   /**
    * POST /api/v1/applications
@@ -40,7 +41,12 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
   router.post(
     '/',
     validateRequest({ body: createApplicationBodySchema }),
-    (req, res, next) => applicationController.createApplication(req, res, next)
+    (req: AuthenticatedRequest, res, next) => {
+      const applicationService = new ApplicationService(req.supabase!.system);
+      const testSessionService = new TestSessionService(req.supabase!.system);
+      const controller = new ApplicationController(applicationService, testSessionService);
+      return controller.createApplication(req, res, next);
+    }
   );
 
   /**
@@ -50,7 +56,12 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
   router.get(
     '/:id',
     validateRequest({ params: paramsSchema }),
-    (req, res, next) => applicationController.getApplicationById(req, res, next)
+    (req: AuthenticatedRequest, res, next) => {
+      const applicationService = new ApplicationService(req.supabase!.system);
+      const testSessionService = new TestSessionService(req.supabase!.system);
+      const controller = new ApplicationController(applicationService, testSessionService);
+      return controller.getApplicationById(req, res, next);
+    }
   );
 
   /**
@@ -60,7 +71,12 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
   router.put(
     '/:id/status',
     validateRequest({ params: paramsSchema, body: updateStatusBodySchema }),
-    (req, res, next) => applicationController.updateApplicationStatus(req, res, next)
+    (req: AuthenticatedRequest, res, next) => {
+      const applicationService = new ApplicationService(req.supabase!.system);
+      const testSessionService = new TestSessionService(req.supabase!.system);
+      const controller = new ApplicationController(applicationService, testSessionService);
+      return controller.updateApplicationStatus(req, res, next);
+    }
   );
 
   /**
@@ -70,7 +86,12 @@ export function createApplicationRoutes(services: ServicesContainer): Router {
   router.post(
     '/:id/test-session',
     validateRequest({ params: paramsSchema }),
-    (req, res, next) => applicationController.createTestSession(req, res, next)
+    (req: AuthenticatedRequest, res, next) => {
+      const applicationService = new ApplicationService(req.supabase!.system);
+      const testSessionService = new TestSessionService(req.supabase!.system);
+      const controller = new ApplicationController(applicationService, testSessionService);
+      return controller.createTestSession(req, res, next);
+    }
   );
 
   return router;
