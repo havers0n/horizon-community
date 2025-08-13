@@ -13,9 +13,9 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/shared/lib/use-toast'
 import { UserPlus } from 'lucide-react'
-import type { Database } from '@roleplay-identity/db-types'
+import { api } from '@/shared/api'
 import { apiClient } from '@/shared/api/api-client'
-import type { ApiResponse } from '@/shared/api/api-client'
+import type { Department } from '@/shared/api/public-service'
 import { useSession } from '@/shared/contexts/SessionContext'
 
 const entryCadetApplicationSchema = z.object({
@@ -40,7 +40,7 @@ interface EntryApplicationModalProps {
   onOpenChange?: (open: boolean) => void
 }
 
-type Department = Database['public']['Functions']['get_all_departments']['Returns'][number]
+// Department тип импортируется из публичного сервиса
 
 // positions removed: cadet entry form не выбирает позицию
 
@@ -55,13 +55,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
   // Загрузка департаментов из публичного API через стандартизованный сервисный клиент
   const { data: departments } = useQuery<Department[]>({
     queryKey: ['public', 'departments'],
-    queryFn: async () => {
-      const response = await apiClient.get<ApiResponse<Department[]>>('/public/departments')
-      if (!response.success) {
-        throw new Error(response.message || 'Не удалось загрузить департаменты')
-      }
-      return response.data
-    },
+    queryFn: () => api.public.getDepartments(),
     staleTime: 5 * 60 * 1000,
   })
   const form = useForm<EntryCadetApplicationFormData>({
