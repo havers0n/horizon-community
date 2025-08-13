@@ -13,6 +13,7 @@ import { NextStepsWidget } from '@/widgets/dashboard/ui/next-steps-widget';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/shared/contexts/SessionContext';
 import { NextStepCard } from '@/shared/ui/NextStepCard';
+import { EntryApplicationModal } from '@/features/entry-application/ui/entry-application-modal';
 import { toast } from 'sonner';
 import { isCandidate, isMember, isCitizen, isAdmin } from '@roleplay-identity/shared-types';
 
@@ -205,7 +206,9 @@ export default function Dashboard() {
 
   // Преобразование данных для виджетов
   const transformedData = transformDashboardData(data);
-  const isCandidateRole = isCandidate(data.user.role);
+  // Кандидат: если нет активных треков и статусов
+  const isTrueCandidate = (!session?.cadetTracks || session.cadetTracks.length === 0) && (!session?.statuses || session.statuses.length === 0)
+  const isCandidateRole = isTrueCandidate || isCandidate(data.user.role);
   const isMemberRole = isMember(data.user.role);
   const isCitizenRole = isCitizen(data.user.role);
   const isAdminRole = isAdmin(data.user.role);
@@ -264,13 +267,16 @@ export default function Dashboard() {
 
             {/* Candidate Dashboard Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Application Status Widget */}
-              {transformedData.applicationStatus && (
-                <ApplicationStatusWidget {...transformedData.applicationStatus} />
-              )}
-
-              {/* Quick Actions Widget */}
-              <QuickActionsWidget actions={quickActions} />
+              {/* Call-to-action panel */}
+              <Card className="bg-gray-800 border-gray-600 md:col-span-2 lg:col-span-2">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-100 mb-1">Готовы присоединиться?</h3>
+                    <p className="text-gray-400">Заполните заявку на вступление и начните путь кадета.</p>
+                  </div>
+                  <EntryApplicationModal />
+                </CardContent>
+              </Card>
 
               {/* Next Steps Widget */}
               {transformedData.nextSteps && (

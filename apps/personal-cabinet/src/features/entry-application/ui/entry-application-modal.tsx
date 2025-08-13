@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
@@ -10,9 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/shared/lib/use-toast'
 import { UserPlus, Building2, GraduationCap } from 'lucide-react'
+import type { Database } from '@roleplay-identity/db-types'
+import { apiClient } from '@/shared/api/api-client'
+import { useSession } from '@/shared/contexts/SessionContext'
 
 const entryApplicationSchema = z.object({
   personalInfo: z.object({
@@ -48,12 +51,7 @@ interface EntryApplicationModalProps {
   onOpenChange?: (open: boolean) => void
 }
 
-const departments = [
-  { id: 'police', name: 'Полиция', icon: '👮', description: 'Правоохранительные органы' },
-  { id: 'ems', name: 'Скорая помощь', icon: '🚑', description: 'Медицинская служба' },
-  { id: 'fire', name: 'Пожарная служба', icon: '🚒', description: 'Пожарная охрана' },
-  { id: 'admin', name: 'Администрация', icon: '🏛️', description: 'Административные функции' }
-]
+type Department = Database['common']['Tables']['departments']['Row']
 
 const positions = {
   police: [
@@ -89,6 +87,17 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
   const setOpen = onOpenChange || setInternalOpen
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { refetch: refetchSession } = useSession()
+
+  // Загрузка департаментов из публичного API
+  const { data: departments, isLoading: departmentsLoading } = useQuery<{ success: boolean; data: Department[]; count?: number } | null>({
+    queryKey: ['public', 'departments'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ success: boolean; data: Department[]; count?: number }>('/public/departments')
+      return res
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
 
   const form = useForm<EntryApplicationFormData>({
@@ -122,24 +131,32 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 
   const mutation = useMutation({
     mutationFn: async (data: EntryApplicationFormData) => {
-      // Здесь будет API вызов для создания заявки на вступление
-      console.log('Создание заявки на вступление:', data)
-      return { success: true, id: 'app_' + Date.now() }
+      const payload = {
+        type: 'entry',
+        data: {
+          personalInfo: data.personalInfo,
+          departmentInfo: data.departmentInfo,
+          additionalInfo: data.additionalInfo,
+        },
+      }
+      const created = await apiClient.post<any>('/applications', payload)
+      return created
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/entry-applications'] })
+    onSuccess: async () => {
       toast({
         title: 'Заявка отправлена!',
-        description: `Ваша заявка #${data.id} успешно отправлена. Мы свяжемся с вами в ближайшее время.`
+        description: 'Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.'
       })
+      await refetchSession()
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'data'] })
       setOpen(false)
       form.reset()
       setCurrentStep(1)
     },
-    onError: () => {
+    onError: (err: any) => {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось отправить заявку. Попробуйте еще раз.',
+        description: err?.message || 'Не удалось отправить заявку. Попробуйте еще раз.',
         variant: 'destructive'
       })
     }
