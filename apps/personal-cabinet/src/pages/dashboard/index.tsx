@@ -11,6 +11,8 @@ import { StatisticsWidget } from '@/widgets/dashboard/ui/statistics-widget';
 import { ApplicationStatusWidget } from '@/widgets/dashboard/ui/application-status-widget';
 import { NextStepsWidget } from '@/widgets/dashboard/ui/next-steps-widget';
 import { useNavigate } from 'react-router-dom';
+import { useSession } from '@/shared/contexts/SessionContext';
+import { NextStepCard } from '@/shared/ui/NextStepCard';
 import { toast } from 'sonner';
 import { isCandidate, isMember, isCitizen, isAdmin } from '@roleplay-identity/shared-types';
 
@@ -48,6 +50,7 @@ const DashboardError = ({ error }: { error: Error }) => (
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useDashboardData();
+  const { session } = useSession();
 
   // Обработчики для быстрых действий
   const handleQuickAction = (action: string) => {
@@ -223,6 +226,10 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Next step based on cadetTracks */}
+        {Array.isArray(session?.cadetTracks) && session!.cadetTracks!.length > 0 && (
+          <NextStepCard stageCode={session!.cadetTracks![0]?.stage_code || null} />
+        )}
         {/* Role-based Dashboard */}
         {isCandidateRole ? (
           // Dashboard для кандидатов

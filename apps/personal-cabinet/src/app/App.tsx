@@ -4,6 +4,10 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/shared/ui/toaster'
 import { TooltipProvider } from '@/shared/ui/tooltip'
 import { AuthProvider } from '@/features/auth'
+import { SessionProvider } from '@/shared/contexts/SessionContext'
+import { StageGuard } from '@/shared/ui/StageGuard'
+import { SessionProvider } from '@/shared/contexts/SessionContext'
+import { StageGuard } from '@/shared/ui/StageGuard'
 import { ThemeProvider } from '@/features/theme'
 import { ProtectedRoute } from '@/shared/ui/protected-route'
 // import { ConnectionStatus } from '@/shared/ui/connection-status'
@@ -66,6 +70,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <TooltipProvider>
+            <SessionProvider>
             <Router>
               <React.Suspense fallback={<LoadingSpinner />}>
                 <Routes>
@@ -79,6 +84,46 @@ function App() {
                   {/* Protected routes */}
                   <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route
+                      path="/cadet/test"
+                      element={
+                        <StageGuard requiredStage="cadet_test">
+                          <React.Suspense fallback={<LoadingSpinner />}>
+                            {React.createElement(React.lazy(() => import('@/pages/cadet/test')))}
+                          </React.Suspense>
+                        </StageGuard>
+                      }
+                    />
+                    <Route
+                      path="/cadet/training"
+                      element={
+                        <StageGuard requiredStage="cadet_training">
+                          <React.Suspense fallback={<LoadingSpinner />}>
+                            {React.createElement(React.lazy(() => import('@/pages/cadet/training')))}
+                          </React.Suspense>
+                        </StageGuard>
+                      }
+                    />
+                    <Route
+                      path="/cadet/test"
+                      element={
+                        <StageGuard requiredStage="cadet_test">
+                          <React.Suspense fallback={<LoadingSpinner />}>
+                            {React.createElement(React.lazy(() => import('@/pages/cadet/test')))}
+                          </React.Suspense>
+                        </StageGuard>
+                      }
+                    />
+                    <Route
+                      path="/cadet/training"
+                      element={
+                        <StageGuard requiredStage="cadet_training">
+                          <React.Suspense fallback={<LoadingSpinner />}>
+                            {React.createElement(React.lazy(() => import('@/pages/cadet/training')))}
+                          </React.Suspense>
+                        </StageGuard>
+                      }
+                    />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/departments" element={<Departments />} />
@@ -129,6 +174,7 @@ function App() {
               <Toaster />
               {/* <ConnectionStatus /> */}
             </Router>
+            </SessionProvider>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
