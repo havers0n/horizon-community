@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/shared/contexts/SessionContext';
 import { NextStepCard } from '@/shared/ui/NextStepCard';
 import { EntryApplicationModal } from '@/features/entry-application/ui/entry-application-modal';
+import { Button } from '@/shared/ui/button';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { isCandidate, isMember, isCitizen, isAdmin } from '@roleplay-identity/shared-types';
 
@@ -235,63 +237,31 @@ export default function Dashboard() {
         )}
         {/* Role-based Dashboard */}
         {isCandidateRole ? (
-          // Dashboard для кандидатов
+          // Упрощённый дашборд для кандидатов: только CTA и полезные ссылки
           <div className="space-y-6">
-            {/* Welcome Block */}
+            {/* CTA Widget */}
             <Card className="bg-gray-800 border-gray-600">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-4">
                   <div>
-                    <h1 className="text-2xl font-semibold text-gray-100">
-                      Добро пожаловать, {data.user.firstName || "Пользователь"}!
-                    </h1>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Ваш статус: <span className="font-medium text-yellow-400">
-                        {data.user.role === "candidate" ? "Кандидат" : "Кандидат"}
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      У вас осталось <span className="font-semibold text-gold-400">
-                        {data.user.attemptsLeft || 0} попыток
-                      </span> для подачи заявки в этом месяце.
-                    </p>
+                    <h1 className="text-2xl font-semibold text-gray-100">Начните свой путь в HorizonCommunity</h1>
+                    <p className="text-gray-400 mt-2">Подайте заявку на вступление в один из наших департаментов и станьте частью истории.</p>
                   </div>
-                  <div className="text-right">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-900 text-yellow-200">
-                      В ожидании
-                    </div>
+                  <div>
+                    <EntryApplicationModal>
+                      <Button size="lg">Подать заявку на вступление</Button>
+                    </EntryApplicationModal>
+                  </div>
+                  <div className="flex gap-6">
+                    <Link to="/departments" className="text-primary hover:underline">Знакомство с департаментами</Link>
+                    <Link to="/gallery" className="text-primary hover:underline">Посмотреть галерею</Link>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Candidate Dashboard Grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Call-to-action panel */}
-              <Card className="bg-gray-800 border-gray-600 md:col-span-2 lg:col-span-2">
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-100 mb-1">Готовы присоединиться?</h3>
-                    <p className="text-gray-400">Заполните заявку на вступление и начните путь кадета.</p>
-                  </div>
-                  <EntryApplicationModal />
-                </CardContent>
-              </Card>
-
-              {/* Next Steps Widget */}
-              {transformedData.nextSteps && (
-                <NextStepsWidget steps={transformedData.nextSteps} />
-              )}
-
-              {/* Feed Widget */}
-              <FeedWidget activities={transformedData.feed} />
-
-              {/* Announcements Widget */}
-              <AnnouncementsWidget announcements={transformedData.announcements} />
-
-              {/* Useful Links Widget */}
-              <UsefulLinksWidget links={transformedData.usefulLinks} />
-            </div>
+            {/* Useful Links Widget */}
+            <UsefulLinksWidget links={transformedData.usefulLinks} />
           </div>
         ) : (isMemberRole || isAdminRole) ? (
           // Dashboard для участников сообщества и администраторов
@@ -384,4 +354,5 @@ export default function Dashboard() {
       </div>
     </Layout>
   );
+} 
 } 
