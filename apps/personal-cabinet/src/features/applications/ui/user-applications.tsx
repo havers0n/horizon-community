@@ -99,8 +99,8 @@ export function UserApplications() {
                       </div>
                     </div>
                   </div>
-                  <Badge className={getStatusColor(application.status || '')}>
-                    {application.status || 'Неизвестно'}
+                  <Badge className={getStatusColor((application as any).status || application.status_id || '')}>
+                    {(application as any).status || application.status_id || 'Неизвестно'}
                   </Badge>
                 </div>
               </div>

@@ -43,11 +43,7 @@ export interface DashboardData {
 }
 
 // API ответ
-interface DashboardApiResponse {
-  success: boolean;
-  data: DashboardData;
-  message?: string;
-}
+// legacy type removed
 
 /**
  * Хук для получения данных дашборда

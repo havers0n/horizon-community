@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import { Layout } from '@/shared/ui'
 import { Card, CardContent } from '@/shared/ui'
 

@@ -35,7 +35,7 @@ export const checkEnvironmentVariables = () => {
 export const checkSupabaseConnection = async () => {
   try {
     const { supabase } = await import('./supabase')
-    const { data, error } = await supabase.from('profiles').select('count').limit(1)
+    const { error } = await supabase.from('profiles').select('count').limit(1)
     
     if (error) {
       console.error('🔴 [Personal Cabinet] Ошибка подключения к Supabase:', error.message)
@@ -54,7 +54,7 @@ export const checkSupabaseConnection = async () => {
 export const checkApiConnection = async () => {
   try {
     const { apiClient } = await import('../api/api-client')
-    const response = await apiClient.get('/health')
+    await apiClient.get('/health')
     
     console.log('✅ [Personal Cabinet] Подключение к API успешно')
     return true

@@ -38,7 +38,7 @@ const testSchema = z.object({
 
 type TestFormValues = z.infer<typeof testSchema>
 
-function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: TestFormValues) => Promise<void> }) {
+function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: TestFormValues) => Promise<any> }) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<TestFormValues>({
     resolver: zodResolver(testSchema),
     defaultValues: {
@@ -102,7 +102,7 @@ function QuestionForm({
   onCancel,
 }: {
   initial?: Partial<QuestionFormValues>
-  onSubmit: (values: QuestionFormValues) => Promise<void>
+  onSubmit: (values: QuestionFormValues) => Promise<any>
   onCancel?: () => void
 }) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm<QuestionFormValues>({

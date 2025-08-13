@@ -3,12 +3,12 @@
 import { apiClient } from './api-client';
 import type { PaginatedResponse } from './api-client';
 import type { Database } from '@roleplay-identity/db-types';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 
 // --- ПРАВИЛЬНЫЕ ПСЕВДОНИМЫ ---
-type Applications = Database['mdt']['Tables']['applications']['Row'];
-type ApplicationsInsert = Database['mdt']['Tables']['applications']['Insert'];
-type ApplicationsUpdate = Partial<Database['mdt']['Tables']['applications']['Update']>;
+type Applications = Database['system']['Tables']['applications']['Row'];
+type ApplicationsInsert = Database['system']['Tables']['applications']['Insert'];
+type ApplicationsUpdate = Partial<Database['system']['Tables']['applications']['Update']>;
 
 // --- ТИПЫ ДЛЯ КОММЕНТАРИЕВ ---
 interface Comments {
@@ -26,7 +26,7 @@ interface CommentsInsert {
 }
 
 // --- ТИПЫ ДЛЯ API ---
-export type CreateApplicationPayload = Omit<ApplicationsInsert, 'id' | 'created_at' | 'updated_at'> & {
+export type CreateApplicationPayload = Omit<ApplicationsInsert, 'id' | 'created_at' | 'updated_at' | 'author_user_id'> & {
   attachments_files?: File[];
 };
 
@@ -34,7 +34,7 @@ export type UpdateApplicationData = ApplicationsUpdate;
 
 export interface ApplicationFilters {
   type?: Applications['type'];
-  status?: Applications['status'];
+  status?: string;
   search?: string;
 }
 

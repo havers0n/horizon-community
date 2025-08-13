@@ -23,7 +23,7 @@ export default function AdminApplicationsPage() {
   const queryClient = useQueryClient()
   const [status, setStatus] = React.useState<string>('')
   const [department, setDepartment] = React.useState<string>('')
-  const [page, setPage] = React.useState<number>(1)
+  const [page] = React.useState<number>(1)
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
   const [reviewStatus, setReviewStatus] = React.useState<string>('')
   const [reviewComment, setReviewComment] = React.useState<string>('')
@@ -31,7 +31,6 @@ export default function AdminApplicationsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-applications', { status, department, page }],
     queryFn: () => listAdminApplications({ status: status || undefined, department: department || undefined, page }),
-    keepPreviousData: true,
   })
 
   const { data: selectedApplication } = useQuery({
@@ -48,8 +47,8 @@ export default function AdminApplicationsPage() {
     },
   })
 
-  const items = data?.items || []
-  const pagination = data?.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 }
+  const items = (data as any)?.items || []
+  // const pagination = (data as any)?.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

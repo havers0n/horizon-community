@@ -4,7 +4,7 @@ import type { Database } from '@roleplay-identity/db-types';
 // Типы из БД - исправленные схемы
 type UserProfile = Database['public']['Tables']['profiles']['Row'];
 type UserSettings = Database['public']['Tables']['user_settings']['Row'];
-type Application = Database['mdt']['Tables']['applications']['Row']; // Исправлено: mdt схема
+type Application = Database['system']['Tables']['applications']['Row']; // Исправлено: system схема
 type Department = Database['common']['Tables']['departments']['Row']; // Исправлено: common схема
 
 // Типы для обновления

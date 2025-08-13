@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { listTests, createTest, updateTest, deleteTest, type AdminTest, type CreateTestDto } from '../api'
+import { listTests, createTest, deleteTest, type AdminTest, type CreateTestDto } from '../api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -21,7 +21,7 @@ const testSchema = z.object({
 
 type TestFormValues = z.infer<typeof testSchema>
 
-function TestForm({ onSubmit, defaultValues, onCancel }: { onSubmit: (v: CreateTestDto) => Promise<void>, defaultValues?: Partial<TestFormValues>, onCancel?: () => void }) {
+function TestForm({ onSubmit, defaultValues, onCancel }: { onSubmit: (v: CreateTestDto) => Promise<any>, defaultValues?: Partial<TestFormValues>, onCancel?: () => void }) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<TestFormValues>({
     resolver: zodResolver(testSchema),
     defaultValues: defaultValues as any,

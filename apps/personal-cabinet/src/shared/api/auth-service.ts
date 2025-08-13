@@ -2,11 +2,11 @@
 
 import { apiClient } from './api-client';
 import type { Database } from '@roleplay-identity/db-types';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 
 // --- ПРАВИЛЬНЫЕ ПСЕВДОНИМЫ ---
 type Profiles = Database['public']['Tables']['profiles']['Row'];
-type ProfilesInsert = Database['public']['Tables']['profiles']['Insert'];
+// type ProfilesInsert = Database['public']['Tables']['profiles']['Insert'];
 type ProfilesUpdate = Partial<Database['public']['Tables']['profiles']['Update']>;
 
 // --- ТИПЫ ДЛЯ API ---

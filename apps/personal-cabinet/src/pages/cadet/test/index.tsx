@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import { Layout } from '@/shared/ui'
 import { Card, CardContent, Button } from '@/shared/ui'
 import { useNavigate } from 'react-router-dom'

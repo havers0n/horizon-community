@@ -1,6 +1,6 @@
 import type { Database } from '@roleplay-identity/db-types'
 
-// Указываем схему `mdt` и таблицу `test_sessions`
-export type TestSession = Database['mdt']['Tables']['test_sessions']['Row']
-export type TestSessionInsert = Database['mdt']['Tables']['test_sessions']['Insert']
-export type TestSessionUpdate = Database['mdt']['Tables']['test_sessions']['Update']
+// Указываем схему `system` и таблицу `test_sessions`
+export type TestSession = Database['system']['Tables']['test_sessions']['Row']
+export type TestSessionInsert = Database['system']['Tables']['test_sessions']['Insert']
+export type TestSessionUpdate = Database['system']['Tables']['test_sessions']['Update']

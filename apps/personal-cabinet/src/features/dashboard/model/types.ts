@@ -191,12 +191,6 @@ const formatTimeAgo = (dateString: string): string => {
   }
 };
 
-const formatPlaytime = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return `${hours}ч ${remainingMinutes}м`;
-};
-
 const getActivityIconAndColor = (type: string): { icon: string; color: string } => {
   switch (type) {
     case 'application':

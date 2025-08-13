@@ -31,7 +31,7 @@ export default function ApplicationTestPage() {
 
   const focusLossMutation = useMutation({
     mutationFn: (sessionId: string) => reportFocusLoss(sessionId),
-    onSuccess: (resp: any) => {
+    onSuccess: () => {
       setFocusLosses((n) => n + 1)
       toast({ title: 'Потеря фокуса', description: 'Вы покинули вкладку. Это нарушение правил прохождения теста.', variant: 'destructive' })
     },

@@ -16,7 +16,7 @@ export function GalleryWidget({
   items,
   departments,
   showFilter = true,
-  showUpload = false,
+  // showUpload = false,
   className
 }: GalleryWidgetProps) {
   const [selectedDepartment, setSelectedDepartment] = useState('all')

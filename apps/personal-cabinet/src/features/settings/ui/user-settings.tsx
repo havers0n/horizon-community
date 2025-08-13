@@ -29,7 +29,7 @@ export function UserSettings() {
     if (settings) {
       setLocalSettings({
         theme: (settings.theme as 'light' | 'dark' | 'system') || 'system',
-        language: (settings.language as 'en' | 'ru') || 'ru',
+        language: 'ru',
         notifications: {
           email: true,
           push: true,
