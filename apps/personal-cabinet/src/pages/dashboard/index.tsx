@@ -7,9 +7,7 @@ import { FeedWidget } from '@/widgets/dashboard/ui/feed-widget';
 import { QuickActionsWidget } from '@/widgets/dashboard/ui/quick-actions-widget';
 import { AnnouncementsWidget } from '@/widgets/dashboard/ui/announcements-widget';
 import { UsefulLinksWidget } from '@/widgets/dashboard/ui/useful-links-widget';
-import { StatisticsWidget } from '@/widgets/dashboard/ui/statistics-widget';
-import { ApplicationStatusWidget } from '@/widgets/dashboard/ui/application-status-widget';
-import { NextStepsWidget } from '@/widgets/dashboard/ui/next-steps-widget';
+// Упрощаем дашборд под новую модель сессии: статистика и статусы временно отключены
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/shared/contexts/SessionContext';
 import { NextStepCard } from '@/shared/ui/NextStepCard';
@@ -282,11 +280,6 @@ export default function Dashboard() {
 
               {/* Announcements Widget */}
               <AnnouncementsWidget announcements={transformedData.announcements} />
-
-              {/* Statistics Widget */}
-              {transformedData.statistics && (
-                <StatisticsWidget statistics={transformedData.statistics} />
-              )}
             </div>
           </div>
         ) : isCitizenRole ? (
@@ -354,5 +347,4 @@ export default function Dashboard() {
       </div>
     </Layout>
   );
-} 
-} 
+}

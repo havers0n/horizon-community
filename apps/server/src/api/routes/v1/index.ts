@@ -129,7 +129,7 @@ export function createV1Router(): Router {
 
       const [rolesRes, permsRpcRes, permsViewRes, membershipsRes, cadetTracksRes] = await Promise.all([
         rolesPromise,
-        permissionsViaRpcPromise?.catch(() => null) ?? Promise.resolve(null),
+        permissionsViaRpcPromise,
         permissionsViaViewPromise,
         membershipsPromise,
         cadetTracksPromise,

@@ -45,7 +45,7 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, isLoading } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await signOut();
@@ -131,7 +131,7 @@ export function Layout({ children }: LayoutProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={toggleTheme}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="transition-all duration-200"
             >
               {theme === "dark" ? "🌞" : "🌙"}
@@ -150,7 +150,7 @@ export function Layout({ children }: LayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.avatar} alt={getUserDisplayName()} />
+                    <AvatarImage src={(user as any)?.avatar || undefined} alt={getUserDisplayName()} />
                     <AvatarFallback>{getUserInitials(user?.email)}</AvatarFallback>
                   </Avatar>
                 </Button>

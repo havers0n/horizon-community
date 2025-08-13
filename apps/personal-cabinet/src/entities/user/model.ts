@@ -10,7 +10,7 @@ export interface User {
   id: string;
   email: string | null;
   username: string | null;
-  role: ProfileDbRow['role']; // Берем тип роли прямо из типа БД
+  role: string; // В актуальной схеме роль в profiles отсутствует; используем строку
   avatarUrl: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -32,7 +32,7 @@ export function normalizeUser(profile: ProfileDbRow, character?: Partial<Charact
     id: profile.id,
     email: profile.email,
     username: profile.username,
-    role: profile.role,
+    role: 'citizen',
     // На бэкенде avatar_url может быть, а может и нет в таблице profiles,
     // поэтому проверяем его наличие.
     avatarUrl: 'avatar_url' in profile ? (profile as any).avatar_url : null,

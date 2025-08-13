@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/shared/api/api-client';
+import { useMemo } from 'react';
+import { useSession } from '@/shared/contexts/SessionContext';
 
 // Типы для данных дашборда
 export interface DashboardData {
@@ -40,48 +40,6 @@ export interface DashboardData {
     icon: string;
     description: string;
   }>;
-  statistics?: {
-    playtime: number;
-    reputation: number;
-    reports: number;
-    achievements: number;
-  };
-  applicationStatus?: {
-    attemptsLeft: number;
-    applicationsCount: number;
-    testsPassed: number;
-  };
-  nextSteps?: Array<{
-    id: string;
-    title: string;
-    description: string;
-    completed: boolean;
-    link: string | null;
-  }>;
-  departments?: Array<{
-    id: string;
-    name: string;
-    description: string;
-    logo_url: string;
-    division?: {
-      id: string;
-      name: string;
-    };
-  }>;
-  complaints?: Array<{
-    id: string;
-    title: string;
-    description: string;
-    status: string;
-    created_at: string;
-  }>;
-  reports?: Array<{
-    id: string;
-    title: string;
-    description: string;
-    status: string;
-    created_at: string;
-  }>;
 }
 
 // API ответ
@@ -96,25 +54,41 @@ interface DashboardApiResponse {
  * Централизует логику получения данных в одном месте
  */
 export const useDashboardData = () => {
-  return useQuery<DashboardData, Error>({
-    queryKey: ['dashboard', 'data'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get<DashboardApiResponse>('/cabinet/dashboard-data');
-        
-        if (!response.success) {
-          throw new Error(response.message || 'Ошибка загрузки данных дашборда');
-        }
-        
-        return response.data;
-      } catch (error) {
-        console.error('Ошибка загрузки данных дашборда:', error);
-        throw new Error('Не удалось загрузить данные дашборда');
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 минут
-    gcTime: 10 * 60 * 1000, // 10 минут
-    retry: 2,
-    refetchOnWindowFocus: false,
-  });
-}; 
+  const { session, isLoading: sessionLoading, error: sessionError } = useSession();
+
+  const data = useMemo<DashboardData | undefined>(() => {
+    if (!session) return undefined;
+
+    // Определяем основную роль пользователя по приоритету
+    const rolePriority = ['admin', 'staff', 'candidate', 'citizen'];
+    const primaryRole = rolePriority.find((r) => session.roles.includes(r)) || 'citizen';
+
+    return {
+      user: {
+        id: session.user.id,
+        email: '',
+        username: session.user.username ?? null,
+        role: primaryRole,
+        avatarUrl: null,
+        firstName: null,
+        lastName: null,
+        department: null,
+        division: null,
+        isActive: true,
+        gameWarnings: 0,
+        adminWarnings: 0,
+        attemptsLeft: 0,
+        profileImageUrl: null,
+      },
+      activities: [],
+      announcements: [],
+      usefulLinks: [],
+      // Остальные поля опциональны и зависят от расширенных данных, которых нет в сессии
+      // statistics, applicationStatus, nextSteps, departments, complaints, reports
+    } as DashboardData;
+  }, [session]);
+
+  const error = sessionError ? new Error(sessionError) : null;
+
+  return { data, isLoading: sessionLoading, error };
+};

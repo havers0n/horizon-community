@@ -18,6 +18,7 @@ export type UserSession = {
 type SessionResponse = {
   success: boolean
   data: UserSession
+  message?: string
 }
 
 type SessionContextType = {

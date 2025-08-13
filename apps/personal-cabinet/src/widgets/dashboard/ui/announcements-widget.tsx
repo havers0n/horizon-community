@@ -82,7 +82,7 @@ export const AnnouncementsWidget: React.FC<AnnouncementsWidgetProps> = ({ announ
                       {announcement.title}
                     </h4>
                     <p className="text-xs text-gray-400 line-clamp-2">
-                      {announcement.content}
+                      {announcement.preview}
                     </p>
                     <p className="text-xs text-gray-500 mt-2">
                       {announcement.timeAgo}

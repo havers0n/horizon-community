@@ -46,7 +46,7 @@ function App() {
   console.log('✅ [Personal Cabinet] Приложение инициализировано')
   console.log('✅ [Personal Cabinet] Все провайдеры подключены')
 
-  const AdminRoute: React.FC = ({ children }: any) => {
+  const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user, isLoading } = useAuth()
     if (isLoading) {
       return (
@@ -60,7 +60,7 @@ function App() {
     if (!allowedRoles.includes((user.role as any) || '')) {
       return <Navigate to="/dashboard" replace />
     }
-    return children
+    return <>{children}</>
   }
 
   return (

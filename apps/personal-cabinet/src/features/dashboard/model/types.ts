@@ -102,6 +102,7 @@ export interface NextStep {
   description: string;
   completed: boolean;
   link: string | null;
+  action?: () => void;
 }
 
 export interface NextStepsWidgetProps {
@@ -112,12 +113,9 @@ export interface NextStepsWidgetProps {
 export const transformDashboardData = (data: DashboardData) => {
   return {
     profile: transformProfileData(data.user),
-    feed: transformFeedData(data.activities),
-    announcements: transformAnnouncementsData(data.announcements),
-    usefulLinks: data.usefulLinks,
-    statistics: data.statistics ? transformStatisticsData(data.statistics) : undefined,
-    applicationStatus: data.applicationStatus ? transformApplicationStatusData(data.applicationStatus) : undefined,
-    nextSteps: data.nextSteps,
+    feed: transformFeedData(data.activities || []),
+    announcements: transformAnnouncementsData(data.announcements || []),
+    usefulLinks: data.usefulLinks || [],
   };
 };
 
@@ -137,7 +135,7 @@ const transformProfileData = (user: DashboardData['user']): ProfileWidgetProps =
     status,
     gameWarnings: user.gameWarnings,
     adminWarnings: user.adminWarnings,
-    avatarUrl: user.avatarUrl || user.profileImageUrl,
+    avatarUrl: user.avatarUrl || user.profileImageUrl || undefined,
     initials,
   };
 };
@@ -174,40 +172,6 @@ const transformAnnouncementsData = (announcements: DashboardData['announcements'
       icon,
     };
   });
-};
-
-const transformStatisticsData = (statistics: DashboardData['statistics']): StatisticsWidgetProps['statistics'] => {
-  return {
-    playtime: {
-      title: 'Время игры',
-      value: formatPlaytime(statistics.playtime),
-      icon: 'Clock',
-    },
-    reputation: {
-      title: 'Репутация',
-      value: `${statistics.reputation}/5.0`,
-      icon: 'Star',
-    },
-    reports: {
-      title: 'Рапорты',
-      value: statistics.reports.toString(),
-      icon: 'FileText',
-    },
-    achievements: {
-      title: 'Достижения',
-      value: `${statistics.achievements}/15`,
-      icon: 'Award',
-    },
-  };
-};
-
-const transformApplicationStatusData = (status: DashboardData['applicationStatus']): ApplicationStatusWidgetProps => {
-  return {
-    attemptsLeft: status.attemptsLeft,
-    applicationsCount: status.applicationsCount,
-    testsPassed: status.testsPassed,
-    status: 'pending', // Определяется логикой
-  };
 };
 
 // Вспомогательные функции

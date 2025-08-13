@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
@@ -90,7 +90,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
   const { refetch: refetchSession } = useSession()
 
   // Загрузка департаментов из публичного API
-  const { data: departments, isLoading: departmentsLoading } = useQuery<{ success: boolean; data: Department[]; count?: number } | null>({
+  const { data: departments } = useQuery<{ success: boolean; data: Department[]; count?: number } | null>({
     queryKey: ['public', 'departments'],
     queryFn: async () => {
       const res = await apiClient.get<{ success: boolean; data: Department[]; count?: number }>('/public/departments')
@@ -369,10 +369,10 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {departments.map((dept) => (
+                        {departments?.data?.map((dept) => (
                               <SelectItem key={dept.id} value={dept.id}>
                                 <div className="flex items-center gap-2">
-                                  <span>{dept.icon}</span>
+                                  <span>{/* no icon in schema */}</span>
                                   <span>{dept.name}</span>
                                 </div>
                               </SelectItem>

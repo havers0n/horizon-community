@@ -6,7 +6,6 @@ import { Button } from '@/shared/ui/button';
 import { ProfileWidgetProps } from '@/features/dashboard/model/types';
 import { 
   ArrowRight,
-  AlertTriangle,
   Shield,
 } from 'lucide-react';
 
@@ -98,7 +97,6 @@ export const ProfileWidget: React.FC<ProfileWidgetProps> = ({
               <Badge 
                 variant="outline" 
                 className={getWarningColor(adminWarnings)}
-                size="sm"
               >
                 {adminWarnings}
               </Badge>
@@ -108,7 +106,6 @@ export const ProfileWidget: React.FC<ProfileWidgetProps> = ({
               <Badge 
                 variant="outline" 
                 className={getWarningColor(gameWarnings)}
-                size="sm"
               >
                 {gameWarnings}
               </Badge>
