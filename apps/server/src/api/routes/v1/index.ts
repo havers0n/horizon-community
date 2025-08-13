@@ -105,14 +105,14 @@ export function createV1Router(): Router {
       // Роли из представления v_effective_roles
       const rolesPromise = supa.common
         .from('v_effective_roles' as any)
-        .select('role')
+        .select('role_name')
         .eq('user_id', userId);
 
-      // Пермишены через RPC (если доступен) с fall-back на представление
-      const permissionsViaRpcPromise = (supa.common.rpc as any)?.('get_user_permissions', { p_user_id: userId });
+      // Пермишены через RPC (public схема) с fall-back на представление
+      const permissionsViaRpcPromise = (supa.public.rpc as any)?.('get_user_permissions', { p_user_id: userId });
       const permissionsViaViewPromise = supa.common
         .from('v_effective_permissions' as any)
-        .select('permission')
+        .select('permission_code')
         .eq('user_id', userId);
 
       // Статусы через memberships -> statuses
@@ -121,11 +121,18 @@ export function createV1Router(): Router {
         .select('status_id')
         .eq('user_id', userId);
 
-      const [rolesRes, permsRpcRes, permsViewRes, membershipsRes] = await Promise.all([
+      // Cadet tracks через v_cadet_tracks_enriched
+      const cadetTracksPromise = supa.common
+        .from('v_cadet_tracks_enriched' as any)
+        .select('*')
+        .eq('user_id', userId);
+
+      const [rolesRes, permsRpcRes, permsViewRes, membershipsRes, cadetTracksRes] = await Promise.all([
         rolesPromise,
         permissionsViaRpcPromise?.catch(() => null) ?? Promise.resolve(null),
         permissionsViaViewPromise,
         membershipsPromise,
+        cadetTracksPromise,
       ]);
 
       if (rolesRes.error) {
@@ -140,13 +147,16 @@ export function createV1Router(): Router {
       if (permsViewRes.error) {
         return res.status(500).json({ success: false, error: permsViewRes.error.message });
       }
+      if (cadetTracksRes.error) {
+        return res.status(500).json({ success: false, error: cadetTracksRes.error.message });
+      }
 
-      const roles = (rolesRes.data || []).map((r: any) => r.role).filter(Boolean);
+      const roles = (rolesRes.data || []).map((r: any) => r.role_name).filter(Boolean);
 
       // Если RPC вернул массив строк — используем его; иначе соберем из view
       const permissions = Array.isArray(permsRpcRes?.data)
         ? (permsRpcRes!.data as string[])
-        : ((permsViewRes.data || []).map((p: any) => p.permission).filter(Boolean));
+        : ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
 
       // Получить коды статусов по status_id
       const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
@@ -162,6 +172,10 @@ export function createV1Router(): Router {
         statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
       }
 
+      // Формируем cadetTracks (если в представлении есть флаг активности — фильтруем)
+      const cadetTracksRaw = (cadetTracksRes.data || []) as any[];
+      const cadetTracks = cadetTracksRaw.filter((t: any) => (typeof t.is_active === 'boolean' ? t.is_active : true));
+
       // Уникализируем
       const unique = (arr: string[]) => Array.from(new Set(arr));
 
@@ -175,6 +189,7 @@ export function createV1Router(): Router {
           roles: unique(roles),
           permissions: unique(permissions),
           statuses: unique(statuses),
+          cadetTracks,
         },
       });
     } catch (error) {

@@ -67,10 +67,15 @@ export class ApplicationController {
   async updateApplicationStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, review_comment } = req.body as { status: string; review_comment?: string };
+      // @ts-ignore
+      const reviewerUserId: string = req.user?.id;
 
-      // Простое обновление статуса
-      const updatedApplication = await this.applicationService.updateApplication(id, { status });
+      if (!reviewerUserId) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      const updatedApplication = await this.applicationService.updateApplicationStatus(id, status, reviewerUserId, review_comment);
       res.status(200).json(updatedApplication);
     } catch (error) {
       next(error);

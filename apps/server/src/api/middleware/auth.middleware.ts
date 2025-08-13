@@ -156,7 +156,7 @@ export async function authenticateToken(
     try {
       userClients = createUserSupabaseClients(token);
       // Прикрепляем к запросу
-      (req as any).supabase = userClients;
+      req.supabase = userClients;
     } catch (e) {
       console.error('[AuthMiddleware] Failed to create user-scoped Supabase clients:', e);
       res.status(500).json({ success: false, error: 'Server configuration error' });
@@ -165,7 +165,7 @@ export async function authenticateToken(
 
     // Получаем профиль пользователя
     console.log('Getting user profile for ID:', user.id); // ШПИОН №8
-    const profile = await getUserProfile(user.id, (req as any).supabase.public);
+    const profile = await getUserProfile(user.id, req.supabase!.public);
     console.log('User Profile:', profile); // ШПИОН №9: Что получили из профиля?
 
     if (!profile) {
@@ -193,20 +193,24 @@ export async function authenticateToken(
 
     // --- Построение сессии авторизации (roles, permissions, statuses) ---
     try {
-      const supa = (req as any).supabase;
+      const supa = req.supabase;
+      if (!supa) {
+        res.status(500).json({ success: false, error: 'Server configuration error: missing per-request Supabase client' });
+        return;
+      }
       const userId = authenticatedUser.id;
 
       // Роли
       const rolesPromise = supa.common
         .from('v_effective_roles' as any)
-        .select('role')
+        .select('role_name')
         .eq('user_id', userId);
 
-      // Пермишены: RPC предпочтительно, иначе view
-      const permissionsViaRpcPromise = (supa.common.rpc as any)?.('get_user_permissions', { p_user_id: userId });
+      // Пермишены: RPC предпочтительно (public схема), иначе view
+      const permissionsViaRpcPromise = (supa.public.rpc as any)?.('get_user_permissions', { p_user_id: userId });
       const permissionsViaViewPromise = supa.common
         .from('v_effective_permissions' as any)
-        .select('permission')
+        .select('permission_code')
         .eq('user_id', userId);
 
       // Статусы: memberships -> statuses
@@ -217,7 +221,7 @@ export async function authenticateToken(
 
       const [rolesRes, permsRpcRes, permsViewRes, membershipsRes] = await Promise.all([
         rolesPromise,
-        permissionsViaRpcPromise?.catch(() => null) ?? Promise.resolve(null),
+        permissionsViaRpcPromise ?? Promise.resolve(null),
         permissionsViaViewPromise,
         membershipsPromise,
       ]);
@@ -239,10 +243,10 @@ export async function authenticateToken(
         return;
       }
 
-      const roles = (rolesRes.data || []).map((r: any) => r.role).filter(Boolean);
+      const roles = (rolesRes.data || []).map((r: any) => r.role_name).filter(Boolean);
       const permissions = Array.isArray(permsRpcRes?.data)
         ? (permsRpcRes!.data as string[])
-        : ((permsViewRes.data || []).map((p: any) => p.permission).filter(Boolean));
+        : ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
 
       const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
       let statuses: string[] = [];
@@ -259,7 +263,7 @@ export async function authenticateToken(
       }
 
       const unique = (arr: string[]) => Array.from(new Set(arr));
-      (req as any).session = {
+      req.session = {
         user: { id: userId, username: authenticatedUser.username },
         roles: unique(roles),
         permissions: unique(permissions),
@@ -437,7 +441,7 @@ export async function requireCharacter(
     }
 
     // Получаем персонажей пользователя строго через пер-запросный клиент
-    const commonDb = (req as any).supabase?.common;
+    const commonDb = req.supabase?.common;
     if (!commonDb) {
       res.status(500).json({
         success: false,
@@ -578,7 +582,7 @@ export async function authenticateAny(
               created_at: profile.created_at,
               user_metadata: user.user_metadata
             };
-            (req as any).supabase = userClients;
+            req.supabase = userClients;
             return next();
           }
         }
@@ -629,7 +633,7 @@ export function requirePermission(permission: string) {
     }
 
     // Проверяем разрешения из сессии, собранной в authenticateToken
-    const sessionPermissions: string[] = ((req as any).session?.permissions ?? []) as string[];
+    const sessionPermissions: string[] = req.session?.permissions ?? [];
     if (!Array.isArray(sessionPermissions) || !sessionPermissions.includes(permission)) {
       res.status(403).json({
         success: false,

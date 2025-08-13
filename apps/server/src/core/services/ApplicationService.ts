@@ -367,6 +367,37 @@ export class ApplicationService {
         const userId: string = (updated as any).author_user_id;
 
         if (departmentId && this.commonDb) {
+          // 1) Создать cadet_track с этапом cadet_test, если его ещё нет для этой заявки
+          try {
+            // Проверяем, не существует ли уже cadet_track, связанный с этой заявкой
+            const { data: existingTrack, error: existingErr } = await (this.commonDb as any)
+              .from('cadet_tracks')
+              .select('id')
+              .eq('application_id', id)
+              .maybeSingle();
+
+            if (existingErr && (existingErr as any).code !== 'PGRST116') {
+              console.warn('[ApplicationService] cadet_tracks select error:', existingErr);
+            }
+
+            if (!existingTrack) {
+              const cadetTestStageId = await this.fetchStatusId('cadet_track_stage', 'cadet_test');
+              const { error: insertTrackErr } = await (this.commonDb as any)
+                .from('cadet_tracks')
+                .insert({
+                  user_id: userId,
+                  department_id: departmentId,
+                  application_id: id,
+                  current_stage_id: cadetTestStageId,
+                });
+              if (insertTrackErr) {
+                console.warn('[ApplicationService] cadet_tracks insert failed:', insertTrackErr);
+              }
+            }
+          } catch (trackErr) {
+            console.warn('[ApplicationService] cadet_tracks pipeline error:', trackErr);
+          }
+
           const rankId = await this.resolveCadetRankId(departmentId);
           const activeStatusId = await this.resolveActiveStatusId();
 

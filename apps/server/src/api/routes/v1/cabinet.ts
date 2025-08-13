@@ -4,6 +4,9 @@ import type { ServicesContainer } from '../../../types/services';
 import { authenticateToken } from '../../middleware/auth.middleware';
 import { validateRequest } from '../../../utils/validation';
 import { CabinetController } from '../../../core/controllers/CabinetController';
+import { CabinetService } from '../../../core/services/CabinetService';
+import { ApplicationService } from '../../../core/services/ApplicationService';
+import { ReportService } from '../../../core/services/ReportService';
 
 // Валидационные схемы (Правило №4)
 const updateProfileSchema = z.object({
@@ -29,8 +32,20 @@ const updateSettingsSchema = z.object({
 
 export function createCabinetRoutes(services: ServicesContainer): Router {
   const router = Router();
-  const { cabinetService } = services;
-  const cabinetController = new CabinetController(cabinetService);
+
+  // Пер-запросная фабрика контроллера: создаем сервисы на основе req.supabase
+  const buildController = (req: any): CabinetController => {
+    const supa = req.supabase;
+    if (!supa) {
+      throw new Error('Server configuration error: missing per-request Supabase client');
+    }
+    const cabinetService = new CabinetService(
+      supa.public,
+      new ApplicationService({ system: supa.system, common: supa.common, public: supa.public }),
+      new ReportService(supa.mdt)
+    );
+    return new CabinetController(cabinetService);
+  };
 
   /**
    * GET /api/v1/cabinet/dashboard-data
@@ -40,7 +55,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/dashboard-data',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getDashboardData(req, res, next)
+    (req, res, next) => buildController(req).getDashboardData(req, res, next)
   );
 
   /**
@@ -51,7 +66,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/profile',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserProfile(req, res, next)
+    (req, res, next) => buildController(req).getUserProfile(req, res, next)
   );
 
   /**
@@ -62,7 +77,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/profile',
     authenticateToken,
     validateRequest({ body: updateProfileSchema }), // Валидация с Zod
-    (req, res, next) => cabinetController.updateUserProfile(req, res, next)
+    (req, res, next) => buildController(req).updateUserProfile(req, res, next)
   );
 
   /**
@@ -73,7 +88,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/character',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserCharacter(req, res, next)
+    (req, res, next) => buildController(req).getUserCharacter(req, res, next)
   );
 
   /**
@@ -84,7 +99,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/applications',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserApplications(req, res, next)
+    (req, res, next) => buildController(req).getUserApplications(req, res, next)
   );
 
   /**
@@ -95,7 +110,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/reports',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserReports(req, res, next)
+    (req, res, next) => buildController(req).getUserReports(req, res, next)
   );
 
   /**
@@ -106,7 +121,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/departments',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserDepartments(req, res, next)
+    (req, res, next) => buildController(req).getUserDepartments(req, res, next)
   );
 
   /**
@@ -117,7 +132,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/settings',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserSettings(req, res, next)
+    (req, res, next) => buildController(req).getUserSettings(req, res, next)
   );
 
   /**
@@ -128,7 +143,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/settings',
     authenticateToken,
     validateRequest({ body: updateSettingsSchema }), // Валидация с Zod
-    (req, res, next) => cabinetController.updateUserSettings(req, res, next)
+    (req, res, next) => buildController(req).updateUserSettings(req, res, next)
   );
 
   /**
@@ -139,7 +154,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/stats',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserStats(req, res, next)
+    (req, res, next) => buildController(req).getUserStats(req, res, next)
   );
 
   /**
@@ -150,7 +165,7 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     '/complaints',
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
-    (req, res, next) => cabinetController.getUserComplaints(req, res, next)
+    (req, res, next) => buildController(req).getUserComplaints(req, res, next)
   );
 
   return router;

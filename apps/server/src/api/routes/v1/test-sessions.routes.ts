@@ -40,6 +40,47 @@ router.post('/:id/submit', authenticateToken, async (req: any, res) => {
     const { answers } = req.body;
     const service = new TestSessionService(req.supabase!.system);
     const result = await service.submitTest(sessionId, userId, answers);
+
+    // === КАДЕТСКИЙ ТРЕК: перевод стадии на cadet_training при успешной сдаче ===
+    if (result?.passed === true) {
+      try {
+        const supa = req.supabase!;
+        // Получаем application_id из сессии
+        const { data: session, error: sErr } = await supa.system
+          .from('test_sessions' as any)
+          .select('application_id')
+          .eq('id', sessionId)
+          .maybeSingle();
+        if (!sErr && session?.application_id) {
+          // Резолвим статус cadet_training
+          const { data: kind, error: kindErr } = await supa.common
+            .from('status_kinds' as any)
+            .select('id')
+            .eq('code', 'cadet_track_stage')
+            .maybeSingle();
+          if (!kindErr && kind?.id) {
+            const { data: status, error: stErr } = await supa.common
+              .from('statuses' as any)
+              .select('id')
+              .eq('code', 'cadet_training')
+              .eq('kind_id', kind.id)
+              .maybeSingle();
+            if (!stErr && status?.id) {
+              const { error: updErr } = await supa.common
+                .from('cadet_tracks' as any)
+                .update({ current_stage_id: status.id })
+                .eq('application_id', session.application_id);
+              if (updErr) {
+                console.warn('[TestSessionsRoutes] cadet_tracks update failed:', updErr);
+              }
+            }
+          }
+        }
+      } catch (trackErr) {
+        console.warn('[TestSessionsRoutes] cadet_tracks training stage pipeline error:', trackErr);
+      }
+    }
+
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
     console.error('[TestSessionsRoutes] submitTest error:', error);

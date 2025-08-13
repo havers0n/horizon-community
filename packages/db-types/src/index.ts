@@ -14,6 +14,106 @@ export type Database = {
   }
   common: {
     Tables: {
+      cadet_tracks: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          current_stage_id: string
+          department_id: string
+          id: string
+          progress: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          current_stage_id: string
+          department_id: string
+          id?: string
+          progress?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          current_stage_id?: string
+          department_id?: string
+          id?: string
+          progress?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cadet_tracks_current_stage_id_fkey"
+            columns: ["current_stage_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cadet_tracks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cadet_training_sessions: {
+        Row: {
+          conducted_by_user_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          result_status_id: string | null
+          track_id: string
+          training_type: string
+        }
+        Insert: {
+          conducted_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          result_status_id?: string | null
+          track_id: string
+          training_type: string
+        }
+        Update: {
+          conducted_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          result_status_id?: string | null
+          track_id?: string
+          training_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cadet_training_sessions_result_status_id_fkey"
+            columns: ["result_status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cadet_training_sessions_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "cadet_tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cadet_training_sessions_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "v_cadet_tracks_enriched"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cargo_shipments: {
         Row: {
           cargo_type: string
@@ -1357,6 +1457,38 @@ export type Database = {
       }
     }
     Views: {
+      v_cadet_tracks_enriched: {
+        Row: {
+          application_id: string | null
+          created_at: string | null
+          current_stage_id: string | null
+          department_id: string | null
+          department_name: string | null
+          id: string | null
+          progress: Json | null
+          stage_code: string | null
+          stage_name: string | null
+          updated_at: string | null
+          user_id: string | null
+          user_username: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cadet_tracks_current_stage_id_fkey"
+            columns: ["current_stage_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cadet_tracks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_character_licenses: {
         Row: {
           character_id: string | null
@@ -3248,6 +3380,14 @@ export type Database = {
       gtrgm_out: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      has_permission: {
+        Args: {
+          p_permission_code: string
+          p_scope_type: Database["common"]["Enums"]["scope_type"]
+          p_scope_id: string
+        }
+        Returns: boolean
       }
       is_guest_candidate: {
         Args: Record<PropertyKey, never>

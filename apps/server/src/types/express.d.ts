@@ -10,12 +10,21 @@ export interface SupabaseRequestClients {
   system: SupabaseClient<Database, 'system'>;
 }
 
+// Типизированные данные сессии, собираемые в authenticateToken
+export interface SessionData {
+  user: { id: string; username: string | null };
+  roles: string[];
+  permissions: string[];
+  statuses: string[];
+}
+
 declare global {
   namespace Express {
     interface Request {
       user?: User;
       character?: Database['common']['Tables']['characters']['Row'];
       supabase?: SupabaseRequestClients;
+      session?: SessionData;
     }
   }
 }
