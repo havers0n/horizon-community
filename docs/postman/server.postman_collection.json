@@ -1,0 +1,350 @@
+{
+  "info": {
+    "name": "Horizon Server API",
+    "_postman_id": "7b2f9a3b-4b6d-4f0a-9f2c-2a0b2c8b1a01",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Полная коллекция эндпоинтов серверного API (/api, /api/v1). Для защищённых запросов используйте переменную {{authToken}} в заголовке Authorization."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:5000" },
+    { "key": "version", "value": "v1" },
+    { "key": "authToken", "value": "" },
+    { "key": "origin", "value": "http://localhost:3001" },
+    { "key": "register_username", "value": "testuser2" },
+    { "key": "register_email", "value": "test11@example.com" },
+    { "key": "register_password", "value": "StrongP@ssw0rd" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "try {",
+          "  var origin = pm.variables.get('origin') || 'http://localhost:3001';",
+          "  if (!pm.request.headers.has('Origin')) {",
+          "    pm.request.headers.add({ key: 'Origin', value: origin });",
+          "  } else {",
+          "    pm.request.headers.upsert({ key: 'Origin', value: origin });",
+          "  }",
+          "} catch (e) { }"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /api/health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/health" }
+        },
+        {
+          "name": "GET /api/{{version}}/health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/health" }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/{{version}}/auth/register",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{register_username}}\",\n  \"email\": \"{{register_email}}\",\n  \"password\": \"{{register_password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/{{version}}/auth/register",
+            "description": "Регистрация пользователя."
+          }
+        },
+        {
+          "name": "POST /api/{{version}}/auth/login",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{register_email}}\",\n  \"password\": \"{{register_password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/{{version}}/auth/login",
+            "description": "Вход пользователя. Возвращает access_token и refresh_token."
+          }
+        },
+        {
+          "name": "POST /api/{{version}}/auth/verify",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<JWT or other>\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/{{version}}/auth/verify",
+            "description": "Проверка токена (заготовка)."
+          }
+        },
+        {
+          "name": "GET /api/{{version}}/auth/me",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": "{{baseUrl}}/api/{{version}}/auth/me",
+            "description": "Профиль текущего пользователя."
+          }
+        },
+        {
+          "name": "POST /api/{{version}}/auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": "{{baseUrl}}/api/{{version}}/auth/logout",
+            "description": "Выход из системы (клиент удаляет токен)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Session",
+      "item": [
+        {
+          "name": "GET /api/{{version}}/auth/me/session",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": "{{baseUrl}}/api/{{version}}/auth/me/session",
+            "description": "Динамические роли, пермишены, статусы и кадетский трек для текущего пользователя."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET /api/{{version}}/dashboard-data",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": "{{baseUrl}}/api/{{version}}/dashboard-data",
+            "description": "Композитные данные для дашборда."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cabinet",
+      "item": [
+        { "name": "GET /api/{{version}}/cabinet/dashboard-data", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/dashboard-data" } },
+        { "name": "GET /api/{{version}}/cabinet/profile", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/profile" } },
+        {
+          "name": "PUT /api/{{version}}/cabinet/profile",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"newname\",\n  \"bio\": \"About me\",\n  \"avatar_url\": \"https://example.com/avatar.png\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/{{version}}/cabinet/profile"
+          }
+        },
+        { "name": "GET /api/{{version}}/cabinet/character", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/character" } },
+        { "name": "GET /api/{{version}}/cabinet/applications", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/applications" } },
+        { "name": "GET /api/{{version}}/cabinet/reports", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/reports" } },
+        { "name": "GET /api/{{version}}/cabinet/departments", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/departments" } },
+        { "name": "GET /api/{{version}}/cabinet/settings", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/settings" } },
+        {
+          "name": "PUT /api/{{version}}/cabinet/settings",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": \"dark\",\n  \"language\": \"ru\",\n  \"notifications\": { \"email\": true, \"push\": true, \"sms\": false },\n  \"privacy\": { \"profile_visible\": true, \"show_email\": false, \"show_phone\": false }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/{{version}}/cabinet/settings"
+          }
+        },
+        { "name": "GET /api/{{version}}/cabinet/stats", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/stats" } },
+        { "name": "GET /api/{{version}}/cabinet/complaints", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/cabinet/complaints" } }
+      ]
+    },
+    {
+      "name": "Characters",
+      "item": [
+        {
+          "name": "POST /api/{{version}}/characters",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"00000000-0000-0000-0000-000000000000\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"date_of_birth\": null,\n  \"gender\": null,\n  \"phone_number\": null,\n  \"address\": null,\n  \"occupation\": null,\n  \"mugshot_url\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/{{version}}/characters",
+            "description": "Создать персонажа (роль citizen). Пользователь может создавать только своего персонажа."
+          }
+        },
+        { "name": "GET /api/{{version}}/characters/my", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/characters/my" } },
+        { "name": "GET /api/{{version}}/characters/:id", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/characters/:id" } },
+        {
+          "name": "PUT /api/{{version}}/characters/:id",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Jane\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/{{version}}/characters/:id"
+          }
+        },
+        { "name": "DELETE /api/{{version}}/characters/:id", "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/characters/:id" } }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "POST /api/{{version}}/applications",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"join_department\",\n  \"data\": {\n    \"department\": \"police\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/{{version}}/applications",
+            "description": "Создать новую заявку."
+          }
+        },
+        { "name": "GET /api/{{version}}/applications/:id", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/applications/:id" } },
+        {
+          "name": "PUT /api/{{version}}/applications/:id/status",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"awaiting_review\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/{{version}}/applications/:id/status",
+            "description": "Обновить статус заявки (user-level)."
+          }
+        },
+        {
+          "name": "POST /api/{{version}}/applications/:id/test-session",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": "{{baseUrl}}/api/{{version}}/applications/:id/test-session",
+            "description": "Создать сессию тестирования по заявке."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Departments",
+      "item": [
+        { "name": "GET /api/{{version}}/departments", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/departments" } },
+        { "name": "GET /api/{{version}}/departments/:id", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/departments/:id" } },
+        { "name": "GET /api/{{version}}/departments/:id/members", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/departments/:id/members" } },
+        { "name": "POST /api/{{version}}/departments", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/api/{{version}}/departments", "description": "Создать департамент (admin)." } },
+        { "name": "PUT /api/{{version}}/departments/:id", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/api/{{version}}/departments/:id", "description": "Обновить департамент (admin)." } },
+        { "name": "DELETE /api/{{version}}/departments/:id", "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/departments/:id", "description": "Удалить департамент (admin)." } }
+      ]
+    },
+    {
+      "name": "Test Sessions",
+      "item": [
+        {
+          "name": "POST /api/{{version}}/test-sessions",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"testId\": \"00000000-0000-0000-0000-000000000000\",\n  \"applicationId\": \"00000000-0000-0000-0000-000000000000\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/{{version}}/test-sessions"
+          }
+        },
+        { "name": "POST /api/{{version}}/test-sessions/:id/focus-loss", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/test-sessions/:id/focus-loss" } },
+        {
+          "name": "POST /api/{{version}}/test-sessions/:id/submit",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"answers\": [\n    { \"questionId\": \"q1\", \"answer\": \"A\" }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/api/{{version}}/test-sessions/:id/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Applications",
+          "item": [
+            { "name": "GET /api/{{version}}/admin/applications", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": { "raw": "{{baseUrl}}/api/{{version}}/admin/applications?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["api", "{{version}}", "admin", "applications"], "query": [ { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }, { "key": "status", "value": "" }, { "key": "department", "value": "" } ] } } },
+            { "name": "GET /api/{{version}}/admin/applications/:id", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/admin/applications/:id" } },
+            {
+              "name": "PUT /api/{{version}}/admin/applications/:id/status",
+              "request": {
+                "method": "PUT",
+                "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"new_status_code\": \"approved\",\n  \"review_comment\": \"OK\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": "{{baseUrl}}/api/{{version}}/admin/applications/:id/status"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tests",
+          "item": [
+            { "name": "POST /api/{{version}}/admin/tests", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/api/{{version}}/admin/tests", "description": "Создать тест (admin)." } },
+            { "name": "PUT /api/{{version}}/admin/tests/:id", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/api/{{version}}/admin/tests/:id", "description": "Обновить тест (admin)." } },
+            { "name": "POST /api/{{version}}/admin/tests/:id/questions", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/api/{{version}}/admin/tests/:id/questions", "description": "Добавить вопрос к тесту (admin)." } }
+          ]
+        },
+        {
+          "name": "Support",
+          "item": [
+            {
+              "name": "POST /api/{{version}}/admin/support/tickets/:ticketId/reply",
+              "request": {
+                "method": "POST",
+                "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+                "body": { "mode": "raw", "raw": "{\n  \"content\": \"Ответ администратора\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": "{{baseUrl}}/api/{{version}}/admin/support/tickets/:ticketId/reply"
+              }
+            }
+          ]
+        },
+        {
+          "name": "User Metadata",
+          "item": [
+            {
+              "name": "POST /api/{{version}}/admin/user-metadata/fix",
+              "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000000\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/{{version}}/admin/user-metadata/fix" }
+            },
+            { "name": "GET /api/{{version}}/admin/user-metadata/check/:userId", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ], "url": "{{baseUrl}}/api/{{version}}/admin/user-metadata/check/:userId" } },
+            {
+              "name": "POST /api/{{version}}/admin/user-metadata/fix-by-email",
+              "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/{{version}}/admin/user-metadata/fix-by-email" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Misc Health",
+      "item": [
+        { "name": "GET /api/{{version}}/report-templates/health", "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/report-templates/health" } },
+        { "name": "GET /api/{{version}}/ems-fd-reports/health", "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/ems-fd-reports/health" } },
+        { "name": "GET /api/{{version}}/law-reports/health", "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/law-reports/health" } },
+        { "name": "GET /api/{{version}}/discord/health", "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/discord/health" } },
+        { "name": "GET /api/{{version}}/forum/health", "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/forum/health" } },
+        { "name": "GET /api/{{version}}/realtime/health", "request": { "method": "GET", "url": "{{baseUrl}}/api/{{version}}/realtime/health" } }
+      ]
+    }
+  ]
+}
+
+

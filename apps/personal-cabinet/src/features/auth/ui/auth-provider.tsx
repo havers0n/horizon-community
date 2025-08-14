@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, ReactNode } from 'react'
 import { AuthContextType, RegisterPayload } from '../model'
 import { AuthAPI } from '../api'
-import { setAuthState, clearAuthState, getAuthState } from '@/shared/lib/auth'
-import { User, normalizeUser } from '@/entities/user'
+import { setAuthState, clearAuthState } from '@/shared/lib/auth'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { User } from '@/entities/user'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -11,33 +12,27 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Лёгкий провайдер аутентификации: состояние берём из SessionProvider
+  const { session, isLoading } = useSession()
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authState = getAuthState()
-        if (authState.accessToken && authState.user) {
-          // Проверяем токен через API
-          try {
-            const userData = await AuthAPI.getCurrentUser()
-            setUser(normalizeUser(userData))
-          } catch (error) {
-            console.error('Token validation failed:', error)
-            clearAuthState()
-          }
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error)
-        clearAuthState()
-      } finally {
-        setIsLoading(false)
+  const user: User | null = session
+    ? {
+        id: session.user.id,
+        email: null,
+        username: session.user.username,
+        role: (['admin', 'staff', 'candidate', 'citizen'].find(r => session.roles.includes(r)) || 'citizen') as string,
+        avatarUrl: null,
+        firstName: null,
+        lastName: null,
+        department: undefined,
+        division: undefined,
+        isActive: true,
+        gameWarnings: 0,
+        adminWarnings: 0,
+        attemptsLeft: 0,
+        profileImageUrl: undefined,
       }
-    }
-
-    checkAuth()
-  }, [])
+    : null
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -48,7 +43,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (userData && access_token && refresh_token) {
         setAuthState(userData, access_token, refresh_token)
-        setUser(normalizeUser(userData))
       } else {
         throw new Error('Invalid response format')
       }
@@ -67,7 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (userData && access_token && refresh_token) {
         setAuthState(userData, access_token, refresh_token)
-        setUser(normalizeUser(userData))
       } else {
         throw new Error('Invalid response format')
       }
@@ -84,7 +77,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('Sign out failed:', error)
     } finally {
       clearAuthState()
-      setUser(null)
     }
   }
 

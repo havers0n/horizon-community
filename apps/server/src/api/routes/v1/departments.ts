@@ -8,7 +8,9 @@ import { DepartmentService } from '../../../core/services/DepartmentService';
 export function createDepartmentRoutes(services: ServicesContainer): Router {
   const router = Router();
   router.get('/', (req: AuthenticatedRequest, res, next) => {
-    const departmentService = new DepartmentService(req.supabase!.mdt);
+    // Публичный список департаментов приходит из схемы common/public через RPC
+    // Поэтому используем per-request клиент публичной схемы
+    const departmentService = new DepartmentService(req.supabase!.public);
     const departmentController = new DepartmentController(departmentService);
     return departmentController.getAllDepartments(req, res, next);
   });

@@ -1,5 +1,4 @@
-// Экспорт хуков
-export { useDashboardData } from './hooks/useDashboardData';
+// Экспорт хуков (legacy хук удалён)
 
 // Экспорт типов и утилит
 export { 

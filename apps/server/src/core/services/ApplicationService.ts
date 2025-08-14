@@ -344,10 +344,42 @@ export class ApplicationService {
   }
 
   async updateApplicationStatus(id: string, newStatusCode: string, reviewerUserId: string, reviewComment?: string): Promise<SystemApplication> {
+    // Resolve provided status code to its UUID in common.statuses
+    if (!this.commonDb) {
+      console.error('[ApplicationService] updateApplicationStatus: common client is not available');
+      throw new AppError('Server configuration error: common schema not available', 500);
+    }
+    // 1) Получаем kind_id для application_status
+    const { data: kind, error: kindError } = await (this.commonDb as any)
+      .from('status_kinds')
+      .select('id')
+      .eq('code', 'application_status')
+      .single();
+
+    if (kindError || !kind?.id) {
+      console.error('[ApplicationService] updateApplicationStatus: status kind application_status not found', kindError);
+      throw new AppError('Не удалось определить вид статуса для заявок (application_status)', 500);
+    }
+
+    // 2) Разрешаем статус по КОДУ и ВИДУ (kind_id)
+    const { data: status, error: statusError } = await (this.commonDb as any)
+      .from('statuses')
+      .select('id')
+      .eq('code', newStatusCode)
+      .eq('kind_id', kind.id)
+      .single();
+
+    if (statusError || !status?.id) {
+      console.error('[ApplicationService] updateApplicationStatus: invalid or unknown status code for application_status', newStatusCode, statusError);
+      throw new AppError(`Некорректный или неизвестный код статуса для заявок: ${newStatusCode}`, 400);
+    }
+
+    const newStatusId = status.id as string;
+
     const { data: updated, error } = await this.systemDb
       .from('applications')
       .update({
-        status_id: newStatusCode as any,
+        status_id: newStatusId,
         reviewer_user_id: reviewerUserId,
         review_comment: reviewComment || null,
       } as any)
@@ -362,7 +394,41 @@ export class ApplicationService {
 
     // Автоповышение кандидата до кадета и перевод в ожидающий тест, если одобрена входная заявка
     try {
-      if ((updated as any)?.type === 'entry' && newStatusCode === 'approved') {
+      // 1) Получаем код статуса по новому status_id заявки (status_id хранит UUID)
+      let resolvedStatusCode: string | null = null;
+      try {
+        if (this.commonDb) {
+          const { data: statusById, error: statusByIdErr } = await (this.commonDb as any)
+            .from('statuses')
+            .select('code, id')
+            .eq('id', (updated as any).status_id)
+            .maybeSingle();
+
+          if (statusByIdErr) {
+            console.warn('[ApplicationService] statuses by id lookup error:', statusByIdErr);
+          }
+
+          if ((statusById as any)?.code) {
+            resolvedStatusCode = (statusById as any).code as string;
+          } else {
+            // Фолбэк: если в status_id по ошибке записан код, пробуем найти по code
+            const { data: statusByCode, error: statusByCodeErr } = await (this.commonDb as any)
+              .from('statuses')
+              .select('code, id')
+              .eq('code', (updated as any).status_id)
+              .maybeSingle();
+            if (statusByCodeErr) {
+              console.warn('[ApplicationService] statuses by code lookup error:', statusByCodeErr);
+            }
+            resolvedStatusCode = (statusByCode as any)?.code || null;
+          }
+        }
+      } catch (statusResolveErr) {
+        console.warn('[ApplicationService] status resolve pipeline error:', statusResolveErr);
+      }
+
+      // 2) Двигаем пайплайн только если это входная заявка и код статуса — 'approved'
+      if ((updated as any)?.type === 'entry' && resolvedStatusCode === 'approved') {
         const departmentId: string | null = (updated as any).target_department_id || null;
         const userId: string = (updated as any).author_user_id;
 
@@ -422,9 +488,10 @@ export class ApplicationService {
           ...(entryTestId ? { test_id: entryTestId } : {}),
         };
 
+        const awaitingTestStatusId = await this.fetchStatusId('application_status', 'awaiting_test');
         const { data: promoted, error: promoteErr } = await this.systemDb
           .from('applications')
-          .update({ status_id: 'awaiting_test' as any, data: mergedData as any })
+          .update({ status_id: awaitingTestStatusId, data: mergedData as any })
           .eq('id', id)
           .select('*')
           .single();

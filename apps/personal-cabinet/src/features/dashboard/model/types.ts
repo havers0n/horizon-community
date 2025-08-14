@@ -1,4 +1,43 @@
-import { DashboardData } from '../hooks/useDashboardData';
+// Тип DashbordData переносим локально, чтобы убрать зависимость от удалённого хука
+export interface DashboardData {
+  user: {
+    id: string;
+    email: string;
+    username: string | null;
+    role: string;
+    avatarUrl: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    department: string | null;
+    division: string | null;
+    isActive: boolean;
+    gameWarnings: number;
+    adminWarnings: number;
+    attemptsLeft: number;
+    profileImageUrl: string | null;
+  };
+  activities: Array<{
+    id: string;
+    type: 'application' | 'complaint' | 'report' | 'test' | 'notification';
+    status: string;
+    title: string;
+    createdAt: string;
+  }>;
+  announcements: Array<{
+    id: string;
+    title: string;
+    preview: string;
+    priority: 'high' | 'normal' | 'low';
+    createdAt: string;
+  }>;
+  usefulLinks: Array<{
+    id: string;
+    title: string;
+    url: string;
+    icon: string;
+    description: string;
+  }>;
+}
 
 // Типы для ProfileWidget
 export interface ProfileWidgetProps {

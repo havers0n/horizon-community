@@ -74,8 +74,10 @@ const axiosInstance: AxiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      // Гарантируем наличие headers и динамически проставляем Authorization
+      (config.headers as any) = (config.headers as any) || {};
+      (config.headers as any).Authorization = `Bearer ${token}`;
     }
     return config;
   },

@@ -1,5 +1,6 @@
 import { Bell, ChevronDown, Shield } from "lucide-react";
 import { useAuth } from '@/features/auth';
+import { useSession } from '@/shared/contexts/SessionContext';
 import { useQuery } from '@tanstack/react-query';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Avatar, AvatarFallback, AvatarImage } from '@/shared/ui';
 import { getUserInitials, getUserDisplayName } from '@/entities/user';
@@ -10,13 +11,10 @@ interface HeaderProps {
 
 export function Header({ onNotificationClick }: HeaderProps) {
   const { user, signOut } = useAuth();
+  const { session } = useSession();
 
-  const { data: dashboardData } = useQuery({
-    queryKey: ["/api/dashboard"],
-    enabled: !!user,
-  });
-
-  const unreadCount = (dashboardData as any)?.unreadNotifications || 0;
+  // Убираем вторичный запрос дашборда; используем данные сессии, если появятся счетчики
+  const unreadCount = 0;
 
   const handleLogout = async () => {
     try {

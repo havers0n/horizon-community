@@ -112,178 +112,62 @@ async function getUserCharacters(
 // ===== ОСНОВНОЙ MIDDLEWARE ДЛЯ АУТЕНТИФИКАЦИИ =====
 
 export async function authenticateToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
+	req: Request,
+	res: Response,
+	next: NextFunction
 ): Promise<void> {
-  console.log('--- AUTH MIDDLEWARE START ---'); // ШПИОН №1
+	try {
+		const authHeader = req.headers.authorization;
+		const token = authHeader && authHeader.split(' ')[1];
 
-  try {
-    const authHeader = req.headers.authorization;
-    console.log('Authorization Header:', authHeader); // ШПИОН №2: Что пришло в заголовке?
+		if (!token) {
+			res.status(401).json({ success: false, error: 'Access token required' });
+			return;
+		}
 
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-    console.log('Extracted Token:', token); // ШПИОН №3: Смогли ли мы извлечь токен?
+		// Верифицируем JWT через Supabase
+		const { data: { user }, error } = await supabase.auth.getUser(token);
+		if (error || !user) {
+			console.error('[AuthMiddleware] Token verification failed:', error);
+			res.status(401).json({ success: false, error: 'Invalid or expired token' });
+			return;
+		}
 
-    if (!token) {
-      console.log('No token found, sending 401.'); // ШПИОН №4
-      res.status(401).json({
-        success: false,
-        error: 'Access token required'
-      });
-      return;
-    }
+		// Создаем пер-запросные клиенты под токен пользователя (RLS-first)
+		let userClients: ReturnType<typeof createUserSupabaseClients>;
+		try {
+			userClients = createUserSupabaseClients(token);
+			req.supabase = userClients;
+		} catch (e) {
+			console.error('[AuthMiddleware] Failed to create user-scoped Supabase clients:', e);
+			res.status(500).json({ success: false, error: 'Server configuration error' });
+			return;
+		}
 
-    // Верифицируем токен через Supabase
-    console.log('Created Supabase client, calling getUser...'); // ШПИОН №4.5
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+		// Получаем базовый профиль из public.profiles
+		const profile = await getUserProfile(user.id, req.supabase!.public);
+		if (!profile) {
+			res.status(401).json({ success: false, error: 'User profile not found' });
+			return;
+		}
 
-    console.log('Supabase getUser Error:', error); // ШПИОН №5: Была ли ошибка от Supabase?
-    console.log('Supabase getUser Data:', user);  // ШПИОН №6: Что Supabase вернул в качестве юзера?
+		// Формируем легкий объект пользователя и прикрепляем к запросу
+		const authenticatedUser: AuthenticatedUser = {
+			id: user.id,
+			email: user.email,
+			username: profile.username,
+			role: (profile as any).role ?? 'citizen',
+			created_at: profile.created_at,
+			user_metadata: user.user_metadata
+		};
+		(req as AuthenticatedRequest).user = authenticatedUser;
 
-    if (error || !user) {
-      console.log('Token verification failed, sending 401.'); // ШПИОН №7
-      console.error('[AuthMiddleware] Token verification failed:', error);
-      res.status(401).json({
-        success: false,
-        error: 'Invalid or expired token'
-      });
-      return;
-    }
-
-    // Создаем пер-запросные клиенты под токен пользователя (RLS)
-    let userClients: ReturnType<typeof createUserSupabaseClients>;
-    try {
-      userClients = createUserSupabaseClients(token);
-      // Прикрепляем к запросу
-      req.supabase = userClients;
-    } catch (e) {
-      console.error('[AuthMiddleware] Failed to create user-scoped Supabase clients:', e);
-      res.status(500).json({ success: false, error: 'Server configuration error' });
-      return;
-    }
-
-    // Получаем профиль пользователя
-    console.log('Getting user profile for ID:', user.id); // ШПИОН №8
-    const profile = await getUserProfile(user.id, req.supabase!.public);
-    console.log('User Profile:', profile); // ШПИОН №9: Что получили из профиля?
-
-    if (!profile) {
-      console.log('User profile not found, sending 401.'); // ШПИОН №10
-      res.status(401).json({
-        success: false,
-        error: 'User profile not found'
-      });
-      return;
-    }
-
-    // Создаем объект аутентифицированного пользователя
-    const authenticatedUser: AuthenticatedUser = {
-      id: user.id,
-      email: user.email,
-      username: profile.username,
-      role: (profile as any).role ?? 'citizen',
-      created_at: profile.created_at,
-      user_metadata: user.user_metadata
-    };
-    console.log('Created AuthenticatedUser:', authenticatedUser); // ШПИОН №11: Что создали?
-
-    // Приводим req к AuthenticatedRequest и добавляем пользователя
-    (req as AuthenticatedRequest).user = authenticatedUser;
-
-    // --- Построение сессии авторизации (roles, permissions, statuses) ---
-    try {
-      const supa = req.supabase;
-      if (!supa) {
-        res.status(500).json({ success: false, error: 'Server configuration error: missing per-request Supabase client' });
-        return;
-      }
-      const userId = authenticatedUser.id;
-
-      // Роли
-      const rolesPromise = supa.common
-        .from('v_effective_roles' as any)
-        .select('role_name')
-        .eq('user_id', userId);
-
-      // Пермишены: RPC предпочтительно (public схема), иначе view
-      const permissionsViaRpcPromise = (supa.public.rpc as any)?.('get_user_permissions', { p_user_id: userId });
-      const permissionsViaViewPromise = supa.common
-        .from('v_effective_permissions' as any)
-        .select('permission_code')
-        .eq('user_id', userId);
-
-      // Статусы: memberships -> statuses
-      const membershipsPromise = supa.common
-        .from('memberships' as any)
-        .select('status_id')
-        .eq('user_id', userId);
-
-      const [rolesRes, permsRpcRes, permsViewRes, membershipsRes] = await Promise.all([
-        rolesPromise,
-        permissionsViaRpcPromise ?? Promise.resolve(null),
-        permissionsViaViewPromise,
-        membershipsPromise,
-      ]);
-
-      if (rolesRes.error) {
-        res.status(500).json({ success: false, error: rolesRes.error.message });
-        return;
-      }
-      if (membershipsRes.error) {
-        res.status(500).json({ success: false, error: membershipsRes.error.message });
-        return;
-      }
-      if (permsRpcRes && (permsRpcRes as any).error) {
-        res.status(500).json({ success: false, error: (permsRpcRes as any).error.message });
-        return;
-      }
-      if (permsViewRes.error) {
-        res.status(500).json({ success: false, error: permsViewRes.error.message });
-        return;
-      }
-
-      const roles = (rolesRes.data || []).map((r: any) => r.role_name).filter(Boolean);
-      const permissions = Array.isArray(permsRpcRes?.data)
-        ? (permsRpcRes!.data as string[])
-        : ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
-
-      const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
-      let statuses: string[] = [];
-      if (statusIds.length > 0) {
-        const statusesRes = await supa.common
-          .from('statuses' as any)
-          .select('code, id')
-          .in('id', statusIds as any);
-        if (statusesRes.error) {
-          res.status(500).json({ success: false, error: statusesRes.error.message });
-          return;
-        }
-        statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
-      }
-
-      const unique = (arr: string[]) => Array.from(new Set(arr));
-      req.session = {
-        user: { id: userId, username: authenticatedUser.username },
-        roles: unique(roles),
-        permissions: unique(permissions),
-        statuses: unique(statuses),
-      };
-    } catch (sessionError) {
-      console.error('[AuthMiddleware] Failed to build auth session:', sessionError);
-      res.status(500).json({ success: false, error: 'Failed to build auth session' });
-      return;
-    }
-
-    console.log('Authentication SUCCESS, calling next()'); // ШПИОН №12
-    next();
-  } catch (error) {
-    console.error('[AuthMiddleware] CRITICAL ERROR:', error); // ШПИОН №13
-    res.status(500).json({
-      success: false,
-      error: 'Authentication failed'
-    });
-  }
+		// НИКАКОЙ сборки сессии здесь. Полная сессия строится в /api/v1/auth/me/session
+		next();
+	} catch (error) {
+		console.error('[AuthMiddleware] CRITICAL ERROR:', error);
+		res.status(500).json({ success: false, error: 'Authentication failed' });
+	}
 }
 
 // ===== MIDDLEWARE ДЛЯ ПРОВЕРКИ РОЛИ =====

@@ -1,6 +1,5 @@
 import { Layout } from '@/shared/ui';
 import { Card, CardContent, Skeleton } from '@/shared/ui';
-import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
 import { transformDashboardData } from '@/features/dashboard/model/types';
 import { ProfileWidget } from '@/widgets/dashboard/ui/profile-widget';
 import { FeedWidget } from '@/widgets/dashboard/ui/feed-widget';
@@ -50,8 +49,7 @@ const DashboardError = ({ error }: { error: Error }) => (
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { data, isLoading, error } = useDashboardData();
-  const { session } = useSession();
+  const { session, isLoading, error } = useSession();
 
   // Обработчики для быстрых действий
   const handleQuickAction = (action: string) => {
@@ -196,7 +194,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!data) {
+  if (!session) {
     return (
       <Layout>
         <DashboardError error={new Error('Данные не найдены')} />
@@ -205,24 +203,45 @@ export default function Dashboard() {
   }
 
   // Преобразование данных для виджетов
-  const transformedData = transformDashboardData(data);
+  const transformedData = transformDashboardData({
+    user: {
+      id: session.user.id,
+      email: '',
+      username: session.user.username,
+      role: (session.roles.find(r => ['admin','staff','candidate','citizen'].includes(r)) || 'citizen') as string,
+      avatarUrl: null,
+      firstName: null,
+      lastName: null,
+      department: null,
+      division: null,
+      isActive: true,
+      gameWarnings: 0,
+      adminWarnings: 0,
+      attemptsLeft: 0,
+      profileImageUrl: null,
+    },
+    activities: [],
+    announcements: [],
+    usefulLinks: [],
+  } as any);
   // Кандидат: если нет активных треков и статусов
+  const primaryRole = (session.roles.find(r => ['admin','staff','candidate','citizen'].includes(r)) || 'citizen') as string;
   const isTrueCandidate = (!session?.cadetTracks || session.cadetTracks.length === 0) && (!session?.statuses || session.statuses.length === 0)
-  const isCandidateRole = isTrueCandidate || isCandidate(data.user.role);
-  const isMemberRole = isMember(data.user.role);
-  const isCitizenRole = isCitizen(data.user.role);
-  const isAdminRole = isAdmin(data.user.role);
-  const quickActions = createQuickActions(data.user.role);
+  const isCandidateRole = isTrueCandidate || isCandidate(primaryRole);
+  const isMemberRole = isMember(primaryRole);
+  const isCitizenRole = isCitizen(primaryRole);
+  const isAdminRole = isAdmin(primaryRole);
+  const quickActions = createQuickActions(primaryRole);
 
   // Отладочная информация (только в режиме разработки)
   if (process.env.NODE_ENV === 'development') {
     console.log('Dashboard Debug Info:', {
-      userRole: data.user.role,
+      userRole: primaryRole,
       isCandidate: isCandidateRole,
       isMember: isMemberRole,
       isCitizen: isCitizenRole,
       isAdmin: isAdminRole,
-      userData: data.user
+      userData: session.user
     });
   }
 
@@ -291,7 +310,7 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h1 className="text-2xl font-semibold text-gray-100">
-                      Добро пожаловать, {data.user.firstName || "Пользователь"}!
+                       Добро пожаловать, {transformedData.profile.userName || "Пользователь"}!
                     </h1>
                     <p className="text-sm text-gray-400 mt-1">
                       Ваш статус: <span className="font-medium text-blue-400">

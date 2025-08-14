@@ -66,9 +66,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <SessionProvider>
+        <SessionProvider>
+          <AuthProvider>
+            <TooltipProvider>
             <Router>
               <React.Suspense fallback={<LoadingSpinner />}>
                 <Routes>
@@ -172,9 +172,9 @@ function App() {
               <Toaster />
               {/* <ConnectionStatus /> */}
             </Router>
-            </SessionProvider>
-          </TooltipProvider>
-        </AuthProvider>
+            </TooltipProvider>
+          </AuthProvider>
+        </SessionProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

@@ -3,15 +3,18 @@ import { AppError } from '../../utils/AppError';
 import type { Database } from '@roleplay-identity/db-types';
 
 export class DepartmentService {
-  private readonly db: SupabaseClient<Database, 'mdt'>;
+  private readonly db: SupabaseClient<Database, any>;
 
-  constructor(mdtDb: SupabaseClient<Database, 'mdt'>) {
-    this.db = mdtDb;
+  constructor(db: SupabaseClient<Database, any>) {
+    this.db = db;
   }
 
   async getAllDepartments() {
-    // Placeholder implementation
-    return [];
+    const { data, error } = await this.db.rpc('get_all_departments');
+    if (error) {
+      throw new AppError(`Failed to fetch departments: ${error.message}`, 500);
+    }
+    return data ?? [];
   }
 
   async getDepartmentById(id: number) {
