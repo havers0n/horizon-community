@@ -12,6 +12,7 @@ import { Link, useNavigate } from 'react-router-dom'
 const registerSchema = z.object({
   firstName: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
   lastName: z.string().min(2, 'Фамилия должна содержать минимум 2 символа'),
+  username: z.string().min(3, 'Имя пользователя должно содержать минимум 3 символа'),
   email: z.string().email('Введите корректный email'),
   password: z.string().min(6, 'Пароль должен содержать минимум 6 символов'),
   confirmPassword: z.string(),
@@ -41,6 +42,7 @@ export default function RegisterPage() {
       await signUp({
         email: data.email,
         password: data.password,
+        username: data.username,
         first_name: data.firstName,
         last_name: data.lastName
       })
@@ -99,6 +101,19 @@ export default function RegisterPage() {
                     <p className="text-sm text-red-500">{errors.lastName.message}</p>
                   )}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="username">Имя пользователя</Label>
+                <Input
+                  id="username"
+                  placeholder="ivan.petrov"
+                  {...register('username')}
+                  className={errors.username ? 'border-red-500' : ''}
+                />
+                {errors.username && (
+                  <p className="text-sm text-red-500">{errors.username.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">

@@ -1,7 +1,5 @@
 
 import { LoginForm } from '@/features/auth'
-import { ApiTest } from '@/features/auth/ui/api-test'
-import { ServerTest } from '@/features/auth/ui/server-test'
 
 export default function LoginPage() {
   return (
@@ -18,8 +16,6 @@ export default function LoginPage() {
 
         <div className="flex gap-8 justify-center flex-wrap">
           <LoginForm />
-          <ApiTest />
-          <ServerTest />
         </div>
       </div>
     </div>
