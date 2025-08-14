@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.middleware';
 import { AuthService } from '../../core/services/AuthService';
 import { registerSchema, loginSchema } from '@roleplay-identity/shared-schema';
 import { AppError } from '../../utils/AppError';
+import { createClient } from '@supabase/supabase-js';
 
 // ===== ФАБРИЧНАЯ ФУНКЦИЯ ДЛЯ СОЗДАНИЯ AUTH РОУТОВ =====
 export function createAuthRoutes() {
@@ -96,6 +97,33 @@ export function createAuthRoutes() {
           error: 'Internal server error'
         });
       }
+    }
+  });
+
+  // ===== ОБНОВЛЕНИЕ ДОСТУПА ПО refresh_token (публичный роут) =====
+  router.post('/refresh', async (req, res) => {
+    try {
+      const { refresh_token } = req.body || {};
+      if (!refresh_token || typeof refresh_token !== 'string') {
+        return res.status(400).json({ success: false, error: 'refresh_token is required' });
+      }
+
+      if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.error('[AuthRoutes] Missing Supabase env variables for refresh');
+        return res.status(500).json({ success: false, error: 'Server configuration error' });
+      }
+
+      const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+      const { data, error } = await supa.auth.refreshSession({ refresh_token });
+
+      if (error || !data?.session?.access_token) {
+        return res.status(401).json({ success: false, error: 'Invalid or expired refresh token' });
+      }
+
+      return res.status(200).json({ access_token: data.session.access_token });
+    } catch (error) {
+      console.error('[AuthRoutes] Refresh error:', error);
+      return res.status(500).json({ success: false, error: 'Internal server error' });
     }
   });
 

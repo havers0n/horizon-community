@@ -13,7 +13,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   // Лёгкий провайдер аутентификации: состояние берём из SessionProvider
-  const { session, isLoading } = useSession()
+  const { session, isLoading, refetch } = useSession()
 
   const user: User | null = session
     ? {
@@ -43,6 +43,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (userData && access_token && refresh_token) {
         setAuthState(userData, access_token, refresh_token)
+        await refetch()
       } else {
         throw new Error('Invalid response format')
       }
