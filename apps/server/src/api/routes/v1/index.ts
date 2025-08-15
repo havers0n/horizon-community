@@ -85,95 +85,9 @@ export function createV1Router(): Router {
 
   // --- ШАГ 3: РЕГИСТРИСТРИРУЕМ ЗАЩИЩЕННЫЕ РОУТЫ ---
   
-  /**
-   * GET /api/v1/auth/me/session
-   * Возвращает сессию пользователя с динамическими ролями, пермишенами и статусами.
-   * Источники данных:
-   *  - Роли: common.v_effective_roles (по user_id)
-   *  - Пермишены: common.v_effective_permissions или rpc.get_user_permissions(p_user_id)
-   *  - Статусы: join common.memberships -> common.statuses по пользователю
-   */
-  router.get('/auth/me/session', async (req, res) => {
-    try {
-      const userId = req.user?.id as string | undefined;
-      if (!userId) {
-        return res.status(401).json({ success: false, error: 'Unauthorized' });
-      }
-
-      const supa = req.supabase!;
-
-      const rolesQuery = supa.common
-        .from('v_effective_roles' as any)
-        .select('role_name, display_name')
-        .eq('user_id', userId);
-
-      const permissionsRpcQuery = (supa.public.rpc as any)?.('get_user_permissions', { p_user_id: userId });
-      const permissionsViewQuery = supa.common
-        .from('v_effective_permissions' as any)
-        .select('permission_code')
-        .eq('user_id', userId);
-
-      const membershipsQuery = supa.common
-        .from('memberships' as any)
-        .select('status_id')
-        .eq('user_id', userId);
-
-      const cadetTracksQuery = supa.common
-        .from('v_cadet_tracks_enriched' as any)
-        .select('*')
-        .eq('user_id', userId);
-
-      const [rolesRes, permsRpcRes, permsViewRes, membershipsRes, cadetTracksRes] = await Promise.all([
-        rolesQuery,
-        permissionsRpcQuery,
-        permissionsViewQuery,
-        membershipsQuery,
-        cadetTracksQuery,
-      ]);
-
-      if (rolesRes.error) return res.status(500).json({ success: false, error: rolesRes.error.message });
-      if (membershipsRes.error) return res.status(500).json({ success: false, error: membershipsRes.error.message });
-      if (permsRpcRes && (permsRpcRes as any).error) return res.status(500).json({ success: false, error: (permsRpcRes as any).error.message });
-      if (permsViewRes.error) return res.status(500).json({ success: false, error: permsViewRes.error.message });
-      if (cadetTracksRes.error) return res.status(500).json({ success: false, error: cadetTracksRes.error.message });
-
-      const roles = (rolesRes.data || [])
-        .map((r: any) => ({ code: r.role_name, name: r.display_name }))
-        .filter((r: any) => r.code && r.name);
-      const permissions = Array.isArray(permsRpcRes?.data)
-        ? (permsRpcRes!.data as string[])
-        : ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
-
-      const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
-      let statuses: string[] = [];
-      if (statusIds.length > 0) {
-        const statusesRes = await supa.common
-          .from('statuses' as any)
-          .select('code, id')
-          .in('id', statusIds as any);
-        if (statusesRes.error) return res.status(500).json({ success: false, error: statusesRes.error.message });
-        statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
-      }
-
-      const cadetTracksRaw = (cadetTracksRes.data || []) as any[];
-      const cadetTracks = cadetTracksRaw.filter((t: any) => (typeof t.is_active === 'boolean' ? t.is_active : true));
-
-      const unique = (arr: string[]) => Array.from(new Set(arr));
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          user: { id: userId, username: req.user?.username ?? null },
-          roles: roles,
-          permissions: unique(permissions),
-          statuses: unique(statuses),
-          cadetTracks,
-        },
-      });
-    } catch (error) {
-      console.error('Error building session:', error);
-      return res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Internal server error' });
-    }
+  // Упрощенный обработчик: сессия уже собрана в authenticateToken
+  router.get('/auth/me/session', (req, res) => {
+    return res.status(200).json({ success: true, data: (req as any).session });
   });
 
   /**

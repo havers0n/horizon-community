@@ -103,12 +103,12 @@ export default function AdminApplicationsPage() {
     return statusCodeByIdMap.get(value) ?? value
   }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['admin-applications', { status, department, page }],
     queryFn: () => listAdminApplications({ status: status || undefined, department: department || undefined, page }),
   })
 
-  const { data: selectedApplication } = useQuery({
+  const { data: selectedApplication, isFetching: isFetchingSelected, isError: isSelectedError, error: selectedError } = useQuery({
     queryKey: ['admin-application', selectedId],
     queryFn: () => getAdminApplicationById(selectedId!),
     enabled: !!selectedId,
@@ -153,15 +153,17 @@ export default function AdminApplicationsPage() {
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label className="text-sm text-muted-foreground">Статус</label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(v) => setStatus(v === 'all' ? '' : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Все" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все</SelectItem>
-                {applicationStatuses.map((s: { code: string; name: string }) => (
-                  <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>
-                ))}
+                <SelectItem value="all">Все статусы</SelectItem>
+                {applicationStatuses
+                  .filter((s: any) => s && typeof s.code === 'string' && s.code.length > 0)
+                  .map((s: { id?: string; code: string; name: string }) => (
+                    <SelectItem key={s.id ?? s.code} value={s.code}>{s.name}</SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -181,7 +183,32 @@ export default function AdminApplicationsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div>Загрузка...</div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Короткий ID</TableHead>
+                  <TableHead>Автор</TableHead>
+                  <TableHead>Департамент</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Создано</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><div className="h-4 w-24 bg-gray-800 rounded animate-pulse" /></TableCell>
+                    <TableCell><div className="h-4 w-40 bg-gray-800 rounded animate-pulse" /></TableCell>
+                    <TableCell><div className="h-4 w-48 bg-gray-800 rounded animate-pulse" /></TableCell>
+                    <TableCell><div className="h-4 w-28 bg-gray-800 rounded animate-pulse" /></TableCell>
+                    <TableCell><div className="h-4 w-36 bg-gray-800 rounded animate-pulse" /></TableCell>
+                    <TableCell className="text-right"><div className="h-8 w-20 bg-gray-800 rounded animate-pulse inline-block" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : isError ? (
+            <div className="text-red-400">Ошибка загрузки заявок: {typeof (error as any)?.message === 'string' ? (error as any).message : 'Неизвестная ошибка'}</div>
           ) : (
             <Table>
               <TableHeader>
@@ -194,7 +221,7 @@ export default function AdminApplicationsPage() {
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
-            <TableBody>
+              <TableBody>
                 {items.map((app: AdminApplication) => (
                   <TableRow
                     key={app.id}
@@ -202,7 +229,7 @@ export default function AdminApplicationsPage() {
                     onClick={() => { setSelectedId(app.id); setReviewStatus(getStatusCodeFromIdOrCode(app.status_id)); setReviewComment('') }}
                   >
                     <TableCell className="font-mono">{app.id.slice(0, 8)}</TableCell>
-                    <TableCell className="font-mono">{app.author_user_id.slice(0, 8)}</TableCell>
+                    <TableCell className="font-mono">{app.author_user_id?.slice(0, 8) || '-'}</TableCell>
                     <TableCell>{getDepartmentName(app.target_department_id)}</TableCell>
                     <TableCell>{getStatusName(app.status_id)}</TableCell>
                     <TableCell>{app.created_at ? new Date(app.created_at).toLocaleString() : '-'}</TableCell>
@@ -227,12 +254,24 @@ export default function AdminApplicationsPage() {
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Общая информация</div>
                 <div className="rounded border p-3 text-sm space-y-2">
-                  <div className="flex justify-between gap-4"><span className="text-muted-foreground">ID</span><span className="font-mono">{selectedId?.slice(0,8)}</span></div>
-                  <div className="flex justify-between gap-4"><span className="text-muted-foreground">Автор</span><span className="font-mono">{selectedApplication?.author_user_id?.slice(0,8)}</span></div>
-                  <div className="flex justify-between gap-4"><span className="text-muted-foreground">Департамент</span><span>{getDepartmentName(selectedApplication?.target_department_id)}</span></div>
-                  <div className="flex justify-between gap-4"><span className="text-muted-foreground">Статус</span><span>{getStatusName(selectedApplication?.status_id)}</span></div>
-                  <div className="flex justify-between gap-4"><span className="text-muted-foreground">Тип</span><span>{selectedApplication?.type ?? '-'}</span></div>
-                  <div className="flex justify-between gap-4"><span className="text-muted-foreground">Создано</span><span>{selectedApplication?.created_at ? new Date(selectedApplication.created_at).toLocaleString() : '-'}</span></div>
+                  {isFetchingSelected ? (
+                    <>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="flex justify-between gap-4"><span className="h-4 w-24 bg-gray-800 rounded animate-pulse" /><span className="h-4 w-36 bg-gray-800 rounded animate-pulse" /></div>
+                      ))}
+                    </>
+                  ) : isSelectedError ? (
+                    <div className="text-red-400">Ошибка загрузки данных заявки: {typeof (selectedError as any)?.message === 'string' ? (selectedError as any).message : 'Неизвестная ошибка'}</div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">ID</span><span className="font-mono">{selectedId?.slice(0,8)}</span></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Автор</span><span className="font-mono">{selectedApplication?.author_user_id?.slice(0,8)}</span></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Департамент</span><span>{getDepartmentName(selectedApplication?.target_department_id)}</span></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Статус</span><span>{getStatusName(selectedApplication?.status_id)}</span></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Тип</span><span>{selectedApplication?.type ?? '-'}</span></div>
+                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Создано</span><span>{selectedApplication?.created_at ? new Date(selectedApplication.created_at).toLocaleString() : '-'}</span></div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -242,21 +281,37 @@ export default function AdminApplicationsPage() {
                   {(() => {
                     const data = (selectedApplication as any)?.data ?? {}
                     const entries = Object.entries(data as Record<string, any>)
+                    if (isFetchingSelected) return <div className="h-24 bg-gray-800 rounded animate-pulse" />
                     if (!entries.length) return <div className="text-muted-foreground">Нет дополнительных данных</div>
 
                     const formatKey = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                    const renderObject = (obj: Record<string, any>) => (
+                      <div className="space-y-1">
+                        {Object.entries(obj).map(([k2, v2]) => (
+                          <div key={k2} className="flex justify-between gap-4">
+                            <span className="text-muted-foreground">{formatKey(k2)}</span>
+                            <span className="text-right break-all">{String(v2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )
                     const renderValue = (v: any): React.ReactNode => {
                       if (v === null || v === undefined) return '-' as any
                       if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v)
-                      if (Array.isArray(v)) return v.map((x, i) => <span key={i} className="inline-block mr-1">{String(x)}</span>)
-                      if (typeof v === 'object') return <pre className="whitespace-pre-wrap break-words text-xs">{JSON.stringify(v, null, 2)}</pre>
+                      if (Array.isArray(v)) return <div className="flex flex-wrap gap-1">{v.map((x, i) => <span key={i} className="inline-block px-2 py-0.5 bg-gray-800 rounded text-xs">{String(x)}</span>)}</div>
+                      if (typeof v === 'object') return renderObject(v as Record<string, any>)
                       return String(v)
                     }
 
                     return entries.map(([k, v]) => (
-                      <div key={k} className="flex justify-between gap-4">
-                        <span className="text-muted-foreground">{formatKey(k)}</span>
-                        <span className="text-right break-all">{renderValue(v)}</span>
+                      <div key={k} className="space-y-1">
+                        <div className="flex justify-between gap-4">
+                          <span className="text-muted-foreground">{formatKey(k)}</span>
+                          <span className="text-right break-all">{(typeof v === 'object' && v !== null) ? '' : renderValue(v)}</span>
+                        </div>
+                        {(typeof v === 'object' && v !== null) ? (
+                          <div className="pl-2 border-l border-gray-700">{renderValue(v)}</div>
+                        ) : null}
                       </div>
                     ))
                   })()}
@@ -271,9 +326,11 @@ export default function AdminApplicationsPage() {
                     <SelectValue placeholder="Выберите статус" />
                   </SelectTrigger>
                   <SelectContent>
-                    {applicationStatuses.map((s: { code: string; name: string }) => (
-                      <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>
-                    ))}
+                    {applicationStatuses
+                      .filter((s: any) => s && typeof s.code === 'string' && s.code.length > 0)
+                      .map((s: { id?: string; code: string; name: string }) => (
+                        <SelectItem key={s.id ?? s.code} value={s.code}>{s.name}</SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -281,9 +338,11 @@ export default function AdminApplicationsPage() {
                 <label className="text-sm text-muted-foreground">Комментарий ревьюера</label>
                 <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={6} />
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setSelectedId(null)}>Закрыть</Button>
-                <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: reviewStatus, review_comment: reviewComment })}>Сохранить</Button>
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button variant="secondary" onClick={() => setSelectedId(null)}>Закрыть</Button>
+                <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: reviewStatus || 'approved', review_comment: reviewComment })}>Сохранить</Button>
+                <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'approved', review_comment: reviewComment })}>Одобрить</Button>
+                <Button variant="destructive" onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'rejected', review_comment: reviewComment })}>Отклонить</Button>
               </div>
             </div>
           </div>

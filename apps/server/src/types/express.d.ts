@@ -13,9 +13,10 @@ export interface SupabaseRequestClients {
 // Типизированные данные сессии, собираемые в authenticateToken
 export interface SessionData {
   user: { id: string; username: string | null };
-  roles: string[];
+  roles: { code: string; name: string }[] | string[];
   permissions: string[];
   statuses: string[];
+  cadetTracks?: any[];
 }
 
 declare global {

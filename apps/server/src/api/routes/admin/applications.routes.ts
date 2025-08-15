@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { authenticateToken, requireAnyRole } from '../../middleware/auth.middleware';
+import { authenticateToken, requirePermission } from '../../middleware/auth.middleware';
 import { ApplicationService } from '../../../core/services/ApplicationService';
 
 const router: Router = Router();
@@ -22,7 +22,7 @@ const updateStatusBodySchema = z.object({
 });
 
 // GET /api/v1/admin/applications
-router.get('/applications', authenticateToken, requireAnyRole(['admin', 'staff']), async (req: any, res) => {
+router.get('/applications', authenticateToken, requirePermission('applications.manage'), async (req: any, res) => {
   try {
     const parse = listQuerySchema.safeParse(req.query);
     if (!parse.success) {
@@ -49,7 +49,7 @@ router.get('/applications', authenticateToken, requireAnyRole(['admin', 'staff']
 });
 
 // GET /api/v1/admin/applications/:id
-router.get('/applications/:id', authenticateToken, requireAnyRole(['admin', 'staff']), async (req: any, res) => {
+router.get('/applications/:id', authenticateToken, requirePermission('applications.manage'), async (req: any, res) => {
   try {
     const params = paramsSchema.parse(req.params);
     const service = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
@@ -65,7 +65,7 @@ router.get('/applications/:id', authenticateToken, requireAnyRole(['admin', 'sta
 });
 
 // PUT /api/v1/admin/applications/:id/status
-router.put('/applications/:id/status', authenticateToken, requireAnyRole(['admin', 'staff']), async (req: any, res) => {
+router.put('/applications/:id/status', authenticateToken, requirePermission('applications.manage'), async (req: any, res) => {
   try {
     const params = paramsSchema.parse(req.params);
     const body = updateStatusBodySchema.parse(req.body);

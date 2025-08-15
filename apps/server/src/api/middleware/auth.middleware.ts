@@ -162,8 +162,107 @@ export async function authenticateToken(
 		};
 		(req as AuthenticatedRequest).user = authenticatedUser;
 
-		// НИКАКОЙ сборки сессии здесь. Полная сессия строится в /api/v1/auth/me/session
-		next();
+		// ===== СБОРКА ПОЛНОЙ СЕССИИ ПОЛЬЗОВАТЕЛЯ (единый источник истины) =====
+		try {
+			const supa = (req as any).supabase;
+			if (!supa) {
+				res.status(500).json({ success: false, error: 'Server configuration error: missing per-request Supabase client' });
+				return;
+			}
+
+			const userId = authenticatedUser.id;
+
+			const rolesQuery = supa.common
+				.from('v_effective_roles' as any)
+				.select('role_name, display_name')
+				.eq('user_id', userId);
+
+			const permissionsRpcQuery = (supa.public.rpc as any)?.('get_user_permissions', { p_user_id: userId });
+			const permissionsViewQuery = supa.common
+				.from('v_effective_permissions' as any)
+				.select('permission_code')
+				.eq('user_id', userId);
+
+			const membershipsQuery = supa.common
+				.from('memberships' as any)
+				.select('status_id')
+				.eq('user_id', userId);
+
+			const cadetTracksQuery = supa.common
+				.from('v_cadet_tracks_enriched' as any)
+				.select('*')
+				.eq('user_id', userId);
+
+			const [rolesRes, permsRpcRes, permsViewRes, membershipsRes, cadetTracksRes] = await Promise.all([
+				rolesQuery,
+				permissionsRpcQuery,
+				permissionsViewQuery,
+				membershipsQuery,
+				cadetTracksQuery,
+			]);
+
+			if (rolesRes.error) {
+				res.status(500).json({ success: false, error: rolesRes.error.message });
+				return;
+			}
+			if (membershipsRes.error) {
+				res.status(500).json({ success: false, error: membershipsRes.error.message });
+				return;
+			}
+			if (permsRpcRes && (permsRpcRes as any).error) {
+				res.status(500).json({ success: false, error: (permsRpcRes as any).error.message });
+				return;
+			}
+			if (permsViewRes.error) {
+				res.status(500).json({ success: false, error: permsViewRes.error.message });
+				return;
+			}
+			if (cadetTracksRes.error) {
+				res.status(500).json({ success: false, error: cadetTracksRes.error.message });
+				return;
+			}
+
+			const roles = (rolesRes.data || [])
+				.map((r: any) => ({ code: r.role_name, name: r.display_name }))
+				.filter((r: any) => r.code && r.name);
+
+			const permissions = Array.isArray(permsRpcRes?.data)
+				? (permsRpcRes!.data as string[])
+				: ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
+
+			const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
+			let statuses: string[] = [];
+			if (statusIds.length > 0) {
+				const statusesRes = await supa.common
+					.from('statuses' as any)
+					.select('code, id')
+					.in('id', statusIds as any);
+				if (statusesRes.error) {
+					res.status(500).json({ success: false, error: statusesRes.error.message });
+					return;
+				}
+				statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
+			}
+
+			const cadetTracksRaw = (cadetTracksRes.data || []) as any[];
+			const cadetTracks = cadetTracksRaw.filter((t: any) => (typeof t.is_active === 'boolean' ? t.is_active : true));
+
+			const unique = (arr: string[]) => Array.from(new Set(arr));
+
+			// Прикрепляем построенную сессию к запросу
+			(req as any).session = {
+				user: { id: userId, username: authenticatedUser.username ?? null },
+				roles: roles,
+				permissions: unique(permissions),
+				statuses: unique(statuses),
+				cadetTracks,
+			};
+
+			next();
+		} catch (sessionError) {
+			console.error('[AuthMiddleware] Error building session:', sessionError);
+			res.status(500).json({ success: false, error: 'Failed to build user session' });
+		}
 	} catch (error) {
 		console.error('[AuthMiddleware] CRITICAL ERROR:', error);
 		res.status(500).json({ success: false, error: 'Authentication failed' });
