@@ -8,6 +8,7 @@ import { AppError } from '../../utils/AppError';
 type SystemApplication = Database['system']['Tables']['applications']['Row'];
 type SystemApplicationInsert = Database['system']['Tables']['applications']['Insert'];
 type SystemApplicationUpdate = Database['system']['Tables']['applications']['Update'];
+type AdminApplicationViewRow = Database['system']['Views']['v_admin_applications']['Row'];
 
 // Статус в system схеме хранится как строковый идентификатор
 type ApplicationStatus = string;
@@ -115,10 +116,13 @@ export class ApplicationService {
    */
   async getApplicationById(id: string): Promise<SystemApplication | null> {
     try {
-      const { data, error } = await this.systemDb
-        .from('applications')
-        .select('*')
-        .eq('id', id)
+      if (!this.publicDb) {
+        console.error('[ApplicationService] getApplicationById: public client is not available');
+        throw new AppError('Server configuration error: public schema not available', 500);
+      }
+
+      const { data, error } = await (this.publicDb as any)
+        .rpc('get_admin_application_by_id', { p_application_id: id })
         .single();
 
       if (error) {
@@ -127,7 +131,7 @@ export class ApplicationService {
         throw new AppError('Ошибка при поиске заявки', 500);
       }
 
-      return data;
+      return data as any as SystemApplication;
     } catch (error) {
       console.error('[ApplicationService] Error in getApplicationById:', error);
       throw error;
@@ -237,24 +241,39 @@ export class ApplicationService {
   /**
    * ADMIN: Получить все заявки с пагинацией и фильтрами
    */
-  async getAllApplications(filters: { status?: string; department?: string; page: number; limit: number }): Promise<{ items: SystemApplication[]; page: number; limit: number; total: number; }> {
+  async getAllApplications(filters: { status?: string; department?: string; page: number; limit: number }): Promise<{ items: AdminApplicationViewRow[]; page: number; limit: number; total: number; }> {
     const { status, department, page, limit } = filters;
 
-    let query = this.systemDb.from('applications').select('*', { count: 'exact' }).order('created_at', { ascending: false });
-    if (status) query = (query as any).eq('status_id', status);
-    if (department) query = (query as any).eq('target_department_id', department);
+    const statusId = status || null;
+    const departmentId = department || null;
 
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
+    if (!this.publicDb) {
+      console.error('[ApplicationService] getAllApplications: public client is not available');
+      throw new AppError('Server configuration error: public schema not available', 500);
+    }
 
-    const { data, error, count } = await (query as any).range(from, to);
+    const { data, error } = await (this.publicDb as any).rpc('get_admin_applications', {
+      p_page: page,
+      p_limit: limit,
+      p_status_id: statusId,
+      p_department_id: departmentId,
+    });
 
     if (error) {
       console.error('[ApplicationService] getAllApplications error:', error);
       throw new AppError('Не удалось получить список заявок', 500);
     }
 
-    return { items: (data || []) as SystemApplication[], page, limit, total: count || 0 };
+    const { count, error: countError } = await this.systemDb
+      .from('applications')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('[ApplicationService] getAllApplications count error:', countError);
+      throw new AppError('Не удалось получить количество заявок', 500);
+    }
+
+    return { items: (data || []) as AdminApplicationViewRow[], page, limit, total: count || 0 };
   }
 
   /**

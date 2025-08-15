@@ -15,6 +15,70 @@ import { apiClient } from '@/shared/api/api-client'
 
 // Удалён локальный STATUSES: статусы теперь подтягиваются динамически из словаря
 
+// Словарь переводов ключей данных заявки на человеко-читаемые русские метки
+const dataKeyLabels: { [key: string]: string } = {
+  full_name: 'ФИО',
+  first_name: 'Имя',
+  last_name: 'Фамилия',
+  middle_name: 'Отчество',
+  birth_date: 'Дата рождения',
+  date_of_birth: 'Дата рождения',
+  phone: 'Телефон',
+  email: 'E-mail',
+  motivation: 'Мотивация',
+  department_id: 'Департамент',
+  department: 'Департамент',
+  experience: 'Опыт',
+  skills: 'Навыки',
+  links: 'Ссылки',
+  discord: 'Discord',
+  telegram: 'Telegram',
+  nickname: 'Никнейм',
+  test_id: 'Тест',
+  city: 'Город',
+  address: 'Адрес',
+  reason: 'Причина',
+  source: 'Откуда вы узнали о нас?',
+  has_microphone: 'Наличие микрофона',
+  pc_requirements_link: 'Ссылка на системные требования',
+  pc_meets_requirements: 'ПК соответствует требованиям',
+  department_understanding: 'Понимание задач департамента',
+  in_other_communities_now: 'Состоит в других сообществах',
+  been_in_other_fivem_communities: 'Состоял в других FiveM сообществах',
+};
+
+const getLabel = (key: string) => dataKeyLabels[key] ?? key;
+
+const DetailItem: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
+  <div className="py-3 grid grid-cols-3 gap-5">
+    <dt className="text-base text-muted-foreground">{label}</dt>
+    <dd className="text-base col-span-2 break-all leading-relaxed">{value ?? '-'}</dd>
+  </div>
+);
+
+// Note: SectionTitle removed as layout was restructured
+
+const deriveStatusKind = (name?: string | null): 'submitted' | 'approved' | 'rejected' | 'other' => {
+  const v = String(name || '').toLowerCase()
+  if (v.includes('подан') || v.includes('submit') || v.includes('await')) return 'submitted'
+  if (v.includes('одобр') || v.includes('approv')) return 'approved'
+  if (v.includes('отклон') || v.includes('reject')) return 'rejected'
+  return 'other'
+}
+
+const StatusBadge: React.FC<{ name?: string | null }> = ({ name }) => {
+  const kind = deriveStatusKind(name)
+  const base = 'px-2.5 py-0.5 rounded-full text-xs font-medium inline-flex items-center'
+  const tone = kind === 'submitted'
+    ? 'bg-blue-900 text-blue-300'
+    : kind === 'approved'
+      ? 'bg-green-900 text-green-300'
+      : kind === 'rejected'
+        ? 'bg-red-900 text-red-300'
+        : 'bg-gray-800 text-gray-300'
+  return <span className={`${base} ${tone}`}>{name || '-'}</span>
+}
+
 export default function AdminApplicationsPage() {
   const queryClient = useQueryClient()
   const { session, isLoading: isSessionLoading } = useSession()
@@ -22,7 +86,7 @@ export default function AdminApplicationsPage() {
   const [department, setDepartment] = React.useState<string>('')
   const [page] = React.useState<number>(1)
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
-  const [reviewStatus, setReviewStatus] = React.useState<string>('')
+  // removed reviewStatus state as status is now controlled via explicit buttons
   const [reviewComment, setReviewComment] = React.useState<string>('')
 
   // Dictionaries: statuses and departments
@@ -35,36 +99,21 @@ export default function AdminApplicationsPage() {
     staleTime: 10 * 60 * 1000,
   })
 
-  const { data: departmentsDict } = useQuery({
-    queryKey: ['dict', 'departments'],
-    queryFn: async () => {
-      const res = await apiClient.get<any>('/common/departments')
-      return (res as any).data ?? (res as any)
-    },
-    staleTime: 10 * 60 * 1000,
-  })
+  // Removed departments dictionary — not required for enriched rendering
 
-  const statusNameMap = React.useMemo(() => {
-    const map = new Map<string, string>()
-    ;(statusesDict ?? []).forEach((s: any) => {
-      const id = s?.id ?? s?.status_id ?? s?.uuid ?? s?.code
-      const name = s?.name ?? s?.display_name ?? s?.label ?? s?.code ?? s?.id
-      if (id) map.set(String(id), String(name))
-      if (s?.code) map.set(String(s.code), String(name))
-    })
-    return map
-  }, [statusesDict])
+  // Removed statusNameMap — enriched status_name provided by API
 
   // Карта соответствия: id статуса -> code (для установки значения в выпадающем списке изменения статуса)
-  const statusCodeByIdMap = React.useMemo(() => {
-    const map = new Map<string, string>()
-    ;(statusesDict ?? []).forEach((s: any) => {
-      const id = s?.id ?? s?.status_id ?? s?.uuid
-      const code = s?.code ?? s?.id
-      if (id && code) map.set(String(id), String(code))
-    })
-    return map
-  }, [statusesDict])
+  // removed statusCodeByIdMap as we no longer allow selecting arbitrary status in modal
+  // const statusCodeByIdMap = React.useMemo(() => {
+  //   const map = new Map<string, string>()
+  //   ;(statusesDict ?? []).forEach((s: any) => {
+  //     const id = s?.id ?? s?.status_id ?? s?.uuid
+  //     const code = s?.code ?? s?.id
+  //     if (id && code) map.set(String(id), String(code))
+  //   })
+  //   return map
+  // }, [statusesDict])
 
   // Список статусов только нужного вида: application_status
   const applicationStatuses = React.useMemo(() => {
@@ -78,30 +127,14 @@ export default function AdminApplicationsPage() {
     }))
   }, [statusesDict])
 
-  const departmentNameMap = React.useMemo(() => {
-    const map = new Map<string, string>()
-    ;(departmentsDict ?? []).forEach((d: any) => {
-      const id = d?.id ?? d?.department_id ?? d?.uuid
-      const name = d?.name ?? d?.display_name ?? d?.title ?? d?.label ?? d?.code ?? d?.id
-      if (id) map.set(String(id), String(name))
-    })
-    return map
-  }, [departmentsDict])
+  // Removed departmentNameMap — enriched department_name provided by API
 
-  const getStatusName = (idOrCode?: string | null) => {
-    if (!idOrCode) return '-'
-    return statusNameMap.get(idOrCode) ?? idOrCode
-  }
+  // Removed getStatusName/getDepartmentName — status and department now rendered via enriched names
 
-  const getDepartmentName = (id?: string | null) => {
-    if (!id) return '-'
-    return departmentNameMap.get(id) ?? id
-  }
-
-  const getStatusCodeFromIdOrCode = (value?: string | null) => {
-    if (!value) return ''
-    return statusCodeByIdMap.get(value) ?? value
-  }
+  // const getStatusCodeFromIdOrCode = (value?: string | null) => {
+  //   if (!value) return ''
+  //   return statusCodeByIdMap.get(value) ?? value
+  // }
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['admin-applications', { status, department, page }],
@@ -226,15 +259,15 @@ export default function AdminApplicationsPage() {
                   <TableRow
                     key={app.id}
                     className="cursor-pointer"
-                    onClick={() => { setSelectedId(app.id); setReviewStatus(getStatusCodeFromIdOrCode(app.status_id)); setReviewComment('') }}
+                    onClick={() => { setSelectedId(app.id); setReviewComment('') }}
                   >
                     <TableCell className="font-mono">{app.id.slice(0, 8)}</TableCell>
-                    <TableCell className="font-mono">{app.author_user_id?.slice(0, 8) || '-'}</TableCell>
-                    <TableCell>{getDepartmentName(app.target_department_id)}</TableCell>
-                    <TableCell>{getStatusName(app.status_id)}</TableCell>
+                    <TableCell>{app.author_name || '-'}</TableCell>
+                    <TableCell>{app.department_name || '-'}</TableCell>
+                    <TableCell><StatusBadge name={app.status_name} /></TableCell>
                     <TableCell>{app.created_at ? new Date(app.created_at).toLocaleString() : '-'}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setSelectedId(app.id); setReviewStatus(getStatusCodeFromIdOrCode(app.status_id)); setReviewComment('') }}>Просмотр</Button>
+                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setSelectedId(app.id); setReviewComment('') }}>Просмотр</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -245,105 +278,126 @@ export default function AdminApplicationsPage() {
       </Card>
 
       <Dialog open={!!selectedId} onOpenChange={(open) => !open && setSelectedId(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="w-[76vw] max-w-[76vw] h-[72vh] top-[48%] md:top-[46%] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Заявка {selectedId?.slice(0,8)}</DialogTitle>
           </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Общая информация</div>
-                <div className="rounded border p-3 text-sm space-y-2">
-                  {isFetchingSelected ? (
-                    <>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="flex justify-between gap-4"><span className="h-4 w-24 bg-gray-800 rounded animate-pulse" /><span className="h-4 w-36 bg-gray-800 rounded animate-pulse" /></div>
-                      ))}
-                    </>
-                  ) : isSelectedError ? (
-                    <div className="text-red-400">Ошибка загрузки данных заявки: {typeof (selectedError as any)?.message === 'string' ? (selectedError as any).message : 'Неизвестная ошибка'}</div>
-                  ) : (
-                    <>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">ID</span><span className="font-mono">{selectedId?.slice(0,8)}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Автор</span><span className="font-mono">{selectedApplication?.author_user_id?.slice(0,8)}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Департамент</span><span>{getDepartmentName(selectedApplication?.target_department_id)}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Статус</span><span>{getStatusName(selectedApplication?.status_id)}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Тип</span><span>{selectedApplication?.type ?? '-'}</span></div>
-                      <div className="flex justify-between gap-4"><span className="text-muted-foreground">Создано</span><span>{selectedApplication?.created_at ? new Date(selectedApplication.created_at).toLocaleString() : '-'}</span></div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Данные заявки</div>
-                <div className="rounded border p-3 text-sm space-y-2 max-h-64 overflow-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full min-h-0">
+            {/* LEFT: Application Data (large scrollable area) */}
+            <div className="md:col-span-2 flex flex-col min-h-0">
+              <div className="space-y-3 flex-1 min-h-0">
+                <div className="text-base text-muted-foreground">Данные заявки</div>
+                <div className="rounded border p-4 text-base space-y-3 flex-1 min-h-0">
                   {(() => {
                     const data = (selectedApplication as any)?.data ?? {}
                     const entries = Object.entries(data as Record<string, any>)
                     if (isFetchingSelected) return <div className="h-24 bg-gray-800 rounded animate-pulse" />
                     if (!entries.length) return <div className="text-muted-foreground">Нет дополнительных данных</div>
 
-                    const formatKey = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                    const formatKey = (key: string) => getLabel(key)
+                    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
+
+                    const renderPrimitive = (key: string, v: any): React.ReactNode => {
+                      if (v === null || v === undefined) return '-' as any
+                      if (typeof v === 'boolean') return v ? <span className="text-green-400">Да</span> : <span className="text-red-400">Нет</span>
+                      if (typeof v === 'string') {
+                        const val = v.trim()
+                        if (uuidRegex.test(val)) {
+                          if (['department', 'department_id'].includes(key)) return (selectedApplication as any)?.department_name || '-'
+                          if (['status', 'status_id'].includes(key)) return (selectedApplication as any)?.status_name || '-'
+                          if (['author', 'author_user_id', 'user_id'].includes(key)) return (selectedApplication as any)?.author_name || '-'
+                          return '-'
+                        }
+                        if (val.startsWith('http://') || val.startsWith('https://')) {
+                          return <a href={val} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{val}</a>
+                        }
+                        return val
+                      }
+                      if (typeof v === 'number') return String(v)
+                      return String(v)
+                    }
+
                     const renderObject = (obj: Record<string, any>) => (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {Object.entries(obj).map(([k2, v2]) => (
-                          <div key={k2} className="flex justify-between gap-4">
-                            <span className="text-muted-foreground">{formatKey(k2)}</span>
-                            <span className="text-right break-all">{String(v2)}</span>
+                          <div key={k2} className="py-3 grid grid-cols-3 gap-5">
+                            <dt className="text-base text-muted-foreground">{formatKey(k2)}</dt>
+                            <dd className="text-base col-span-2 break-all leading-relaxed">{Array.isArray(v2)
+                              ? <div className="flex flex-wrap gap-1">{(v2 as any[]).map((x, i) => <span key={i} className="inline-block px-2 py-0.5 bg-gray-800 rounded text-xs">{String(x)}</span>)}</div>
+                              : (typeof v2 === 'object' && v2 !== null) ? renderObject(v2 as Record<string, any>)
+                              : renderPrimitive(k2, v2)}</dd>
                           </div>
                         ))}
                       </div>
                     )
-                    const renderValue = (v: any): React.ReactNode => {
-                      if (v === null || v === undefined) return '-' as any
-                      if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v)
-                      if (Array.isArray(v)) return <div className="flex flex-wrap gap-1">{v.map((x, i) => <span key={i} className="inline-block px-2 py-0.5 bg-gray-800 rounded text-xs">{String(x)}</span>)}</div>
-                      if (typeof v === 'object') return renderObject(v as Record<string, any>)
-                      return String(v)
-                    }
 
-                    return entries.map(([k, v]) => (
-                      <div key={k} className="space-y-1">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-muted-foreground">{formatKey(k)}</span>
-                          <span className="text-right break-all">{(typeof v === 'object' && v !== null) ? '' : renderValue(v)}</span>
-                        </div>
-                        {(typeof v === 'object' && v !== null) ? (
-                          <div className="pl-2 border-l border-gray-700">{renderValue(v)}</div>
-                        ) : null}
-                      </div>
-                    ))
+                    return (
+                      <dl className="divide-y divide-gray-700">
+                        {entries.map(([k, v]) => (
+                          <div key={k} className="py-3 grid grid-cols-3 gap-5">
+                            <dt className="text-base text-muted-foreground">{formatKey(k)}</dt>
+                            <dd className="text-base col-span-2 break-all leading-relaxed">{Array.isArray(v)
+                              ? <div className="flex flex-wrap gap-1">{(v as any[]).map((x, i) => <span key={i} className="inline-block px-2 py-0.5 bg-gray-800 rounded text-xs">{String(x)}</span>)}</div>
+                              : (typeof v === 'object' && v !== null) ? renderObject(v as Record<string, any>)
+                              : renderPrimitive(k, v)}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )
                   })()}
                 </div>
               </div>
             </div>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm text-muted-foreground">Новый статус</label>
-                <Select value={reviewStatus} onValueChange={setReviewStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {applicationStatuses
-                      .filter((s: any) => s && typeof s.code === 'string' && s.code.length > 0)
-                      .map((s: { id?: string; code: string; name: string }) => (
-                        <SelectItem key={s.id ?? s.code} value={s.code}>{s.name}</SelectItem>
+
+            {/* RIGHT: General Info on top, Reviewer comment below */}
+            <div className="flex flex-col gap-4 min-h-0">
+              <div className="space-y-3">
+                <div className="text-base text-muted-foreground">Общая информация</div>
+                <div className="rounded border p-4 text-base space-y-3">
+                  {isFetchingSelected ? (
+                    <>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="flex justify-between gap-6"><span className="h-5 w-28 bg-gray-800 rounded animate-pulse" /><span className="h-5 w-40 bg-gray-800 rounded animate-pulse" /></div>
                       ))}
-                  </SelectContent>
-                </Select>
+                    </>
+                  ) : isSelectedError ? (
+                    <div className="text-red-400">Ошибка загрузки данных заявки: {typeof (selectedError as any)?.message === 'string' ? (selectedError as any).message : 'Неизвестная ошибка'}</div>
+                  ) : (
+                    <dl className="divide-y divide-gray-700">
+                      <DetailItem label="ID" value={<span className="font-mono">{selectedId?.slice(0,8)}</span>} />
+                      <DetailItem label="Автор" value={(selectedApplication as any)?.author_name || '-'} />
+                      <DetailItem label="Департамент" value={(selectedApplication as any)?.department_name || '-'} />
+                      <DetailItem label="Статус" value={<StatusBadge name={(selectedApplication as any)?.status_name} />} />
+                      <DetailItem label="Тип" value={selectedApplication?.type ?? '-'} />
+                      <DetailItem label="Создано" value={selectedApplication?.created_at ? new Date(selectedApplication.created_at).toLocaleString() : '-'} />
+                    </dl>
+                  )}
+                </div>
               </div>
+ 
+              {/* Reviewer comment */}
               <div>
-                <label className="text-sm text-muted-foreground">Комментарий ревьюера</label>
-                <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={6} />
+                <label className="text-base text-muted-foreground">Комментарий ревьюера</label>
+                {(() => {
+                  const statusName = String((selectedApplication as any)?.status_name || '')
+                  const isSubmitted = statusName.toLowerCase().includes('подан') || statusName.toLowerCase().includes('submit')
+                  return (
+                    <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={10} disabled={!isSubmitted} />
+                  )
+                })()}
               </div>
-              <div className="flex flex-wrap justify-end gap-2">
-                <Button variant="secondary" onClick={() => setSelectedId(null)}>Закрыть</Button>
-                <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: reviewStatus || 'approved', review_comment: reviewComment })}>Сохранить</Button>
-                <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'approved', review_comment: reviewComment })}>Одобрить</Button>
-                <Button variant="destructive" onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'rejected', review_comment: reviewComment })}>Отклонить</Button>
-              </div>
+              {(() => {
+                const statusName = String((selectedApplication as any)?.status_name || '')
+                const isSubmitted = statusName.toLowerCase().includes('подан') || statusName.toLowerCase().includes('submit')
+                return isSubmitted ? (
+                  <div className="flex flex-wrap justify-end gap-3">
+                    <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'approved', review_comment: reviewComment })}>Одобрить</Button>
+                    <Button variant="destructive" onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'rejected', review_comment: reviewComment })}>Отклонить</Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground p-3 rounded border border-gray-700">Заявка уже обработана. Статус: <span className="font-semibold">{(selectedApplication as any)?.status_name || '-'}</span></div>
+                )
+              })()}
             </div>
           </div>
         </DialogContent>

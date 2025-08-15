@@ -3883,6 +3883,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "test_sessions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "v_admin_applications"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "test_sessions_test_id_fkey"
             columns: ["test_id"]
             isOneToOne: false
@@ -3935,6 +3942,25 @@ export type Database = {
           type_name: string | null
           updated_at: string | null
           user_id: string | null
+        }
+        Relationships: []
+      }
+      v_admin_applications: {
+        Row: {
+          author_character_id: string | null
+          author_name: string | null
+          author_user_id: string | null
+          created_at: string | null
+          data: Json | null
+          department_name: string | null
+          id: string | null
+          review_comment: string | null
+          reviewer_user_id: string | null
+          status_id: string | null
+          status_name: string | null
+          target_department_id: string | null
+          type: string | null
+          updated_at: string | null
         }
         Relationships: []
       }

@@ -8,6 +8,10 @@ export interface AdminApplication {
   type: string
   created_at?: string
   data?: any
+  // Обогащённые, человеко-читаемые поля из бэкенда
+  author_name?: string | null
+  department_name?: string | null
+  status_name?: string | null
 }
 
 export interface AdminApplicationsFilters {
