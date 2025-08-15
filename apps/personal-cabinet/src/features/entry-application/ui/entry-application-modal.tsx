@@ -12,32 +12,33 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/shared/lib/use-toast'
-import { UserPlus } from 'lucide-react'
+import { UserPlus, Paperclip } from 'lucide-react'
 import { api } from '@/shared/api'
-import { apiClient } from '@/shared/api/api-client'
+import { apiClient, uploadFileWithProgress } from '@/shared/api/api-client'
 import type { Department } from '@/shared/api/public-service'
 import { useSession } from '@/shared/contexts/SessionContext'
 
 const entryCadetApplicationSchema = z.object({
-  fullName: z.string().min(5, 'Укажите полные ФИО'),
-  birthDate: z.string().min(1, 'Укажите дату рождения'),
-  departmentId: z.string().uuid('Выберите департамент'),
-  departmentUnderstanding: z.string().min(10, 'Опишите, чем занимается департамент'),
-  motivation: z.string().min(10, 'Опишите вашу мотивацию'),
-  hasMicrophone: z.enum(['yes', 'no']),
-  pcMeetsRequirements: z.enum(['yes', 'no']),
-  pcRequirementsLink: z.string().url('Укажите корректную ссылку'),
-  source: z.string().min(2, 'Укажите источник'),
-  inOtherCommunitiesNow: z.enum(['yes', 'no']),
-  beenInOtherFivemCommunities: z.enum(['yes', 'no']),
+	fullName: z.string().min(5, 'Укажите имя и фамилию полностью'),
+	age: z.coerce.number().int().min(16, 'Возраст должен быть не менее 16 лет'),
+	departmentId: z.string().uuid('Выберите департамент'),
+	departmentUnderstanding: z.string().min(10, 'Опишите, чем занимается департамент'),
+	motivation: z.string().min(10, 'Опишите вашу мотивацию'),
+	hasMicrophone: z.enum(['yes', 'no']),
+	pcMeetsRequirements: z.enum(['yes', 'no']),
+	pcRequirementsText: z.string().optional().default(''),
+	source: z.string().min(2, 'Укажите источник'),
+	otherCommunitiesExperience: z.enum(['current', 'past', 'none'], {
+		required_error: 'Выберите вариант опыта',
+	}),
 })
 
 type EntryCadetApplicationFormData = z.infer<typeof entryCadetApplicationSchema>
 
 interface EntryApplicationModalProps {
-  children?: React.ReactNode
-  isOpen?: boolean
-  onOpenChange?: (open: boolean) => void
+	children?: React.ReactNode
+	isOpen?: boolean
+	onOpenChange?: (open: boolean) => void
 }
 
 // Department тип импортируется из публичного сервиса
@@ -45,326 +46,337 @@ interface EntryApplicationModalProps {
 // positions removed: cadet entry form не выбирает позицию
 
 export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryApplicationModalProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
-  const open = typeof isOpen === 'boolean' ? isOpen : internalOpen
-  const setOpen = onOpenChange || setInternalOpen
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const { refetch: refetchSession } = useSession()
+	const [internalOpen, setInternalOpen] = useState(false)
+	const open = typeof isOpen === 'boolean' ? isOpen : internalOpen
+	const setOpen = onOpenChange || setInternalOpen
+	const { toast } = useToast()
+	const queryClient = useQueryClient()
+	const { refetch: refetchSession } = useSession()
 
-  // Загрузка департаментов из публичного API через стандартизованный сервисный клиент
-  const { data: departments } = useQuery<Department[]>({
-    queryKey: ['public', 'departments'],
-    queryFn: () => api.public.getDepartments(),
-    staleTime: 5 * 60 * 1000,
-  })
-  const form = useForm<EntryCadetApplicationFormData>({
-    resolver: zodResolver(entryCadetApplicationSchema),
-    defaultValues: {
-      fullName: '',
-      birthDate: '',
-      departmentId: '' as any,
-      departmentUnderstanding: '',
-      motivation: '',
-      pcRequirementsLink: '',
-      source: '',
-    } as any,
-  })
+	// Загрузка департаментов из публичного API через стандартизованный сервисный клиент
+	const { data: departments } = useQuery<Department[]>({
+		queryKey: ['public', 'departments'],
+		queryFn: () => api.public.getDepartments(),
+		staleTime: 5 * 60 * 1000,
+	})
+	const form = useForm<EntryCadetApplicationFormData>({
+		resolver: zodResolver(entryCadetApplicationSchema),
+		defaultValues: {
+			fullName: '',
+			age: undefined as unknown as number,
+			departmentId: '' as any,
+			departmentUnderstanding: '',
+			motivation: '',
+			pcRequirementsText: '',
+			source: '',
+		} as any,
+	})
 
-  const mutation = useMutation({
-    mutationFn: async (data: EntryCadetApplicationFormData) => {
-      const toBool = (v: 'yes' | 'no') => v === 'yes'
-      const payload = {
-        type: 'entry',
-        target_department_id: data.departmentId,
-        data: {
-          full_name: data.fullName,
-          birth_date: data.birthDate,
-          department_understanding: data.departmentUnderstanding,
-          motivation: data.motivation,
-          has_microphone: toBool(data.hasMicrophone),
-          pc_meets_requirements: toBool(data.pcMeetsRequirements),
-          pc_requirements_link: data.pcRequirementsLink,
-          source: data.source,
-          in_other_communities_now: toBool(data.inOtherCommunitiesNow),
-          been_in_other_fivem_communities: toBool(data.beenInOtherFivemCommunities),
-        },
-      }
-      const created = await apiClient.post<any>('/applications', payload)
-      return created
-    },
-    onSuccess: async () => {
-      toast({
-        title: 'Заявка отправлена!',
-        description: 'Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.'
-      })
-      await refetchSession()
-      queryClient.invalidateQueries({ queryKey: ['dashboard', 'data'] })
-      setOpen(false)
-      form.reset()
-    },
-    onError: (err: any) => {
-      toast({
-        title: 'Ошибка',
-        description: err?.message || 'Не удалось отправить заявку. Попробуйте еще раз.',
-        variant: 'destructive'
-      })
-    }
-  })
+	const mutation = useMutation({
+		mutationFn: async (data: EntryCadetApplicationFormData) => {
+			const toBool = (v: 'yes' | 'no') => v === 'yes'
+			const mapExperience = (v: 'current' | 'past' | 'none') => ({
+				in_other_communities_now: v === 'current',
+				been_in_other_fivem_communities: v === 'current' || v === 'past',
+			})
+			const payload = {
+				type: 'entry',
+				target_department_id: data.departmentId,
+				data: {
+					full_name: data.fullName,
+					age: data.age,
+					department_understanding: data.departmentUnderstanding,
+					motivation: data.motivation,
+					has_microphone: toBool(data.hasMicrophone),
+					pc_meets_requirements: toBool(data.pcMeetsRequirements),
+					pc_requirements_text: data.pcRequirementsText || '',
+					source: data.source,
+					...mapExperience(data.otherCommunitiesExperience),
+				},
+			}
+			const created = await apiClient.post<any>('/applications', payload)
+			return created
+		},
+		onSuccess: async () => {
+			toast({
+				title: 'Заявка отправлена!',
+				description: 'Ваша заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.'
+			})
+			await refetchSession()
+			queryClient.invalidateQueries({ queryKey: ['dashboard', 'data'] })
+			setOpen(false)
+			form.reset()
+		},
+		onError: (err: any) => {
+			toast({
+				title: 'Ошибка',
+				description: err?.message || 'Не удалось отправить заявку. Попробуйте еще раз.',
+				variant: 'destructive'
+			})
+		}
+	})
 
-  const onSubmit = (data: EntryCadetApplicationFormData) => {
-    mutation.mutate(data)
-  }
-  // watching to keep controlled select synced (value used implicitly by react-hook-form)
-  form.watch('departmentId')
+	const onSubmit = (data: EntryCadetApplicationFormData) => {
+		mutation.mutate(data)
+	}
+	// watching to keep controlled select synced (value used implicitly by react-hook-form)
+	form.watch('departmentId')
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Подать заявку на вступление
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Заявка на вступление как кадет
-          </DialogTitle>
-        </DialogHeader>
-        
+	const handleAttachScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (!file) return
+		try {
+			const response: any = await uploadFileWithProgress(file)
+			// Пытаемся извлечь публичный URL из стандартных полей ответа
+			const url = (response?.publicUrl) || (response?.url) || (response?.data?.publicUrl) || (response?.data?.url)
+			if (!url) {
+				toast({ title: 'Загрузка выполнена, но URL не получен', description: 'Не удалось получить публичный URL файла', variant: 'destructive' })
+				return
+			}
+			const current = form.getValues('pcRequirementsText') || ''
+			const next = current ? `${current}\n${url}` : url
+			form.setValue('pcRequirementsText', next, { shouldDirty: true, shouldTouch: true })
+			toast({ title: 'Скриншот прикреплён', description: 'Ссылка добавлена в поле системных требований' })
+		} catch (err: any) {
+			toast({ title: 'Ошибка загрузки файла', description: err?.message || 'Попробуйте снова', variant: 'destructive' })
+		}
+		// сбрасываем значение, чтобы можно было выбрать тот же файл повторно при желании
+		e.currentTarget.value = ''
+	}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5" />
-                  Личная информация и вопросы
-                </CardTitle>
-                <CardDescription>
-                  Заполните все поля. Ответы будут использованы для рассмотрения вашей заявки как кадета.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ваше ФИО *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Иванов Иван Иванович" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="birthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Дата рождения *</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+	return (
+		<Dialog open={open} onOpenChange={setOpen}>
+			<DialogTrigger asChild>
+				{children || (
+					<Button>
+						<UserPlus className="h-4 w-4 mr-2" />
+						Подать заявку на вступление
+					</Button>
+				)}
+			</DialogTrigger>
+			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+				<DialogHeader>
+					<DialogTitle className="flex items-center gap-2">
+						<UserPlus className="h-5 w-5" />
+						Заявка на вступление как кадет
+					</DialogTitle>
+				</DialogHeader>
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<UserPlus className="h-5 w-5" />
+									Личная информация и вопросы
+								</CardTitle>
+								<CardDescription>
+									Заполните все поля. Ответы будут использованы для рассмотрения вашей заявки как кадета.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="grid grid-cols-2 gap-4">
+									<FormField
+										control={form.control}
+										name="fullName"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Ваше имя и фамилия</FormLabel>
+												<FormControl>
+													<Input placeholder="Иван Иванов" {...field} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="age"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Ваш возраст</FormLabel>
+												<FormControl>
+													<Input type="number" min={16} placeholder="18" {...field} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 
-                <FormField
-                  control={form.control}
-                  name="departmentId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>В какой департамент вы хотите вступить? *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите департамент" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {departments?.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.id}>
-                              {dept.full_name || dept.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+								<FormField
+									control={form.control}
+									name="departmentId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>В какой департамент вы хотите вступить?</FormLabel>
+											<Select onValueChange={field.onChange} value={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Выберите департамент" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{departments?.map((dept) => (
+														<SelectItem key={dept.id} value={dept.id}>
+															{dept.full_name || dept.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-                <FormField
-                  control={form.control}
-                  name="departmentUnderstanding"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Чем занимается данный департамент по вашему мнению? *</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Опишите, какие задачи выполняет департамент..." className="min-h-[100px]" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+								<FormField
+									control={form.control}
+									name="departmentUnderstanding"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Чем занимается данный департамент по вашему мнению?</FormLabel>
+											<FormControl>
+												<Textarea placeholder="Опишите, какие задачи выполняет департамент..." className="min-h-[100px]" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-                <FormField
-                  control={form.control}
-                  name="motivation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Почему вы хотите вступить именно в этот департамент? *</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Опишите вашу мотивацию..." className="min-h-[100px]" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+								<FormField
+									control={form.control}
+									name="motivation"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Почему вы хотите вступить именно в этот департамент?</FormLabel>
+											<FormControl>
+												<Textarea placeholder="Опишите вашу мотивацию..." className="min-h-[100px]" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="hasMicrophone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Присутствует ли у вас исправный микрофон? *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Выберите ответ" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="yes">Да</SelectItem>
-                            <SelectItem value="no">Нет</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+								<div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+									<div className="md:col-span-5">
+										<FormField
+											control={form.control}
+											name="hasMicrophone"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="flex items-center min-h-[24px]">Присутствует ли у вас исправный микрофон?</FormLabel>
+													<Select onValueChange={field.onChange} value={field.value}>
+														<FormControl>
+															<SelectTrigger>
+																<SelectValue placeholder="Выберите ответ" />
+															</SelectTrigger>
+														</FormControl>
+														<SelectContent>
+															<SelectItem value="yes">Да</SelectItem>
+															<SelectItem value="no">Нет</SelectItem>
+														</SelectContent>
+													</Select>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+									<div className="md:col-span-7">
+										<FormField
+											control={form.control}
+											name="pcMeetsRequirements"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="block w-full text-right flex items-center justify-end min-h-[24px]">Соответствует ли ваш ПК системным требованиям FiveM?</FormLabel>
+													<Select onValueChange={field.onChange} value={field.value}>
+														<FormControl>
+															<SelectTrigger className="w-full md:w-[85%] md:ml-auto">
+																<SelectValue placeholder="Выберите ответ" />
+															</SelectTrigger>
+														</FormControl>
+														<SelectContent>
+															<SelectItem value="yes">Да</SelectItem>
+															<SelectItem value="no">Нет</SelectItem>
+														</SelectContent>
+													</Select>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+								</div>
 
-                  <FormField
-                    control={form.control}
-                    name="pcMeetsRequirements"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Соответствует ли ваш ПК системным требованиям FiveM? *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Выберите ответ" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="yes">Да</SelectItem>
-                            <SelectItem value="no">Нет</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+								<FormField
+									control={form.control}
+									name="pcRequirementsText"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Ваши системные требования</FormLabel>
+											<FormControl>
+												<Textarea placeholder="Опишите характеристики ПК (например: CPU, RAM, GPU, OS) или прикрепите скриншот — ссылка будет добавлена сюда автоматически" className="min-h-[100px]" {...field} />
+											</FormControl>
+											<div className="flex items-center gap-2 pt-2">
+												<input id="pc-specs-file" type="file" accept="image/*" className="hidden" onChange={handleAttachScreenshot} />
+												<label htmlFor="pc-specs-file">
+													<Button type="button" variant="outline">
+														<Paperclip className="h-4 w-4 mr-2" /> Прикрепить скриншот
+													</Button>
+												</label>
+											</div>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-                <FormField
-                  control={form.control}
-                  name="pcRequirementsLink"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ссылка на системные характеристики вашего ПК *</FormLabel>
-                      <FormControl>
-                        <Input type="url" placeholder="https://example.com/your-pc-specs" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+								<FormField
+									control={form.control}
+									name="source"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Откуда вы узнали про нас?</FormLabel>
+											<FormControl>
+												<Input placeholder="Discord, VK, друзья, YouTube и т.д." {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-                <FormField
-                  control={form.control}
-                  name="source"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Откуда вы узнали про нас? *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Discord, VK, друзья, YouTube и т.д." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+								<FormField
+									control={form.control}
+									name="otherCommunitiesExperience"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Опыт в других FiveM-сообществах</FormLabel>
+											<Select onValueChange={field.onChange} value={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Выберите вариант" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="current">Да, состою сейчас</SelectItem>
+													<SelectItem value="past">Да, состоял ранее</SelectItem>
+													<SelectItem value="none">Нет, это первый опыт</SelectItem>
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</CardContent>
+						</Card>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="inOtherCommunitiesNow"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Состоите ли вы в других сообществах на данный момент? *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Выберите ответ" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="yes">Да</SelectItem>
-                            <SelectItem value="no">Нет</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="beenInOtherFivemCommunities"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Состояли ли вы в других FiveM-сообществах ранее? *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Выберите ответ" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="yes">Да</SelectItem>
-                            <SelectItem value="no">Нет</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-end gap-2">
-              <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Отправка...' : 'Отправить заявку'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Отмена
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  )
+						<div className="flex justify-end gap-2">
+							<Button type="submit" disabled={mutation.isPending}>
+								{mutation.isPending ? 'Отправка...' : 'Отправить заявку'}
+							</Button>
+							<Button type="button" variant="outline" onClick={() => setOpen(false)}>
+								Отмена
+							</Button>
+						</div>
+					</form>
+				</Form>
+			</DialogContent>
+		</Dialog>
+	)
 } 
