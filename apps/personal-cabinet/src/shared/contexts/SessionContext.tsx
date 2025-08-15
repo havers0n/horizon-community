@@ -3,7 +3,7 @@ import { apiClient } from '@/shared/api/api-client'
 
 export type UserSession = {
   user: { id: string; username: string | null }
-  roles: string[]
+  roles: Array<{ code: string; name: string }>
   permissions: string[]
   statuses: string[]
   cadetTracks?: Array<{

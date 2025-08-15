@@ -159,7 +159,7 @@ export default function AdminApplicationsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Все</SelectItem>
-                {applicationStatuses.map((s) => (
+                {applicationStatuses.map((s: { code: string; name: string }) => (
                   <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -271,7 +271,7 @@ export default function AdminApplicationsPage() {
                     <SelectValue placeholder="Выберите статус" />
                   </SelectTrigger>
                   <SelectContent>
-                    {applicationStatuses.map((s) => (
+                    {applicationStatuses.map((s: { code: string; name: string }) => (
                       <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>
                     ))}
                   </SelectContent>

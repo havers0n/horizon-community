@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1246,16 +1246,19 @@ export type Database = {
       roles: {
         Row: {
           description: string | null
+          display_name: string | null
           id: string
           name: string
         }
         Insert: {
           description?: string | null
+          display_name?: string | null
           id?: string
           name: string
         }
         Update: {
           description?: string | null
+          display_name?: string | null
           id?: string
           name?: string
         }
@@ -1535,6 +1538,7 @@ export type Database = {
       }
       v_effective_roles: {
         Row: {
+          display_name: string | null
           role_id: string | null
           role_name: string | null
           scope_id: string | null
@@ -1556,10 +1560,10 @@ export type Database = {
     Functions: {
       has_permission: {
         Args: {
-          p_user_id: string
           p_code: string
-          p_scope_type: Database["common"]["Enums"]["scope_type"]
           p_scope_id: string
+          p_scope_type: Database["common"]["Enums"]["scope_type"]
+          p_user_id: string
         }
         Returns: boolean
       }
@@ -2756,9 +2760,9 @@ export type Database = {
         Args:
           | { p_data: Json }
           | {
+              p_date_of_birth: string
               p_first_name: string
               p_last_name: string
-              p_date_of_birth: string
               p_ssn: string
             }
         Returns: {
@@ -2921,12 +2925,12 @@ export type Database = {
       get_all_departments: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          name: string
-          full_name: string
-          logo_url: string
           description: string
+          full_name: string
           gallery: string[]
+          id: string
+          logo_url: string
+          name: string
         }[]
       }
       get_bolo_by_id: {
@@ -3105,7 +3109,7 @@ export type Database = {
         Returns: Database["public"]["CompositeTypes"]["character_with_profile"][]
       }
       get_characters_by_age_range: {
-        Args: { p_min_age: number; p_max_age: number }
+        Args: { p_max_age: number; p_min_age: number }
         Returns: {
           address: string | null
           arrested: boolean | null
@@ -3193,11 +3197,11 @@ export type Database = {
       }
       get_characters_with_filters: {
         Args: {
-          p_owner_id?: string
           p_gender?: string
-          p_occupation?: string
           p_limit?: number
+          p_occupation?: string
           p_offset?: number
+          p_owner_id?: string
         }
         Returns: {
           address: string | null
@@ -3346,6 +3350,16 @@ export type Database = {
           recipient_user_id: string
         }[]
       }
+      get_user_departments: {
+        Args: { p_user_id: string }
+        Returns: {
+          division: Json
+          full_name: string
+          id: string
+          logo_url: string
+          name: string
+        }[]
+      }
       get_user_notifications: {
         Args: { p_user_id: string }
         Returns: {
@@ -3384,8 +3398,8 @@ export type Database = {
       has_permission: {
         Args: {
           p_permission_code: string
-          p_scope_type: Database["common"]["Enums"]["scope_type"]
           p_scope_id: string
+          p_scope_type: Database["common"]["Enums"]["scope_type"]
         }
         Returns: boolean
       }
@@ -3410,7 +3424,7 @@ export type Database = {
         Returns: boolean
       }
       search_characters: {
-        Args: { p_query: string } | { p_query: string; p_limit?: number }
+        Args: { p_limit?: number; p_query: string } | { p_query: string }
         Returns: {
           address: string | null
           arrested: boolean | null
@@ -3504,11 +3518,11 @@ export type Database = {
         Returns: Json
       }
       update_signal: {
-        Args: { p_signal_id: string; p_data: Json }
+        Args: { p_data: Json; p_signal_id: string }
         Returns: Json
       }
       update_unit_on_duty: {
-        Args: { p_unit_id: string; p_data: Json }
+        Args: { p_data: Json; p_unit_id: string }
         Returns: Json
       }
       validate_character_data: {

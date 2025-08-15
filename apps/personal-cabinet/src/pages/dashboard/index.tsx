@@ -189,7 +189,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <Layout>
-        <DashboardError error={error} />
+        <DashboardError error={new Error(typeof error === 'string' ? error : String(error))} />
       </Layout>
     );
   }
@@ -202,13 +202,29 @@ export default function Dashboard() {
     );
   }
 
-  // Преобразование данных для виджетов
+  // Вспомогательная функция: определить приоритетную роль
+  type RoleObj = { code: string; name: string };
+  const determinePrimaryRole = (roles: RoleObj[]): RoleObj => {
+    const fallback: RoleObj = { code: 'citizen', name: 'Гражданский' };
+    if (!Array.isArray(roles) || roles.length === 0) return fallback;
+    const byCode = (code: string) => roles.find(r => r.code === code);
+    return (
+      byCode('system_admin') ||
+      byCode('admin') ||
+      byCode('staff') ||
+      byCode('candidate') ||
+      byCode('citizen') ||
+      roles[0]
+    );
+  };
+
+  // Преобразование данных для второстепенных виджетов
   const transformedData = transformDashboardData({
     user: {
       id: session.user.id,
       email: '',
       username: session.user.username,
-      role: (session.roles.find(r => ['admin','staff','candidate','citizen'].includes(r)) || 'citizen') as string,
+      role: determinePrimaryRole(session.roles).code,
       avatarUrl: null,
       firstName: null,
       lastName: null,
@@ -224,19 +240,25 @@ export default function Dashboard() {
     announcements: [],
     usefulLinks: [],
   } as any);
+
   // Кандидат: если нет активных треков и статусов
-  const primaryRole = (session.roles.find(r => ['admin','staff','candidate','citizen'].includes(r)) || 'citizen') as string;
-  const isTrueCandidate = (!session?.cadetTracks || session.cadetTracks.length === 0) && (!session?.statuses || session.statuses.length === 0)
-  const isCandidateRole = isTrueCandidate || isCandidate(primaryRole);
-  const isMemberRole = isMember(primaryRole);
-  const isCitizenRole = isCitizen(primaryRole);
-  const isAdminRole = isAdmin(primaryRole);
-  const quickActions = createQuickActions(primaryRole);
+  const primaryRole = determinePrimaryRole(session.roles);
+  const isTrueCandidate = (
+    (primaryRole.code === 'candidate' || primaryRole.code === 'citizen') &&
+    (!session?.cadetTracks || session.cadetTracks.length === 0) &&
+    (!session?.statuses || session.statuses.length === 0)
+  )
+  const isCandidateRole = isTrueCandidate || isCandidate(primaryRole.code);
+  const isMemberRole = isMember(primaryRole.code);
+  const isCitizenRole = isCitizen(primaryRole.code);
+  const isAdminRole = isAdmin(primaryRole.code) || primaryRole.code === 'system_admin';
+  const quickActions = createQuickActions(primaryRole.code);
+  const hasAdminPermission = Array.isArray(session.permissions) && session.permissions.includes('admin.panel.access');
 
   // Отладочная информация (только в режиме разработки)
   if (process.env.NODE_ENV === 'development') {
     console.log('Dashboard Debug Info:', {
-      userRole: primaryRole,
+      userRole: primaryRole.code,
       isCandidate: isCandidateRole,
       isMember: isMemberRole,
       isCitizen: isCitizenRole,
@@ -248,6 +270,26 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Главный баннер с приоритетной ролью */}
+        <Card className="bg-gray-800 border-gray-600">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-100">
+                  Добро пожаловать, {session.user.username || 'Пользователь'}!
+                </h1>
+                <p className="text-sm text-gray-400 mt-1">
+                  Ваша роль: <span className="font-medium text-blue-400">{primaryRole?.name}</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+                  Активен
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         {/* Next step based on cadetTracks */}
         {Array.isArray(session?.cadetTracks) && session!.cadetTracks!.length > 0 && (
           <NextStepCard stageCode={session!.cadetTracks![0]?.stage_code || null} />
@@ -264,11 +306,13 @@ export default function Dashboard() {
                     <h1 className="text-2xl font-semibold text-gray-100">Начните свой путь в HorizonCommunity</h1>
                     <p className="text-gray-400 mt-2">Подайте заявку на вступление в один из наших департаментов и станьте частью истории.</p>
                   </div>
-                  <div>
-                    <EntryApplicationModal>
-                      <Button size="lg">Подать заявку на вступление</Button>
-                    </EntryApplicationModal>
-                  </div>
+                  {!(primaryRole.code === 'system_admin' || hasAdminPermission) && (
+                    <div>
+                      <EntryApplicationModal>
+                        <Button size="lg">Подать заявку на вступление</Button>
+                      </EntryApplicationModal>
+                    </div>
+                  )}
                   <div className="flex gap-6">
                     <Link to="/departments" className="text-primary hover:underline">Знакомство с департаментами</Link>
                     <Link to="/gallery" className="text-primary hover:underline">Посмотреть галерею</Link>
@@ -286,7 +330,21 @@ export default function Dashboard() {
             {/* Member Dashboard Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* Profile Widget */}
-              <ProfileWidget {...transformedData.profile} />
+              <ProfileWidget {
+                ...{
+                  userName: session.user.username || 'Пользователь',
+                  departments: (Array.isArray(session.statuses) && session.statuses.length > 0)
+                    ? session.statuses.join(', ')
+                    : (isAdminRole || hasAdminPermission ? 'Системная роль: Администратор' : 'Не указан'),
+                  rank: '-',
+                  unit: '-',
+                  status: ((Array.isArray(session.statuses) && session.statuses.length > 0) || isAdminRole || hasAdminPermission) ? 'Active' : 'Inactive',
+                  gameWarnings: 0,
+                  adminWarnings: 0,
+                  avatarUrl: undefined,
+                  initials: (session.user.username || 'П').slice(0, 2).toUpperCase(),
+                }
+              } />
 
               {/* Quick Actions Widget */}
               <QuickActionsWidget actions={quickActions} />
@@ -313,9 +371,7 @@ export default function Dashboard() {
                        Добро пожаловать, {transformedData.profile.userName || "Пользователь"}!
                     </h1>
                     <p className="text-sm text-gray-400 mt-1">
-                      Ваш статус: <span className="font-medium text-blue-400">
-                        Гражданский
-                      </span>
+                      Ваш статус: <span className="font-medium text-blue-400">{primaryRole?.name}</span>
                     </p>
                     <p className="text-sm text-gray-400 mt-2">
                       Добро пожаловать в личный кабинет. Здесь вы можете отслеживать свои активности и получать важную информацию.
@@ -330,10 +386,25 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Citizen Dashboard Grid */}
+            {/* Citizen Dashboard Grid */
+            }
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* Profile Widget */}
-              <ProfileWidget {...transformedData.profile} />
+              <ProfileWidget {
+                ...{
+                  userName: session.user.username || 'Пользователь',
+                  departments: (Array.isArray(session.statuses) && session.statuses.length > 0)
+                    ? session.statuses.join(', ')
+                    : (isAdminRole || hasAdminPermission ? 'Системная роль: Администратор' : 'Не указан'),
+                  rank: '-',
+                  unit: '-',
+                  status: ((Array.isArray(session.statuses) && session.statuses.length > 0) || isAdminRole || hasAdminPermission) ? 'Active' : 'Inactive',
+                  gameWarnings: 0,
+                  adminWarnings: 0,
+                  avatarUrl: undefined,
+                  initials: (session.user.username || 'П').slice(0, 2).toUpperCase(),
+                }
+              } />
 
               {/* Quick Actions Widget */}
               <QuickActionsWidget actions={quickActions} />

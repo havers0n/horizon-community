@@ -30,7 +30,7 @@ export interface UpdateSettingsData {
 }
 
 // API ответы
-interface ApiResponse<T> {
+export interface CabinetApiResponse<T> {
   success: boolean;
   data: T;
   error?: string;
@@ -40,29 +40,29 @@ interface ApiResponse<T> {
 export const cabinetApi = {
   // Профиль пользователя
   getProfile: () => 
-    apiClient.get<ApiResponse<UserProfile>>('/cabinet/profile'),
+    apiClient.get<CabinetApiResponse<UserProfile>>('/cabinet/profile'),
 
   updateProfile: (data: UpdateProfileData) => 
-    apiClient.put<ApiResponse<UserProfile>>('/cabinet/profile', data),
+    apiClient.put<CabinetApiResponse<UserProfile>>('/cabinet/profile', data),
 
   // Заявки пользователя
   getApplications: () => 
-    apiClient.get<ApiResponse<Application[]>>('/applications/my'),
+    apiClient.get<CabinetApiResponse<Application[]>>('/applications/my'),
 
   // Департаменты пользователя
   getDepartments: () => 
-    apiClient.get<ApiResponse<Department[]>>('/cabinet/departments'),
+    apiClient.get<CabinetApiResponse<Department[]>>('/cabinet/departments'),
 
   // Настройки пользователя
   getSettings: () => 
-    apiClient.get<ApiResponse<UserSettings>>('/cabinet/settings'),
+    apiClient.get<CabinetApiResponse<UserSettings>>('/cabinet/settings'),
 
   updateSettings: (settings: UpdateSettingsData) => 
-    apiClient.put<ApiResponse<UserSettings>>('/cabinet/settings', settings),
+    apiClient.put<CabinetApiResponse<UserSettings>>('/cabinet/settings', settings),
 
   // Статистика пользователя
   getStats: () => 
-    apiClient.get<ApiResponse<{
+    apiClient.get<CabinetApiResponse<{
       applicationsCount: number;
       departmentsCount: number;
       lastActivity: string | null;

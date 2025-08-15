@@ -20,7 +20,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         id: session.user.id,
         email: null,
         username: session.user.username,
-        role: (['admin', 'staff', 'candidate', 'citizen'].find(r => session.roles.includes(r)) || 'citizen') as string,
+        role: (() => {
+          const roles = Array.isArray(session.roles) ? session.roles : [];
+          const by = (code: string) => roles.find(r => r.code === code);
+          const primary = by('system_admin') || by('admin') || by('staff') || by('candidate') || by('citizen') || roles[0];
+          // маппим system_admin к admin для обратной совместимости строковых ролей в UI
+          return (primary?.code === 'system_admin' ? 'admin' : primary?.code || 'citizen') as string;
+        })(),
         avatarUrl: null,
         firstName: null,
         lastName: null,

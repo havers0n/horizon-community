@@ -50,7 +50,7 @@ export const AnnouncementsWidget: React.FC<AnnouncementsWidgetProps> = ({ announ
             <div className="text-gray-500 mb-2">
               <Megaphone className="w-8 h-8 mx-auto" />
             </div>
-            <p className="text-sm text-gray-400">Нет новых объявлений</p>
+            <p className="text-sm text-gray-400">Скоро: важные объявления появятся здесь</p>
           </div>
         ) : (
           <div className="space-y-3">

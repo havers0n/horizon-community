@@ -46,7 +46,7 @@ export const FeedWidget: React.FC<FeedWidgetProps> = ({ activities }) => {
             <div className="text-gray-500 mb-2">
               <Bell className="w-8 h-8 mx-auto" />
             </div>
-            <p className="text-sm text-gray-400">Нет новых событий</p>
+            <p className="text-sm text-gray-400">Скоро: персональная лента появится здесь</p>
           </div>
         ) : (
           <div className="space-y-3">

@@ -1,7 +1,7 @@
 import { Bell, ChevronDown, Shield } from "lucide-react";
 import { useAuth } from '@/features/auth';
-import { useSession } from '@/shared/contexts/SessionContext';
-import { useQuery } from '@tanstack/react-query';
+// import { useSession } from '@/shared/contexts/SessionContext';
+// import { useQuery } from '@tanstack/react-query';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Avatar, AvatarFallback, AvatarImage } from '@/shared/ui';
 import { getUserInitials, getUserDisplayName } from '@/entities/user';
 
@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export function Header({ onNotificationClick }: HeaderProps) {
   const { user, signOut } = useAuth();
-  const { session } = useSession();
+  // const { session } = useSession();
 
   // Убираем вторичный запрос дашборда; используем данные сессии, если появятся счетчики
   const unreadCount = 0;

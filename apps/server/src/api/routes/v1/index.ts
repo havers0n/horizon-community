@@ -104,7 +104,7 @@ export function createV1Router(): Router {
 
       const rolesQuery = supa.common
         .from('v_effective_roles' as any)
-        .select('role_name')
+        .select('role_name, display_name')
         .eq('user_id', userId);
 
       const permissionsRpcQuery = (supa.public.rpc as any)?.('get_user_permissions', { p_user_id: userId });
@@ -137,7 +137,9 @@ export function createV1Router(): Router {
       if (permsViewRes.error) return res.status(500).json({ success: false, error: permsViewRes.error.message });
       if (cadetTracksRes.error) return res.status(500).json({ success: false, error: cadetTracksRes.error.message });
 
-      const roles = (rolesRes.data || []).map((r: any) => r.role_name).filter(Boolean);
+      const roles = (rolesRes.data || [])
+        .map((r: any) => ({ code: r.role_name, name: r.display_name }))
+        .filter((r: any) => r.code && r.name);
       const permissions = Array.isArray(permsRpcRes?.data)
         ? (permsRpcRes!.data as string[])
         : ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
@@ -162,7 +164,7 @@ export function createV1Router(): Router {
         success: true,
         data: {
           user: { id: userId, username: req.user?.username ?? null },
-          roles: unique(roles),
+          roles: roles,
           permissions: unique(permissions),
           statuses: unique(statuses),
           cadetTracks,
