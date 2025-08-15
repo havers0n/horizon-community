@@ -1,0 +1,277 @@
+import React from 'react'
+import { Card, CardContent } from '@/shared/ui'
+import { Button } from '@/shared/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog'
+import { Link } from 'react-router-dom'
+import { apiClient } from '@/shared/api/api-client'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { toast } from 'sonner'
+
+export type CadetTrack = {
+  id?: string
+  department_id?: string | null
+  stage_code?: 'cadet_test' | 'cadet_training' | 'cadet_practice' | null | string
+  is_active?: boolean
+  [key: string]: any
+}
+
+type StageCode = 'cadet_test' | 'cadet_training' | 'cadet_practice' | null
+
+export function CadetDashboard({ track }: { track: CadetTrack }) {
+  const allowedStages: Exclude<StageCode, null>[] = ['cadet_test', 'cadet_training', 'cadet_practice']
+  const current: StageCode = allowedStages.includes(track?.stage_code as any)
+    ? (track.stage_code as StageCode)
+    : 'cadet_test'
+  const stages: { code: Exclude<StageCode, null>; title: string }[] = [
+    { code: 'cadet_test', title: 'Тест' },
+    { code: 'cadet_training', title: 'Тренировки' },
+    { code: 'cadet_practice', title: 'Практика' },
+  ]
+
+  const currentIndex = Math.max(0, stages.findIndex(s => s.code === current))
+
+  return (
+    <Card className="bg-gray-800 border-gray-600">
+      <CardContent className="p-6 space-y-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-100">Путь кадета</h2>
+          <p className="text-gray-400 mt-1">Пройдите шаги по очереди. Прогресс обновляется автоматически.</p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          {stages.map((stage, idx) => {
+            const isDone = idx < currentIndex
+            const isActive = idx === currentIndex
+            const baseCircle = 'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold'
+            const baseLine = 'flex-1 h-1 mx-2'
+            const circleClass = isActive
+              ? 'bg-blue-600 text-white'
+              : isDone
+              ? 'bg-emerald-600 text-white'
+              : 'bg-gray-700 text-gray-300'
+            const lineClass = idx < stages.length - 1
+              ? (idx < currentIndex ? 'bg-emerald-600' : 'bg-gray-700')
+              : ''
+            return (
+              <div key={stage.code} className="flex items-center w-full">
+                <div className={`${baseCircle} ${circleClass}`} aria-current={isActive ? 'step' : undefined}>
+                  {idx + 1}
+                </div>
+                <div className={`${baseLine} ${lineClass}`} aria-hidden />
+                <div className="sr-only">{stage.title}</div>
+              </div>
+            )
+          })}
+        </div>
+
+        <div>
+          {current === 'cadet_test' && <CadetTestBlock />}
+          {current === 'cadet_training' && <CadetTrainingBlock />}
+          {current === 'cadet_practice' && <CadetPracticeBlock />}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function CadetTestBlock() {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold text-gray-100">Вступительный тест</h3>
+      <p className="text-gray-300">Пройдите вступительный тест, чтобы перейти к тренировкам. Тест ограничен по времени и требует внимательности.</p>
+      <div className="flex gap-4 items-center">
+        <Link to="/support" className="text-primary hover:underline">Документация по тесту</Link>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setOpen(true)}>Начать Вступительный Тест</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Вступительный тест</DialogTitle>
+            </DialogHeader>
+            <TestTakingModal onClose={() => setOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  )
+}
+
+function CadetTrainingBlock() {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold text-gray-100">Тренировки</h3>
+      <p className="text-gray-300">Поздравляем с успешной сдачей теста! Ниже появится ваше расписание тренировок, когда тренер его утвердит.</p>
+      <div className="rounded-lg border border-gray-700 p-4 text-gray-400">Расписание тренировок появится здесь</div>
+    </div>
+  )
+}
+
+function CadetPracticeBlock() {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold text-gray-100">Практика</h3>
+      <p className="text-gray-300">Добро пожаловать на практику. Ваш наставник свяжется с вами для первичного инструктажа.</p>
+      <div className="rounded-lg border border-gray-700 p-4 text-gray-400">Информация о наставнике появится здесь</div>
+    </div>
+  )
+}
+
+type AvailableTest = { id: string; title: string; description?: string | null }
+type StartedSession = { sessionId: string; questions: Question[]; startTime: string; timeLimit?: number }
+type Question = { id: string; question: string; type: string; options?: string[] }
+
+function TestTakingModal({ onClose }: { onClose: () => void }) {
+  const { refetch } = useSession()
+  const [loading, setLoading] = React.useState(false)
+  const [phase, setPhase] = React.useState<'select' | 'in_progress' | 'result'>('select')
+  const [tests, setTests] = React.useState<AvailableTest[]>([])
+  const [currentTestId, setCurrentTestId] = React.useState<string | null>(null)
+  const [session, setSession] = React.useState<StartedSession | null>(null)
+  const [answers, setAnswers] = React.useState<Record<string, string | string[]>>({})
+  const [result, setResult] = React.useState<{ passed: boolean; percentage?: number } | null>(null)
+
+  React.useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        setLoading(true)
+        const list = await apiClient.get<AvailableTest[]>('/tests')
+        if (mounted) setTests(list || [])
+      } catch (e: any) {
+        toast.error(e?.message || 'Не удалось загрузить список тестов')
+      } finally {
+        setLoading(false)
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
+
+  const start = async (testId: string) => {
+    try {
+      setLoading(true)
+      const data = await apiClient.post<StartedSession>(`/tests/${testId}/start`, {} as any)
+      setCurrentTestId(testId)
+      setSession(data)
+      setPhase('in_progress')
+      setAnswers({})
+    } catch (e: any) {
+      toast.error(e?.message || 'Не удалось начать тест')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const submit = async () => {
+    if (!currentTestId || !session?.sessionId) return
+    try {
+      setLoading(true)
+      const payload = { sessionId: session.sessionId, answers: Object.entries(answers).map(([questionId, answer]) => ({ questionId, answer })) }
+      const res = await apiClient.post<{ success: boolean; data: { passed: boolean; percentage?: number } }>(`/tests/${currentTestId}/submit`, payload as any)
+      const passed = !!res?.data?.passed
+      setResult({ passed, percentage: res?.data?.percentage })
+      setPhase('result')
+      if (passed) {
+        toast.success('Поздравляем! Тест пройден. Переходим к тренировкам.')
+        await refetch()
+        onClose()
+      } else {
+        toast.message('Тест не пройден', { description: 'Вы можете попробовать снова, когда будет доступно.' })
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Ошибка при отправке ответов')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const setAnswer = (q: Question, value: string) => {
+    setAnswers(prev => {
+      if (String(q.type).toLowerCase().includes('multiple')) {
+        const arr = Array.isArray(prev[q.id]) ? (prev[q.id] as string[]) : []
+        return { ...prev, [q.id]: arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value] }
+      }
+      return { ...prev, [q.id]: value }
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      {phase === 'select' && (
+        <div className="space-y-4">
+          <p className="text-gray-300">Выберите доступный тест для старта. После начала отсчёт времени не остановится.</p>
+          <div className="space-y-2">
+            {loading && <div className="text-gray-400">Загрузка...</div>}
+            {!loading && tests.length === 0 && (
+              <div className="text-gray-400">Нет доступных тестов.</div>
+            )}
+            {!loading && tests.map(t => (
+              <div key={t.id} className="flex items-center justify-between rounded-md border border-gray-700 p-3">
+                <div>
+                  <div className="text-gray-100 font-medium">{t.title}</div>
+                  {t.description ? <div className="text-gray-400 text-sm">{t.description}</div> : null}
+                </div>
+                <Button size="sm" onClick={() => start(t.id)} disabled={loading}>Начать</Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {phase === 'in_progress' && session && (
+        <div className="space-y-4">
+          <div className="text-gray-400 text-sm">Сессия: {session.sessionId} {session.timeLimit ? `• Лимит: ${Math.round(session.timeLimit/60)} мин` : ''}</div>
+          <div className="space-y-4">
+            {session.questions.map((q, idx) => (
+              <div key={q.id} className="rounded-md border border-gray-700 p-3">
+                <div className="text-gray-100 font-medium mb-2">{idx + 1}. {q.question}</div>
+                <div className="space-y-1">
+                  {(q.options || []).map(opt => {
+                    const isMultiple = String(q.type).toLowerCase().includes('multiple')
+                    const name = `q_${q.id}`
+                    const checked = isMultiple
+                      ? Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(opt)
+                      : answers[q.id] === opt
+                    return (
+                      <label key={opt} className="flex items-center gap-2 text-gray-200">
+                        <input
+                          type={isMultiple ? 'checkbox' : 'radio'}
+                          name={name}
+                          value={opt}
+                          checked={checked}
+                          onChange={() => setAnswer(q, opt)}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-sm">{opt}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose} disabled={loading}>Отмена</Button>
+            <Button onClick={submit} disabled={loading}>Отправить ответы</Button>
+          </div>
+        </div>
+      )}
+
+      {phase === 'result' && result && (
+        <div className="space-y-2">
+          <div className="text-gray-100 text-lg font-semibold">Результат</div>
+          <div className="text-gray-300">{result.passed ? 'Тест пройден ✅' : 'Тест не пройден'}</div>
+          {typeof result.percentage === 'number' && (
+            <div className="text-gray-400 text-sm">Процент: {result.percentage}%</div>
+          )}
+          <div className="flex justify-end">
+            <Button onClick={onClose}>Закрыть</Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+

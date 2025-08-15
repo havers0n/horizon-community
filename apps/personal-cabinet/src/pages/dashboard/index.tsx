@@ -9,12 +9,12 @@ import { UsefulLinksWidget } from '@/widgets/dashboard/ui/useful-links-widget';
 // Упрощаем дашборд под новую модель сессии: статистика и статусы временно отключены
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/shared/contexts/SessionContext';
-import { NextStepCard } from '@/shared/ui/NextStepCard';
 import { EntryApplicationModal } from '@/features/entry-application/ui/entry-application-modal';
 import { Button } from '@/shared/ui/button';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { isCandidate, isMember, isCitizen, isAdmin } from '@roleplay-identity/shared-types';
+import { CadetDashboard } from '@/features/dashboard/ui/cadet-dashboard';
 
 
 // Компонент загрузки
@@ -202,6 +202,17 @@ export default function Dashboard() {
     );
   }
 
+  // Если у пользователя есть активный кадетский трек — показываем CadetDashboard
+  if (Array.isArray(session?.cadetTracks) && session!.cadetTracks!.length > 0) {
+    return (
+      <Layout>
+        <div className="space-y-6">
+          <CadetDashboard track={session!.cadetTracks![0]} />
+        </div>
+      </Layout>
+    );
+  }
+
   // Вспомогательная функция: определить приоритетную роль
   type RoleObj = { code: string; name: string };
   const determinePrimaryRole = (roles: RoleObj[]): RoleObj => {
@@ -290,10 +301,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        {/* Next step based on cadetTracks */}
-        {Array.isArray(session?.cadetTracks) && session!.cadetTracks!.length > 0 && (
-          <NextStepCard stageCode={session!.cadetTracks![0]?.stage_code || null} />
-        )}
+        {/* Cadet dashboard рендерится выше, если есть cadetTracks */}
         {/* Role-based Dashboard */}
         {isCandidateRole ? (
           // Упрощённый дашборд для кандидатов: только CTA и полезные ссылки
