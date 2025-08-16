@@ -18,6 +18,7 @@ import { apiClient } from '@/shared/api/api-client'
 import type { Department } from '@/shared/api/public-service'
 import { useSession } from '@/shared/contexts/SessionContext'
 import { supabase } from '@/shared/lib/supabase'
+import { getAuthState } from '@/shared/lib/auth'
 
 const entryCadetApplicationSchema = z.object({
 	fullName: z.string().min(5, 'Укажите имя и фамилию полностью'),
@@ -55,6 +56,26 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 	const { session, refetch: refetchSession } = useSession()
 	const [isUploading, setIsUploading] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
+
+	// Обеспечиваем установку токена в клиента Supabase перед запросами к Storage (важно для инкогнито-режима)
+	const ensureSupabaseAuth = async (): Promise<boolean> => {
+		try {
+			const { accessToken, refreshToken } = getAuthState()
+			if (!accessToken) return false
+			const anyAuth: any = (supabase as any).auth
+			if (typeof anyAuth?.setAuth === 'function') {
+				anyAuth.setAuth(accessToken)
+				return true
+			}
+			if (typeof anyAuth?.setSession === 'function') {
+				await anyAuth.setSession({ access_token: accessToken, refresh_token: refreshToken || '' })
+				return true
+			}
+			return false
+		} catch {
+			return false
+		}
+	}
 
 	// Загрузка департаментов из публичного API через стандартизованный сервисный клиент
 	const { data: departments } = useQuery<Department[]>({
@@ -136,6 +157,14 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 				toast({ title: 'Не авторизовано', description: 'Пользователь не найден в сессии', variant: 'destructive' })
 				return
 			}
+
+			// КРИТИЧЕСКО: в инкогнито явно устанавливаем токен для клиента Supabase
+			const authOk = await ensureSupabaseAuth()
+			if (!authOk) {
+				toast({ title: 'Требуется вход', description: 'Не удалось определить токен доступа. Войдите в систему и попробуйте снова.', variant: 'destructive' })
+				return
+			}
+
 			setIsUploading(true)
 			const userId = session.user.id
 			const filePath = `${userId}/${Date.now()}-${selectedFile.name}`
