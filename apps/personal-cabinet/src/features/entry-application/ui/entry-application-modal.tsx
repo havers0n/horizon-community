@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
@@ -14,9 +14,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/shared/lib/use-toast'
 import { UserPlus, Paperclip } from 'lucide-react'
 import { api } from '@/shared/api'
-import { apiClient, uploadFileWithProgress } from '@/shared/api/api-client'
+import { apiClient } from '@/shared/api/api-client'
 import type { Department } from '@/shared/api/public-service'
 import { useSession } from '@/shared/contexts/SessionContext'
+import { supabase } from '@/shared/lib/supabase'
 
 const entryCadetApplicationSchema = z.object({
 	fullName: z.string().min(5, 'Укажите имя и фамилию полностью'),
@@ -51,7 +52,9 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 	const setOpen = onOpenChange || setInternalOpen
 	const { toast } = useToast()
 	const queryClient = useQueryClient()
-	const { refetch: refetchSession } = useSession()
+	const { session, refetch: refetchSession } = useSession()
+	const [isUploading, setIsUploading] = useState(false)
+	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	// Загрузка департаментов из публичного API через стандартизованный сервисный клиент
 	const { data: departments } = useQuery<Department[]>({
@@ -63,12 +66,15 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 		resolver: zodResolver(entryCadetApplicationSchema),
 		defaultValues: {
 			fullName: '',
-			age: undefined as unknown as number,
+			age: '' as any,
 			departmentId: '' as any,
 			departmentUnderstanding: '',
 			motivation: '',
 			pcRequirementsText: '',
 			source: '',
+			hasMicrophone: '' as any,
+			pcMeetsRequirements: '' as any,
+			otherCommunitiesExperience: '' as any,
 		} as any,
 	})
 
@@ -122,26 +128,43 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 	// watching to keep controlled select synced (value used implicitly by react-hook-form)
 	form.watch('departmentId')
 
-	const handleAttachScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0]
-		if (!file) return
+	const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedFile = event.currentTarget.files?.[0]
+		if (!selectedFile) return
 		try {
-			const response: any = await uploadFileWithProgress(file)
-			// Пытаемся извлечь публичный URL из стандартных полей ответа
-			const url = (response?.publicUrl) || (response?.url) || (response?.data?.publicUrl) || (response?.data?.url)
-			if (!url) {
+			if (!session?.user?.id) {
+				toast({ title: 'Не авторизовано', description: 'Пользователь не найден в сессии', variant: 'destructive' })
+				return
+			}
+			setIsUploading(true)
+			const userId = session.user.id
+			const filePath = `${userId}/${Date.now()}-${selectedFile.name}`
+			const { error: uploadError } = await supabase
+				.storage
+				.from('application-attachments')
+				.upload(filePath, selectedFile)
+			if (uploadError) throw uploadError
+
+			const { data: { publicUrl } } = supabase
+				.storage
+				.from('application-attachments')
+				.getPublicUrl(filePath)
+			if (!publicUrl) {
 				toast({ title: 'Загрузка выполнена, но URL не получен', description: 'Не удалось получить публичный URL файла', variant: 'destructive' })
 				return
 			}
-			const current = form.getValues('pcRequirementsText') || ''
-			const next = current ? `${current}\n${url}` : url
-			form.setValue('pcRequirementsText', next, { shouldDirty: true, shouldTouch: true })
-			toast({ title: 'Скриншот прикреплён', description: 'Ссылка добавлена в поле системных требований' })
+			const currentText = form.getValues('pcRequirementsText') || ''
+			const nextText = currentText ? `${currentText}\n${publicUrl}` : publicUrl
+			form.setValue('pcRequirementsText', nextText, { shouldDirty: true, shouldTouch: true })
+			toast({ title: 'Скриншот успешно загружен', description: 'Ссылка добавлена в поле системных требований' })
 		} catch (err: any) {
 			toast({ title: 'Ошибка загрузки файла', description: err?.message || 'Попробуйте снова', variant: 'destructive' })
+		} finally {
+			setIsUploading(false)
+			if (fileInputRef.current) {
+				fileInputRef.current.value = ''
+			}
 		}
-		// сбрасываем значение, чтобы можно было выбрать тот же файл повторно при желании
-		e.currentTarget.value = ''
 	}
 
 	return (
@@ -195,7 +218,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 											<FormItem>
 												<FormLabel>Ваш возраст</FormLabel>
 												<FormControl>
-													<Input type="number" min={16} placeholder="18" {...field} />
+													<Input type="number" min={16} placeholder="18" value={(field.value as any) ?? ''} onChange={(e) => field.onChange(e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))} />
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -209,7 +232,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>В какой департамент вы хотите вступить?</FormLabel>
-											<Select onValueChange={field.onChange} value={field.value}>
+											<Select onValueChange={field.onChange} value={field.value || ''}>
 												<FormControl>
 													<SelectTrigger>
 														<SelectValue placeholder="Выберите департамент" />
@@ -252,9 +275,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 												<Textarea placeholder="Опишите вашу мотивацию..." className="min-h-[100px]" {...field} />
 											</FormControl>
 											<FormMessage />
-										</FormItem>
-									)}
-								/>
+										</FormItem>)}/>
 
 								<div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
 									<div className="md:col-span-5">
@@ -264,7 +285,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="flex items-center min-h-[24px]">Присутствует ли у вас исправный микрофон?</FormLabel>
-													<Select onValueChange={field.onChange} value={field.value}>
+													<Select onValueChange={field.onChange} value={field.value || ''}>
 														<FormControl>
 															<SelectTrigger>
 																<SelectValue placeholder="Выберите ответ" />
@@ -287,7 +308,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="block w-full text-right flex items-center justify-end min-h-[24px]">Соответствует ли ваш ПК системным требованиям FiveM?</FormLabel>
-													<Select onValueChange={field.onChange} value={field.value}>
+													<Select onValueChange={field.onChange} value={field.value || ''}>
 														<FormControl>
 															<SelectTrigger className="w-full md:w-[85%] md:ml-auto">
 																<SelectValue placeholder="Выберите ответ" />
@@ -315,12 +336,10 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 												<Textarea placeholder="Опишите характеристики ПК (например: CPU, RAM, GPU, OS) или прикрепите скриншот — ссылка будет добавлена сюда автоматически" className="min-h-[100px]" {...field} />
 											</FormControl>
 											<div className="flex items-center gap-2 pt-2">
-												<input id="pc-specs-file" type="file" accept="image/*" className="hidden" onChange={handleAttachScreenshot} />
-												<label htmlFor="pc-specs-file">
-													<Button type="button" variant="outline">
-														<Paperclip className="h-4 w-4 mr-2" /> Прикрепить скриншот
-													</Button>
-												</label>
+												<input ref={fileInputRef} id="pc-specs-file" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+												<Button type="button" variant="outline" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
+													{isUploading ? 'Загрузка...' : (<><Paperclip className="h-4 w-4 mr-2" /> Прикрепить скриншот</>)}
+												</Button>
 											</div>
 											<FormMessage />
 										</FormItem>
@@ -347,7 +366,7 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Опыт в других FiveM-сообществах</FormLabel>
-											<Select onValueChange={field.onChange} value={field.value}>
+											<Select onValueChange={field.onChange} value={field.value || ''}>
 												<FormControl>
 													<SelectTrigger>
 														<SelectValue placeholder="Выберите вариант" />

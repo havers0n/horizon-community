@@ -2893,6 +2893,49 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_admin_application_by_id: {
+        Args: { p_application_id: string }
+        Returns: {
+          author_character_id: string
+          author_name: string
+          author_user_id: string
+          created_at: string
+          data: Json
+          department_name: string
+          id: string
+          review_comment: string
+          reviewer_user_id: string
+          status_id: string
+          status_name: string
+          target_department_id: string
+          type: string
+          updated_at: string
+        }[]
+      }
+      get_admin_applications: {
+        Args: {
+          p_department_id?: string
+          p_limit: number
+          p_page: number
+          p_status_id?: string
+        }
+        Returns: {
+          author_character_id: string
+          author_name: string
+          author_user_id: string
+          created_at: string
+          data: Json
+          department_name: string
+          id: string
+          review_comment: string
+          reviewer_user_id: string
+          status_id: string
+          status_name: string
+          target_department_id: string
+          type: string
+          updated_at: string
+        }[]
+      }
       get_all_characters: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
