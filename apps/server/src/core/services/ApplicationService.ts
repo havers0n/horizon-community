@@ -328,6 +328,55 @@ export class ApplicationService {
     return (data as any)?.id || null;
   }
 
+  /**
+   * Найти тест по назначению и контексту ("умный" подбор)
+   * Если нужных колонок ещё нет (до миграции) — безопасный фолбэк на первый тест
+   */
+  private async pickContextAwareTestId(params: {
+    purpose: 'entry' | 'promotion' | 'qualification';
+    departmentId?: string | null;
+    rankId?: string | null;
+    qualificationId?: string | null;
+  }): Promise<string | null> {
+    try {
+      const qb = this.systemDb
+        .from('tests')
+        .select('id')
+        .eq('purpose', params.purpose as any);
+
+      if (params.departmentId) {
+        (qb as any).eq('target_department_id', params.departmentId);
+      }
+      if (params.rankId && params.purpose === 'promotion') {
+        (qb as any).eq('target_rank_id', params.rankId);
+      }
+      if (params.qualificationId && params.purpose === 'qualification') {
+        (qb as any).eq('target_qualification_id', params.qualificationId);
+      }
+
+      const { data, error } = await (qb as any)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        // Если колонок ещё нет (до миграции), Postgres вернёт ошибку 42703 (undefined_column)
+        const pgCode = (error as any)?.code;
+        if (pgCode === '42703') {
+          console.warn('[ApplicationService] pickContextAwareTestId: columns missing (pre-migration). Fallback to first test. Error:', error);
+          return await this.pickEntryTestId();
+        }
+        console.warn('[ApplicationService] pickContextAwareTestId error:', error);
+        return null;
+      }
+
+      return (data as any)?.id || null;
+    } catch (err) {
+      console.warn('[ApplicationService] pickContextAwareTestId unexpected error:', err);
+      return null;
+    }
+  }
+
   private async fetchStatusId(kindCode: string, statusCode: string): Promise<string> {
     if (!this.commonDb) {
       console.error('[ApplicationService] fetchStatusId: common client is not available');
@@ -500,8 +549,11 @@ export class ApplicationService {
           }
         }
 
-        // Обновляем заявку до следующего этапа и при возможности прикрепляем test_id
-        const entryTestId = await this.pickEntryTestId();
+        // Обновляем заявку до следующего этапа и при возможности прикрепляем test_id (контекстно)
+        const entryTestId = await this.pickContextAwareTestId({
+          purpose: 'entry',
+          departmentId: departmentId,
+        });
         const mergedData = {
           ...(updated as any).data || {},
           ...(entryTestId ? { test_id: entryTestId } : {}),

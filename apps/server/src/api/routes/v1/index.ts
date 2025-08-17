@@ -90,6 +90,54 @@ export function createV1Router(): Router {
     return res.status(200).json({ success: true, data: (req as any).session });
   });
 
+  // Справочники: Ranks
+  // GET /api/v1/ranks?department_id=UUID
+  router.get('/ranks', async (req: any, res) => {
+    try {
+      const departmentId: string | undefined = req.query?.department_id as string | undefined;
+      const qb = req.supabase!.common
+        .from('ranks')
+        .select('id, name, department_id, order_index');
+
+      if (departmentId) {
+        (qb as any).eq('department_id', departmentId);
+      }
+
+      const { data, error } = await (qb as any).order('order_index', { ascending: true });
+      if (error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res.json({ success: true, data: data ?? [] });
+    } catch (error: any) {
+      console.error('[V1] /ranks error:', error);
+      return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+
+  // Справочники: Qualifications
+  // GET /api/v1/qualifications?department_id=UUID
+  router.get('/qualifications', async (req: any, res) => {
+    try {
+      const departmentId: string | undefined = req.query?.department_id as string | undefined;
+      const qb = req.supabase!.common
+        .from('qualifications')
+        .select('id, name, department_id');
+
+      if (departmentId) {
+        (qb as any).eq('department_id', departmentId);
+      }
+
+      const { data, error } = await (qb as any).order('name', { ascending: true });
+      if (error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res.json({ success: true, data: data ?? [] });
+    } catch (error: any) {
+      console.error('[V1] /qualifications error:', error);
+      return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+
   /**
    * GET /api/v1/dashboard-data
    * Единый эндпоинт для получения всех данных дашборда

@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   getTest,
@@ -19,6 +19,7 @@ import {
   type AdminQuestionOption,
   type CreateOptionDto,
   type CreateQuestionDto,
+  deleteTest,
 } from '@/features/admin/tests/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
@@ -26,6 +27,7 @@ import { Input } from '@/shared/ui/input'
 import { Textarea } from '@/shared/ui/textarea'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
+import { useSession } from '@/shared/contexts/SessionContext'
 
 // -------- Test Form --------
 const testSchema = z.object({
@@ -34,12 +36,16 @@ const testSchema = z.object({
   duration_minutes: z.coerce.number().int().positive('> 0'),
   passing_score_percent: z.coerce.number().int().min(0).max(100),
   max_focus_losses: z.coerce.number().int().min(0),
+  purpose: z.enum(['entry','promotion','qualification']).optional().nullable(),
+  target_department_id: z.string().uuid('Неверный UUID департамента').optional().nullable(),
+  target_rank_id: z.string().uuid('Неверный UUID звания').optional().nullable(),
+  target_qualification_id: z.string().uuid('Неверный UUID квалификации').optional().nullable(),
 })
 
 type TestFormValues = z.infer<typeof testSchema>
 
 function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: TestFormValues) => Promise<any> }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<TestFormValues>({
+  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset, watch } = useForm<TestFormValues>({
     resolver: zodResolver(testSchema),
     defaultValues: {
       title: test.title,
@@ -47,6 +53,10 @@ function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: Test
       duration_minutes: test.duration_minutes,
       passing_score_percent: test.passing_score_percent,
       max_focus_losses: test.max_focus_losses,
+      purpose: (test as any).purpose ?? undefined,
+      target_department_id: (test as any).target_department_id ?? null,
+      target_rank_id: (test as any).target_rank_id ?? null,
+      target_qualification_id: (test as any).target_qualification_id ?? null,
     },
   })
 
@@ -57,6 +67,10 @@ function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: Test
       duration_minutes: test.duration_minutes,
       passing_score_percent: test.passing_score_percent,
       max_focus_losses: test.max_focus_losses,
+      purpose: (test as any).purpose ?? undefined,
+      target_department_id: (test as any).target_department_id ?? null,
+      target_rank_id: (test as any).target_rank_id ?? null,
+      target_qualification_id: (test as any).target_qualification_id ?? null,
     })
   }, [test, reset])
 
@@ -79,6 +93,29 @@ function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: Test
         <div>
           <label className="text-sm text-muted-foreground">Макс. потерь фокуса</label>
           <Input type="number" {...register('max_focus_losses')} />
+        </div>
+      </div>
+
+      {/* Context selectors */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label className="text-sm text-muted-foreground">Назначение теста</label>
+          <Controller
+            control={control}
+            name={'purpose' as const}
+            render={({ field }) => (
+              <Select value={field.value ?? undefined} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Не выбрано" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="entry">Вступительный</SelectItem>
+                  <SelectItem value="promotion">Повышение</SelectItem>
+                  <SelectItem value="qualification">Квалификация</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       </div>
       <div className="flex gap-2">
@@ -343,6 +380,7 @@ export default function AdminTestEditPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { session, isLoading: isSessionLoading } = useSession()
 
   const testId = useMemo(() => id as string, [id])
 
@@ -360,7 +398,29 @@ export default function AdminTestEditPage() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteTest(testId),
+    onSuccess: () => {
+      // Оптимистично удаляем из списка в кэше
+      queryClient.setQueryData<AdminTest[] | undefined>(['admin-tests'], (old) =>
+        Array.isArray(old) ? old.filter((t) => t.id !== testId) : old
+      )
+      // Чистим связанные кэши
+      queryClient.removeQueries({ queryKey: ['admin-test', testId] })
+      queryClient.removeQueries({ queryKey: ['admin-test-questions', testId] })
+      queryClient.invalidateQueries({ queryKey: ['admin-tests'] })
+      navigate('/admin/tests')
+    },
+  })
+
   if (!testId) return <div>Некорректный идентификатор теста</div>
+
+  if (isSessionLoading) {
+    return <div className="container mx-auto p-6">Загрузка...</div>
+  }
+  if (!session?.permissions?.includes('tests.manage')) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -371,6 +431,16 @@ export default function AdminTestEditPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate('/admin/tests')}>Назад к списку</Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (!confirm('Удалить тест? Действие необратимо.')) return
+              deleteMutation.mutate()
+            }}
+            disabled={deleteMutation.isPending}
+          >
+            Удалить тест
+          </Button>
         </div>
       </div>
 

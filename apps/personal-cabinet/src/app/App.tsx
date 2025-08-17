@@ -148,7 +148,7 @@ function App() {
                       }
                     />
                     <Route
-                      path="/admin/tests/:id"
+                      path="/admin/tests/:id/edit"
                       element={
                         <AdminRoute>
                           <AdminTestEditPage />

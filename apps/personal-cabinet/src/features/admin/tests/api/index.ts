@@ -8,6 +8,10 @@ export interface AdminTest {
   duration_minutes: number
   passing_score_percent: number
   max_focus_losses: number
+  purpose?: 'entry' | 'promotion' | 'qualification' | null
+  target_department_id?: string | null
+  target_rank_id?: string | null
+  target_qualification_id?: string | null
 }
 
 export interface CreateTestDto {
@@ -16,6 +20,10 @@ export interface CreateTestDto {
   duration_minutes: number
   passing_score_percent: number
   max_focus_losses: number
+  purpose?: 'entry' | 'promotion' | 'qualification'
+  target_department_id?: string | null
+  target_rank_id?: string | null
+  target_qualification_id?: string | null
 }
 
 export interface UpdateTestDto extends Partial<CreateTestDto> {}
@@ -92,3 +100,17 @@ export const updateOption = async (optionId: string, dto: Partial<CreateOptionDt
 export const deleteOption = async (optionId: string): Promise<void> => {
   return apiClient.delete<void>(`/admin/options/${optionId}`)
 } 
+
+// Dictionaries
+export interface RankDto { id: string; name: string; department_id: string }
+export interface QualificationDto { id: string; name: string; department_id: string | null }
+
+export const listRanks = async (department_id?: string): Promise<RankDto[]> => {
+  const query = department_id ? `?department_id=${encodeURIComponent(department_id)}` : ''
+  return apiClient.get<RankDto[]>(`/ranks${query}`)
+}
+
+export const listQualifications = async (department_id?: string): Promise<QualificationDto[]> => {
+  const query = department_id ? `?department_id=${encodeURIComponent(department_id)}` : ''
+  return apiClient.get<QualificationDto[]>(`/qualifications${query}`)
+}

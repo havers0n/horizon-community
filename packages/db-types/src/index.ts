@@ -3462,6 +3462,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      promote_candidate_to_cadet: {
+        Args: { p_application_id: string }
+        Returns: undefined
+      }
       revoke_signal: {
         Args: { p_signal_id: string }
         Returns: boolean
@@ -3943,30 +3947,45 @@ export type Database = {
       }
       tests: {
         Row: {
+          created_at: string
           created_by_user_id: string | null
           description: string | null
           duration_minutes: number | null
           id: string
           max_focus_losses: number
           passing_score_percent: number
+          purpose: Database["system"]["Enums"]["test_purpose"]
+          target_department_id: string | null
+          target_qualification_id: string | null
+          target_rank_id: string | null
           title: string
         }
         Insert: {
+          created_at?: string
           created_by_user_id?: string | null
           description?: string | null
           duration_minutes?: number | null
           id?: string
           max_focus_losses?: number
           passing_score_percent?: number
+          purpose?: Database["system"]["Enums"]["test_purpose"]
+          target_department_id?: string | null
+          target_qualification_id?: string | null
+          target_rank_id?: string | null
           title: string
         }
         Update: {
+          created_at?: string
           created_by_user_id?: string | null
           description?: string | null
           duration_minutes?: number | null
           id?: string
           max_focus_losses?: number
           passing_score_percent?: number
+          purpose?: Database["system"]["Enums"]["test_purpose"]
+          target_department_id?: string | null
+          target_qualification_id?: string | null
+          target_rank_id?: string | null
           title?: string
         }
         Relationships: []
@@ -4012,7 +4031,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      test_purpose: "entry" | "promotion" | "qualification"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4182,6 +4201,8 @@ export const Constants = {
     Enums: {},
   },
   system: {
-    Enums: {},
+    Enums: {
+      test_purpose: ["entry", "promotion", "qualification"],
+    },
   },
 } as const

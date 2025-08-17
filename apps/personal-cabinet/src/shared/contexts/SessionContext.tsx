@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useContext, useMemo } from 'react'
 import { apiClient } from '@/shared/api/api-client'
+import { useQuery } from '@tanstack/react-query'
 
 export type UserSession = {
   user: { id: string; username: string | null }
@@ -31,37 +32,33 @@ type SessionContextType = {
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<UserSession | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchSession = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery<UserSession, Error>({
+    queryKey: ['session'],
+    queryFn: async () => {
       const res = await apiClient.get<SessionResponse>('/auth/me/session')
-      if (!res.success) {
-        throw new Error(res.message || 'Failed to fetch session')
+      if (!(res as any)?.success) {
+        throw new Error((res as any)?.message || 'Failed to fetch session')
       }
-      setSession(res.data)
-    } catch (e: any) {
-      setError(e?.message || 'Failed to fetch session')
-      setSession(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchSession()
-  }, [])
+      return (res as any).data as UserSession
+    },
+    // Обновлять данные при возвращении во вкладку
+    refetchOnWindowFocus: true,
+    // Периодический опрос каждые 30 секунд
+    refetchInterval: 30000,
+  })
 
   const value = useMemo<SessionContextType>(() => ({
-    session,
+    session: data ?? null,
     isLoading,
-    error,
-    refetch: fetchSession,
-  }), [session, isLoading, error])
+    error: isError ? (error?.message || 'Failed to fetch session') : null,
+    refetch: async () => { await refetch() },
+  }), [data, isLoading, isError, error, refetch])
 
   return (
     <SessionContext.Provider value={value}>

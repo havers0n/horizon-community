@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { apiClient } from '@/shared/api/api-client'
 import { useSession } from '@/shared/contexts/SessionContext'
 import { toast } from 'sonner'
+import { Progress } from '@/shared/ui/progress'
 
 export type CadetTrack = {
   id?: string
@@ -131,6 +132,8 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
   const [session, setSession] = React.useState<StartedSession | null>(null)
   const [answers, setAnswers] = React.useState<Record<string, string | string[]>>({})
   const [result, setResult] = React.useState<{ passed: boolean; percentage?: number } | null>(null)
+  const [currentIndex, setCurrentIndex] = React.useState<number>(0)
+  const [remaining, setRemaining] = React.useState<number | null>(null)
 
   React.useEffect(() => {
     let mounted = true
@@ -148,6 +151,47 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
     return () => { mounted = false }
   }, [])
 
+  // Таймер обратного отсчёта
+  React.useEffect(() => {
+    if (phase !== 'in_progress' || !session?.timeLimit) {
+      setRemaining(null)
+      return
+    }
+    const startMs = new Date(session.startTime).getTime()
+    const endMs = startMs + session.timeLimit * 1000
+    const tick = () => {
+      const now = Date.now()
+      const left = Math.max(0, Math.floor((endMs - now) / 1000))
+      setRemaining(left)
+      if (left <= 0) {
+        // Автоподача при окончании времени
+        submit()
+      }
+    }
+    tick()
+    const timerId = window.setInterval(tick, 1000)
+    return () => window.clearInterval(timerId)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, session?.sessionId])
+
+  // Anti-cheat: фиксация потери фокуса
+  React.useEffect(() => {
+    if (phase !== 'in_progress' || !session?.sessionId) return
+    const handler = async () => {
+      try {
+        await apiClient.post(`/tests/sessions/${session.sessionId}/violation`, { reason: 'focus_lost', at: new Date().toISOString() } as any)
+        toast.message('Внимание', { description: 'Обнаружена потеря фокуса окна. Это фиксируется системой.' })
+      } catch {}
+    }
+    const onVisibility = () => { if (document.hidden) handler() }
+    window.addEventListener('blur', handler)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('blur', handler)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [phase, session?.sessionId])
+
   const start = async (testId: string) => {
     try {
       setLoading(true)
@@ -156,6 +200,7 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
       setSession(data)
       setPhase('in_progress')
       setAnswers({})
+      setCurrentIndex(0)
     } catch (e: any) {
       toast.error(e?.message || 'Не удалось начать тест')
     } finally {
@@ -196,6 +241,22 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
     })
   }
 
+  const nextQuestion = () => {
+    if (!session) return
+    if (currentIndex < session.questions.length - 1) {
+      setCurrentIndex(currentIndex + 1)
+    }
+  }
+  const prevQuestion = () => {
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1)
+  }
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+
   return (
     <div className="space-y-4">
       {phase === 'select' && (
@@ -221,39 +282,52 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
 
       {phase === 'in_progress' && session && (
         <div className="space-y-4">
-          <div className="text-gray-400 text-sm">Сессия: {session.sessionId} {session.timeLimit ? `• Лимит: ${Math.round(session.timeLimit/60)} мин` : ''}</div>
-          <div className="space-y-4">
-            {session.questions.map((q, idx) => (
-              <div key={q.id} className="rounded-md border border-gray-700 p-3">
-                <div className="text-gray-100 font-medium mb-2">{idx + 1}. {q.question}</div>
-                <div className="space-y-1">
-                  {(q.options || []).map(opt => {
-                    const isMultiple = String(q.type).toLowerCase().includes('multiple')
-                    const name = `q_${q.id}`
-                    const checked = isMultiple
-                      ? Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(opt)
-                      : answers[q.id] === opt
-                    return (
-                      <label key={opt} className="flex items-center gap-2 text-gray-200">
-                        <input
-                          type={isMultiple ? 'checkbox' : 'radio'}
-                          name={name}
-                          value={opt}
-                          checked={checked}
-                          onChange={() => setAnswer(q, opt)}
-                          className="h-4 w-4"
-                        />
-                        <span className="text-sm">{opt}</span>
-                      </label>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between text-sm text-gray-400">
+            <div>Сессия: {session.sessionId}</div>
+            {typeof remaining === 'number' && (
+              <div className="font-mono text-gray-200">⏱ {formatTime(remaining)}</div>
+            )}
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose} disabled={loading}>Отмена</Button>
-            <Button onClick={submit} disabled={loading}>Отправить ответы</Button>
+          <Progress value={((currentIndex) / session.questions.length) * 100} className="h-2" />
+          <div className="rounded-md border border-gray-700 p-3">
+            {(() => {
+              const q = session.questions[currentIndex]
+              return (
+                <>
+                  <div className="text-gray-100 font-medium mb-2">{currentIndex + 1}. {q.question}</div>
+                  <div className="space-y-1">
+                    {(q.options || []).map(opt => {
+                      const isMultiple = String(q.type).toLowerCase().includes('multiple')
+                      const name = `q_${q.id}`
+                      const checked = isMultiple
+                        ? Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(opt)
+                        : answers[q.id] === opt
+                      return (
+                        <label key={opt} className="flex items-center gap-2 text-gray-200">
+                          <input
+                            type={isMultiple ? 'checkbox' : 'radio'}
+                            name={name}
+                            value={opt}
+                            checked={checked}
+                            onChange={() => setAnswer(q, opt)}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm">{opt}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+          <div className="flex justify-between gap-2">
+            <Button variant="outline" onClick={prevQuestion} disabled={loading || currentIndex === 0}>Назад</Button>
+            {currentIndex < (session.questions.length - 1) ? (
+              <Button onClick={nextQuestion} disabled={loading}>Далее</Button>
+            ) : (
+              <Button onClick={submit} disabled={loading}>Отправить ответы</Button>
+            )}
           </div>
         </div>
       )}
