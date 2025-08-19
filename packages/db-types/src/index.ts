@@ -1559,12 +1559,14 @@ export type Database = {
     }
     Functions: {
       has_permission: {
-        Args: {
-          p_code: string
-          p_scope_id: string
-          p_scope_type: Database["common"]["Enums"]["scope_type"]
-          p_user_id: string
-        }
+        Args:
+          | {
+              p_code: string
+              p_scope_id: string
+              p_scope_type: Database["common"]["Enums"]["scope_type"]
+              p_user_id: string
+            }
+          | { p_code: string; p_user: string }
         Returns: boolean
       }
     }
@@ -2458,6 +2460,29 @@ export type Database = {
             columns: ["parent_category_id"]
             isOneToOne: false
             referencedRelation: "doc_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_departments: {
+        Row: {
+          department_id: string
+          document_id: string
+        }
+        Insert: {
+          department_id: string
+          document_id: string
+        }
+        Update: {
+          department_id?: string
+          document_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_departments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
             referencedColumns: ["id"]
           },
         ]

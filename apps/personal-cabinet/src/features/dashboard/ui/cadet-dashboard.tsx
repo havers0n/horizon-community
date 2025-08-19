@@ -10,6 +10,7 @@ import { Progress } from '@/shared/ui/progress'
 
 export type CadetTrack = {
   id?: string
+  application_id?: string | null
   department_id?: string | null
   stage_code?: 'cadet_test' | 'cadet_training' | 'cadet_practice' | null | string
   is_active?: boolean
@@ -66,7 +67,7 @@ export function CadetDashboard({ track }: { track: CadetTrack }) {
         </div>
 
         <div>
-          {current === 'cadet_test' && <CadetTestBlock />}
+          {current === 'cadet_test' && <CadetTestBlock applicationId={track?.application_id} />}
           {current === 'cadet_training' && <CadetTrainingBlock />}
           {current === 'cadet_practice' && <CadetPracticeBlock />}
         </div>
@@ -75,8 +76,9 @@ export function CadetDashboard({ track }: { track: CadetTrack }) {
   )
 }
 
-function CadetTestBlock() {
+function CadetTestBlock({ applicationId }: { applicationId?: string | null }) {
   const [open, setOpen] = React.useState(false)
+  const disabled = !applicationId
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold text-gray-100">Вступительный тест</h3>
@@ -85,13 +87,19 @@ function CadetTestBlock() {
         <Link to="/support" className="text-primary hover:underline">Документация по тесту</Link>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setOpen(true)}>Начать Вступительный Тест</Button>
+            <Button onClick={() => setOpen(true)} disabled={disabled}>
+              {disabled ? 'Заявка не найдена' : 'Начать Вступительный Тест'}
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Вступительный тест</DialogTitle>
             </DialogHeader>
-            <TestTakingModal onClose={() => setOpen(false)} />
+            {applicationId ? (
+              <TestTakingModal applicationId={applicationId} onClose={() => setOpen(false)} />
+            ) : (
+              <div className="text-gray-400">Не удалось найти связанную заявку. Обратитесь в поддержку.</div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -119,37 +127,43 @@ function CadetPracticeBlock() {
   )
 }
 
-type AvailableTest = { id: string; title: string; description?: string | null }
 type StartedSession = { sessionId: string; questions: Question[]; startTime: string; timeLimit?: number }
 type Question = { id: string; question: string; type: string; options?: string[] }
 
-function TestTakingModal({ onClose }: { onClose: () => void }) {
+type TestTakingModalProps = { applicationId: string; onClose: () => void }
+
+function TestTakingModal({ applicationId, onClose }: TestTakingModalProps) {
   const { refetch } = useSession()
   const [loading, setLoading] = React.useState(false)
-  const [phase, setPhase] = React.useState<'select' | 'in_progress' | 'result'>('select')
-  const [tests, setTests] = React.useState<AvailableTest[]>([])
-  const [currentTestId, setCurrentTestId] = React.useState<string | null>(null)
+  const [phase, setPhase] = React.useState<'in_progress' | 'result'>('in_progress')
   const [session, setSession] = React.useState<StartedSession | null>(null)
   const [answers, setAnswers] = React.useState<Record<string, string | string[]>>({})
   const [result, setResult] = React.useState<{ passed: boolean; percentage?: number } | null>(null)
   const [currentIndex, setCurrentIndex] = React.useState<number>(0)
   const [remaining, setRemaining] = React.useState<number | null>(null)
 
+  // Автостарт при открытии модалки
   React.useEffect(() => {
     let mounted = true
     ;(async () => {
       try {
         setLoading(true)
-        const list = await apiClient.get<AvailableTest[]>('/tests')
-        if (mounted) setTests(list || [])
+        const res = await apiClient.post<{ success: boolean; data: StartedSession }>(`/applications/${applicationId}/test-session`, {} as any)
+        const data = (res as any)?.data ?? res
+        if (mounted && data) {
+          setSession(data)
+          setPhase('in_progress')
+          setAnswers({})
+          setCurrentIndex(0)
+        }
       } catch (e: any) {
-        toast.error(e?.message || 'Не удалось загрузить список тестов')
+        toast.error(e?.message || 'Не удалось начать тестовую сессию')
       } finally {
         setLoading(false)
       }
     })()
     return () => { mounted = false }
-  }, [])
+  }, [applicationId])
 
   // Таймер обратного отсчёта
   React.useEffect(() => {
@@ -179,7 +193,7 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
     if (phase !== 'in_progress' || !session?.sessionId) return
     const handler = async () => {
       try {
-        await apiClient.post(`/tests/sessions/${session.sessionId}/violation`, { reason: 'focus_lost', at: new Date().toISOString() } as any)
+        await apiClient.post(`/test-sessions/${session.sessionId}/focus-loss`, { at: new Date().toISOString() } as any)
         toast.message('Внимание', { description: 'Обнаружена потеря фокуса окна. Это фиксируется системой.' })
       } catch {}
     }
@@ -192,30 +206,15 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
     }
   }, [phase, session?.sessionId])
 
-  const start = async (testId: string) => {
-    try {
-      setLoading(true)
-      const data = await apiClient.post<StartedSession>(`/tests/${testId}/start`, {} as any)
-      setCurrentTestId(testId)
-      setSession(data)
-      setPhase('in_progress')
-      setAnswers({})
-      setCurrentIndex(0)
-    } catch (e: any) {
-      toast.error(e?.message || 'Не удалось начать тест')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const submit = async () => {
-    if (!currentTestId || !session?.sessionId) return
+    if (!session?.sessionId) return
     try {
       setLoading(true)
-      const payload = { sessionId: session.sessionId, answers: Object.entries(answers).map(([questionId, answer]) => ({ questionId, answer })) }
-      const res = await apiClient.post<{ success: boolean; data: { passed: boolean; percentage?: number } }>(`/tests/${currentTestId}/submit`, payload as any)
-      const passed = !!res?.data?.passed
-      setResult({ passed, percentage: res?.data?.percentage })
+      const payload = { answers: Object.entries(answers).map(([questionId, answer]) => ({ questionId, answer })) }
+      const res = await apiClient.post<{ success: boolean; data: { passed: boolean; percentage?: number } }>(`/test-sessions/${session.sessionId}/submit`, payload as any)
+      const data = (res as any)?.data ?? res
+      const passed = !!data?.passed
+      setResult({ passed, percentage: data?.percentage })
       setPhase('result')
       if (passed) {
         toast.success('Поздравляем! Тест пройден. Переходим к тренировкам.')
@@ -259,27 +258,6 @@ function TestTakingModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="space-y-4">
-      {phase === 'select' && (
-        <div className="space-y-4">
-          <p className="text-gray-300">Выберите доступный тест для старта. После начала отсчёт времени не остановится.</p>
-          <div className="space-y-2">
-            {loading && <div className="text-gray-400">Загрузка...</div>}
-            {!loading && tests.length === 0 && (
-              <div className="text-gray-400">Нет доступных тестов.</div>
-            )}
-            {!loading && tests.map(t => (
-              <div key={t.id} className="flex items-center justify-between rounded-md border border-gray-700 p-3">
-                <div>
-                  <div className="text-gray-100 font-medium">{t.title}</div>
-                  {t.description ? <div className="text-gray-400 text-sm">{t.description}</div> : null}
-                </div>
-                <Button size="sm" onClick={() => start(t.id)} disabled={loading}>Начать</Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {phase === 'in_progress' && session && (
         <div className="space-y-4">
           <div className="flex items-center justify-between text-sm text-gray-400">

@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useSession } from '@/shared/contexts/SessionContext'
 import { toast } from '@/shared/ui/use-toast'
 import { apiClient } from '@/shared/api/api-client'
+import { getPublicDepartments } from '@/shared/api/public-service'
 
 // Удалён локальный STATUSES: статусы теперь подтягиваются динамически из словаря
 
@@ -90,7 +91,7 @@ export default function AdminApplicationsPage() {
   const [reviewComment, setReviewComment] = React.useState<string>('')
 
   // Dictionaries: statuses and departments
-  const { data: statusesDict } = useQuery({
+  const { data: statusesDict, isLoading: statusesLoading } = useQuery({
     queryKey: ['dict', 'statuses'],
     queryFn: async () => {
       const res = await apiClient.get<any>('/common/statuses')
@@ -99,7 +100,12 @@ export default function AdminApplicationsPage() {
     staleTime: 10 * 60 * 1000,
   })
 
-  // Removed departments dictionary — not required for enriched rendering
+  // Загрузка департаментов (нужна для консистентности словарей и комбинированного состояния загрузки)
+  const { data: departments, isLoading: departmentsLoading } = useQuery({
+    queryKey: ['public', 'departments'],
+    queryFn: getPublicDepartments,
+    staleTime: 5 * 60 * 1000,
+  })
 
   // Removed statusNameMap — enriched status_name provided by API
 
@@ -115,17 +121,32 @@ export default function AdminApplicationsPage() {
   //   return map
   // }, [statusesDict])
 
-  // Список статусов только нужного вида: application_status
+  // Список статусов (fallback: если нет kind_code, используем все статусы)
   const applicationStatuses = React.useMemo(() => {
-    const items = (statusesDict ?? []).filter((s: any) => (
+    const allStatuses = Array.isArray(statusesDict) ? statusesDict : []
+    const filtered = allStatuses.filter((s: any) => (
       s?.kind_code === 'application_status' || s?.kind?.code === 'application_status'
     ))
-    return items.map((s: any) => ({
+    const source = (filtered.length > 0 ? filtered : allStatuses)
+    return source.map((s: any) => ({
       id: String(s?.id ?? s?.status_id ?? s?.uuid ?? s?.code),
       code: String(s?.code ?? s?.id),
       name: String(s?.name ?? s?.display_name ?? s?.label ?? s?.code ?? s?.id),
     }))
   }, [statusesDict])
+
+  // Карта соответствия: id статуса -> code (нужна для вычисления currentStatusCode)
+  const statusIdToCode = React.useMemo(() => {
+    const map = new Map<string, string>()
+    const allStatuses = Array.isArray(statusesDict) ? statusesDict : []
+    const source = (applicationStatuses.length > 0 ? applicationStatuses : allStatuses)
+    for (const s of source as any[]) {
+      const id = String((s as any)?.id ?? (s as any)?.status_id ?? (s as any)?.uuid ?? (s as any)?.code ?? '')
+      const code = String((s as any)?.code ?? (s as any)?.id ?? '')
+      if (id && code) map.set(id, code)
+    }
+    return map
+  }, [applicationStatuses, statusesDict])
 
   // Removed departmentNameMap — enriched department_name provided by API
 
@@ -136,7 +157,7 @@ export default function AdminApplicationsPage() {
   //   return statusCodeByIdMap.get(value) ?? value
   // }
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading: applicationsLoading, isError, error } = useQuery({
     queryKey: ['admin-applications', { status, department, page }],
     queryFn: () => listAdminApplications({ status: status || undefined, department: department || undefined, page }),
   })
@@ -148,10 +169,11 @@ export default function AdminApplicationsPage() {
   })
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, new_status_code, review_comment }: { id: string; new_status_code: string; review_comment?: string }) => updateAdminApplicationStatus(id, { new_status_code, review_comment }),
+    mutationFn: ({ id, status, review_comment }: { id: string; status: string; review_comment?: string }) => updateAdminApplicationStatus(id, { status, review_comment } as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-applications'] })
-      setSelectedId(null)
+      // не закрываем модалку, чтобы показать следующий набор кнопок
+      if (selectedId) queryClient.invalidateQueries({ queryKey: ['admin-application', selectedId] })
       toast({ title: 'Статус обновлён', description: 'Заявка успешно обновлена' })
     },
     onError: (error: any) => {
@@ -159,10 +181,74 @@ export default function AdminApplicationsPage() {
     },
   })
 
+  // Мутация: подтверждение прохождения интервью и промоушен в кадеты
+  const promoteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!id) throw new Error('Не выбрана заявка')
+      // Отправляем пустое JSON-тело, чтобы пройти серверную проверку Content-Type
+      await apiClient.post(`/admin/applications/${id}/promote-to-cadet`, {})
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-applications'] })
+      if (selectedId) queryClient.invalidateQueries({ queryKey: ['admin-application', selectedId] })
+      toast({ title: 'Интервью подтверждено', description: 'Кандидат повышен до кадета' })
+    },
+    onError: (error: any) => {
+      toast({ title: 'Не удалось подтвердить интервью', description: error?.message || 'Ошибка сервера', variant: 'destructive' as any })
+    },
+  })
+
+  // ЕДИНЫЙ ИСТОЧНИК ЛОГИКИ КНОПОК ДЕЙСТВИЙ
+  const renderActionButtons = () => {
+    const statusCode = (selectedApplication as any)?.status_code as string | undefined;
+
+    // Статусы, требующие первичного ревью
+    if (["pending", "submitted", "awaiting_review"].includes(statusCode || '')) {
+      return (
+        <div className="flex items-center gap-2">
+          <Button onClick={() => updateStatusMutation.mutate({ id: (selectedApplication as any).id, status: 'awaiting_interview', review_comment: reviewComment })}>
+            Одобрить (на интервью)
+          </Button>
+          <Button variant="destructive" onClick={() => updateStatusMutation.mutate({ id: (selectedApplication as any).id, status: 'rejected', review_comment: reviewComment })}>
+            Отклонить
+          </Button>
+        </div>
+      );
+    }
+
+    // Статус ожидания интервью
+    if (statusCode === 'awaiting_interview') {
+      return (
+        <div className="flex items-center gap-2">
+          <Button onClick={() => promoteMutation.mutate((selectedApplication as any).id)}>
+            Интервью пройдено
+          </Button>
+          <Button variant="secondary" onClick={() => updateStatusMutation.mutate({ id: (selectedApplication as any).id, status: 'rejected', review_comment: reviewComment })}>
+            Интервью провалено
+          </Button>
+        </div>
+      );
+    }
+
+    // Прочие финальные/неизменяемые статусы
+    return (
+      <div className="text-sm text-gray-400 p-2 border border-gray-600 rounded-md">
+        Заявка уже обработана. Финальный статус: {(selectedApplication as any)?.status_name || 'Неизвестен'}
+      </div>
+    );
+  };
+
   const items = (data as any)?.items || []
   // const pagination = (data as any)?.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 }
 
   if (isSessionLoading) {
+    return (
+      <div className="container mx-auto p-6">Загрузка...</div>
+    )
+  }
+
+  // Комбинированная загрузка словарей и списка заявок
+  if (statusesLoading || departmentsLoading || applicationsLoading) {
     return (
       <div className="container mx-auto p-6">Загрузка...</div>
     )
@@ -215,7 +301,7 @@ export default function AdminApplicationsPage() {
           <CardTitle>Список заявок</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {applicationsLoading ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -379,25 +465,19 @@ export default function AdminApplicationsPage() {
               <div>
                 <label className="text-base text-muted-foreground">Комментарий ревьюера</label>
                 {(() => {
-                  const statusName = String((selectedApplication as any)?.status_name || '')
-                  const isSubmitted = statusName.toLowerCase().includes('подан') || statusName.toLowerCase().includes('submit')
+                  // Вычисляем текущий код статуса предпочтительно из status_code
+                  const rawStatusCode = String((selectedApplication as any)?.status_code || '')
+                  const rawStatusId = String((selectedApplication as any)?.status_id || '')
+                  const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(rawStatusId)
+                  const fallbackCode = isUuid ? (statusIdToCode.get(rawStatusId) || '') : rawStatusId
+                  const currentStatusCode = rawStatusCode || fallbackCode
+                  const isAwaitingReview = currentStatusCode === 'awaiting_review'
                   return (
-                    <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={10} disabled={!isSubmitted} />
+                    <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={10} disabled={!isAwaitingReview} />
                   )
                 })()}
               </div>
-              {(() => {
-                const statusName = String((selectedApplication as any)?.status_name || '')
-                const isSubmitted = statusName.toLowerCase().includes('подан') || statusName.toLowerCase().includes('submit')
-                return isSubmitted ? (
-                  <div className="flex flex-wrap justify-end gap-3">
-                    <Button onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'approved', review_comment: reviewComment })}>Одобрить</Button>
-                    <Button variant="destructive" onClick={() => selectedId && updateStatusMutation.mutate({ id: selectedId, new_status_code: 'rejected', review_comment: reviewComment })}>Отклонить</Button>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground p-3 rounded border border-gray-700">Заявка уже обработана. Статус: <span className="font-semibold">{(selectedApplication as any)?.status_name || '-'}</span></div>
-                )
-              })()}
+              {renderActionButtons()}
             </div>
           </div>
         </DialogContent>

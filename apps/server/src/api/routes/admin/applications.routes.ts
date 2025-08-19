@@ -17,8 +17,13 @@ const paramsSchema = z.object({
 });
 
 const updateStatusBodySchema = z.object({
-  new_status_code: z.string().min(1),
+  // Поддерживаем оба поля для обратной совместимости
+  new_status_code: z.string().min(1).optional(),
+  status: z.string().min(1).optional(),
   review_comment: z.string().optional(),
+}).refine((body) => !!(body.new_status_code || body.status), {
+  message: 'Either new_status_code or status is required',
+  path: ['status'],
 });
 
 // GET /api/v1/admin/applications
@@ -57,9 +62,40 @@ router.get('/applications/:id', authenticateToken, requirePermission('applicatio
     if (!application) {
       return res.status(404).json({ success: false, error: 'Application not found' });
     }
-    return res.status(200).json({ success: true, data: application });
+    // Enrich with status_code for reliable UI logic
+    let status_code: string | null = null;
+    try {
+      const raw = (application as any)?.status_id;
+      const isUuid = typeof raw === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(raw);
+      if (isUuid) {
+        const { data: st, error: stErr } = await (req.supabase!.common as any)
+          .from('statuses' as any)
+          .select('code')
+          .eq('id', raw)
+          .maybeSingle();
+        if (!stErr && st?.code) status_code = st.code;
+      } else if (typeof raw === 'string' && raw.length > 0) {
+        status_code = raw; // already a code
+      }
+    } catch (e) {
+      console.warn('[AdminApplicationsRoutes] failed to resolve status_code:', e);
+    }
+    return res.status(200).json({ success: true, data: { ...(application as any), status_code } });
   } catch (error: any) {
     console.error('[AdminApplicationsRoutes] get by id error:', error);
+    return res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// POST /api/v1/admin/applications/:id/promote-to-cadet
+router.post('/applications/:id/promote-to-cadet', authenticateToken, requirePermission('applications.manage'), async (req: any, res) => {
+  try {
+    const params = paramsSchema.parse(req.params);
+    const service = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
+    const result = await service.promoteCandidateToCadet(params.id);
+    return res.status(200).json({ success: true, data: result });
+  } catch (error: any) {
+    console.error('[AdminApplicationsRoutes] promote-to-cadet error:', error);
     return res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
   }
 });
@@ -71,8 +107,9 @@ router.put('/applications/:id/status', authenticateToken, requirePermission('app
     const body = updateStatusBodySchema.parse(req.body);
 
     const reviewerId: string = req.user!.id;
+    const newStatusCode = body.status || body.new_status_code!;
     const service = new ApplicationService({ system: req.supabase!.system, common: req.supabase!.common, public: req.supabase!.public });
-    const updated = await service.updateApplicationStatus(params.id, body.new_status_code, reviewerId, body.review_comment);
+    const updated = await service.updateApplicationStatus(params.id, newStatusCode, reviewerId, body.review_comment);
 
     // Try to create a notification for application author via public client
     try {

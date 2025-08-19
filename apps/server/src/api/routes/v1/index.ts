@@ -12,6 +12,7 @@ import adminRouter from '../admin';
 import { CabinetService } from '../../../core/services/CabinetService';
 import { ApplicationService } from '../../../core/services/ApplicationService';
 import { ReportService } from '../../../core/services/ReportService';
+import { createCommonRoutes } from './common.routes';
 
 // Временные заглушки для остальных роутов
 // TODO: Преобразовать все роуты в фабричные функции
@@ -84,6 +85,8 @@ export function createV1Router(): Router {
   router.use(authenticateToken);
 
   // --- ШАГ 3: РЕГИСТРИСТРИРУЕМ ЗАЩИЩЕННЫЕ РОУТЫ ---
+  // Общие справочники
+  router.use('/common', createCommonRoutes());
   
   // Упрощенный обработчик: сессия уже собрана в authenticateToken
   router.get('/auth/me/session', (req, res) => {
@@ -134,6 +137,146 @@ export function createV1Router(): Router {
       return res.json({ success: true, data: data ?? [] });
     } catch (error: any) {
       console.error('[V1] /qualifications error:', error);
+      return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+
+  // Документация: дерево категорий и документов (read-only)
+  // GET /api/v1/documents/tree
+  router.get('/documents/tree', async (req: any, res) => {
+    try {
+      const supa = req.supabase?.public;
+      if (!supa) {
+        return res.status(500).json({ success: false, error: 'Server configuration error: missing Supabase client' });
+      }
+
+      // Загружаем категории (RLS применится автоматически)
+      const { data: categories, error: catError } = await supa
+        .from('doc_categories' as any)
+        .select('id, title, description, parent_category_id, sort_order')
+        .order('sort_order', { ascending: true }) as any;
+
+      if (catError) {
+        return res.status(500).json({ success: false, error: catError.message });
+      }
+
+      // Загружаем документы (только опубликованные). RLS по is_internal также применяется
+      const { data: docs, error: docError } = await supa
+        .from('documents' as any)
+        .select('id, title, slug, category_id, updated_at, version, is_published')
+        .eq('is_published', true)
+        .order('title', { ascending: true }) as any;
+
+      if (docError) {
+        return res.status(500).json({ success: false, error: docError.message });
+      }
+
+      type CategoryNode = {
+        id: string;
+        title: string;
+        description: string | null;
+        sortOrder: number;
+        children: CategoryNode[];
+        documents: Array<{
+          id: string;
+          title: string;
+          slug: string;
+          updated_at: string | null;
+          version: number | null;
+        }>;
+      };
+
+      const categoryMap = new Map<string, CategoryNode>();
+      const roots: CategoryNode[] = [];
+
+      // Инициализируем узлы категорий
+      for (const c of categories || []) {
+        categoryMap.set(c.id, {
+          id: c.id,
+          title: c.title,
+          description: c.description ?? null,
+          sortOrder: typeof c.sort_order === 'number' ? c.sort_order : 0,
+          children: [],
+          documents: [],
+        });
+      }
+
+      // Строим иерархию категорий
+      for (const c of categories || []) {
+        const node = categoryMap.get(c.id)!;
+        if (c.parent_category_id && categoryMap.has(c.parent_category_id)) {
+          categoryMap.get(c.parent_category_id)!.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      }
+
+      // Раскладываем документы по категориям
+      for (const d of docs || []) {
+        const target = d.category_id ? categoryMap.get(d.category_id) : undefined;
+        if (target) {
+          target.documents.push({
+            id: d.id,
+            title: d.title,
+            slug: d.slug,
+            updated_at: d.updated_at ?? null,
+            version: typeof d.version === 'number' ? d.version : null,
+          });
+        }
+      }
+
+      // Рекурсивная сортировка
+      const sortTree = (nodes: CategoryNode[]) => {
+        nodes.sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title));
+        for (const n of nodes) {
+          n.children && sortTree(n.children);
+          n.documents.sort((a, b) => a.title.localeCompare(b.title));
+        }
+      };
+      sortTree(roots);
+
+      return res.json({ success: true, data: roots });
+    } catch (error: any) {
+      console.error('[V1] /documents/tree error:', error);
+      return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+
+  // Документация: получение документа по слагу (read-only)
+  // GET /api/v1/documents/slug/:slug
+  router.get('/documents/slug/:slug', async (req: any, res) => {
+    try {
+      const supa = req.supabase?.public;
+      if (!supa) {
+        return res.status(500).json({ success: false, error: 'Server configuration error: missing Supabase client' });
+      }
+
+      const slug = req.params?.slug as string | undefined;
+      if (!slug) {
+        return res.status(400).json({ success: false, error: 'Slug is required' });
+      }
+
+      const { data: doc, error } = await supa
+        .from('documents' as any)
+        .select('id, title, slug, content, category_id, author_user_id, updated_at, version, is_published')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .single();
+
+      if (error) {
+        if ((error as any).code === 'PGRST116' /* No rows */) {
+          return res.status(404).json({ success: false, error: 'Document not found' });
+        }
+        return res.status(500).json({ success: false, error: error.message });
+      }
+
+      if (!doc) {
+        return res.status(404).json({ success: false, error: 'Document not found' });
+      }
+
+      return res.json({ success: true, data: doc });
+    } catch (error: any) {
+      console.error('[V1] /documents/slug/:slug error:', error);
       return res.status(500).json({ success: false, error: 'Internal server error' });
     }
   });

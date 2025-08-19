@@ -37,7 +37,7 @@ export const getAdminApplicationById = async (id: string): Promise<AdminApplicat
   return (res as any).data ?? (res as any)
 }
 
-export const updateAdminApplicationStatus = async (id: string, body: { new_status_code: string; review_comment?: string }): Promise<AdminApplication> => {
-  const res = await apiClient.put<{ success: boolean; data: AdminApplication }>(`/admin/applications/${id}/status`, body)
+export const updateAdminApplicationStatus = async (id: string, body: { status: string; review_comment?: string } | { new_status_code: string; review_comment?: string }): Promise<AdminApplication> => {
+  const res = await apiClient.put<{ success: boolean; data: AdminApplication }>(`/admin/applications/${id}/status`, body as any)
   return (res as any).data ?? (res as any)
 }

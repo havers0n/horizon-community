@@ -14,6 +14,16 @@ export type UserSession = {
     is_active?: boolean
     [key: string]: any
   }>
+  // Новое поле: заявки пользователя (обогащение сессии)
+  applications?: Array<{
+    id: string | null
+    type?: string | null
+    status_code?: string | null
+    status_name?: string | null
+    created_at?: string | null
+    department_name?: string | null
+    [key: string]: any
+  }>
 }
 
 type SessionResponse = {

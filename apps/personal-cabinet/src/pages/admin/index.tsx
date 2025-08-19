@@ -128,7 +128,7 @@ export default function AdminPanelPage() {
               <div className="space-y-2">
                 <Button asChild className="w-full"><Link to="/admin/tests">Тесты и экзамены</Link></Button>
                 <Button variant="outline" className="w-full">Шаблоны отчетов</Button>
-                <Button variant="outline" className="w-full">Документация</Button>
+                <Button asChild variant="outline" className="w-full"><Link to="/admin/documents">Документация</Link></Button>
               </div>
             </CardContent>
           </Card>

@@ -252,19 +252,20 @@ export default function Dashboard() {
     usefulLinks: [],
   } as any);
 
-  // Кандидат: если нет активных треков и статусов
+  // Роли пользователя из сессии
   const primaryRole = determinePrimaryRole(session.roles);
-  const isTrueCandidate = (
-    (primaryRole.code === 'candidate' || primaryRole.code === 'citizen') &&
-    (!session?.cadetTracks || session.cadetTracks.length === 0) &&
-    (!session?.statuses || session.statuses.length === 0)
-  )
-  const isCandidateRole = isTrueCandidate || isCandidate(primaryRole.code);
+  const hasRole = (code: string) => Array.isArray(session.roles) && session.roles.some(r => r.code === code);
+  // Кандидат определяется только по наличию роли 'candidate' и отсутствию админских/штатных ролей
+  const isCandidateRole = hasRole('candidate') && !hasRole('admin') && !hasRole('system_admin') && !hasRole('staff');
   const isMemberRole = isMember(primaryRole.code);
   const isCitizenRole = isCitizen(primaryRole.code);
-  const isAdminRole = isAdmin(primaryRole.code) || primaryRole.code === 'system_admin';
+  const isAdminRole = isAdmin(primaryRole.code) || hasRole('system_admin');
   const quickActions = createQuickActions(primaryRole.code);
   const hasAdminPermission = Array.isArray(session.permissions) && session.permissions.includes('admin.panel.access');
+  // Проверяем, ожидает ли пользователь интервью
+  const isAwaitingInterview = Array.isArray(session.applications)
+    ? session.applications.some(app => app?.status_code === 'awaiting_interview')
+    : false;
 
   // Отладочная информация (только в режиме разработки)
   if (process.env.NODE_ENV === 'development') {
@@ -304,34 +305,63 @@ export default function Dashboard() {
         {/* Cadet dashboard рендерится выше, если есть cadetTracks */}
         {/* Role-based Dashboard */}
         {isCandidateRole ? (
-          // Упрощённый дашборд для кандидатов: только CTA и полезные ссылки
-          <div className="space-y-6">
-            {/* CTA Widget */}
-            <Card className="bg-gray-800 border-gray-600">
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <h1 className="text-2xl font-semibold text-gray-100">Начните свой путь в HorizonCommunity</h1>
-                    <p className="text-gray-400 mt-2">Подайте заявку на вступление в один из наших департаментов и станьте частью истории.</p>
-                  </div>
-                  {!(primaryRole.code === 'system_admin' || hasAdminPermission) && (
+          // Спец. состояние для кандидата, ожидающего интервью
+          isAwaitingInterview ? (
+            <div className="space-y-6">
+              <Card className="bg-gray-800 border-gray-600">
+                <CardContent className="p-6">
+                  <div className="flex flex-col gap-4">
                     <div>
-                      <EntryApplicationModal>
-                        <Button size="lg">Подать заявку на вступление</Button>
-                      </EntryApplicationModal>
+                      <h1 className="text-2xl font-semibold text-gray-100">Поздравляем! Вы прошли отбор</h1>
+                      <p className="text-gray-400 mt-2">
+                        Ваша заявка одобрена. Следующий шаг — интервью. Пожалуйста, проверьте Discord для получения инструкции и назначения времени.
+                      </p>
                     </div>
-                  )}
-                  <div className="flex gap-6">
-                    <Link to="/departments" className="text-primary hover:underline">Знакомство с департаментами</Link>
-                    <Link to="/gallery" className="text-primary hover:underline">Посмотреть галерею</Link>
+                    <div>
+                      <a
+                        href="https://discord.gg/horizoncommunity"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-sm"
+                      >
+                        Перейти в Discord
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Useful Links Widget */}
-            <UsefulLinksWidget links={transformedData.usefulLinks} />
-          </div>
+              {/* Полезные ссылки */}
+              <UsefulLinksWidget links={transformedData.usefulLinks} />
+            </div>
+          ) : (
+            // Обычный кандидатский дашборд с CTA на подачу заявки
+            <div className="space-y-6">
+              <Card className="bg-gray-800 border-gray-600">
+                <CardContent className="p-6">
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <h1 className="text-2xl font-semibold text-gray-100">Начните свой путь в HorizonCommunity</h1>
+                      <p className="text-gray-400 mt-2">Подайте заявку на вступление в один из наших департаментов и станьте частью истории.</p>
+                    </div>
+                    {!(primaryRole.code === 'system_admin' || hasAdminPermission) && (
+                      <div>
+                        <EntryApplicationModal>
+                          <Button size="lg">Подать заявку на вступление</Button>
+                        </EntryApplicationModal>
+                      </div>
+                    )}
+                    <div className="flex gap-6">
+                      <Link to="/departments" className="text-primary hover:underline">Знакомство с департаментами</Link>
+                      <Link to="/gallery" className="text-primary hover:underline">Посмотреть галерею</Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <UsefulLinksWidget links={transformedData.usefulLinks} />
+            </div>
+          )
         ) : (isMemberRole || isAdminRole) ? (
           // Dashboard для участников сообщества и администраторов
           <div className="space-y-6">
@@ -394,8 +424,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Citizen Dashboard Grid */
-            }
+            {/* Citizen Dashboard Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* Profile Widget */}
               <ProfileWidget {

@@ -411,6 +411,177 @@ export class ApplicationService {
     return status.id as string;
   }
 
+  /**
+   * Повысить кандидата до кадета по ID заявки (полная бизнес-логика в TS)
+   * Шаги:
+   *  a) Получить заявку
+   *  b) Разрешить ID ролей (candidate, cadet) и статусов (cadet_test для трека, completed для applications)
+   *  c) Вставить назначение роли 'cadet' в common.role_assignments (если нет активного)
+   *  d) Закрыть активные назначения роли 'candidate' (valid_to = now())
+   *  e) Создать cadet_track со стадией cadet_test
+   *  h) Обновить статус исходной заявки на 'completed'
+   */
+  public async promoteCandidateToCadet(applicationId: string): Promise<{ application_id: string; user_id: string; department_id: string | null; test_id: string | null; test_session_id: string | null; cadet_track_id: string | null; }>
+  {
+    if (!this.commonDb || !this.publicDb) {
+      console.error('[ApplicationService] promoteCandidateToCadet: required clients missing (common/public)');
+      throw new AppError('Server configuration error: required schemas not available', 500);
+    }
+
+    console.log('[ApplicationService] promoteCandidateToCadet: start', { applicationId });
+
+    // a) Получить заявку
+    const { data: application, error: appErr } = await this.systemDb
+      .from('applications')
+      .select('*')
+      .eq('id', applicationId)
+      .single();
+    if (appErr || !application) {
+      console.error('[ApplicationService] promoteCandidateToCadet: application fetch error', appErr);
+      throw new AppError('Заявка не найдена', 404);
+    }
+    console.log('[ApplicationService] Step a) application loaded', { id: application.id, type: (application as any).type, author_user_id: (application as any).author_user_id, target_department_id: (application as any).target_department_id });
+
+    const userId: string = (application as any).author_user_id;
+    const departmentId: string | null = (application as any).target_department_id || null;
+
+    // b) Разрешить ID ролей и статусов
+    const { data: roleCadet, error: roleCadetErr } = await (this.commonDb as any)
+      .from('roles')
+      .select('id, name')
+      .eq('name', 'cadet')
+      .maybeSingle();
+    if (roleCadetErr || !roleCadet?.id) {
+      console.error('[ApplicationService] Step b) role cadet resolve error', roleCadetErr);
+      throw new AppError('Не удалось найти роль cadet', 500);
+    }
+
+    const { data: roleCandidate, error: roleCandidateErr } = await (this.commonDb as any)
+      .from('roles')
+      .select('id, name')
+      .eq('name', 'candidate')
+      .maybeSingle();
+    if (roleCandidateErr || !roleCandidate?.id) {
+      console.error('[ApplicationService] Step b) role candidate resolve error', roleCandidateErr);
+      throw new AppError('Не удалось найти роль candidate', 500);
+    }
+
+    const cadetTestStageId = await this.fetchStatusId('cadet_track_stage', 'cadet_test');
+    console.log('[ApplicationService] Step b) status cadet_test resolved', { cadetTestStageId });
+    const applicationApprovedId = await this.fetchStatusId('application_status', 'approved');
+    console.log('[ApplicationService] Step b) status approved (application) resolved', { applicationApprovedId });
+
+    // c) Вставить назначение роли 'cadet' при его отсутствии (активного)
+    const { data: existingCadetAssign, error: existingCadetErr } = await (this.commonDb as any)
+      .from('role_assignments')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('role_id', roleCadet.id)
+      .is('valid_to', null)
+      .maybeSingle();
+    if (existingCadetErr && (existingCadetErr as any).code !== 'PGRST116') {
+      console.warn('[ApplicationService] Step c) existing cadet role lookup error', existingCadetErr);
+    }
+
+    let insertedCadetAssignmentId: string | null = null;
+    if (!existingCadetAssign) {
+      const { data: insertCadet, error: insertCadetErr } = await (this.commonDb as any)
+        .from('role_assignments')
+        .insert({
+          user_id: userId,
+          role_id: roleCadet.id,
+          // scope_type, subject_type, scope_id — оставляем дефолты схемы (как в БД)
+          valid_from: new Date().toISOString(),
+          valid_to: null,
+        })
+        .select('id')
+        .single();
+      if (insertCadetErr) {
+        console.error('[ApplicationService] Step c) insert cadet role error', insertCadetErr);
+        throw new AppError('Не удалось назначить роль cadet', 500);
+      }
+      insertedCadetAssignmentId = (insertCadet as any)?.id || null;
+      console.log('[ApplicationService] Step c) cadet role assignment inserted', { insertedCadetAssignmentId });
+    } else {
+      console.log('[ApplicationService] Step c) cadet role assignment already active, skipping');
+    }
+
+    // d) Закрыть активные назначения роли 'candidate'
+    const { error: closeCandidateErr } = await (this.commonDb as any)
+      .from('role_assignments')
+      .update({ valid_to: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('role_id', roleCandidate.id)
+      .is('valid_to', null);
+    if (closeCandidateErr) {
+      console.error('[ApplicationService] Step d) close candidate assignments error', closeCandidateErr);
+      throw new AppError('Не удалось закрыть роль candidate', 500);
+    }
+    console.log('[ApplicationService] Step d) candidate role assignments closed');
+
+    // e) Создать cadet_track (если отсутствует)
+    let cadetTrackId: string | null = null;
+    if (departmentId) {
+      const { data: existingTrack, error: existingTrackErr } = await (this.commonDb as any)
+        .from('cadet_tracks')
+        .select('id')
+        .eq('application_id', applicationId)
+        .maybeSingle();
+      if (existingTrackErr && (existingTrackErr as any).code !== 'PGRST116') {
+        console.warn('[ApplicationService] Step e) cadet_tracks lookup error', existingTrackErr);
+      }
+      if (!existingTrack) {
+        const { data: newTrack, error: insertTrackErr } = await (this.commonDb as any)
+          .from('cadet_tracks')
+          .insert({
+            user_id: userId,
+            department_id: departmentId,
+            application_id: applicationId,
+            current_stage_id: cadetTestStageId,
+          })
+          .select('id')
+          .single();
+        if (insertTrackErr) {
+          console.error('[ApplicationService] Step e) cadet_tracks insert error', insertTrackErr);
+          throw new AppError('Не удалось создать кадетский трек', 500);
+        }
+        cadetTrackId = (newTrack as any)?.id || null;
+        console.log('[ApplicationService] Step e) cadet_track created', { cadetTrackId });
+      } else {
+        cadetTrackId = (existingTrack as any)?.id || null;
+        console.log('[ApplicationService] Step e) cadet_track already exists', { cadetTrackId });
+      }
+    } else {
+      console.log('[ApplicationService] Step e) skip cadet_track creation: no departmentId');
+    }
+
+    // f/g: логика подбора теста и создания test_session удалена — создаётся только при явном старте теста пользователем
+    const testId: string | null = null;
+    const testSessionId: string | null = null;
+
+    // h) Обновить статус заявки на 'approved'
+    const { data: updatedApp, error: appUpdateErr } = await this.systemDb
+      .from('applications')
+      .update({ status_id: applicationApprovedId } as any)
+      .eq('id', applicationId)
+      .select('id, status_id')
+      .single();
+    if (appUpdateErr) {
+      console.error('[ApplicationService] Step h) application status (approved) update error', appUpdateErr);
+      throw new AppError('Не удалось одобрить заявку', 500);
+    }
+    console.log('[ApplicationService] Step h) application marked approved', { id: updatedApp?.id, status_id: (updatedApp as any)?.status_id });
+
+    console.log('[ApplicationService] promoteCandidateToCadet: success', { applicationId });
+    return {
+      application_id: applicationId,
+      user_id: userId,
+      department_id: departmentId,
+      test_id: testId,
+      test_session_id: testSessionId,
+      cadet_track_id: cadetTrackId,
+    };
+  }
   async updateApplicationStatus(id: string, newStatusCode: string, reviewerUserId: string, reviewComment?: string): Promise<SystemApplication> {
     // Resolve provided status code to its UUID in common.statuses
     if (!this.commonDb) {
@@ -459,135 +630,7 @@ export class ApplicationService {
       console.error('[ApplicationService] updateApplicationStatus error:', error);
       throw new AppError('Не удалось обновить статус заявки', 500);
     }
-
-    // Автоповышение кандидата до кадета и перевод в ожидающий тест, если одобрена входная заявка
-    try {
-      // 1) Получаем код статуса по новому status_id заявки (status_id хранит UUID)
-      let resolvedStatusCode: string | null = null;
-      try {
-        if (this.commonDb) {
-          const { data: statusById, error: statusByIdErr } = await (this.commonDb as any)
-            .from('statuses')
-            .select('code, id')
-            .eq('id', (updated as any).status_id)
-            .maybeSingle();
-
-          if (statusByIdErr) {
-            console.warn('[ApplicationService] statuses by id lookup error:', statusByIdErr);
-          }
-
-          if ((statusById as any)?.code) {
-            resolvedStatusCode = (statusById as any).code as string;
-          } else {
-            // Фолбэк: если в status_id по ошибке записан код, пробуем найти по code
-            const { data: statusByCode, error: statusByCodeErr } = await (this.commonDb as any)
-              .from('statuses')
-              .select('code, id')
-              .eq('code', (updated as any).status_id)
-              .maybeSingle();
-            if (statusByCodeErr) {
-              console.warn('[ApplicationService] statuses by code lookup error:', statusByCodeErr);
-            }
-            resolvedStatusCode = (statusByCode as any)?.code || null;
-          }
-        }
-      } catch (statusResolveErr) {
-        console.warn('[ApplicationService] status resolve pipeline error:', statusResolveErr);
-      }
-
-      // 2) Двигаем пайплайн только если это входная заявка и код статуса — 'approved'
-      if ((updated as any)?.type === 'entry' && resolvedStatusCode === 'approved') {
-        const departmentId: string | null = (updated as any).target_department_id || null;
-        const userId: string = (updated as any).author_user_id;
-
-        if (departmentId && this.commonDb) {
-          // 1) Создать cadet_track с этапом cadet_test, если его ещё нет для этой заявки
-          try {
-            // Проверяем, не существует ли уже cadet_track, связанный с этой заявкой
-            const { data: existingTrack, error: existingErr } = await (this.commonDb as any)
-              .from('cadet_tracks')
-              .select('id')
-              .eq('application_id', id)
-              .maybeSingle();
-
-            if (existingErr && (existingErr as any).code !== 'PGRST116') {
-              console.warn('[ApplicationService] cadet_tracks select error:', existingErr);
-            }
-
-            if (!existingTrack) {
-              const cadetTestStageId = await this.fetchStatusId('cadet_track_stage', 'cadet_test');
-              const { error: insertTrackErr } = await (this.commonDb as any)
-                .from('cadet_tracks')
-                .insert({
-                  user_id: userId,
-                  department_id: departmentId,
-                  application_id: id,
-                  current_stage_id: cadetTestStageId,
-                });
-              if (insertTrackErr) {
-                console.warn('[ApplicationService] cadet_tracks insert failed:', insertTrackErr);
-              }
-            }
-          } catch (trackErr) {
-            console.warn('[ApplicationService] cadet_tracks pipeline error:', trackErr);
-          }
-
-          const rankId = await this.resolveCadetRankId(departmentId);
-          const activeStatusId = await this.resolveActiveStatusId();
-
-          if (activeStatusId) {
-            const { error: mError } = await (this.commonDb as any)
-              .from('memberships')
-              .insert({
-                user_id: userId,
-                department_id: departmentId,
-                rank_id: rankId,
-                status_id: activeStatusId,
-                is_primary: true,
-              });
-            if (mError) console.warn('[ApplicationService] memberships insert failed:', mError);
-          }
-        }
-
-        // Обновляем заявку до следующего этапа и при возможности прикрепляем test_id (контекстно)
-        const entryTestId = await this.pickContextAwareTestId({
-          purpose: 'entry',
-          departmentId: departmentId,
-        });
-        const mergedData = {
-          ...(updated as any).data || {},
-          ...(entryTestId ? { test_id: entryTestId } : {}),
-        };
-
-        const awaitingTestStatusId = await this.fetchStatusId('application_status', 'awaiting_test');
-        const { data: promoted, error: promoteErr } = await this.systemDb
-          .from('applications')
-          .update({ status_id: awaitingTestStatusId, data: mergedData as any })
-          .eq('id', id)
-          .select('*')
-          .single();
-        if (!promoteErr && promoted) {
-          // Уведомление пользователю
-          if (this.publicDb) {
-            try {
-              await (this.publicDb as any).from('notifications').insert({
-                recipient_user_id: (updated as any).author_user_id,
-                title: 'Поздравляем! Вы зачислены как кадет',
-                content: 'Ваша заявка одобрена. Следующий шаг — пройти вступительный тест.',
-                status: 'unread',
-              });
-            } catch (nErr) {
-              console.warn('[ApplicationService] notification insert failed:', nErr);
-            }
-          }
-          return promoted as SystemApplication;
-        }
-      }
-    } catch (bizErr) {
-      console.error('[ApplicationService] Cadet promotion pipeline error:', bizErr);
-      // Не прерываем основной флоу, возвращаем обновлённую заявку
-    }
-
+    // Чистая ответственность: только обновление статуса заявки
     return updated as SystemApplication;
   }
 }

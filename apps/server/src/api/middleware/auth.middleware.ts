@@ -247,6 +247,38 @@ export async function authenticateToken(
 			const cadetTracksRaw = (cadetTracksRes.data || []) as any[];
 			const cadetTracks = cadetTracksRaw.filter((t: any) => (typeof t.is_active === 'boolean' ? t.is_active : true));
 
+			// Дополнительно: получаем заявки пользователя для состояния личного кабинета
+			let applications: Array<{
+				id: string | null;
+				type?: string | null;
+				status_code?: string | null;
+				status_name?: string | null;
+				created_at?: string | null;
+				department_name?: string | null;
+			}> = [];
+			try {
+				const applicationsRes = await (supa.system as any)
+					.from('my_applications_view' as any)
+					.select('id, type, status_code, status_name, created_at, department_name')
+					.order('created_at', { ascending: false })
+					.limit(10);
+
+				if (applicationsRes.error) {
+					console.warn('[AuthMiddleware] get applications failed:', applicationsRes.error);
+				} else {
+					applications = (applicationsRes.data || []).map((a: any) => ({
+						id: a.id ?? null,
+						type: a.type ?? null,
+						status_code: a.status_code ?? null,
+						status_name: a.status_name ?? null,
+						created_at: a.created_at ?? null,
+						department_name: a.department_name ?? null,
+					}));
+				}
+			} catch (appsErr) {
+				console.warn('[AuthMiddleware] applications query threw error:', appsErr);
+			}
+
 			const unique = (arr: string[]) => Array.from(new Set(arr));
 
 			// Прикрепляем построенную сессию к запросу
@@ -256,6 +288,7 @@ export async function authenticateToken(
 				permissions: unique(permissions),
 				statuses: unique(statuses),
 				cadetTracks,
+				applications,
 			};
 
 			next();
