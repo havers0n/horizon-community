@@ -62,7 +62,7 @@ export class TestSessionService {
 
 		try {
 			// Шаг 1: Найти ID "вида" статусов для тестовых сессий
-			console.log('[TestSessionService] Step 1.1: Fetching kind_id for "test_session"...');
+			console.log('[TestSessionService] Step 1.1: Fetching kind_id for "test_session_status"...');
 			const { data: statusKind, error: kindError } = await db.common
 				.from('status_kinds')
 				.select('id')
@@ -70,7 +70,7 @@ export class TestSessionService {
 				.single();
 
 			if (kindError) throw new Error(`DB error fetching status_kind: ${kindError.message}`);
-			if (!statusKind) throw new Error('Status kind with code "test_session" not found in common.status_kinds');
+			if (!statusKind) throw new Error('Status kind with code "test_session_status" not found in common.status_kinds');
 			
 			const testSessionStatusKindId = statusKind.id;
 			console.log(`[TestSessionService] Step 1.1 OK: statusKindId is ${testSessionStatusKindId}`);
@@ -250,7 +250,7 @@ export class TestSessionService {
 			const { data: statusKind, error: kindError } = await db.common
 				.from('status_kinds')
 				.select('id')
-				.eq('code', 'test_session_status')
+				.eq('code', 'test_session')
 				.single();
 
 			if (kindError) throw new Error(`DB error fetching status_kind: ${kindError.message}`);
