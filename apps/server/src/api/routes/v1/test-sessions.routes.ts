@@ -10,10 +10,48 @@ router.post('/', authenticateToken, async (req: any, res) => {
     const userId: string = req.user.id;
     const { testId, applicationId } = req.body;
     const service = new TestSessionService(req.supabase!.system);
-    const result = await service.startTestSession(userId, testId, applicationId);
+    const result = await service.startTestSession(userId, testId, applicationId, req.supabase);
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
     console.error('[TestSessionsRoutes] startTestSession error:', error);
+    res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// GET /api/v1/test-sessions/:id — получить полную информацию о сессии с вложенными тестом, вопросами и опциями
+router.get('/:id', authenticateToken, async (req: any, res) => {
+  try {
+    const userId: string = req.user.id;
+    const sessionId: string = req.params.id;
+
+    // Ключевой запрос с вложенными связями
+    const { data, error } = await (req.supabase as any).system
+      .from('test_sessions')
+      .select(`
+        *,
+        tests (
+          *,
+          test_questions (
+            *,
+            test_question_options (*)
+          )
+        )
+      `)
+      .eq('id', sessionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('[TestSessionsRoutes] get session error:', error);
+      return res.status(500).json({ success: false, error: 'Server error' });
+    }
+    if (!data) {
+      return res.status(404).json({ success: false, error: 'Сессия не найдена' });
+    }
+
+    res.status(200).json({ success: true, data });
+  } catch (error: any) {
+    console.error('[TestSessionsRoutes] getTestSession error:', error);
     res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
   }
 });
