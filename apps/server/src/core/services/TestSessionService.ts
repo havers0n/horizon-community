@@ -217,140 +217,146 @@ export class TestSessionService {
 
 	/**
 	 * Отправить тест: сохраняем ответы, считаем баллы и результат, закрываем сессию
+	 * Совместимо как с per-request db (db.system/common), так и с this.db через .schema('common')
 	 */
-	async submitTest(sessionId: string, userId: string, answers: UserAnswer[]) {
+	public async submitTest(sessionId: string, userId: string, answers: any[], db?: any) {
+		console.log('[TestSessionService] submitTest: start', { sessionId, userId });
 		try {
-			// 1) Найти сессию
-			const { data: session, error: sErr } = await this.db
+			const systemDb = db?.system ?? this.db;
+			const commonDb = db?.common ?? (this.db as any).schema('common');
+
+			console.log('[TestSessionService] Step 1: Fetching session with test data...');
+			const { data: session, error: sessionError } = await (systemDb as any)
 				.from('test_sessions')
-				.select('*')
+				.select(`
+					*,
+					tests (
+						passing_score_percent,
+						test_questions (
+							id,
+							question_type,
+							test_question_options (id, is_correct, option_text)
+						)
+					)
+				`)
 				.eq('id', sessionId)
+				.eq('user_id', userId)
 				.single();
 
-			if (sErr || !session) {
-				throw new AppError('Сессия тестирования не найдена', 404);
-			}
-			if (session.user_id !== userId) {
-				throw new AppError('Доступ запрещен', 403);
-			}
-			if (session.status_id !== 'in_progress') {
-				throw new AppError(`Неверный статус сессии: ${session.status_id}`, 409);
-			}
+			if (sessionError) throw new Error(`DB error fetching session: ${sessionError.message}`);
+			if (!session) throw new AppError('Тестовая сессия не найдена или не принадлежит вам.', 404);
 
-			// 2) Проверка времени
-			const startTime = new Date(session.start_time!).getTime();
-			const { data: test } = await this.db.from('tests').select('duration_minutes, passing_score_percent').eq('id', session.test_id).single();
-			const limitSec = (test?.duration_minutes ?? 0) > 0 ? (test!.duration_minutes as number) * 60 : null;
-			const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+			console.log('[TestSessionService] Step 2: Fetching status IDs...');
+			const { data: statuses, error: statusesError } = await (commonDb as any)
+				.from('statuses')
+				.select('id, code')
+				.in('code', ['in_progress', 'completed', 'failed']);
 
-			if (limitSec && elapsedSec > limitSec) {
-				await this.db
-					.from('test_sessions')
-					.update({ status_id: 'expired', end_time: new Date().toISOString() })
-					.eq('id', sessionId);
-				throw new AppError('Время тестирования истекло', 410);
+			if (statusesError) throw new Error(`DB error fetching statuses: ${statusesError.message}`);
+			const statusMap = (statuses || []).reduce((acc: Record<string, string>, s: any) => {
+				acc[s.code] = s.id;
+				return acc;
+			}, {} as Record<string, string>);
+
+			if (!statusMap.in_progress || !statusMap.completed || !statusMap.failed) {
+				throw new Error('Could not find required statuses: in_progress, completed, failed');
 			}
 
-			// 3) Получить структуру теста
-			const { data: questions, error: qErr } = await this.db
-				.from('test_questions')
-				.select('id, question_type')
-				.eq('test_id', session.test_id);
-
-			if (qErr) {
-				throw new AppError('Не удалось получить вопросы теста', 500);
+			console.log(`[TestSessionService] Step 3: Verifying session status. Current statusId: ${session.status_id}`);
+			if (session.status_id !== statusMap.in_progress) {
+				throw new AppError('Этот тест уже был завершен.', 409);
 			}
+			console.log('[TestSessionService] Step 3 OK: Session is in_progress.');
 
-			const questionIds = (questions || []).map((q) => q.id);
-			const { data: options, error: oErr } = await this.db
-				.from('test_question_options')
-				.select('id, question_id, is_correct')
-				.in('question_id', questionIds.length ? questionIds : ['00000000-0000-0000-0000-000000000000']);
-
-			if (oErr) {
-				throw new AppError('Не удалось получить варианты ответов', 500);
-			}
-
-			const correctOptionIdsByQuestion = new Map<string, Set<string>>();
-			for (const opt of options || []) {
-				if (opt.is_correct) {
-					if (!correctOptionIdsByQuestion.has(opt.question_id)) {
-						correctOptionIdsByQuestion.set(opt.question_id, new Set());
-					}
-					correctOptionIdsByQuestion.get(opt.question_id)!.add(opt.id);
-				}
-			}
-
-			// 4) Подсчёт результата
+			console.log('[TestSessionService] Step 4: Calculating score...');
+			const test = (session as any).tests;
 			let score = 0;
-			const totalQuestions = (questions || []).length;
+			const totalQuestions = (test?.test_questions || []).length;
 
-			const answerMap = new Map<string, string | string[]>();
-			for (const a of answers) {
-				answerMap.set(a.questionId, a.answer);
-			}
+			for (const question of test.test_questions || []) {
+				const userAnswer = (answers || []).find((a: any) => a?.questionId === question.id);
+				if (!userAnswer) continue;
+				const options = question.test_question_options || [];
+				const correctIds = new Set(options.filter((o: any) => !!o.is_correct).map((o: any) => o.id));
 
-			for (const q of questions || []) {
-				const answer = answerMap.get(q.id);
-				if (q.question_type === 'text_input') {
-					continue; // текстовые не оцениваем автоматически
-				}
-				const correctSet = correctOptionIdsByQuestion.get(q.id) || new Set<string>();
-				if (!answer) continue;
-
-				if (q.question_type === 'single_choice') {
-					if (typeof answer === 'string' && correctSet.has(answer)) {
-						score += 1;
+				const normalizeToOptionIds = (value: any): string[] => {
+					if (Array.isArray(value)) {
+						return value
+							.map((v) => {
+								const found = options.find((o: any) => o.id === v || o.option_text === v);
+								return found?.id;
+							})
+							.filter(Boolean) as string[];
 					}
-				} else if (q.question_type === 'multiple_choice') {
-					if (Array.isArray(answer)) {
-						const chosen = new Set(answer);
-						const allCorrectChosen = [...correctSet].every((id) => chosen.has(id));
-						const noExtra = [...chosen].every((id) => correctSet.has(id));
-						if (allCorrectChosen && noExtra) {
-							score += 1;
-						}
+					if (typeof value === 'string') {
+						const found = options.find((o: any) => o.id === value || o.option_text === value);
+						return found?.id ? [found.id] : [];
 					}
+					if (value && typeof value === 'object' && typeof value.optionId === 'string') {
+						return [value.optionId];
+					}
+					return [];
+				};
+
+				const selectedIds = new Set(normalizeToOptionIds((userAnswer as any).answer ?? (userAnswer as any).optionId));
+				const type = String(question.question_type || '').toLowerCase();
+				if (type === 'single_choice') {
+					if (selectedIds.size === 1) {
+						const only = [...selectedIds][0];
+						if (correctIds.has(only)) score += 1;
+					}
+				} else if (type === 'multiple_choice') {
+					const allCorrectChosen = [...correctIds].every((id) => selectedIds.has(id));
+					const noExtra = [...selectedIds].every((id) => correctIds.has(id));
+					if (selectedIds.size > 0 && allCorrectChosen && noExtra) score += 1;
+				} else {
+					// free_text/прочее — не оцениваем автоматически
+					continue;
 				}
 			}
 
 			const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
-			const passingScore = test?.passing_score_percent ?? 85;
-			const passed = percentage >= passingScore;
+			const passed = percentage >= (test?.passing_score_percent ?? 0);
+			console.log(`[TestSessionService] Step 4 OK: Score calculated. ${score}/${totalQuestions} (${percentage}%), Passed: ${passed}`);
 
-			// 6) Сохраняем результат
-			const resultPayload: SystemTestResultInsert = {
-				session_id: sessionId,
-				user_id: userId,
-				test_id: session.test_id,
-				score,
-				max_score: totalQuestions,
-				percentage,
-				passed,
-				answers: answers as unknown as any, // answers: Json
-				time_spent_seconds: elapsedSec,
-			};
-
-			const { error: rErr } = await this.db
+			console.log('[TestSessionService] Step 5: Saving test results...');
+			const { error: resultError } = await (systemDb as any)
 				.from('test_results')
-				.insert(resultPayload);
-			if (rErr) {
-				throw new AppError('Не удалось сохранить результат теста', 500);
-			}
+				.insert({
+					session_id: sessionId,
+					user_id: userId,
+					test_id: (session as any).test_id,
+					score,
+					max_score: totalQuestions,
+					percentage,
+					passed,
+					answers: answers,
+				});
+			if (resultError) throw new Error(`DB error saving test results: ${resultError.message}`);
+			console.log('[TestSessionService] Step 5 OK: Results saved.');
 
-			// 7) Закрываем сессию
-			const { error: uErr } = await this.db
+			console.log('[TestSessionService] Step 6: Updating session status...');
+			const finalStatusId = passed ? statusMap.completed : statusMap.failed;
+			const { data: updatedSession, error: updateError } = await (systemDb as any)
 				.from('test_sessions')
-				.update({ status_id: 'completed', end_time: new Date().toISOString() })
-				.eq('id', sessionId);
-			if (uErr) {
-				throw new AppError('Не удалось обновить статус сессии', 500);
-			}
+				.update({ status_id: finalStatusId, end_time: new Date().toISOString() })
+				.eq('id', sessionId)
+				.select()
+				.single();
+			if (updateError) throw new Error(`DB error updating session status: ${updateError.message}`);
+			console.log('[TestSessionService] Step 6 OK: Session status updated.', updatedSession);
 
-			return { score, totalQuestions, percentage, passed };
-		} catch (error) {
-			console.error('[TestSessionService] Error in submitTest:', error);
-			throw error;
+			return { result: 'success', score, percentage, passed, updatedSession };
+		} catch (error: any) {
+			console.error('[TestSessionService] FATAL ERROR in submitTest:', {
+				message: error.message,
+				stack: error.stack,
+			});
+
+			if (error instanceof AppError) {
+				throw error;
+			}
+			throw new AppError('Не удалось завершить тест.', 500);
 		}
 	}
 }
