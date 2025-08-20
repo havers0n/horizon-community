@@ -54,6 +54,7 @@ const AdminTestNewPage = React.lazy(() => import('@/pages/admin/tests/new'))
 const AdminTestEditPage = React.lazy(() => import('@/pages/admin/tests/edit'))
 const ApplicationTestPage = React.lazy(() => import('@/pages/applications/test'))
 const TestSessionPage = React.lazy(() => import('@/pages/tests/session'))
+const TestResultPage = React.lazy(() => import('@/pages/tests/result'))
 const AdminApplicationsPage = React.lazy(() => import('@/pages/admin/applications'))
 
 // ===== Админка: Документация =====
@@ -1416,6 +1417,7 @@ function App() {
                     <Route path="/tests/session/:sessionId" element={<TestSessionPage />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/tests" element={<Tests />} />
+                    <Route path="/tests/result/:sessionId" element={<TestResultPage />} />
                     <Route path="/support" element={<Support />} />
                     <Route path="/docs" element={<DocsTreePage />} />
                     <Route path="/docs/:slug" element={<PlayerDocumentPage />} />

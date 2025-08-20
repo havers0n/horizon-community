@@ -57,6 +57,36 @@ export class TestSessionService {
 		}
 	}
 
+	// --- ДОБАВЛЕНО: безопасный метод получения результата без ответов ---
+	public async getResultBySessionId(sessionId: string, userId: string, db: any) {
+		console.log('[TestSessionService] getResultBySessionId: start', { sessionId, userId });
+
+		const { data: result, error } = await db.system
+			.from('test_results')
+			.select(`
+				score,
+				max_score,
+				percentage,
+				passed,
+				created_at,
+				test_sessions (
+					tests ( title, passing_score_percent )
+				)
+			`)
+			.eq('session_id', sessionId)
+			.eq('user_id', userId)
+			.single();
+
+		if (error) {
+			throw new Error(`DB error fetching test result: ${error.message}`);
+		}
+		if (!result) {
+			throw new AppError('Результат теста не найден или не принадлежит вам.', 404);
+		}
+
+		return result;
+	}
+
 	public async startTestSession(userId: string, testId: string, applicationId: string, db: any) {
 		console.log('[TestSessionService] startTestSession: start', { userId, testId, applicationId });
 

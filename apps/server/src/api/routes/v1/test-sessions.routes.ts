@@ -18,6 +18,20 @@ router.post('/', authenticateToken, async (req: any, res) => {
   }
 });
 
+// GET /api/v1/test-sessions/:sessionId/result — безопасно вернуть результат без ответов
+router.get('/:sessionId/result', authenticateToken, async (req: any, res) => {
+  try {
+    const userId: string = req.user.id;
+    const sessionId: string = req.params.sessionId;
+    const service = new TestSessionService(req.supabase!.system);
+    const data = await service.getResultBySessionId(sessionId, userId, req.supabase);
+    res.status(200).json({ success: true, data });
+  } catch (error: any) {
+    console.error('[TestSessionsRoutes] getResult error:', error);
+    res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
 // GET /api/v1/test-sessions/:id — получить полную информацию о сессии с вложенными тестом, вопросами и опциями
 router.get('/:id', authenticateToken, async (req: any, res) => {
   try {

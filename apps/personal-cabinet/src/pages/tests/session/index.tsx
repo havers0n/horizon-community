@@ -33,13 +33,8 @@ const TestSessionPage: React.FC = () => {
       return (res as any)?.data ?? res
     },
     onSuccess: async (r: any) => {
-      const passed = !!r?.passed
-      if (passed) {
-        toast.success('Поздравляем! Тест пройден.')
-        navigate('/cadet/training')
-      } else {
-        toast.message('Тест не пройден', { description: 'Вы можете попробовать снова, когда будет доступно.' })
-      }
+      toast.success('Тест завершен! Перенаправляем на страницу результатов...')
+      navigate(`/tests/result/${sessionId}`)
     },
     onError: (e: any) => {
       toast.error(e?.message || 'Ошибка при отправке ответов')
