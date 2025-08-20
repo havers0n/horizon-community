@@ -2464,6 +2464,32 @@ export type Database = {
           },
         ]
       }
+      doc_category_departments: {
+        Row: {
+          category_id: string
+          created_at: string
+          department_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          department_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          department_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_category_departments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "doc_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_departments: {
         Row: {
           department_id: string
@@ -2769,6 +2795,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_read_doc: {
+        Args: { doc_id: string }
+        Returns: boolean
+      }
       create_new_application: {
         Args: { p_data: Json }
         Returns: Json
@@ -3979,7 +4009,7 @@ export type Database = {
           id: string
           max_focus_losses: number
           passing_score_percent: number
-          purpose: Database["system"]["Enums"]["test_purpose"]
+          purpose: Database["system"]["Enums"]["test_purpose_enum"]
           target_department_id: string | null
           target_qualification_id: string | null
           target_rank_id: string | null
@@ -3993,7 +4023,7 @@ export type Database = {
           id?: string
           max_focus_losses?: number
           passing_score_percent?: number
-          purpose?: Database["system"]["Enums"]["test_purpose"]
+          purpose?: Database["system"]["Enums"]["test_purpose_enum"]
           target_department_id?: string | null
           target_qualification_id?: string | null
           target_rank_id?: string | null
@@ -4007,7 +4037,7 @@ export type Database = {
           id?: string
           max_focus_losses?: number
           passing_score_percent?: number
-          purpose?: Database["system"]["Enums"]["test_purpose"]
+          purpose?: Database["system"]["Enums"]["test_purpose_enum"]
           target_department_id?: string | null
           target_qualification_id?: string | null
           target_rank_id?: string | null
@@ -4057,6 +4087,7 @@ export type Database = {
     }
     Enums: {
       test_purpose: "entry" | "promotion" | "qualification"
+      test_purpose_enum: "entry" | "promotion" | "qualification"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4228,6 +4259,7 @@ export const Constants = {
   system: {
     Enums: {
       test_purpose: ["entry", "promotion", "qualification"],
+      test_purpose_enum: ["entry", "promotion", "qualification"],
     },
   },
 } as const

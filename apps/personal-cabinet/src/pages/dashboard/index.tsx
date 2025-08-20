@@ -1,5 +1,6 @@
 import { Layout } from '@/shared/ui';
 import { Card, CardContent, Skeleton } from '@/shared/ui';
+import { H2, H3, Muted, Stack } from '@/shared/ui';
 import { transformDashboardData } from '@/features/dashboard/model/types';
 import { ProfileWidget } from '@/widgets/dashboard/ui/profile-widget';
 import { FeedWidget } from '@/widgets/dashboard/ui/feed-widget';
@@ -22,7 +23,7 @@ const DashboardSkeleton = () => (
   <div className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {[...Array(6)].map((_, i) => (
-        <Card key={i} className="bg-gray-800 border-gray-600">
+        <Card key={i} className="card-horizon">
           <CardContent className="p-6">
             <Skeleton className="h-4 w-3/4 mb-4" />
             <Skeleton className="h-20 w-full" />
@@ -35,14 +36,12 @@ const DashboardSkeleton = () => (
 
 // Компонент ошибки
 const DashboardError = ({ error }: { error: Error }) => (
-  <Card className="bg-gray-800 border-gray-600">
+  <Card className="card-horizon">
     <CardContent className="p-6 text-center">
-      <h3 className="text-lg font-semibold text-gray-100 mb-2">
-        Ошибка загрузки данных
-      </h3>
-      <p className="text-gray-400">
-        {error.message || 'Произошла ошибка при загрузке данных dashboard'}
-      </p>
+      <Stack space="sm" className="items-center">
+        <H3>Ошибка загрузки данных</H3>
+        <Muted>{error.message || 'Произошла ошибка при загрузке данных dashboard'}</Muted>
+      </Stack>
     </CardContent>
   </Card>
 );
@@ -181,7 +180,9 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <Layout>
-        <DashboardSkeleton />
+        <div className="container mx-auto px-6 py-6">
+          <DashboardSkeleton />
+        </div>
       </Layout>
     );
   }
@@ -189,7 +190,9 @@ export default function Dashboard() {
   if (error) {
     return (
       <Layout>
-        <DashboardError error={new Error(typeof error === 'string' ? error : String(error))} />
+        <div className="container mx-auto px-6 py-6">
+          <DashboardError error={new Error(typeof error === 'string' ? error : String(error))} />
+        </div>
       </Layout>
     );
   }
@@ -197,17 +200,33 @@ export default function Dashboard() {
   if (!session) {
     return (
       <Layout>
-        <DashboardError error={new Error('Данные не найдены')} />
+        <div className="container mx-auto px-6 py-6">
+          <DashboardError error={new Error('Данные не найдены')} />
+        </div>
       </Layout>
     );
   }
 
   // Если у пользователя есть активный кадетский трек — показываем CadetDashboard
   if (Array.isArray(session?.cadetTracks) && session!.cadetTracks!.length > 0) {
+    const activeTrack = session!.cadetTracks![0];
+    const cadetDepartmentName = Array.isArray(session.applications)
+      ? (session.applications.find(app => app?.id === activeTrack?.application_id)?.department_name ?? null)
+      : null;
+
     return (
       <Layout>
-        <div className="space-y-6">
-          <CadetDashboard track={session!.cadetTracks![0]} />
+        <div className="container mx-auto px-6 py-6 space-y-6">
+          <Stack space="xs">
+            <H2 className="text-2xl font-bold">Личный кабинет</H2>
+            <Muted>Ваш прогресс и действия</Muted>
+          </Stack>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-400">
+              Департамент: <span className="font-medium text-gray-200">{cadetDepartmentName || 'Не указан'}</span>
+            </div>
+          </div>
+          <CadetDashboard track={activeTrack} />
         </div>
       </Layout>
     );
@@ -267,6 +286,19 @@ export default function Dashboard() {
     ? session.applications.some(app => app?.status_code === 'awaiting_interview')
     : false;
 
+  // Производные данные для отображения департамента кандидата
+  const awaitingApp = Array.isArray(session.applications)
+    ? session.applications.find(app => app?.status_code === 'awaiting_interview')
+    : null;
+  const awaitingDepartmentName = awaitingApp?.department_name ?? null;
+
+  const lastApp = Array.isArray(session.applications) && session.applications.length > 0
+    ? [...session.applications].sort((a, b) =>
+        new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime()
+      )[0]
+    : null;
+  const lastDepartmentName = lastApp?.department_name ?? null;
+
   // Отладочная информация (только в режиме разработки)
   if (process.env.NODE_ENV === 'development') {
     console.log('Dashboard Debug Info:', {
@@ -281,42 +313,39 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Главный баннер с приоритетной ролью */}
-        <Card className="bg-gray-800 border-gray-600">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-100">
-                  Добро пожаловать, {session.user.username || 'Пользователь'}!
-                </h1>
-                <p className="text-sm text-gray-400 mt-1">
-                  Ваша роль: <span className="font-medium text-blue-400">{primaryRole?.name}</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
-                  Активен
-                </div>
-              </div>
+      <div className="container mx-auto px-6 py-6 space-y-6">
+        {/* Шапка страницы */}
+        <div className="flex items-start justify-between">
+          <Stack space="xs">
+            <H2 className="text-2xl font-bold">Личный кабинет</H2>
+            <Muted>Ваши быстрые действия и актуальная информация</Muted>
+          </Stack>
+          <div className="text-right">
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+              Активен
             </div>
-          </CardContent>
-        </Card>
-        {/* Cadet dashboard рендерится выше, если есть cadetTracks */}
+          </div>
+        </div>
+
         {/* Role-based Dashboard */}
         {isCandidateRole ? (
           // Спец. состояние для кандидата, ожидающего интервью
           isAwaitingInterview ? (
             <div className="space-y-6">
-              <Card className="bg-gray-800 border-gray-600">
+              <Card className="card-horizon">
                 <CardContent className="p-6">
                   <div className="flex flex-col gap-4">
-                    <div>
-                      <h1 className="text-2xl font-semibold text-gray-100">Поздравляем! Вы прошли отбор</h1>
-                      <p className="text-gray-400 mt-2">
+                    <Stack space="xs">
+                      <H2 className="text-xl font-semibold">Поздравляем! Вы прошли отбор</H2>
+                      <Muted>
                         Ваша заявка одобрена. Следующий шаг — интервью. Пожалуйста, проверьте Discord для получения инструкции и назначения времени.
-                      </p>
-                    </div>
+                      </Muted>
+                      {awaitingDepartmentName && (
+                        <Muted>
+                          Департамент: <span className="font-medium">{awaitingDepartmentName}</span>
+                        </Muted>
+                      )}
+                    </Stack>
                     <div>
                       <a
                         href="https://discord.gg/horizoncommunity"
@@ -337,13 +366,18 @@ export default function Dashboard() {
           ) : (
             // Обычный кандидатский дашборд с CTA на подачу заявки
             <div className="space-y-6">
-              <Card className="bg-gray-800 border-gray-600">
+              <Card className="card-horizon">
                 <CardContent className="p-6">
                   <div className="flex flex-col gap-4">
-                    <div>
-                      <h1 className="text-2xl font-semibold text-gray-100">Начните свой путь в HorizonCommunity</h1>
-                      <p className="text-gray-400 mt-2">Подайте заявку на вступление в один из наших департаментов и станьте частью истории.</p>
-                    </div>
+                    <Stack space="xs">
+                      <H2 className="text-xl font-semibold">Начните свой путь в HorizonCommunity</H2>
+                      <Muted>Подайте заявку на вступление в один из наших департаментов и станьте частью истории.</Muted>
+                      {lastDepartmentName && (
+                        <Muted>
+                          Текущая заявка: <span className="font-medium">{lastDepartmentName}</span>
+                        </Muted>
+                      )}
+                    </Stack>
                     {!(primaryRole.code === 'system_admin' || hasAdminPermission) && (
                       <div>
                         <EntryApplicationModal>
@@ -401,20 +435,20 @@ export default function Dashboard() {
           // Dashboard для граждан
           <div className="space-y-6">
             {/* Welcome Block для граждан */}
-            <Card className="bg-gray-800 border-gray-600">
+            <Card className="card-horizon">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h1 className="text-2xl font-semibold text-gray-100">
+                  <Stack space="xs">
+                    <H2 className="text-xl font-semibold">
                        Добро пожаловать, {transformedData.profile.userName || "Пользователь"}!
-                    </h1>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Ваш статус: <span className="font-medium text-blue-400">{primaryRole?.name}</span>
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">
+                    </H2>
+                    <Muted>
+                      Ваш статус: <span className="font-medium">{primaryRole?.name}</span>
+                    </Muted>
+                    <Muted>
                       Добро пожаловать в личный кабинет. Здесь вы можете отслеживать свои активности и получать важную информацию.
-                    </p>
-                  </div>
+                    </Muted>
+                  </Stack>
                   <div className="text-right">
                     <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
                       Активен
@@ -458,15 +492,13 @@ export default function Dashboard() {
           </div>
         ) : (
           // Fallback для неизвестных ролей
-          <Card className="bg-gray-800 border-gray-600">
+          <Card className="card-horizon">
             <CardContent className="p-6">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-100 mb-2">
-                  Неизвестная роль пользователя
-                </h3>
-                <p className="text-gray-400">
-                  Пожалуйста, обратитесь к администратору для настройки прав доступа.
-                </p>
+                <Stack space="sm" className="items-center">
+                  <H3>Неизвестная роль пользователя</H3>
+                  <Muted>Пожалуйста, обратитесь к администратору для настройки прав доступа.</Muted>
+                </Stack>
               </div>
             </CardContent>
           </Card>

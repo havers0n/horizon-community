@@ -11,8 +11,8 @@ import {
   type CreateTestDto,
   listRanks,
   listQualifications,
+  listDepartments,
 } from '@/features/admin/tests/api'
-import { getPublicDepartments } from '@/shared/api/public-service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -31,7 +31,6 @@ const questionSchema = z.object({
   options: z.array(optionSchema),
 }).superRefine((val, ctx) => {
   if (val.question_type === 'free_text') {
-    // для свободного текста варианты не требуются
     return
   }
   if (!val.options || val.options.length < 2) {
@@ -45,10 +44,12 @@ const testSchema = z.object({
   duration_minutes: z.coerce.number().int().positive('> 0'),
   passing_score_percent: z.coerce.number().int().min(0).max(100),
   max_focus_losses: z.coerce.number().int().min(0),
-  purpose: z.enum(['entry','promotion','qualification']).optional(),
-  target_department_id: z.string().uuid('Неверный UUID департамента').optional().nullable(),
-  target_rank_id: z.string().uuid('Неверный UUID звания').optional().nullable(),
-  target_qualification_id: z.string().uuid('Неверный UUID квалификации').optional().nullable(),
+  purpose: z.enum(['ENTRY','PROMOTION','QUALIFICATION']),
+  target: z.union([
+    z.object({ department_id: z.string().uuid() }),
+    z.object({ rank_id: z.string().uuid() }),
+    z.object({ qualification_id: z.string().uuid() }),
+  ]),
   questions: z.array(questionSchema).default([]),
 })
 
@@ -75,6 +76,8 @@ export default function AdminTestNewPage() {
       duration_minutes: 20,
       passing_score_percent: 70,
       max_focus_losses: 0,
+      purpose: 'ENTRY',
+      target: { department_id: '' as any },
       questions: [],
     },
   })
@@ -82,19 +85,19 @@ export default function AdminTestNewPage() {
   const questionsFA = useFieldArray({ control, name: 'questions' })
 
   // Dictionaries
-  const { data: departments } = useQuery({ queryKey: ['departments'], queryFn: getPublicDepartments, staleTime: 300_000 })
+  const { data: departments } = useQuery({ queryKey: ['departments'], queryFn: listDepartments, staleTime: 300_000 })
   const purpose = useWatch({ control, name: 'purpose' as const })
-  const targetDepartmentId = useWatch({ control, name: 'target_department_id' as const })
+  const departmentId = useWatch({ control, name: 'target.department_id' as const })
   const { data: ranks } = useQuery({
-    queryKey: ['ranks', targetDepartmentId],
-    queryFn: () => listRanks(targetDepartmentId || undefined),
-    enabled: !!targetDepartmentId,
+    queryKey: ['ranks', departmentId],
+    queryFn: () => listRanks(departmentId || undefined),
+    enabled: !!departmentId && purpose === 'PROMOTION',
     staleTime: 300_000,
   })
   const { data: qualifications } = useQuery({
-    queryKey: ['qualifications', targetDepartmentId],
-    queryFn: () => listQualifications(targetDepartmentId || undefined),
-    enabled: !!targetDepartmentId,
+    queryKey: ['qualifications', departmentId],
+    queryFn: () => listQualifications(departmentId || undefined),
+    enabled: purpose === 'QUALIFICATION',
     staleTime: 300_000,
   })
 
@@ -267,14 +270,13 @@ export default function AdminTestNewPage() {
     }
 
     const { questions, ...testDto } = values
-    const created = await createMutation.mutateAsync(testDto)
+    const created = await createMutation.mutateAsync(testDto as unknown as CreateTestDto)
     const testId: string | undefined = (created as any)?.id || (created as any)?.data?.id
     if (!testId) {
       console.error('[CreateTest] Unexpected createTest response shape:', created)
       throw new Error('Не удалось получить идентификатор теста из ответа сервера')
     }
 
-    // Последовательно создаём вопросы и их варианты
     for (const q of questions) {
       const createdQuestion = await createQuestion(testId, {
         question_text: q.question_text,
@@ -287,7 +289,7 @@ export default function AdminTestNewPage() {
       }
       if (q.question_type !== 'free_text') {
         for (const opt of q.options) {
-          await addOption(questionId, {
+          await addOption(testId ? questionId : '', {
             option_text: opt.option_text,
             is_correct: !!opt.is_correct,
           })
@@ -358,87 +360,89 @@ export default function AdminTestNewPage() {
                   control={control}
                   name={'purpose' as const}
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select value={field.value} onValueChange={(v) => field.onChange(v as any)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Выберите назначение" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="entry">Вступительный</SelectItem>
-                        <SelectItem value="promotion">Повышение</SelectItem>
-                        <SelectItem value="qualification">Квалификация</SelectItem>
+                        <SelectItem value="ENTRY">Вступительный</SelectItem>
+                        <SelectItem value="PROMOTION">Повышение</SelectItem>
+                        <SelectItem value="QUALIFICATION">Квалификация</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 />
               </div>
 
-              <div>
-                <label className="text-sm text-muted-foreground">Департамент</label>
-                <Controller
-                  control={control}
-                  name={'target_department_id' as const}
-                  render={({ field }) => (
-                    <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Не выбрано" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(departments || []).map((d) => (
-                          <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
+              {purpose === 'ENTRY' && (
+                <div>
+                  <label className="text-sm text-muted-foreground">Департамент</label>
+                  <Controller
+                    control={control}
+                    name={'target.department_id' as const}
+                    render={({ field }) => (
+                      <Select value={field.value || undefined} onValueChange={(v) => field.onChange(v)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Не выбрано" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(departments || []).map((d) => (
+                            <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              )}
+
+              {purpose === 'PROMOTION' && (
+                <div>
+                  <label className="text-sm text-muted-foreground">Звание</label>
+                  <Controller
+                    control={control}
+                    name={'target.rank_id' as const}
+                    render={({ field }) => (
+                      <Select value={field.value || undefined} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Не выбрано" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(ranks || []).map((r) => (
+                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              )}
+
+              {purpose === 'QUALIFICATION' && (
+                <div>
+                  <label className="text-sm text-muted-foreground">Квалификация</label>
+                  <Controller
+                    control={control}
+                    name={'target.qualification_id' as const}
+                    render={({ field }) => (
+                      <Select value={field.value || undefined} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Не выбрано" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(qualifications || []).map((q) => (
+                            <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              )}
 
               {/* spacer */}
               <div />
             </div>
-
-            {purpose === 'promotion' && (
-              <div>
-                <label className="text-sm text-muted-foreground">Звание (для повышения)</label>
-                <Controller
-                  control={control}
-                  name={'target_rank_id' as const}
-                  render={({ field }) => (
-                    <Select value={field.value || undefined} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Не выбрано" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(ranks || []).map((r) => (
-                          <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-            )}
-
-            {purpose === 'qualification' && (
-              <div>
-                <label className="text-sm text-muted-foreground">Квалификация</label>
-                <Controller
-                  control={control}
-                  name={'target_qualification_id' as const}
-                  render={({ field }) => (
-                    <Select value={field.value || undefined} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Не выбрано" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(qualifications || []).map((q) => (
-                          <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

@@ -10,7 +10,6 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   const getStatusConfig = (status: string) => {
     switch (status.toLowerCase()) {
       case "approved":
-      case "approved":
       case "success":
         return {
           variant: "success" as const,
@@ -60,7 +59,6 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
           label: "Завершено",
           className: "bg-success/20 text-success border border-success/30"
         };
-      case "cancelled":
       case "cancelled":
         return {
           variant: "destructive" as const,

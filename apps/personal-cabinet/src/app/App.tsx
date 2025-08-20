@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/shared/ui/toaster'
 import { TooltipProvider } from '@/shared/ui/tooltip'
@@ -22,6 +22,16 @@ import { Switch } from '@/shared/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import { supabase } from '@/shared/lib/supabase'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
+import TiptapLink from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
+import TextAlign from '@tiptap/extension-text-align'
+import Placeholder from '@tiptap/extension-placeholder'
+import { loadInitialTiptapDoc } from '@/lib/tiptapTransform'
+import { Extension } from '@tiptap/core'
+import Suggestion from '@tiptap/suggestion'
 
 // Lazy loaded pages
 const Homepage = React.lazy(() => import('@/pages/homepage'))
@@ -43,6 +53,7 @@ const AdminTestsPage = React.lazy(() => import('@/pages/admin/tests'))
 const AdminTestNewPage = React.lazy(() => import('@/pages/admin/tests/new'))
 const AdminTestEditPage = React.lazy(() => import('@/pages/admin/tests/edit'))
 const ApplicationTestPage = React.lazy(() => import('@/pages/applications/test'))
+const TestSessionPage = React.lazy(() => import('@/pages/tests/session'))
 const AdminApplicationsPage = React.lazy(() => import('@/pages/admin/applications'))
 
 // ===== Админка: Документация =====
@@ -122,6 +133,507 @@ const DepartmentPicker: React.FC<{
   )
 }
 
+// Простая реализация Slash-меню по символу "/"
+const SlashCommands = Extension.create({
+  name: 'slash',
+  addOptions() {
+    return {
+      suggestion: {
+        char: '/',
+        startOfLine: true,
+        items: ({ query }: { query: string }) => {
+          const items = [
+            { title: 'Заголовок', run: (e: any) => e.chain().focus().setHeading({ level: 2 }).run() },
+            { title: 'Параграф', run: (e: any) => e.chain().focus().setParagraph().run() },
+            { title: 'Список', run: (e: any) => e.chain().focus().toggleBulletList().run() },
+            { title: 'Нумер. список', run: (e: any) => e.chain().focus().toggleOrderedList().run() },
+            { title: 'Код', run: (e: any) => e.chain().focus().toggleCodeBlock().run() },
+            { title: 'Изображение', run: () => document.getElementById('doc-image-input')?.click() },
+          ]
+          return items.filter(i => i.title.toLowerCase().includes((query || '').toLowerCase()))
+        },
+        render: () => {
+          let component: HTMLDivElement | null = null
+          let list: HTMLDivElement | null = null
+
+          return {
+            onStart: (props: any) => {
+              component = document.createElement('div')
+              component.className = 'z-50 rounded-md border border-zinc-700 bg-zinc-800 p-1 shadow-lg'
+              list = document.createElement('div')
+              list.className = 'flex flex-col'
+              component.appendChild(list)
+              document.body.appendChild(component)
+
+              const { clientRect } = props
+              if (clientRect) {
+                const rect = clientRect()
+                if (rect) {
+                  component.style.position = 'fixed'
+                  component.style.left = rect.left + 'px'
+                  component.style.top = rect.bottom + 6 + 'px'
+                }
+              }
+
+              props.items.forEach((item: any) => {
+                const btn = document.createElement('button')
+                btn.type = 'button'
+                btn.className = 'px-3 py-1 text-left text-sm hover:bg-zinc-700 rounded'
+                btn.textContent = item.title
+                btn.addEventListener('click', () => {
+                  (props.editor as any).chain().focus()
+                  item.run(props.editor)
+                  props.command({ id: item.title })
+                })
+                list!.appendChild(btn)
+              })
+            },
+            onUpdate: (props: any) => {
+              if (!component || !list) return
+              list.innerHTML = ''
+              props.items.forEach((item: any) => {
+                const btn = document.createElement('button')
+                btn.type = 'button'
+                btn.className = 'px-3 py-1 text-left text-sm hover:bg-zinc-700 rounded'
+                btn.textContent = item.title
+                btn.addEventListener('click', () => {
+                  (props.editor as any).chain().focus()
+                  item.run(props.editor)
+                  props.command({ id: item.title })
+                })
+                list!.appendChild(btn)
+              })
+              const { clientRect } = props
+              if (clientRect) {
+                const rect = clientRect()
+                if (rect && component) {
+                  component.style.left = rect.left + 'px'
+                  component.style.top = rect.bottom + 6 + 'px'
+                }
+              }
+            },
+            onKeyDown: (props: any) => {
+              if (props.event.key === 'Escape') {
+                props.command('close')
+                return true
+              }
+              return false
+            },
+            onExit: () => {
+              if (component) {
+                component.remove()
+                component = null
+              }
+              list = null
+            },
+          }
+        },
+      },
+    }
+  },
+  addProseMirrorPlugins() {
+    return [Suggestion({ editor: this.editor, ...((this.options as any).suggestion) })]
+  },
+})
+
+// Вспомогательное Bubble-меню без зависимости от @tiptap/react/BubbleMenu
+const InlineBubble: React.FC<{ editor: any; setLink: () => void; containerRef: React.RefObject<HTMLDivElement> }> = ({ editor, setLink, containerRef }) => {
+  const [visible, setVisible] = React.useState(false)
+  const [pos, setPos] = React.useState<{ left: number; top: number }>({ left: 0, top: 0 })
+
+  const updatePosition = React.useCallback(() => {
+    if (!editor || !containerRef.current) return
+    const { from, to } = editor.state.selection || { from: 0, to: 0 }
+    if (from === to) return
+    const mid = Math.floor((from + to) / 2)
+    let coords: any
+    try { coords = editor.view.coordsAtPos(mid) } catch { /* ignore */ }
+    if (!coords) {
+      try { coords = editor.view.coordsAtPos(to) } catch { /* ignore */ }
+    }
+    const containerRect = containerRef.current.getBoundingClientRect()
+    if (!coords || !containerRect) return
+    const rawLeft = (coords.left ?? 0) - containerRect.left
+    const rawTop = (coords.top ?? 0) - containerRect.top
+    const width = containerRect.width
+    const left = Math.min(Math.max(rawLeft, 24), width - 24)
+    const top = Math.max(rawTop - 24, 8)
+    setPos({ left, top })
+  }, [editor, containerRef])
+
+  React.useEffect(() => {
+    const handleChange = () => {
+      const hasSelection = editor?.state?.selection?.from !== editor?.state?.selection?.to
+      const focused = editor?.isFocused
+      const editable = editor?.isEditable
+      const show = Boolean(focused && editable) // показываем и при каретке без выделения
+      setVisible(show)
+      if (show) updatePosition()
+    }
+    const hide = () => setVisible(false)
+    editor?.on('selectionUpdate', handleChange)
+    editor?.on('transaction', handleChange)
+    editor?.on('focus', handleChange)
+    editor?.on('blur', hide)
+    window.addEventListener('mouseup', handleChange)
+    window.addEventListener('keyup', handleChange)
+    document.addEventListener('selectionchange', handleChange)
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    // Первичный пересчет после маунта
+    setTimeout(handleChange, 0)
+    return () => {
+      editor?.off('selectionUpdate', handleChange)
+      editor?.off('transaction', handleChange)
+      editor?.off('focus', handleChange)
+      editor?.off('blur', hide)
+      window.removeEventListener('mouseup', handleChange)
+      window.removeEventListener('keyup', handleChange)
+      document.removeEventListener('selectionchange', handleChange)
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [editor, updatePosition])
+
+  if (!visible) return null
+  return (
+    <div
+      style={{ position: 'absolute', left: pos.left, top: pos.top, transform: 'translate(-50%, -100%)' }}
+      className="z-[999] rounded bg-zinc-800 p-1 shadow-lg border border-zinc-600 flex gap-1 pointer-events-auto"
+    >
+      <button onClick={()=>editor.chain().focus().toggleBold().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('bold')?'bg-zinc-700':'hover:bg-zinc-700'}`}>B</button>
+      <button onClick={()=>editor.chain().focus().toggleItalic().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('italic')?'bg-zinc-700':'hover:bg-zinc-700'}`}>I</button>
+      <button onClick={()=>editor.chain().focus().toggleUnderline().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('underline')?'bg-zinc-700':'hover:bg-zinc-700'}`}>U</button>
+      <button onClick={setLink} className={`px-2 py-1 text-xs rounded ${editor.isActive('link')?'bg-zinc-700':'hover:bg-zinc-700'}`}>Link</button>
+      <button onClick={()=>editor.chain().focus().toggleBulletList().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('bulletList')?'bg-zinc-700':'hover:bg-zinc-700'}`}>•</button>
+      <button onClick={()=>editor.chain().focus().toggleOrderedList().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('orderedList')?'bg-zinc-700':'hover:bg-zinc-700'}`}>1.</button>
+      <button onClick={()=>editor.chain().focus().toggleCodeBlock().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('codeBlock')?'bg-zinc-700':'hover:bg-zinc-700'}`}>{'</>'}</button>
+    </div>
+  )
+}
+
+const EditorToolbar: React.FC<{ editor: any; setLink: () => void; openImagePicker: () => void }> = ({ editor, setLink, openImagePicker }) => {
+  if (!editor) return null
+  return (
+    <div className="sticky top-2 z-[200] w-full flex justify-center mb-2 pointer-events-none">
+      <div className="pointer-events-auto flex gap-1 rounded bg-zinc-800 p-1 shadow-lg border border-zinc-600">
+        <button onClick={()=>editor.chain().focus().toggleBold().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('bold')?'bg-zinc-700':'hover:bg-zinc-700'}`}>B</button>
+        <button onClick={()=>editor.chain().focus().toggleItalic().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('italic')?'bg-zinc-700':'hover:bg-zinc-700'}`}>I</button>
+        <button onClick={()=>editor.chain().focus().toggleUnderline().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('underline')?'bg-zinc-700':'hover:bg-zinc-700'}`}>U</button>
+        <button onClick={setLink} className={`px-2 py-1 text-xs rounded ${editor.isActive('link')?'bg-zinc-700':'hover:bg-zinc-700'}`}>Link</button>
+        <div className="mx-1 w-px bg-zinc-700" />
+        <button onClick={()=>editor.chain().focus().toggleBulletList().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('bulletList')?'bg-zinc-700':'hover:bg-zinc-700'}`}>•</button>
+        <button onClick={()=>editor.chain().focus().toggleOrderedList().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('orderedList')?'bg-zinc-700':'hover:bg-zinc-700'}`}>1.</button>
+        <button onClick={()=>editor.chain().focus().toggleCodeBlock().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('codeBlock')?'bg-zinc-700':'hover:bg-zinc-700'}`}>{'</>'}</button>
+        <div className="mx-1 w-px bg-zinc-700" />
+        <button onClick={()=>editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('heading', { level: 2 })?'bg-zinc-700':'hover:bg-zinc-700'}`}>H2</button>
+        <button onClick={()=>editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('heading', { level: 3 })?'bg-zinc-700':'hover:bg-zinc-700'}`}>H3</button>
+        <button onClick={()=>editor.chain().focus().setParagraph().run()} className={`px-2 py-1 text-xs rounded ${editor.isActive('paragraph')?'bg-zinc-700':'hover:bg-zinc-700'}`}>P</button>
+        <div className="mx-1 w-px bg-zinc-700" />
+        <button onClick={()=>editor.chain().focus().setTextAlign('left').run()} className={`px-2 py-1 text-xs rounded ${editor.isActive({ textAlign: 'left' })?'bg-zinc-700':'hover:bg-zinc-700'}`}>L</button>
+        <button onClick={()=>editor.chain().focus().setTextAlign('center').run()} className={`px-2 py-1 text-xs rounded ${editor.isActive({ textAlign: 'center' })?'bg-zinc-700':'hover:bg-zinc-700'}`}>C</button>
+        <button onClick={()=>editor.chain().focus().setTextAlign('right').run()} className={`px-2 py-1 text-xs rounded ${editor.isActive({ textAlign: 'right' })?'bg-zinc-700':'hover:bg-zinc-700'}`}>R</button>
+        <div className="mx-1 w-px bg-zinc-700" />
+        <button onClick={openImagePicker} className="px-2 py-1 text-xs rounded hover:bg-zinc-700">Img</button>
+      </div>
+    </div>
+  )
+}
+
+// Компонент Tiptap редактора с BubbleMenu, центровкой и обработкой изображений
+const TiptapDocEditor: React.FC<{
+  initialDoc: any
+  onDebouncedUpdate: (doc: any) => void
+  requestImageUpload: (file: File) => Promise<{ src: string; alt?: string }>
+  readOnly?: boolean
+}> = ({ initialDoc, onDebouncedUpdate, requestImageUpload, readOnly = false }) => {
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  const editor = useEditor({
+    editable: !readOnly,
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+        codeBlock: { HTMLAttributes: { class: 'bg-zinc-900 p-3 rounded' } },
+      }),
+      Underline,
+      TiptapLink.configure({ openOnClick: false, autolink: true, linkOnPaste: true }),
+      Image,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Placeholder.configure({ placeholder: 'Начните писать…' }),
+      SlashCommands,
+    ],
+    content: initialDoc || { type: 'doc', content: [{ type: 'paragraph' }] },
+    onUpdate: ({ editor }) => {
+      if (readOnly) return
+      const json = editor.getJSON()
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        onDebouncedUpdate(json)
+      }, 1200)
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-invert max-w-[800px] mx-auto focus:outline-none leading-7',
+      },
+      handlePaste: (view, event) => {
+        if (readOnly) return false
+        const items = (event.clipboardData && event.clipboardData.items) || []
+        for (const item of items) {
+          if (item.kind === 'file') {
+            const file = item.getAsFile()
+            if (file && file.type.startsWith('image/')) {
+              ;(async () => {
+                const { src } = await requestImageUpload(file)
+                editor?.chain().focus().setImage({ src, alt: '' }).run()
+              })()
+              return true
+            }
+          }
+        }
+        return false
+      },
+      handleDrop: (view, event) => {
+        if (readOnly) return false
+        const dt = event.dataTransfer
+        if (dt && dt.files && dt.files.length > 0) {
+          const file = Array.from(dt.files).find(f => f.type.startsWith('image/'))
+          if (file) {
+            ;(async () => {
+              const { src } = await requestImageUpload(file)
+              editor?.chain().focus().setImage({ src, alt: '' }).run()
+            })()
+            return true
+          }
+        }
+        return false
+      },
+    },
+  })
+
+  const setLink = () => {
+    if (!editor) return
+    const prev = editor.getAttributes('link').href || ''
+    const url = window.prompt('Вставьте ссылку', prev)
+    if (url === null) return
+    if (url === '') editor.chain().focus().unsetLink().run()
+    else editor.chain().focus().setLink({ href: url }).run()
+  }
+
+  const onImagePicked: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !editor) return
+    if (!file.type.startsWith('image/')) return
+    const { src } = await requestImageUpload(file)
+    editor.chain().focus().setImage({ src, alt: '' }).run()
+  }
+
+  if (!editor) return null
+
+  return (
+    <div className="space-y-2 px-6 relative" ref={containerRef}>
+      {!readOnly && editor && (
+        <EditorToolbar editor={editor} setLink={setLink} openImagePicker={() => fileInputRef.current?.click()} />
+      )}
+      <div className="max-w-[900px] mx-auto">
+        <EditorContent editor={editor} />
+        {/* Hidden picker to support Slash → Изображение */}
+        {!readOnly && (
+          <input id="doc-image-input" ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onImagePicked} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Публичная документация: дерево категорий и документов (read-only)
+type PublicCategoryNode = {
+  id: string
+  title: string
+  description: string | null
+  children: PublicCategoryNode[]
+  documents: { id: string; title: string; slug: string }[]
+}
+
+const DocsTreePage: React.FC = () => {
+  const [tree, setTree] = React.useState<PublicCategoryNode[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const navigate = useNavigate()
+
+  React.useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await apiClient.get<{ success: boolean; data: PublicCategoryNode[] }>(`/documents/tree`)
+        setTree(res.data || [])
+      } catch (e: any) {
+        setError(e?.message || 'Не удалось загрузить дерево документации')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  const findFirstDocSlug = (n: PublicCategoryNode): string | null => {
+    if (n.documents && n.documents.length > 0) return n.documents[0].slug
+    for (const child of n.children || []) {
+      const s = findFirstDocSlug(child)
+      if (s) return s
+    }
+    return null
+  }
+
+  const renderNode = (node: PublicCategoryNode) => {
+    const firstSlug = findFirstDocSlug(node)
+    return (
+      <div key={node.id} className="border rounded-lg p-3 bg-zinc-900/40">
+        <button
+          type="button"
+          className={`w-full text-left mb-2 ${firstSlug ? 'cursor-pointer hover:underline' : 'cursor-default'}`}
+          onClick={() => { if (firstSlug) navigate(`/docs/${firstSlug}`) }}
+          aria-label={firstSlug ? `Открыть первый документ категории ${node.title}` : undefined}
+        >
+          <div className="text-sm font-semibold">{node.title}</div>
+          {node.description && (
+            <div className="text-xs text-muted-foreground mt-0.5">{node.description}</div>
+          )}
+        </button>
+        {node.documents.length > 0 && (
+          <ul className="space-y-2 text-sm">
+            {node.documents.map((d) => (
+              <li key={d.id}>
+                <Button asChild variant="outline" className="w-full justify-between px-3 py-2 bg-zinc-900 hover:bg-zinc-800/70 border-zinc-700">
+                  <RouterLink to={`/docs/${encodeURIComponent(d.slug)}`} aria-label={`Открыть документ ${d.title}`}>
+                    <span className="text-primary">{d.title}</span>
+                    <span className="text-xs text-muted-foreground ml-2">/{d.slug}</span>
+                  </RouterLink>
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {node.children.length > 0 && (
+          <div className="mt-3 space-y-2 pl-3 border-l border-zinc-700">
+            {node.children.map((c) => (
+              <div key={c.id}>{renderNode(c)}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Документация</h1>
+        <p className="text-muted-foreground">Опубликованные материалы и правила для игроков</p>
+      </div>
+      {loading ? (
+        <div>Загрузка…</div>
+      ) : error ? (
+        <div className="text-red-400">{error}</div>
+      ) : tree.length === 0 ? (
+        <div className="text-muted-foreground">Пока нет опубликованных материалов</div>
+      ) : (
+        <div className="space-y-3">
+          {tree.map((n) => renderNode(n))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Публичная документация: страница просмотра документа по слагу
+const PlayerDocumentPage: React.FC = () => {
+  const { slug } = useParams()
+  const navigate = useNavigate()
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [doc, setDoc] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    const load = async () => {
+      if (!slug) return
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await apiClient.get<{ success: boolean; data: any }>(`/documents/slug/${slug}`)
+        setDoc(loadInitialTiptapDoc(res.data?.content))
+      } catch (e: any) {
+        setError(e?.message || 'Документ не найден или недоступен')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [slug])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Документ</h1>
+          {error && <p className="text-amber-400 text-sm mt-1">{error}</p>}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/docs')}>К списку</Button>
+        </div>
+      </div>
+
+      {!error && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Содержимое</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TiptapDocViewer doc={doc} />
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+const TiptapDocViewer: React.FC<{ doc: any }> = ({ doc }) => {
+  const editor = useEditor({
+    editable: false,
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      Underline,
+      TiptapLink.configure({ openOnClick: true }),
+      Image,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    ],
+    content: doc || { type: 'doc', content: [{ type: 'paragraph' }] },
+    editorProps: {
+      attributes: { class: 'prose prose-invert max-w-[800px] mx-auto leading-7' },
+    },
+  })
+  if (!editor) return null
+  return (
+    <div className="px-6">
+      <div className="max-w-[900px] mx-auto">
+        <EditorContent editor={editor} />
+      </div>
+    </div>
+  )
+}
+
 // Компонент: Дерево категорий со CRUD
 const AdminDocCategoriesTree: React.FC<{
   categories: DocCategory[]
@@ -136,6 +648,9 @@ const AdminDocCategoriesTree: React.FC<{
   const [title, setTitle] = React.useState('')
   const [parentId, setParentId] = React.useState<string | null>(null)
   const [isInternal, setIsInternal] = React.useState(false)
+  const [allDeps, setAllDeps] = React.useState<Department[]>([])
+  const [catDeps, setCatDeps] = React.useState<string[]>([])
+  const [savingCatDeps, setSavingCatDeps] = React.useState(false)
 
   const byParent: Record<string, DocCategory[]> = {}
   categories.forEach(c => {
@@ -158,6 +673,39 @@ const AdminDocCategoriesTree: React.FC<{
     setParentId(cat.parent_category_id)
     setIsInternal(!!cat.is_internal)
     setIsModalOpen(true)
+  }
+
+  // Загрузка департаментов и привязок категории при открытии модалки редактирования
+  React.useEffect(() => {
+    const loadDeps = async () => {
+      try {
+        const res = await apiClient.get<{ success: boolean; data: Department[] }>(`/departments`)
+        setAllDeps(Array.isArray(res) ? res as any : (res?.data || []))
+      } catch {}
+      if (editId) {
+        try {
+          const resp = await apiClient.get<{ success: boolean; data: { department_id: string }[] }>(`/admin/doc-categories/${editId}/departments`)
+          const ids = (resp.data || []).map(r => r.department_id)
+          setCatDeps(ids)
+        } catch {}
+      } else {
+        setCatDeps([])
+      }
+    }
+    if (isModalOpen) loadDeps()
+  }, [isModalOpen, editId])
+
+  const toggleCatDep = (id: string) => {
+    setCatDeps(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id])
+  }
+  const saveCatDeps = async () => {
+    if (!editId) return
+    setSavingCatDeps(true)
+    try {
+      await apiClient.post(`/admin/doc-categories/${editId}/departments`, { departmentIds: catDeps })
+    } finally {
+      setSavingCatDeps(false)
+    }
   }
 
   const submit = async () => {
@@ -233,6 +781,26 @@ const AdminDocCategoriesTree: React.FC<{
               <Label>Внутренняя</Label>
               <Switch checked={isInternal} onCheckedChange={setIsInternal} />
             </div>
+            {editId && (
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-medium">Доступ департаментов (наследуется документами)</legend>
+                <div className="grid grid-cols-2 gap-2 max-h-56 overflow-auto pr-1">
+                  {allDeps.map((d:any)=> (
+                    <label key={d.id} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={catDeps.includes(d.id)}
+                        onChange={(e)=> toggleCatDep(d.id)}
+                      />
+                      <span>{d.full_name ?? d.name}</span>
+                    </label>
+                  ))}
+                </div>
+                <div>
+                  <Button size="sm" variant="secondary" onClick={saveCatDeps} disabled={savingCatDeps}>{savingCatDeps ? 'Сохраняю…' : 'Сохранить доступ'}</Button>
+                </div>
+              </fieldset>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={()=>setIsModalOpen(false)}>Отмена</Button>
@@ -251,6 +819,24 @@ const AdminDocumentsPage: React.FC = () => {
   const [activeCategoryId, setActiveCategoryId] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const navigate = useNavigate()
+
+  const [isNewOpen, setIsNewOpen] = React.useState(false)
+  const [newTitle, setNewTitle] = React.useState('')
+  const [newSlug, setNewSlug] = React.useState('')
+  const [newCategoryId, setNewCategoryId] = React.useState<string | null>(null)
+  const [newPublished, setNewPublished] = React.useState(false)
+  const slugTouchedRef = React.useRef(false)
+
+  const translit = React.useCallback((s: string) => {
+    const map: Record<string,string> = {"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e","ж":"zh","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"h","ц":"c","ч":"ch","ш":"sh","щ":"sch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya","А":"a","Б":"b","В":"v","Г":"g","Д":"d","Е":"e","Ё":"e","Ж":"zh","З":"z","И":"i","Й":"y","К":"k","Л":"l","М":"m","Н":"n","О":"o","П":"p","Р":"r","С":"s","Т":"t","У":"u","Ф":"f","Х":"h","Ц":"c","Ч":"ch","Ш":"sh","Щ":"sch","Ъ":"","Ы":"y","Ь":"","Э":"e","Ю":"yu","Я":"ya"};
+    const replaced = s.split('').map(ch=>map[ch]??ch).join('')
+    const ascii = replaced.normalize('NFKD').replace(/[^\w\s-]/g, '')
+    return ascii.trim().toLowerCase().replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '')
+  }, [])
+
+  React.useEffect(() => {
+    if (!slugTouchedRef.current) setNewSlug(translit(newTitle))
+  }, [newTitle, translit])
 
   const load = async () => {
     setIsLoading(true)
@@ -281,15 +867,31 @@ const AdminDocumentsPage: React.FC = () => {
 
   const filteredDocs = documents.filter(d => !activeCategoryId || d.category_id === activeCategoryId)
 
+  const openNewModal = () => {
+    setNewTitle('')
+    setNewPublished(false)
+    setNewCategoryId(activeCategoryId ?? null)
+    setNewSlug('')
+    slugTouchedRef.current = false
+    setIsNewOpen(true)
+  }
+
   const createDocument = async () => {
-    if (!activeCategoryId) return
-    const title = prompt('Название документа') || ''
-    if (!title) return
+    if (!newTitle || !newCategoryId) return
+    const payload = {
+      title: newTitle,
+      slug: newSlug || translit(newTitle),
+      category_id: newCategoryId,
+      is_published: newPublished,
+      is_internal: false,
+      content: { type: 'tiptap', doc: { type: 'doc', content: [{ type: 'paragraph' }] } },
+    }
     const res = await apiClient.post<{ success: boolean; data: DocumentItem }>(
       '/admin/documents',
-      { title, slug: '', category_id: activeCategoryId, content: { type: 'doc', blocks: [] }, is_published: false, is_internal: false }
+      payload
     )
     const id = res.data.id
+    setIsNewOpen(false)
     await load()
     navigate(`/admin/documents/edit/${id}`)
   }
@@ -319,7 +921,7 @@ const AdminDocumentsPage: React.FC = () => {
                   <CardTitle>Документы</CardTitle>
                   <CardDescription>{activeCategoryId ? 'Выбранная категория' : 'Выберите категорию слева'}</CardDescription>
                 </div>
-                <Button disabled={!activeCategoryId} onClick={createDocument}>Создать документ</Button>
+                <Button disabled={!activeCategoryId} onClick={openNewModal}>Новый документ</Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -359,11 +961,48 @@ const AdminDocumentsPage: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Новый документ</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Название</Label>
+              <Input value={newTitle} onChange={e=>setNewTitle(e.target.value)} placeholder="Название документа" />
+            </div>
+            <div className="space-y-2">
+              <Label>Слаг</Label>
+              <Input value={newSlug} onChange={e=>{ setNewSlug(e.target.value); slugTouchedRef.current = true }} placeholder="slug" />
+            </div>
+            <div className="space-y-2">
+              <Label>Категория</Label>
+              <Select value={newCategoryId ?? ''} onValueChange={v=>setNewCategoryId(v)}>
+                <SelectTrigger><SelectValue placeholder="Выберите категорию" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map(c=> (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Опубликован</Label>
+              <Switch checked={newPublished} onCheckedChange={setNewPublished} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={()=>setIsNewOpen(false)}>Отмена</Button>
+            <Button onClick={createDocument} disabled={!newTitle || !newCategoryId}>Создать</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
-// Простой редактор на блоках (WYSIWYG-like) с сохранением JSONB
+// Редактор документа на Tiptap с автосохранением JSONB
 const AdminDocumentEditorPage: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -374,12 +1013,25 @@ const AdminDocumentEditorPage: React.FC = () => {
   const [categoryId, setCategoryId] = React.useState('')
   const [isPublished, setIsPublished] = React.useState(false)
   const [isInternal, setIsInternal] = React.useState(false)
-  const [blocks, setBlocks] = React.useState<EditorBlock[]>([])
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const [initialDoc, setInitialDoc] = React.useState<any>({ type: 'doc', content: [{ type: 'paragraph' }] })
 
   // Привязка департаментов
   const [depIds, setDepIds] = React.useState<string[]>([])
   const [savingDeps, setSavingDeps] = React.useState(false)
+
+  // Индикатор автосохранения
+  const [isSaving, setIsSaving] = React.useState(false)
+  const saveTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestDocRef = React.useRef<any>(null)
+
+  // Просмотр/Редактирование
+  const [isPreview, setIsPreview] = React.useState(false)
+
+  // Сворачивание доступа по умолчанию
+  const [accessOpen, setAccessOpen] = React.useState(false)
+
+  // Флаг готовности: исключаем автосохранение до загрузки данных
+  const [isLoaded, setIsLoaded] = React.useState(false)
 
   React.useEffect(()=>{
     const load = async () => {
@@ -394,10 +1046,7 @@ const AdminDocumentEditorPage: React.FC = () => {
         setCategoryId(d.category_id)
         setIsPublished(!!d.is_published)
         setIsInternal(!!d.is_internal)
-        const initialBlocks = Array.isArray(d.content?.blocks) ? d.content.blocks : []
-        setBlocks(initialBlocks)
-
-        // загрузим привязанные департаменты
+        setInitialDoc(loadInitialTiptapDoc(d.content))
         try {
           const rel = await apiClient.get<{ success: boolean; data: { department_id: string }[] }>(`/admin/documents/${id}/departments`)
           setDepIds((rel.data || []).map(r => r.department_id))
@@ -405,37 +1054,20 @@ const AdminDocumentEditorPage: React.FC = () => {
           console.warn('Не удалось загрузить привязки департаментов', e)
         }
       }
+      setIsLoaded(true)
     }
     load()
   }, [id])
 
-  // Автогенерация slug, если пользователь не редактировал slug вручную
+  // Автогенерация slug
   React.useEffect(()=>{
     if (!slugTouched) {
-      const translit = (s: string) => {
-        const map: Record<string,string> = {"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e","ж":"zh","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"h","ц":"c","ч":"ch","ш":"sh","щ":"sch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya","А":"a","Б":"b","В":"v","Г":"g","Д":"d","Е":"e","Ё":"e","Ж":"zh","З":"z","И":"i","Й":"y","К":"k","Л":"l","М":"m","Н":"n","О":"o","П":"p","Р":"r","С":"s","Т":"t","У":"u","Ф":"f","Х":"h","Ц":"c","Ч":"ch","Ш":"sh","Щ":"sch","Ъ":"","Ы":"y","Ь":"","Э":"e","Ю":"yu","Я":"ya"};
-        const replaced = s.split('').map(ch=>map[ch]??ch).join('');
-        const ascii = replaced.normalize('NFKD').replace(/[^\w\s-]/g, '');
-        return ascii.trim().toLowerCase().replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
-      }
-      setSlug(translit(title))
+      const map: Record<string,string> = {"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e","ж":"zh","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"h","ц":"c","ч":"ch","ш":"sh","щ":"sch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya","А":"a","Б":"b","В":"v","Г":"g","Д":"d","Е":"e","Ё":"e","Ж":"zh","З":"z","И":"i","Й":"y","К":"k","Л":"l","М":"m","Н":"n","О":"o","П":"p","Р":"r","С":"s","Т":"t","У":"u","Ф":"f","Х":"h","Ц":"c","Ч":"ch","Ш":"sh","Щ":"sch","Ъ":"","Ы":"y","Ь":"","Э":"e","Ю":"yu","Я":"ya"};
+      const replaced = title.split('').map(ch=>map[ch]??ch).join('')
+      const ascii = replaced.normalize('NFKD').replace(/[^\w\s-]/g, '')
+      setSlug(ascii.trim().toLowerCase().replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, ''))
     }
   }, [title, slugTouched])
-
-  const addBlock = (type: 'heading'|'paragraph'|'code') => {
-    const base: any = { type, text: '' }
-    if (type === 'heading' || type === 'paragraph') base.align = 'left'
-    setBlocks(prev => [...prev, base])
-  }
-  const updateBlock = (i: number, text: string) => {
-    setBlocks(prev => prev.map((b, idx)=> idx===i && (b as any).text !== undefined ? { ...(b as any), text } as EditorBlock : b))
-  }
-  const updateBlockAlign = (i: number, align: 'left'|'center'|'right') => {
-    setBlocks(prev => prev.map((b, idx)=> idx===i ? { ...b, align } : b))
-  }
-  const removeBlock = (i: number) => {
-    setBlocks(prev => prev.filter((_, idx)=> idx!==i))
-  }
 
   const requestSignedUploadUrl = async (file: File): Promise<{ signedUrl: string; path: string }> => {
     const resp = await apiClient.post<{ success: boolean; data: { signedUrl: string; path: string } }>(
@@ -446,52 +1078,51 @@ const AdminDocumentEditorPage: React.FC = () => {
   }
 
   async function uploadFileToSignedUrl(signedUrl: string, file: File) {
-    try {
-      // Use the global apiClient to automatically include the Authorization header.
-      // Use the PUT method, which is standard for Supabase Storage uploads.
-      const data = await apiClient.put(signedUrl, file, {
-        headers: {
-          'Content-Type': file.type,
-        },
-      });
-
-      console.log('File uploaded successfully via apiClient PUT.');
-      return data; // Return data if any, or resolve promise.
-
-    } catch (error) {
-      console.error('Error in uploadFileToSignedUrl:', error);
-      throw error; // Re-throw for the calling function to handle.
-    }
+    await apiClient.put(signedUrl, file, { headers: { 'Content-Type': file.type } })
   }
 
-  const onImageButtonClick = () => {
-    fileInputRef.current?.click()
+  const requestImageUpload = async (file: File): Promise<{ src: string; alt?: string }> => {
+    const { signedUrl, path } = await requestSignedUploadUrl(file)
+    await uploadFileToSignedUrl(signedUrl, file)
+    const { data } = supabase.storage.from('doc_attachments').getPublicUrl(path)
+    return { src: data.publicUrl, alt: '' }
   }
 
-  const handleImageSelected: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
-    try {
-      const file = e.target.files?.[0]
-      e.target.value = ''
-      if (!file) return
-
-      const { signedUrl, path } = await requestSignedUploadUrl(file)
-      await uploadFileToSignedUrl(signedUrl, file)
-
-      const { data } = supabase.storage.from('doc_attachments').getPublicUrl(path)
-      const publicUrl = data.publicUrl
-      const alt = window.prompt('Альтернативный текст (alt) для изображения', '') || undefined
-
-      setBlocks(prev => [...prev, { type: 'image', src: publicUrl, alt }])
-    } catch (err) {
-      console.error('Image upload failed', err)
-      alert('Не удалось загрузить изображение')
-    }
+  const scheduleSave = (doc: any) => {
+    if (!isLoaded) return
+    latestDocRef.current = doc
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(async () => {
+      if (!id) return
+      setIsSaving(true)
+      try {
+        const payload = {
+          title,
+          slug,
+          is_published: isPublished,
+          is_internal: isInternal,
+          content: { type: 'tiptap', doc: latestDocRef.current || initialDoc },
+          ...(categoryId ? { category_id: categoryId } : {}),
+        }
+        await apiClient.put(`/admin/documents/${id}`, payload)
+      } finally {
+        setIsSaving(false)
+      }
+    }, 1200)
   }
+
+  // Триггер автосохранения при изменении метаданных
+  React.useEffect(() => {
+    if (!id) return
+    if (!isLoaded) return
+    scheduleSave(latestDocRef.current || initialDoc)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, slug, categoryId, isPublished, isInternal])
 
   // Загрузчик списка департаментов
   const loadDepartments = React.useCallback(async (): Promise<Department[]> => {
-    const res = await apiClient.get<{ success: boolean; data: Department[] }>(`/admin/departments`)
-    return res.data || []
+    const res = await apiClient.get<any>(`/departments`)
+    return Array.isArray(res) ? res : (res?.data || [])
   }, [])
 
   // Сохранение привязок департаментов
@@ -505,54 +1136,24 @@ const AdminDocumentEditorPage: React.FC = () => {
     }
   }
 
-  const save = async () => {
-    if (!id) return
-    const payload = {
-      title,
-      slug,
-      category_id: categoryId,
-      is_published: isPublished,
-      is_internal: isInternal,
-      content: { type: 'doc', blocks },
-    }
-    await apiClient.put(`/admin/documents/${id}`, payload)
-    navigate('/admin/documents')
-  }
-
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Редактор документа</h1>
-        <div className="flex gap-2">
-          {id && id !== 'new' && (
-            <Button variant="outline" onClick={()=>navigate(`/admin/documents/view/${id}`)}>Предпросмотр</Button>
-          )}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">Редактор документа</h1>
+          <div className={`text-xs px-2 py-0.5 rounded ${isSaving ? 'bg-zinc-800 text-zinc-300' : 'bg-emerald-900/40 text-emerald-300'}`}>
+            {isSaving ? 'Сохраняю…' : 'Сохранено'}
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <Button variant={isPreview ? 'outline' : 'secondary'} size="sm" onClick={()=>setIsPreview(false)}>Редактор</Button>
+          <Button variant={isPreview ? 'secondary' : 'outline'} size="sm" onClick={()=>setIsPreview(true)}>Просмотр</Button>
           <Button variant="outline" onClick={()=>navigate('/admin/documents')}>Назад</Button>
-          <Button onClick={save}>Сохранить</Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-1 space-y-4">
-          <div className="space-y-2">
-            <Label>Название</Label>
-            <Input value={title} onChange={e=>setTitle(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Слаг (URL)</Label>
-            <Input value={slug} onChange={e=>{ setSlug(e.target.value); setSlugTouched(true); }} />
-          </div>
-          <div className="space-y-2">
-            <Label>Категория</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger><SelectValue placeholder="Выберите категорию" /></SelectTrigger>
-              <SelectContent>
-                {categories.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div className="flex items-center justify-between">
             <Label>Опубликован</Label>
             <Switch checked={isPublished} onCheckedChange={setIsPublished} />
@@ -562,83 +1163,69 @@ const AdminDocumentEditorPage: React.FC = () => {
             <Switch checked={isInternal} onCheckedChange={setIsInternal} />
           </div>
 
-          {/* Блок доступа по департаментам */}
-          {!isInternal && (
-            <div className="mt-4 space-y-3">
-              <div className="text-sm text-muted-foreground">
-                Если не выбрано ни одного департамента — документ публичный для всех, у кого есть доступ согласно политикам. Если выбраны департаменты — документ виден только участникам этих департаментов.
+          {/* Блок доступа (свернут по умолчанию) */}
+          <div className="mt-4 border rounded">
+            <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Доступ</span>
+                {isInternal ? (
+                  <span className="text-xs text-zinc-300 bg-zinc-800 px-2 py-0.5 rounded">Internal</span>
+                ) : (
+                  <span className="text-xs text-zinc-300 bg-zinc-800 px-2 py-0.5 rounded">{depIds.length > 0 ? 'Департаментский' : 'Публичный'}</span>
+                )}
               </div>
-              <DepartmentPicker value={depIds} onChange={setDepIds} loadDepartments={loadDepartments} />
-              <div className="flex items-center gap-4">
-                <div className="text-sm">
-                  Текущий режим: {depIds.length > 0 ? <b>Департаментский</b> : <b>Публичный</b>}
-                </div>
-                <Button variant="secondary" size="sm" onClick={saveDepartments} disabled={savingDeps}>
-                  {savingDeps ? 'Сохраняю…' : 'Сохранить доступ'}
-                </Button>
-              </div>
+              <Button variant="ghost" size="sm" onClick={()=>setAccessOpen(v=>!v)}>{accessOpen ? 'Скрыть' : 'Показать'}</Button>
             </div>
-          )}
+            {accessOpen && (
+              <div className={`px-3 pb-3 ${isInternal ? 'opacity-50 pointer-events-none' : ''}`}>
+                {!isInternal && (
+                  <div className="text-sm text-muted-foreground mb-2">
+                    Если не выбрано ни одного департамента — документ публичный для всех, у кого есть доступ согласно политикам. Если выбраны департаменты — документ виден только участникам этих департаментов.
+                  </div>
+                )}
+                <DepartmentPicker value={depIds} onChange={setDepIds} loadDepartments={loadDepartments} />
+                <div className="flex items-center gap-4 mt-3">
+                  <Button variant="secondary" size="sm" onClick={saveDepartments} disabled={savingDeps || isInternal}>
+                    {savingDeps ? 'Сохраняю…' : 'Сохранить доступ'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Содержимое</CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={()=>addBlock('heading')}>Заголовок</Button>
-                  <Button variant="outline" onClick={()=>addBlock('paragraph')}>Основной текст</Button>
-                  <Button variant="outline" onClick={()=>addBlock('code')}>Код</Button>
-                  <Button variant="outline" onClick={onImageButtonClick}>Изображение</Button>
-                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelected} />
+              <div className="px-6">
+                <input
+                  className="text-2xl md:text-3xl font-semibold w-full bg-transparent border-0 focus:ring-0 outline-none mb-2"
+                  placeholder="Название документа"
+                  value={title}
+                  onChange={e=>setTitle(e.target.value)}
+                />
+                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                  <span>Категория:</span>
+                  <Select value={categoryId} onValueChange={setCategoryId}>
+                    <SelectTrigger className="h-7 w-[260px] text-left"><SelectValue placeholder="Выберите категорию" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {blocks.map((b, i)=> (
-                  <div key={i} className="p-3 border rounded">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="text-xs text-muted-foreground">{
-                          b.type==='heading' ? 'Заголовок' :
-                          b.type==='paragraph' ? 'Основной текст' :
-                          b.type==='code' ? 'Код' :
-                          b.type==='image' ? 'Изображение' : b.type
-                        }</div>
-                        {b.type !== 'code' && b.type !== 'image' && (
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="text-slate-400">Выравнивание</span>
-                            <div className="flex items-center gap-1">
-                              <Button size="sm" variant={((b as any).align ?? 'left')==='left' ? 'secondary' : 'outline'} onClick={()=>updateBlockAlign(i, 'left')}>L</Button>
-                              <Button size="sm" variant={((b as any).align ?? 'left')==='center' ? 'secondary' : 'outline'} onClick={()=>updateBlockAlign(i, 'center')}>C</Button>
-                              <Button size="sm" variant={((b as any).align ?? 'left')==='right' ? 'secondary' : 'outline'} onClick={()=>updateBlockAlign(i, 'right')}>R</Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <Button size="sm" variant="destructive" onClick={()=>removeBlock(i)}>Удалить</Button>
-                    </div>
-                    {b.type === 'image' ? (
-                      <div className="my-2">
-                        <img src={(b as any).src} alt={(b as any).alt || 'Изображение'} className="max-w-full h-auto rounded-md border" />
-                        {(b as any).alt && <div className="text-xs text-slate-400 mt-1">alt: {(b as any).alt}</div>}
-                      </div>
-                    ) : (
-                      <textarea
-                        className={`w-full bg-transparent border rounded p-2 text-sm ${ (((b as any).align ?? 'left')==='center') ? 'text-center' : ( (((b as any).align ?? 'left')==='right') ? 'text-right' : '' ) }`}
-                        rows={b.type==='code'? 8 : 3}
-                        placeholder={b.type==='heading'? 'Заголовок' : b.type==='code'? 'Код' : 'Основной текст'}
-                        value={(b as any).text}
-                        onChange={e=>updateBlock(i, e.target.value)}
-                      />
-                    )}
-                  </div>
-                ))}
-                {blocks.length===0 && (
-                  <div className="text-sm text-muted-foreground">Добавьте блоки содержимого через панель инструментов сверху.</div>
-                )}
-              </div>
+              {isPreview ? (
+                <TiptapDocViewer doc={latestDocRef.current || initialDoc} />
+              ) : (
+                <TiptapDocEditor
+                  initialDoc={initialDoc}
+                  onDebouncedUpdate={scheduleSave}
+                  requestImageUpload={requestImageUpload}
+                />
+              )}
             </CardContent>
           </Card>
         </div>
@@ -647,7 +1234,7 @@ const AdminDocumentEditorPage: React.FC = () => {
   )
 }
 
-// Просмотр документа «как игрок» (использует публичный endpoint по slug)
+// Просмотр документа (read-only) на Tiptap
 const AdminDocumentViewPage: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -660,12 +1247,9 @@ const AdminDocumentViewPage: React.FC = () => {
     const load = async () => {
       if (!id) return
       try {
-        // 1) Получаем метаданные админского документа, чтобы узнать slug
         const adminRes = await apiClient.get<{ success: boolean; data: DocumentItem }>(`/admin/documents/${id}`)
         const meta = adminRes.data
         setAdminDoc(meta)
-
-        // 2) Пытаемся получить публичный вид по slug (RLS + is_published)
         try {
           const pub = await apiClient.get<{ success: boolean; data: DocumentItem }>(`/documents/slug/${meta.slug}`)
           setPlayerDoc(pub.data)
@@ -679,37 +1263,6 @@ const AdminDocumentViewPage: React.FC = () => {
     load()
   }, [id])
 
-  const renderBlocks = (content: any) => {
-    const blocks = Array.isArray(content?.blocks) ? content.blocks as Array<any> : []
-    return (
-      <div className="space-y-6">
-        {blocks.map((b, i)=>{
-          if (b.type === 'heading') return <h2 key={i} className={`text-xl font-semibold ${ (b.align ?? 'left')==='center' ? 'text-center' : ( (b.align ?? 'left')==='right' ? 'text-right' : '' )}`}>{b.text}</h2>
-          if (b.type === 'code') return (
-            <pre key={i} className="bg-black/40 border border-gray-700 rounded p-3 text-xs overflow-auto">
-{b.text}
-            </pre>
-          )
-          if (b.type === 'image') {
-            return (
-              <div key={i} className="my-4">
-                <img
-                  src={b.src}
-                  alt={b.alt || 'Изображение из документа'}
-                  className="max-w-full h-auto rounded-md border"
-                />
-              </div>
-            )
-          }
-          return <p key={i} className={`text-slate-300 text-sm whitespace-pre-wrap ${ (b.align ?? 'left')==='center' ? 'text-center' : ( (b.align ?? 'left')==='right' ? 'text-right' : '' )}`}>{b.text}</p>
-        })}
-        {blocks.length === 0 && (
-          <div className="text-sm text-muted-foreground">Пустой документ.</div>
-        )}
-      </div>
-    )
-  }
-
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -718,6 +1271,7 @@ const AdminDocumentViewPage: React.FC = () => {
 
   const showDoc = playerDoc ?? adminDoc
   const isPlayerView = !!playerDoc && !unavailableToPlayer
+  const tiptapDoc = loadInitialTiptapDoc(showDoc?.content)
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -756,7 +1310,7 @@ const AdminDocumentViewPage: React.FC = () => {
               <CardTitle>Содержимое</CardTitle>
             </CardHeader>
             <CardContent>
-              {renderBlocks(showDoc?.content)}
+              <TiptapDocViewer doc={tiptapDoc} />
             </CardContent>
           </Card>
         </div>
@@ -859,9 +1413,12 @@ function App() {
                     <Route path="/departments" element={<Departments />} />
                     <Route path="/applications" element={<Applications />} />
                     <Route path="/applications/:applicationId/test" element={<ApplicationTestPage />} />
+                    <Route path="/tests/session/:sessionId" element={<TestSessionPage />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/tests" element={<Tests />} />
                     <Route path="/support" element={<Support />} />
+                    <Route path="/docs" element={<DocsTreePage />} />
+                    <Route path="/docs/:slug" element={<PlayerDocumentPage />} />
                     <Route
                       path="/admin"
                       element={

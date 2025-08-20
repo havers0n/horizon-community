@@ -47,45 +47,57 @@ export const getTestResultSchema = z.object({
   }),
 });
 
-/**
- * Схема для создания теста (админ)
- */
-export const createTestSchema = z.object({
-  body: z.object({
-    title: z.string().min(1, 'Название теста обязательно'),
-    description: z.string().optional(),
-    questions: z.array(z.object({
-      id: z.string().min(1, 'ID вопроса обязателен'),
-      question: z.string().min(1, 'Текст вопроса обязателен'),
-      type: z.enum(['single', 'multiple', 'text']),
-      options: z.array(z.string()).optional(),
-      correct_answer: z.any(),
-      points: z.number().min(1, 'Количество баллов должно быть больше 0'),
-    })).min(1, 'Должен быть хотя бы один вопрос'),
-    timeLimit: z.number().min(1, 'Лимит времени должен быть больше 0').optional(),
-    passingScore: z.number().min(0, 'Проходной балл не может быть отрицательным').optional(),
-  }),
+const uuid = z.string().uuid();
+
+// --- ШАГ 1: СХЕМА-ПРЕПРОЦЕССОР ---
+// Эта схема принимает ЛЮБОЙ объект, находит `purpose` и приводит его к нижнему регистру.
+// .passthrough() сохраняет все остальные поля (title, target и т.д.) без изменений.
+const PreprocessorSchema = z
+	.object({
+		purpose: z.string().trim().transform((val) => val.toLowerCase())
+	})
+	.passthrough();
+
+// --- ШАГ 2: СТРОГАЯ СХЕМА-ВАЛИДАТОР ---
+// Этот валидатор ожидает, что `purpose` УЖЕ в нижнем регистре.
+const BaseTestSchema = z.object({
+	title: z.string().min(1).max(200),
+	description: z.string().max(5000).optional(),
+	duration_minutes: z.number().int().min(1).optional(),
+	passing_score_percent: z.number().int().min(0).max(100).optional(),
+	max_focus_losses: z.number().int().min(0).optional()
 });
 
-/**
- * Схема для обновления теста (админ)
- */
-export const updateTestSchema = z.object({
-  params: z.object({
-    id: z.string().uuid('ID теста должен быть валидным UUID'),
-  }),
-  body: z.object({
-    title: z.string().min(1, 'Название теста обязательно').optional(),
-    description: z.string().optional(),
-    questions: z.array(z.object({
-      id: z.string().min(1, 'ID вопроса обязателен'),
-      question: z.string().min(1, 'Текст вопроса обязателен'),
-      type: z.enum(['single', 'multiple', 'text']),
-      options: z.array(z.string()).optional(),
-      correct_answer: z.any(),
-      points: z.number().min(1, 'Количество баллов должно быть больше 0'),
-    })).min(1, 'Должен быть хотя бы один вопрос').optional(),
-    timeLimit: z.number().min(1, 'Лимит времени должен быть больше 0').optional(),
-    passingScore: z.number().min(0, 'Проходной балл не может быть отрицательным').optional(),
-  }),
-}); 
+const ValidatorSchema = z.discriminatedUnion('purpose', [
+	BaseTestSchema.extend({
+		purpose: z.literal('entry'),
+		target: z.object({ department_id: uuid })
+	}),
+	BaseTestSchema.extend({
+		purpose: z.literal('promotion'),
+		target: z.object({ rank_id: uuid })
+	}),
+	BaseTestSchema.extend({
+		purpose: z.literal('qualification'),
+		target: z.object({ qualification_id: uuid })
+	})
+]);
+
+// --- ШАГ 3: ОБЪЕДИНЕНИЕ ЧЕРЕЗ .pipe() ---
+// Сначала прогоняем данные через препроцессор, а результат — через валидатор.
+export const TestCreateSchema = PreprocessorSchema.pipe(ValidatorSchema);
+
+// Схема для обновления остается простой, так как `purpose` не меняется.
+export const TestUpdateSchema = BaseTestSchema.partial().extend({
+	target: z
+		.union([
+			z.object({ department_id: uuid }),
+			z.object({ rank_id: uuid }),
+			z.object({ qualification_id: uuid })
+		])
+		.optional()
+});
+
+// Экспортируем типы
+export type TestCreatePayload = z.infer<typeof TestCreateSchema>;
+export type TestUpdatePayload = z.infer<typeof TestUpdateSchema>; 

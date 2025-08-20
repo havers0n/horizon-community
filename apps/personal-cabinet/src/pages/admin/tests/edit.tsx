@@ -20,6 +20,9 @@ import {
   type CreateOptionDto,
   type CreateQuestionDto,
   deleteTest,
+  listDepartments,
+  listRanks,
+  listQualifications,
 } from '@/features/admin/tests/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
@@ -36,10 +39,12 @@ const testSchema = z.object({
   duration_minutes: z.coerce.number().int().positive('> 0'),
   passing_score_percent: z.coerce.number().int().min(0).max(100),
   max_focus_losses: z.coerce.number().int().min(0),
-  purpose: z.enum(['entry','promotion','qualification']).optional().nullable(),
-  target_department_id: z.string().uuid('Неверный UUID департамента').optional().nullable(),
-  target_rank_id: z.string().uuid('Неверный UUID звания').optional().nullable(),
-  target_qualification_id: z.string().uuid('Неверный UUID квалификации').optional().nullable(),
+  // purpose неизменяем — не валидируем его здесь
+  target: z.union([
+    z.object({ department_id: z.string().uuid() }),
+    z.object({ rank_id: z.string().uuid() }),
+    z.object({ qualification_id: z.string().uuid() }),
+  ]).optional(),
 })
 
 type TestFormValues = z.infer<typeof testSchema>
@@ -53,10 +58,6 @@ function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: Test
       duration_minutes: test.duration_minutes,
       passing_score_percent: test.passing_score_percent,
       max_focus_losses: test.max_focus_losses,
-      purpose: (test as any).purpose ?? undefined,
-      target_department_id: (test as any).target_department_id ?? null,
-      target_rank_id: (test as any).target_rank_id ?? null,
-      target_qualification_id: (test as any).target_qualification_id ?? null,
     },
   })
 
@@ -67,12 +68,23 @@ function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: Test
       duration_minutes: test.duration_minutes,
       passing_score_percent: test.passing_score_percent,
       max_focus_losses: test.max_focus_losses,
-      purpose: (test as any).purpose ?? undefined,
-      target_department_id: (test as any).target_department_id ?? null,
-      target_rank_id: (test as any).target_rank_id ?? null,
-      target_qualification_id: (test as any).target_qualification_id ?? null,
     })
   }, [test, reset])
+
+  const purpose = (test.purpose || '').toUpperCase()
+
+  // словари
+  const { data: departments } = useQuery({ queryKey: ['departments'], queryFn: listDepartments, staleTime: 300_000 })
+  const { data: ranks } = useQuery({
+    queryKey: ['ranks', test.target_department_id],
+    queryFn: () => listRanks((test as any).target_department_id || undefined),
+    enabled: purpose === 'PROMOTION',
+  })
+  const { data: qualifications } = useQuery({
+    queryKey: ['qualifications', test.target_department_id],
+    queryFn: () => listQualifications((test as any).target_department_id || undefined),
+    enabled: purpose === 'QUALIFICATION',
+  })
 
   return (
     <form onSubmit={handleSubmit(async (v) => { await onSubmit(v) })} className="space-y-3">
@@ -96,28 +108,96 @@ function TestForm({ test, onSubmit }: { test: AdminTest, onSubmit: (values: Test
         </div>
       </div>
 
-      {/* Context selectors */}
+      {/* Purpose — только просмотр */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label className="text-sm text-muted-foreground">Назначение теста</label>
-          <Controller
-            control={control}
-            name={'purpose' as const}
-            render={({ field }) => (
-              <Select value={field.value ?? undefined} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Не выбрано" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="entry">Вступительный</SelectItem>
-                  <SelectItem value="promotion">Повышение</SelectItem>
-                  <SelectItem value="qualification">Квалификация</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Input readOnly value={purpose} />
         </div>
       </div>
+
+      {/* Target — редактируем в рамках текущего purpose */}
+      {purpose === 'ENTRY' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="text-sm text-muted-foreground">Департамент</label>
+            <Controller
+              control={control}
+              name={'target' as const}
+              render={({ field }) => (
+                <Select
+                  value={(field.value as any)?.department_id || (test as any).target_department_id || undefined}
+                  onValueChange={(v) => field.onChange({ department_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Не выбрано" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(departments || []).map((d) => (
+                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </div>
+      )}
+
+      {purpose === 'PROMOTION' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="text-sm text-muted-foreground">Звание</label>
+            <Controller
+              control={control}
+              name={'target' as const}
+              render={({ field }) => (
+                <Select
+                  value={(field.value as any)?.rank_id || (test as any).target_rank_id || undefined}
+                  onValueChange={(v) => field.onChange({ rank_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Не выбрано" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(ranks || []).map((r) => (
+                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </div>
+      )}
+
+      {purpose === 'QUALIFICATION' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="text-sm text-muted-foreground">Квалификация</label>
+            <Controller
+              control={control}
+              name={'target' as const}
+              render={({ field }) => (
+                <Select
+                  value={(field.value as any)?.qualification_id || (test as any).target_qualification_id || undefined}
+                  onValueChange={(v) => field.onChange({ qualification_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Не выбрано" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(qualifications || []).map((q) => (
+                      <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Button type="submit" disabled={isSubmitting}>Сохранить</Button>
       </div>
@@ -200,7 +280,6 @@ function OptionsEditor({ question, testId }: { question: AdminQuestion, testId: 
 
   const handleToggleCorrect = async (opt: AdminQuestionOption, newValue: boolean) => {
     if (question.question_type === 'single_choice' && newValue) {
-      // Сбрасываем остальные
       const others = question.options.filter(o => o.id !== opt.id && o.is_correct)
       await Promise.all(others.map(o => updateOptionMutation.mutateAsync({ optionId: o.id, dto: { is_correct: false } })))
     }
@@ -401,11 +480,9 @@ export default function AdminTestEditPage() {
   const deleteMutation = useMutation({
     mutationFn: () => deleteTest(testId),
     onSuccess: () => {
-      // Оптимистично удаляем из списка в кэше
       queryClient.setQueryData<AdminTest[] | undefined>(['admin-tests'], (old) =>
         Array.isArray(old) ? old.filter((t) => t.id !== testId) : old
       )
-      // Чистим связанные кэши
       queryClient.removeQueries({ queryKey: ['admin-test', testId] })
       queryClient.removeQueries({ queryKey: ['admin-test-questions', testId] })
       queryClient.invalidateQueries({ queryKey: ['admin-tests'] })

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken, requirePermission } from '../../middleware/auth.middleware';
 import { TestAdminService } from '../../../core/services/TestAdminService';
+import { TestCreateSchema, TestUpdateSchema } from '../../../core/schemas/test.schemas';
 
 const router: Router = Router();
 
@@ -45,7 +46,12 @@ router.post('/', authenticateToken, requirePermission('tests.manage'), async (re
   try {
     const userId = req.user!.id;
     const service = new TestAdminService(req.supabase!.system);
-    const test = await service.createTest(userId, req.body);
+    const payload = TestCreateSchema.parse(req.body);
+
+    // Лог итогового payload после Zod-трансформаций
+    console.log('[AdminTestsRoutes] Parsed Payload from Zod:', payload);
+
+    const test = await service.createTest(userId, payload);
     res.status(201).json({ success: true, data: test });
   } catch (error: any) {
     console.error('[AdminTestsRoutes] createTest error:', error);
@@ -58,7 +64,8 @@ router.put('/:id', authenticateToken, requirePermission('tests.manage'), async (
   try {
     const testId = req.params.id;
     const service = new TestAdminService(req.supabase!.system);
-    const test = await service.updateTest(testId, req.body);
+    const payload = TestUpdateSchema.parse(req.body);
+    const test = await service.updateTest(testId, payload);
     res.status(200).json({ success: true, data: test });
   } catch (error: any) {
     console.error('[AdminTestsRoutes] updateTest error:', error);

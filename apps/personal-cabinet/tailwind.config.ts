@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import defaultTheme from "tailwindcss/defaultTheme"
 
 export default {
   darkMode: "class",
@@ -41,6 +42,11 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        surface: {
+          1: "hsl(var(--surface-1))",
+          2: "hsl(var(--surface-2))",
+          3: "hsl(var(--surface-3))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
@@ -98,6 +104,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
+        mono: ["var(--font-mono)", ...defaultTheme.fontFamily.mono],
       },
       keyframes: {
         "accordion-down": {
@@ -166,12 +176,18 @@ export default {
         "progress-fill": "progress-fill 1s ease-out",
       },
       boxShadow: {
-        'horizon': '0 4px 14px 0 rgba(30, 42, 58, 0.25)',
-        'horizon-lg': '0 10px 25px 0 rgba(30, 42, 58, 0.3)',
-        'horizon-xl': '0 20px 40px 0 rgba(30, 42, 58, 0.35)',
-        'gold': '0 4px 14px 0 rgba(198, 169, 107, 0.25)',
-        'gold-lg': '0 10px 25px 0 rgba(198, 169, 107, 0.3)',
-        'gold-xl': '0 20px 40px 0 rgba(198, 169, 107, 0.35)',
+        sm: 'var(--shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05))',
+        DEFAULT: 'var(--shadow, 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1))',
+        md: 'var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1))',
+        lg: 'var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1))',
+        xl: 'var(--shadow-xl, 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04))',
+        '2xl': 'var(--shadow-2xl, 0 25px 50px -12px rgba(0,0,0,0.25))',
+        horizon: 'var(--shadow-horizon, 0 4px 14px 0 rgba(30, 42, 58, 0.25))',
+        'horizon-lg': 'var(--shadow-horizon-lg, 0 10px 25px 0 rgba(30, 42, 58, 0.3))',
+        'horizon-xl': 'var(--shadow-horizon-xl, 0 20px 40px 0 rgba(30, 42, 58, 0.35))',
+        gold: 'var(--shadow-gold, 0 4px 14px 0 rgba(198, 169, 107, 0.25))',
+        'gold-lg': 'var(--shadow-gold-lg, 0 10px 25px 0 rgba(198, 169, 107, 0.3))',
+        'gold-xl': 'var(--shadow-gold-xl, 0 20px 40px 0 rgba(198, 169, 107, 0.35))',
       },
       backgroundImage: {
         'gradient-horizon': 'linear-gradient(135deg, #1e2a3a 0%, #718096 100%)',

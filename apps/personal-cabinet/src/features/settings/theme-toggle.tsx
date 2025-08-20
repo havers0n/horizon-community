@@ -1,6 +1,6 @@
-import { useTheme } from 'next-themes'
-import { Button } from '@shared/ui'
+import { Button } from '@/shared/ui/button'
 import { Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/features/theme'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()

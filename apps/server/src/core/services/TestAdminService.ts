@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../../utils/AppError';
 import type { Database } from '@roleplay-identity/db-types';
+import type { TestCreatePayload, TestUpdatePayload } from '../schemas/test.schemas';
 
 // Типы для схемы system
 type SystemTest = Database['system']['Tables']['tests']['Row'];
@@ -18,6 +19,82 @@ export class TestAdminService {
 
   constructor(systemDb: SupabaseClient<Database, 'system'>) {
     this.db = systemDb;
+  }
+
+  // === Helpers для новой модели назначения целей ===
+  private mapTargetColumns(purpose: string, target: any) {
+    const p = (purpose || '').toLowerCase();
+    switch (p) {
+      case 'entry':
+        return {
+          target_department_id: target.department_id,
+          target_rank_id: null,
+          target_qualification_id: null,
+        } as Partial<SystemTestInsert>;
+      case 'promotion':
+        return {
+          target_department_id: null,
+          target_rank_id: target.rank_id,
+          target_qualification_id: null,
+        } as Partial<SystemTestInsert>;
+      case 'qualification':
+        return {
+          target_department_id: null,
+          target_rank_id: null,
+          target_qualification_id: target.qualification_id,
+        } as Partial<SystemTestInsert>;
+      default:
+        throw new AppError('UNSUPPORTED_TEST_PURPOSE', 400);
+    }
+  }
+
+  private async ensureReferenceExists(purpose: string, target: any) {
+    const p = (purpose || '').toLowerCase();
+    // Дружественная проверка FK до вставки/обновления
+    switch (p) {
+      case 'entry': {
+        if (!target?.department_id) {
+          throw new AppError('DEPARTMENT_ID_REQUIRED', 422);
+        }
+        const { data, error } = await (this.db as any)
+          .schema('common')
+          .from('departments')
+          .select('id')
+          .eq('id', target.department_id)
+          .single();
+        if (error || !data) throw new AppError('DEPARTMENT_NOT_FOUND', 422);
+        return;
+      }
+      case 'promotion': {
+        if (!target?.rank_id) {
+          throw new AppError('RANK_ID_REQUIRED', 422);
+        }
+        const { data, error } = await (this.db as any)
+          .schema('common')
+          .from('ranks')
+          .select('id')
+          .eq('id', target.rank_id)
+          .single();
+        if (error || !data) throw new AppError('RANK_NOT_FOUND', 422);
+        return;
+      }
+      case 'qualification': {
+        if (!target?.qualification_id) {
+          throw new AppError('QUALIFICATION_ID_REQUIRED', 422);
+        }
+        const { data, error } = await (this.db as any)
+          .schema('common')
+          .from('qualifications')
+          .select('id')
+          .eq('id', target.qualification_id)
+          .single();
+        if (error || !data) throw new AppError('QUALIFICATION_NOT_FOUND', 422);
+        return;
+      }
+      default: {
+        throw new AppError('UNKNOWN_TEST_PURPOSE', 400);
+      }
+    }
   }
 
   /**
@@ -43,27 +120,39 @@ export class TestAdminService {
   }
 
   /**
-   * Создать новый тест
+   * Создать новый тест (новая схема payload)
    */
-  async createTest(userId: string, testData: Omit<SystemTestInsert, 'created_by_user_id'>): Promise<SystemTest> {
+  async createTest(userId: string, payload: TestCreatePayload): Promise<SystemTest> {
     try {
-      const payload: SystemTestInsert = {
-        ...testData,
+      const purpose = payload.purpose as any; // 'entry' | 'promotion' | 'qualification'
+      await this.ensureReferenceExists(purpose, payload.target);
+
+      const targetCols = this.mapTargetColumns(purpose, payload.target);
+
+      const insertRecord: SystemTestInsert = {
+        title: payload.title,
+        description: payload.description ?? null,
+        duration_minutes: payload.duration_minutes ?? null,
+        passing_score_percent: payload.passing_score_percent ?? undefined,
+        max_focus_losses: payload.max_focus_losses ?? undefined,
+        purpose,
+        ...targetCols,
         created_by_user_id: userId,
-      };
+      } as SystemTestInsert;
 
       const { data, error } = await this.db
         .from('tests')
-        .insert(payload)
+        .insert(insertRecord)
         .select('*')
         .single();
 
       if (error || !data) {
+        console.error('[TestAdminService] RAW DB ERROR on createTest:', { error, insertRecord });
         throw new AppError('Не удалось создать тест', 500);
       }
       return data as SystemTest;
     } catch (error) {
-      console.error('[TestAdminService] Error in createTest:', error);
+      console.error('[TestAdminService] Error in createTest (catch):', error);
       throw error;
     }
   }
@@ -220,23 +309,52 @@ export class TestAdminService {
   }
 
   /**
-   * Обновить тест
+   * Обновить тест (новая схема payload)
    */
-  async updateTest(testId: string, testData: SystemTestUpdate): Promise<SystemTest> {
+  async updateTest(testId: string, payload: TestUpdatePayload): Promise<SystemTest> {
     try {
+      // Сначала читаем существующий тест, чтобы знать фиксированный purpose
+      const existing = await this.db
+        .from('tests')
+        .select('*')
+        .eq('id', testId)
+        .single();
+      if (existing.error || !existing.data) {
+        throw new AppError('Тест не найден', 404);
+      }
+
+      const currentPurpose = existing.data.purpose as 'ENTRY' | 'PROMOTION' | 'QUALIFICATION';
+
+      const updateRecord: SystemTestUpdate = {} as SystemTestUpdate;
+      if (typeof payload.title === 'string') updateRecord.title = payload.title;
+      if (typeof payload.description !== 'undefined') updateRecord.description = payload.description ?? null;
+      if (typeof payload.duration_minutes !== 'undefined') updateRecord.duration_minutes = payload.duration_minutes;
+      if (typeof payload.passing_score_percent !== 'undefined') updateRecord.passing_score_percent = payload.passing_score_percent;
+      if (typeof payload.max_focus_losses !== 'undefined') updateRecord.max_focus_losses = payload.max_focus_losses;
+
+      if (payload.target) {
+        await this.ensureReferenceExists(currentPurpose, payload.target);
+        const targetCols = this.mapTargetColumns(currentPurpose, payload.target);
+        // Явно устанавливаем все три целевых поля согласно текущему purpose
+        updateRecord.target_department_id = (targetCols as any).target_department_id ?? null;
+        updateRecord.target_rank_id = (targetCols as any).target_rank_id ?? null;
+        updateRecord.target_qualification_id = (targetCols as any).target_qualification_id ?? null;
+      }
+
       const { data, error } = await this.db
         .from('tests')
-        .update(testData)
+        .update(updateRecord)
         .eq('id', testId)
         .select('*')
         .single();
 
       if (error || !data) {
+        console.error('[TestAdminService] RAW DB ERROR on updateTest:', { error, updateRecord, testId });
         throw new AppError('Не удалось обновить тест', 500);
       }
       return data as SystemTest;
     } catch (error) {
-      console.error('[TestAdminService] Error in updateTest:', error);
+      console.error('[TestAdminService] Error in updateTest (catch):', error);
       throw error;
     }
   }

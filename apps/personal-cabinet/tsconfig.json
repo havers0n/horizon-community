@@ -37,6 +37,7 @@
       "@shared": ["./src/shared"],
       "@shared/ui": ["./src/shared/ui"],
       "@ui": ["../../libs/ui-components/src"],
+      "@shared/ui-components": ["../../libs/ui-components/src"],
       
       // === ДОБАВЛЕННЫЙ ПУТЬ К ТИПАМ ===
       "@roleplay-identity/db-types": ["../../packages/db-types/src/index.ts"],

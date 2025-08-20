@@ -1,16 +1,14 @@
 import { NotificationsWidget } from '@widgets/notifications'
+import { PageHeader, SectionCard } from '@/shared/ui/page-sections'
 
 function NotificationsPage() {
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Уведомления</h1>
-        <p className="text-muted-foreground">
-          Просмотр и управление уведомлениями
-        </p>
-      </div>
+    <div className="container mx-auto px-6 py-6 space-y-6">
+      <PageHeader title="Уведомления" description="Просмотр и управление уведомлениями" />
 
-      <NotificationsWidget />
+      <SectionCard>
+        <NotificationsWidget />
+      </SectionCard>
     </div>
   )
 }

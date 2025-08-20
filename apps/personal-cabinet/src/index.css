@@ -25,6 +25,30 @@
     --input: 45 20% 89%; /* #e8e5e0 */
     --ring: 45 65% 67%; /* #c6a96b */
     --radius: 0.5rem;
+    /* Шрифты */
+    --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    /* Тени — базовые */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    /* Тени — брендовые */
+    --shadow-horizon: 0 4px 14px 0 rgba(30, 42, 58, 0.25);
+    --shadow-horizon-lg: 0 10px 25px 0 rgba(30, 42, 58, 0.3);
+    --shadow-horizon-xl: 0 20px 40px 0 rgba(30, 42, 58, 0.35);
+
+    --shadow-gold: 0 4px 14px 0 rgba(198, 169, 107, 0.25);
+    --shadow-gold-lg: 0 10px 25px 0 rgba(198, 169, 107, 0.3);
+    --shadow-gold-xl: 0 20px 40px 0 rgba(198, 169, 107, 0.35);
+    /* Поверхности для светлой темы */
+    --surface-1: 0 0% 100%;
+    --surface-2: 45 20% 96%;
+    --surface-3: 45 20% 92%;
     
     /* Расширенная цветовая палитра для светлой темы */
     --success: 142 52% 65%; /* #81C784 */
@@ -63,12 +87,18 @@
     --border: 220 13% 15%; /* #2c3d42 */
     --input: 220 13% 15%; /* #2c3d42 */
     --ring: 45 65% 67%; /* #c6a96b */
+    /* Поверхности для темной темы */
+    --surface-1: 220 13% 10%;
+    --surface-2: 220 13% 14%;
+    --surface-3: 220 13% 18%;
     --success: 142.1 70.6% 45.3%;
     --success-foreground: 144.9 80.4% 10%;
     --warning: 45 65% 67%; /* #c6a96b */
     --warning-foreground: 220 13% 10%; /* #1e2a3a */
     --info: 199 89% 48%;
     --info-foreground: 45 20% 96%; /* #f5f3f0 */
+    /* При необходимости можно адаптировать тени под тёмную тему */
+    /* --shadow: 0 1px 3px 0 rgba(0,0,0,0.4), 0 1px 2px -1px rgba(0,0,0,0.35); */
   }
 }
 
@@ -80,116 +110,17 @@
     @apply bg-background text-foreground;
   }
   
-  /* Принудительно применяем темную тему для всего приложения */
-  html {
-    @apply dark;
-  }
+  /* Убрано принудительное применение тёмной темы; управление темой через провайдер */
+  /* html { @apply dark; } */
   
   /* Исправляем цвета для темной темы */
   .dark {
     color-scheme: dark;
   }
   
-  /* Переопределяем цвета для виджетов в темной теме */
-  .dark .text-gray-900 {
-    @apply text-gray-100;
-  }
-  
-  .dark .text-gray-700 {
-    @apply text-gray-300;
-  }
-  
-  .dark .text-gray-600 {
-    @apply text-gray-400;
-  }
-  
-  .dark .bg-gray-50 {
-    @apply bg-gray-800;
-  }
-  
-  .dark .bg-gray-100 {
-    @apply bg-gray-700;
-  }
-  
-  .dark .bg-white {
-    @apply bg-gray-800;
-  }
-  
-  .dark .hover\:bg-gray-50:hover {
-    @apply hover:bg-gray-700;
-  }
-  
-  .dark .border-gray-200 {
-    @apply border-gray-600;
-  }
-  
-  .dark .bg-green-100 {
-    @apply bg-green-900;
-  }
-  
-  .dark .text-green-800 {
-    @apply text-green-200;
-  }
-  
-  .dark .border-green-200 {
-    @apply border-green-700;
-  }
-  
-  .dark .bg-yellow-100 {
-    @apply bg-yellow-900;
-  }
-  
-  .dark .text-yellow-800 {
-    @apply text-yellow-200;
-  }
-  
-  .dark .border-yellow-200 {
-    @apply border-yellow-700;
-  }
-  
-  .dark .bg-red-100 {
-    @apply bg-red-900;
-  }
-  
-  .dark .text-red-800 {
-    @apply text-red-200;
-  }
-  
-  .dark .border-red-200 {
-    @apply border-red-700;
-  }
-  
-  .dark .bg-blue-100 {
-    @apply bg-blue-900;
-  }
-  
-  .dark .text-blue-800 {
-    @apply text-blue-200;
-  }
-  
-  .dark .border-blue-200 {
-    @apply border-blue-700;
-  }
-  
-  .dark .text-blue-600 {
-    @apply text-blue-400;
-  }
-  
-  .dark .hover\:text-blue-700:hover {
-    @apply hover:text-blue-300;
-  }
-  
-  .dark .bg-gray-200 {
-    @apply bg-gray-600;
-  }
-  
-  .dark .text-gray-600 {
-    @apply text-gray-400;
-  }
-  
-  .dark .shadow-sm {
-    @apply shadow-gray-900;
-  }
+  /* Точечные тёмные стили вместо глобальных переопределений */
+  .dark .card-horizon { @apply bg-gray-800 border-gray-700 shadow; }
+  .dark .nav-item.active { @apply bg-gray-700 text-white border-l-2 border-gold-500; }
 }
 
 /* Дополнительные стили для соответствия client приложению */
@@ -282,6 +213,24 @@
     @apply shadow-md border-gray-300;
   }
 
+  /* Тёмная адаптация карточек */
+  .dark .card-horizon {
+    @apply bg-gray-800 border-gray-700 shadow;
+  }
+
+  .nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+  }
+
+  .nav-item.active {
+    @apply bg-gold-100 text-gold-900;
+  }
+
+  /* Тёмная адаптация активного пункта навигации */
+  .dark .nav-item.active {
+    @apply bg-gray-700 text-white border-l-2 border-gold-500;
+  }
+
   .card-gold {
     @apply bg-white border border-gold-200 shadow-sm;
   }
@@ -360,14 +309,6 @@
 
   .modal-content {
     @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4;
-  }
-
-  .nav-item {
-    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100;
-  }
-
-  .nav-item.active {
-    @apply bg-gold-100 text-gold-900;
   }
 
   .btn-horizon {

@@ -6,6 +6,7 @@ import { Badge } from '@/shared/ui/badge'
 import { DiscordIcon, VKIcon } from '@/shared/ui/icons'
 import { useAuth } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
+import { H1, H2, Lead, Stack } from '@shared/ui-components'
 
 // Типы для департаментов
 interface Department {
@@ -230,135 +231,139 @@ export default function Homepage() {
           backgroundPosition: 'center'
         }}
       >
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+        <Stack space="lg" className="max-w-4xl mx-auto">
+          <H1>
             HorizonCommunity:<br />Где начинается твоя история
-          </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          </H1>
+          <Lead className="max-w-2xl mx-auto">
             Серьезное игровое сообщество, построенное на платформе FiveM. Вступай в ряды одного из департаментов и начни свою карьеру.
-          </p>
+          </Lead>
           <Button asChild size="lg" className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 px-8 py-4 text-lg font-bold shadow-lg">
             <Link to="/register">Подать заявку</Link>
           </Button>
-        </div>
+        </Stack>
       </section>
 
       {/* Departments Section */}
       <section className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Наши Департаменты</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {departments.map((department) => (
-              <Card
-                key={department.id}
-                className={cn(
-                  "bg-gray-800 border-gray-700 hover:bg-gray-750 transition-all duration-300 cursor-pointer group relative overflow-hidden",
-                  "hover:transform hover:-translate-y-1 hover:shadow-xl"
-                )}
-                onClick={() => setSelectedDepartment(selectedDepartment === department.id ? null : department.id)}
-              >
-                <CardContent className="p-6 relative">
-                  <div className="text-center">
-                    <div className={cn(
-                      "w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl",
-                      department.bgColor
-                    )}>
-                      <span>{department.icon}</span>
+          <Stack space="xl">
+            <H2 className="text-center">Наши Департаменты</H2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {departments.map((department) => (
+                <Card
+                  key={department.id}
+                  className={cn(
+                    "bg-gray-800 border-gray-700 hover:bg-gray-750 transition-all duration-300 cursor-pointer group relative overflow-hidden",
+                    "hover:transform hover:-translate-y-1 hover:shadow-xl"
+                  )}
+                  onClick={() => setSelectedDepartment(selectedDepartment === department.id ? null : department.id)}
+                >
+                  <CardContent className="p-6 relative">
+                    <div className="text-center">
+                      <div className={cn(
+                        "w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl",
+                        department.bgColor
+                      )}>
+                        <span>{department.icon}</span>
+                      </div>
+                      <h3 className="text-xl font-bold mb-2">{department.name}</h3>
+                      <p className="text-gray-400 text-sm mb-2">{department.fullName}</p>
+                      <p className="text-gray-500 text-xs">Обеспечение правопорядка</p>
                     </div>
-                    <h3 className="text-xl font-bold mb-2">{department.name}</h3>
-                    <p className="text-gray-400 text-sm mb-2">{department.fullName}</p>
-                    <p className="text-gray-500 text-xs">Обеспечение правопорядка</p>
-                  </div>
-                  
-                  {/* Hover overlay with description */}
-                  <div className={cn(
-                    "absolute inset-0 bg-gray-900/90 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                    "flex items-center justify-center p-6 text-center"
-                  )}>
-                    <p className="text-sm text-gray-300">{department.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    {/* Hover overlay with description */}
+                    <div className={cn(
+                      "absolute inset-0 bg-gray-900/90 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                      "flex items-center justify-center p-6 text-center"
+                    )}>
+                      <p className="text-sm text-gray-300">{department.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </Stack>
         </div>
       </section>
 
       {/* Gallery Section */}
       <section className="py-20 bg-gray-950">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Жизнь нашего сообщества</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {galleryItems.map((item) => (
-              <div
-                key={item.id}
-                className="relative overflow-hidden rounded-lg h-64 group cursor-pointer"
-              >
-                <img
-                  src={item.imageUrl}
-                  alt={item.alt}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <div>
-                    <span className="font-medium text-white">{item.title}</span>
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      {item.department}
-                    </Badge>
+          <Stack space="xl">
+            <H2 className="text-center">Жизнь нашего сообщества</H2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {galleryItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="relative overflow-hidden rounded-lg h-64 group cursor-pointer"
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt={item.alt}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <div>
+                      <span className="font-medium text-white">{item.title}</span>
+                      <Badge variant="secondary" className="ml-2 text-xs">
+                        {item.department}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Button asChild variant="ghost" className="text-gold-500 hover:text-gold-400">
-              <Link to="/gallery">
-                Смотреть всю галерею
-                <span className="ml-2">→</span>
-              </Link>
-            </Button>
-          </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <Button asChild variant="ghost" className="text-gold-500 hover:text-gold-400">
+                <Link to="/gallery">
+                  Смотреть всю галерею
+                  <span className="ml-2">→</span>
+                </Link>
+              </Button>
+            </div>
+          </Stack>
         </div>
       </section>
 
       {/* FAQ Section */}
       <section className="py-20 bg-gray-900">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-center mb-12">Остались вопросы?</h2>
-          
-          <div className="bg-gray-800 rounded-xl overflow-hidden mb-6">
-            {faqItems.map((item) => (
-              <div key={item.id} className="border-b border-gray-700 last:border-b-0">
-                <Button
-                  variant="ghost"
-                  className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-700"
-                  onClick={() => toggleFAQ(item.id)}
-                >
-                  <span className="font-medium text-lg">{item.question}</span>
-                  <span className={cn(
-                    "transition-transform duration-300",
-                    openFAQ === item.id ? "rotate-180" : ""
-                  )}>
-                    ▼
-                  </span>
-                </Button>
-                {openFAQ === item.id && (
-                  <div className="px-6 pb-6">
-                    <p className="text-gray-300">{item.answer}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button asChild variant="ghost" className="text-gold-500 hover:text-gold-400">
-              <Link to="/faq">
-                Читать все вопросы (FAQ)
-                <span className="ml-2">→</span>
-              </Link>
-            </Button>
-          </div>
+          <Stack space="xl">
+            <H2 className="text-center">Остались вопросы?</H2>
+            <div className="bg-gray-800 rounded-xl overflow-hidden">
+              {faqItems.map((item) => (
+                <div key={item.id} className="border-b border-gray-700 last:border-b-0">
+                  <Button
+                    variant="ghost"
+                    className="w-full flex justify-between items-center p-6 text-left hover:bg-gray-700"
+                    onClick={() => toggleFAQ(item.id)}
+                  >
+                    <span className="font-medium text-lg">{item.question}</span>
+                    <span className={cn(
+                      "transition-transform duration-300",
+                      openFAQ === item.id ? "rotate-180" : ""
+                    )}>
+                      ▼
+                    </span>
+                  </Button>
+                  {openFAQ === item.id && (
+                    <div className="px-6 pb-6">
+                      <p className="text-gray-300">{item.answer}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <Button asChild variant="ghost" className="text-gold-500 hover:text-gold-400">
+                <Link to="/faq">
+                  Читать все вопросы (FAQ)
+                  <span className="ml-2">→</span>
+                </Link>
+              </Button>
+            </div>
+          </Stack>
         </div>
       </section>
 

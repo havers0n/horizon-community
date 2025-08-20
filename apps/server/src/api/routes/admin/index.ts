@@ -177,6 +177,71 @@ router.delete('/doc-categories/:id', requirePermission('documents.manage'), asyn
   }
 });
 
+// === Привязка департаментов к КАТЕГОРИЯМ документов ===
+// GET /api/v1/admin/doc-categories/:id/departments
+router.get('/doc-categories/:id/departments', requirePermission('documents.manage'), async (req: any, res) => {
+  try {
+    const supa = req.supabase?.public;
+    const id = req.params.id as string;
+    const { data, error } = await supa
+      .from('doc_category_departments' as any)
+      .select('department_id')
+      .eq('category_id', id);
+    if (error) return res.status(500).json({ success:false, error: error.message });
+    return res.json({ success:true, data: data ?? [] });
+  } catch (e:any) {
+    console.error('[AdminDocCats] list deps', e);
+    return res.status(500).json({ success:false, error:'Internal server error' });
+  }
+});
+
+// POST /api/v1/admin/doc-categories/:id/departments
+// Body: { departmentIds: string[] }
+router.post('/doc-categories/:id/departments', requirePermission('documents.manage'), async (req: any, res) => {
+  try {
+    const supa = req.supabase?.public;
+    const id = req.params.id as string;
+    const raw = (req.body?.departmentIds ?? []) as unknown;
+    if (!Array.isArray(raw)) return res.status(400).json({ success:false, error:'departmentIds must be an array' });
+
+    const uniqueIds = Array.from(new Set(raw.filter((v) => typeof v === 'string' && v.trim().length > 0)));
+
+    // проверим, что депы существуют
+    const { data: deps, error: depsErr } = await supa.schema('common')
+      .from('departments' as any)
+      .select('id')
+      .in('id', uniqueIds);
+    if (depsErr) return res.status(500).json({ success:false, error: depsErr.message });
+
+    // очистим старые привязки
+    const { error: delErr } = await supa
+      .from('doc_category_departments' as any)
+      .delete()
+      .eq('category_id', id);
+    if (delErr) return res.status(500).json({ success:false, error: delErr.message });
+
+    // если пусто — вернёмся
+    if (!deps?.length) return res.json({ success:true, data: [] });
+
+    // вставим новые
+    const rows = deps.map((d: any) => ({ category_id: id, department_id: d.id }));
+    const { error: insErr } = await supa.from('doc_category_departments' as any).insert(rows as any);
+    if (insErr) return res.status(500).json({ success:false, error: insErr.message });
+
+    // вернём актуальный список
+    const { data, error } = await supa
+      .from('doc_category_departments' as any)
+      .select('department_id')
+      .eq('category_id', id);
+    if (error) return res.status(500).json({ success:false, error: error.message });
+
+    return res.json({ success:true, data: data ?? [] });
+  } catch (e:any) {
+    console.error('[AdminDocCats] sync deps', e);
+    return res.status(500).json({ success:false, error:'Internal server error' });
+  }
+});
+
 // --- Документы ---
 // GET /api/v1/admin/documents
 router.get('/documents', requirePermission('documents.manage'), async (req: any, res) => {
