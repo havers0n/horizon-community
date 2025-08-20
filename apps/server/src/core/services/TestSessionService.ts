@@ -10,301 +10,347 @@ export type SystemTestSession = Database['system']['Tables']['test_sessions']['R
 export type SystemTestResultInsert = Database['system']['Tables']['test_results']['Insert'];
 
 export type UserAnswer = {
-  questionId: string;
-  answer: string | string[];
+	questionId: string;
+	answer: string | string[];
 };
 
 export class TestSessionService {
-  private readonly db: SupabaseClient<Database, 'system'>;
+	private readonly db: SupabaseClient<Database, 'system'>;
 
-  constructor(systemDb: SupabaseClient<Database, 'system'>) {
-    this.db = systemDb;
-  }
+	constructor(systemDb: SupabaseClient<Database, 'system'>) {
+		this.db = systemDb;
+	}
 
-  /**
-   * Запустить сессию теста: создает запись в system.test_sessions и возвращает вопросы без флага is_correct
-   */
-  async startTestSession(userId: string, testId: string, applicationId?: string) {
-    try {
-      // 1) Получаем тест (только активные)
-      const { data: test, error: testError } = await this.db
-        .from('tests')
-        .select('id, duration_minutes, passing_score_percent, max_focus_losses')
-        .eq('id', testId)
-        .single();
+	/**
+	 * Получить полную информацию о сессии с вложенными тестом, вопросами и опциями
+	 */
+	public async getTestSessionById(sessionId: string, userId: string, db: any) {
+		try {
+			const { data, error } = await db.system
+				.from('test_sessions')
+				.select(`
+					*,
+					tests (
+						*,
+						test_questions (
+							*,
+							test_question_options (*)
+						)
+					)
+				`)
+				.eq('id', sessionId)
+				.eq('user_id', userId)
+				.single();
 
-      if (testError || !test) {
-        throw new AppError('Тест не найден', 404);
-      }
+			if (error) {
+				console.error('[TestSessionService] getTestSessionById DB error:', error);
+				throw new AppError('Не удалось получить сессию тестирования', 500);
+			}
+			if (!data) {
+				throw new AppError('Сессия не найдена', 404);
+			}
 
-      // 2) Создаем сессию
-      const now = new Date().toISOString();
-      const sessionPayload: Database['system']['Tables']['test_sessions']['Insert'] = {
-        user_id: userId,
-        test_id: testId,
-        application_id: applicationId ?? null,
-        status_id: 'in_progress',
-        start_time: now,
-        focus_losses_count: 0,
-      };
+			return data;
+		} catch (err) {
+			console.error('[TestSessionService] Error in getTestSessionById:', err);
+			throw err;
+		}
+	}
 
-      const { data: session, error: sessionError } = await this.db
-        .from('test_sessions')
-        .insert(sessionPayload)
-        .select('*')
-        .single();
+	public async startTestSession(userId: string, testId: string, applicationId: string, db: any) {
+		console.log('[TestSessionService] startTestSession: start', { userId, testId, applicationId });
 
-      if (sessionError || !session) {
-        throw new AppError('Не удалось создать сессию тестирования', 500);
-      }
+		try {
+			// Шаг 1: Найти ID "вида" статусов для тестовых сессий
+			console.log('[TestSessionService] Step 1.1: Fetching kind_id for "test_session"...');
+			const { data: statusKind, error: kindError } = await db.common
+				.from('status_kinds')
+				.select('id')
+				.eq('code', 'test_session')
+				.single();
 
-      // 3) Получаем вопросы и опции, скрывая корректность
-      const { data: questions, error: qErr } = await this.db
-        .from('test_questions')
-        .select('id, question_text, question_type, order_index')
-        .eq('test_id', testId)
-        .order('order_index', { ascending: true });
+			if (kindError) throw new Error(`DB error fetching status_kind: ${kindError.message}`);
+			if (!statusKind) throw new Error('Status kind with code "test_session" not found in common.status_kinds');
+			
+			const testSessionStatusKindId = statusKind.id;
+			console.log(`[TestSessionService] Step 1.1 OK: statusKindId is ${testSessionStatusKindId}`);
 
-      if (qErr) {
-        throw new AppError('Не удалось получить вопросы теста', 500);
-      }
+			// Шаг 2: Найти ID статуса "в процессе", используя kind_id
+			console.log('[TestSessionService] Step 1.2: Fetching status_id for "in_progress"...');
+			const { data: inProgressStatus, error: statusError } = await db.common
+				.from('statuses')
+				.select('id')
+				.eq('code', 'in_progress')
+				.eq('kind_id', testSessionStatusKindId) // <-- УТОЧНЕНИЕ ПРИКАЗА
+				.single();
 
-      const questionIds = (questions || []).map((q) => q.id);
-      const { data: options, error: oErr } = await this.db
-        .from('test_question_options')
-        .select('id, question_id, option_text')
-        .in('question_id', questionIds.length ? questionIds : ['00000000-0000-0000-0000-000000000000'])
-        .order('id');
+			if (statusError) throw new Error(`DB error fetching status: ${statusError.message}`);
+			if (!inProgressStatus) throw new Error('Status with code "in_progress" for test sessions not found in common.statuses');
 
-      if (oErr) {
-        throw new AppError('Не удалось получить варианты ответов', 500);
-      }
+			const statusId = inProgressStatus.id;
+			console.log(`[TestSessionService] Step 1.2 OK: statusId is ${statusId}`);
 
-      const optionsByQuestion = new Map<string, Array<{ id: string; option_text: string }>>();
-      for (const opt of options || []) {
-        const arr = optionsByQuestion.get(opt.question_id) || [];
-        arr.push({ id: opt.id, option_text: opt.option_text });
-        optionsByQuestion.set(opt.question_id, arr);
-      }
+			// Шаг 2: Проверить, нет ли у пользователя уже активной сессии
+			console.log('[TestSessionService] Step 2: Checking for existing active sessions...');
+			const { data: existingSessions, error: selectSessionError } = await db.system
+				.from('test_sessions')
+				.select('id')
+				.eq('user_id', userId)
+				.eq('status_id', statusId);
 
-      const questionsForClient = (questions || []).map((q) => ({
-        id: q.id,
-        text: q.question_text,
-        type: q.question_type,
-        order_index: q.order_index,
-        options: optionsByQuestion.get(q.id) || [],
-      }));
+			if (selectSessionError) throw new Error(`DB error checking existing sessions: ${selectSessionError.message}`);
 
-      // duration_minutes -> в секундах
-      const timeLimitSeconds = (test.duration_minutes ?? 0) > 0 ? (test.duration_minutes as number) * 60 : null;
+			// Проверяем, вернулся ли массив, и есть ли в нем хоть что-то
+			if (Array.isArray(existingSessions) && existingSessions.length > 0) {
+				console.warn(`[TestSessionService] User already has ${existingSessions.length} active session(s). Denying creation of a new one.`);
+				throw new AppError('У вас уже есть активная сессия тестирования.', 409);
+			}
 
-      return {
-        sessionId: (session as SystemTestSession).id,
-        questions: questionsForClient,
-        startTime: (session as SystemTestSession).start_time!,
-        timeLimit: timeLimitSeconds,
-      };
-    } catch (error) {
-      console.error('[TestSessionService] Error in startTestSession:', error);
-      throw error;
-    }
-  }
+			console.log('[TestSessionService] Step 2 OK: No active session found.');
 
-  /**
-   * Зафиксировать потерю фокуса. Если превышен лимит, аннулировать сессию
-   */
-  async recordFocusLoss(sessionId: string, userId: string) {
-    try {
-      const { data: session, error: sErr } = await this.db
-        .from('test_sessions')
-        .select('id, user_id, test_id, status_id, focus_losses_count')
-        .eq('id', sessionId)
-        .single();
+			// Шаг 4: Получить детали самого теста
+			console.log(`[TestSessionService] Step 3: Fetching test details for testId: ${testId}...`);
+			const { data: testDetails, error: testDetailsError } = await db.system
+				.from('tests')
+				.select('id')
+				.eq('id', testId)
+				.single();
+				
+			if (testDetailsError) throw new Error(`DB error fetching test details: ${testDetailsError.message}`);
+			if (!testDetails) throw new AppError(`Тест с ID ${testId} не найден.`, 404);
 
-      if (sErr || !session) {
-        throw new AppError('Сессия не найдена', 404);
-      }
-      if (session.user_id !== userId) {
-        throw new AppError('Доступ запрещен', 403);
-      }
-      if (session.status_id !== 'in_progress') {
-        return { status: session.status_id, focus_losses_count: session.focus_losses_count ?? 0 };
-      }
+			console.log(`[TestSessionService] Step 3 OK: Test with id ${testId} found.`);
 
-      const { data: test, error: tErr } = await this.db
-        .from('tests')
-        .select('id, max_focus_losses')
-        .eq('id', session.test_id)
-        .single();
+			// Шаг 5: Создать новую сессию
+			const sessionRecord = {
+				user_id: userId,
+				test_id: testId,
+				application_id: applicationId,
+				status_id: statusId,
+			};
+			console.log('[TestSessionService] Step 4: Inserting new test session with data:', sessionRecord);
 
-      if (tErr || !test) {
-        throw new AppError('Тест не найден', 404);
-      }
+			const { data: newSession, error: insertError } = await db.system
+				.from('test_sessions')
+				.insert(sessionRecord)
+				.select('*')
+				.single();
 
-      const current = (session.focus_losses_count ?? 0) + 1;
-      const maxLosses = test.max_focus_losses ?? 0;
+			if (insertError) throw new Error(`DB error inserting new session: ${insertError.message}`);
 
-      if (maxLosses > 0 && current > maxLosses) {
-        const { error: updErr } = await this.db
-          .from('test_sessions')
-          .update({ status_id: 'annulled', end_time: new Date().toISOString(), focus_losses_count: current })
-          .eq('id', sessionId);
-        if (updErr) {
-          throw new AppError('Не удалось обновить статус сессии', 500);
-        }
-        return { status: 'annulled' as const, focus_losses_count: current };
-      }
+			console.log('[TestSessionService] Step 4 OK: Session created successfully!', newSession);
+			return newSession;
 
-      const { error: incErr } = await this.db
-        .from('test_sessions')
-        .update({ focus_losses_count: current })
-        .eq('id', sessionId);
-      if (incErr) {
-        throw new AppError('Не удалось обновить сессию', 500);
-      }
-      return { status: 'in_progress' as const, focus_losses_count: current };
-    } catch (error) {
-      console.error('[TestSessionService] Error in recordFocusLoss:', error);
-      throw error;
-    }
-  }
+		} catch (error: any) {
+			// Логируем НАСТОЯЩУЮ ошибку
+			console.error('[TestSessionService] FATAL ERROR in startTestSession:', {
+				message: error.message,
+				stack: error.stack,
+			});
+			
+			if (error instanceof AppError) {
+				throw error;
+			}
+			
+			throw new AppError('Не удалось создать сессию тестирования', 500);
+		}
+	}
 
-  /**
-   * Отправить тест: сохраняем ответы, считаем баллы и результат, закрываем сессию
-   */
-  async submitTest(sessionId: string, userId: string, answers: UserAnswer[]) {
-    try {
-      // 1) Найти сессию
-      const { data: session, error: sErr } = await this.db
-        .from('test_sessions')
-        .select('*')
-        .eq('id', sessionId)
-        .single();
+	/**
+	 * Зафиксировать потерю фокуса. Если превышен лимит, аннулировать сессию
+	 */
+	async recordFocusLoss(sessionId: string, userId: string) {
+		try {
+			const { data: session, error: sErr } = await this.db
+				.from('test_sessions')
+				.select('id, user_id, test_id, status_id, focus_losses_count')
+				.eq('id', sessionId)
+				.single();
 
-      if (sErr || !session) {
-        throw new AppError('Сессия тестирования не найдена', 404);
-      }
-      if (session.user_id !== userId) {
-        throw new AppError('Доступ запрещен', 403);
-      }
-      if (session.status_id !== 'in_progress') {
-        throw new AppError(`Неверный статус сессии: ${session.status_id}`, 409);
-      }
+			if (sErr || !session) {
+				throw new AppError('Сессия не найдена', 404);
+			}
+			if (session.user_id !== userId) {
+				throw new AppError('Доступ запрещен', 403);
+			}
+			if (session.status_id !== 'in_progress') {
+				return { status: session.status_id, focus_losses_count: session.focus_losses_count ?? 0 };
+			}
 
-      // 2) Проверка времени
-      const startTime = new Date(session.start_time!).getTime();
-      const { data: test } = await this.db.from('tests').select('duration_minutes, passing_score_percent').eq('id', session.test_id).single();
-      const limitSec = (test?.duration_minutes ?? 0) > 0 ? (test!.duration_minutes as number) * 60 : null;
-      const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+			const { data: test, error: tErr } = await this.db
+				.from('tests')
+				.select('id, max_focus_losses')
+				.eq('id', session.test_id)
+				.single();
 
-      if (limitSec && elapsedSec > limitSec) {
-        await this.db
-          .from('test_sessions')
-          .update({ status_id: 'expired', end_time: new Date().toISOString() })
-          .eq('id', sessionId);
-        throw new AppError('Время тестирования истекло', 410);
-      }
+			if (tErr || !test) {
+				throw new AppError('Тест не найден', 404);
+			}
 
-      // 3) Получить структуру теста
-      const { data: questions, error: qErr } = await this.db
-        .from('test_questions')
-        .select('id, question_type')
-        .eq('test_id', session.test_id);
+			const current = (session.focus_losses_count ?? 0) + 1;
+			const maxLosses = test.max_focus_losses ?? 0;
 
-      if (qErr) {
-        throw new AppError('Не удалось получить вопросы теста', 500);
-      }
+			if (maxLosses > 0 && current > maxLosses) {
+				const { error: updErr } = await this.db
+					.from('test_sessions')
+					.update({ status_id: 'annulled', end_time: new Date().toISOString(), focus_losses_count: current })
+					.eq('id', sessionId);
+				if (updErr) {
+					throw new AppError('Не удалось обновить статус сессии', 500);
+				}
+				return { status: 'annulled' as const, focus_losses_count: current };
+			}
 
-      const questionIds = (questions || []).map((q) => q.id);
-      const { data: options, error: oErr } = await this.db
-        .from('test_question_options')
-        .select('id, question_id, is_correct')
-        .in('question_id', questionIds.length ? questionIds : ['00000000-0000-0000-0000-000000000000']);
+			const { error: incErr } = await this.db
+				.from('test_sessions')
+				.update({ focus_losses_count: current })
+				.eq('id', sessionId);
+			if (incErr) {
+				throw new AppError('Не удалось обновить сессию', 500);
+			}
+			return { status: 'in_progress' as const, focus_losses_count: current };
+		} catch (error) {
+			console.error('[TestSessionService] Error in recordFocusLoss:', error);
+			throw error;
+		}
+	}
 
-      if (oErr) {
-        throw new AppError('Не удалось получить варианты ответов', 500);
-      }
+	/**
+	 * Отправить тест: сохраняем ответы, считаем баллы и результат, закрываем сессию
+	 */
+	async submitTest(sessionId: string, userId: string, answers: UserAnswer[]) {
+		try {
+			// 1) Найти сессию
+			const { data: session, error: sErr } = await this.db
+				.from('test_sessions')
+				.select('*')
+				.eq('id', sessionId)
+				.single();
 
-      const correctOptionIdsByQuestion = new Map<string, Set<string>>();
-      for (const opt of options || []) {
-        if (opt.is_correct) {
-          if (!correctOptionIdsByQuestion.has(opt.question_id)) {
-            correctOptionIdsByQuestion.set(opt.question_id, new Set());
-          }
-          correctOptionIdsByQuestion.get(opt.question_id)!.add(opt.id);
-        }
-      }
+			if (sErr || !session) {
+				throw new AppError('Сессия тестирования не найдена', 404);
+			}
+			if (session.user_id !== userId) {
+				throw new AppError('Доступ запрещен', 403);
+			}
+			if (session.status_id !== 'in_progress') {
+				throw new AppError(`Неверный статус сессии: ${session.status_id}`, 409);
+			}
 
-      // 4) Подсчёт результата
-      let score = 0;
-      const totalQuestions = (questions || []).length;
+			// 2) Проверка времени
+			const startTime = new Date(session.start_time!).getTime();
+			const { data: test } = await this.db.from('tests').select('duration_minutes, passing_score_percent').eq('id', session.test_id).single();
+			const limitSec = (test?.duration_minutes ?? 0) > 0 ? (test!.duration_minutes as number) * 60 : null;
+			const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
 
-      const answerMap = new Map<string, string | string[]>();
-      for (const a of answers) {
-        answerMap.set(a.questionId, a.answer);
-      }
+			if (limitSec && elapsedSec > limitSec) {
+				await this.db
+					.from('test_sessions')
+					.update({ status_id: 'expired', end_time: new Date().toISOString() })
+					.eq('id', sessionId);
+				throw new AppError('Время тестирования истекло', 410);
+			}
 
-      for (const q of questions || []) {
-        const answer = answerMap.get(q.id);
-        if (q.question_type === 'text_input') {
-          continue; // текстовые не оцениваем автоматически
-        }
-        const correctSet = correctOptionIdsByQuestion.get(q.id) || new Set<string>();
-        if (!answer) continue;
+			// 3) Получить структуру теста
+			const { data: questions, error: qErr } = await this.db
+				.from('test_questions')
+				.select('id, question_type')
+				.eq('test_id', session.test_id);
 
-        if (q.question_type === 'single_choice') {
-          if (typeof answer === 'string' && correctSet.has(answer)) {
-            score += 1;
-          }
-        } else if (q.question_type === 'multiple_choice') {
-          if (Array.isArray(answer)) {
-            const chosen = new Set(answer);
-            const allCorrectChosen = [...correctSet].every((id) => chosen.has(id));
-            const noExtra = [...chosen].every((id) => correctSet.has(id));
-            if (allCorrectChosen && noExtra) {
-              score += 1;
-            }
-          }
-        }
-      }
+			if (qErr) {
+				throw new AppError('Не удалось получить вопросы теста', 500);
+			}
 
-      const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
-      const passingScore = test?.passing_score_percent ?? 85;
-      const passed = percentage >= passingScore;
+			const questionIds = (questions || []).map((q) => q.id);
+			const { data: options, error: oErr } = await this.db
+				.from('test_question_options')
+				.select('id, question_id, is_correct')
+				.in('question_id', questionIds.length ? questionIds : ['00000000-0000-0000-0000-000000000000']);
 
-      // 6) Сохраняем результат
-      const resultPayload: SystemTestResultInsert = {
-        session_id: sessionId,
-        user_id: userId,
-        test_id: session.test_id,
-        score,
-        max_score: totalQuestions,
-        percentage,
-        passed,
-        answers: answers as unknown as any, // answers: Json
-        time_spent_seconds: elapsedSec,
-      };
+			if (oErr) {
+				throw new AppError('Не удалось получить варианты ответов', 500);
+			}
 
-      const { error: rErr } = await this.db
-        .from('test_results')
-        .insert(resultPayload);
-      if (rErr) {
-        throw new AppError('Не удалось сохранить результат теста', 500);
-      }
+			const correctOptionIdsByQuestion = new Map<string, Set<string>>();
+			for (const opt of options || []) {
+				if (opt.is_correct) {
+					if (!correctOptionIdsByQuestion.has(opt.question_id)) {
+						correctOptionIdsByQuestion.set(opt.question_id, new Set());
+					}
+					correctOptionIdsByQuestion.get(opt.question_id)!.add(opt.id);
+				}
+			}
 
-      // 7) Закрываем сессию
-      const { error: uErr } = await this.db
-        .from('test_sessions')
-        .update({ status_id: 'completed', end_time: new Date().toISOString() })
-        .eq('id', sessionId);
-      if (uErr) {
-        throw new AppError('Не удалось обновить статус сессии', 500);
-      }
+			// 4) Подсчёт результата
+			let score = 0;
+			const totalQuestions = (questions || []).length;
 
-      return { score, totalQuestions, percentage, passed };
-    } catch (error) {
-      console.error('[TestSessionService] Error in submitTest:', error);
-      throw error;
-    }
-  }
+			const answerMap = new Map<string, string | string[]>();
+			for (const a of answers) {
+				answerMap.set(a.questionId, a.answer);
+			}
+
+			for (const q of questions || []) {
+				const answer = answerMap.get(q.id);
+				if (q.question_type === 'text_input') {
+					continue; // текстовые не оцениваем автоматически
+				}
+				const correctSet = correctOptionIdsByQuestion.get(q.id) || new Set<string>();
+				if (!answer) continue;
+
+				if (q.question_type === 'single_choice') {
+					if (typeof answer === 'string' && correctSet.has(answer)) {
+						score += 1;
+					}
+				} else if (q.question_type === 'multiple_choice') {
+					if (Array.isArray(answer)) {
+						const chosen = new Set(answer);
+						const allCorrectChosen = [...correctSet].every((id) => chosen.has(id));
+						const noExtra = [...chosen].every((id) => correctSet.has(id));
+						if (allCorrectChosen && noExtra) {
+							score += 1;
+						}
+					}
+				}
+			}
+
+			const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+			const passingScore = test?.passing_score_percent ?? 85;
+			const passed = percentage >= passingScore;
+
+			// 6) Сохраняем результат
+			const resultPayload: SystemTestResultInsert = {
+				session_id: sessionId,
+				user_id: userId,
+				test_id: session.test_id,
+				score,
+				max_score: totalQuestions,
+				percentage,
+				passed,
+				answers: answers as unknown as any, // answers: Json
+				time_spent_seconds: elapsedSec,
+			};
+
+			const { error: rErr } = await this.db
+				.from('test_results')
+				.insert(resultPayload);
+			if (rErr) {
+				throw new AppError('Не удалось сохранить результат теста', 500);
+			}
+
+			// 7) Закрываем сессию
+			const { error: uErr } = await this.db
+				.from('test_sessions')
+				.update({ status_id: 'completed', end_time: new Date().toISOString() })
+				.eq('id', sessionId);
+			if (uErr) {
+				throw new AppError('Не удалось обновить статус сессии', 500);
+			}
+
+			return { score, totalQuestions, percentage, passed };
+		} catch (error) {
+			console.error('[TestSessionService] Error in submitTest:', error);
+			throw error;
+		}
+	}
 }

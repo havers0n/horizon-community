@@ -23,32 +23,8 @@ router.get('/:id', authenticateToken, async (req: any, res) => {
   try {
     const userId: string = req.user.id;
     const sessionId: string = req.params.id;
-
-    // Ключевой запрос с вложенными связями
-    const { data, error } = await (req.supabase as any).system
-      .from('test_sessions')
-      .select(`
-        *,
-        tests (
-          *,
-          test_questions (
-            *,
-            test_question_options (*)
-          )
-        )
-      `)
-      .eq('id', sessionId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error) {
-      console.error('[TestSessionsRoutes] get session error:', error);
-      return res.status(500).json({ success: false, error: 'Server error' });
-    }
-    if (!data) {
-      return res.status(404).json({ success: false, error: 'Сессия не найдена' });
-    }
-
+    const service = new TestSessionService(req.supabase!.system);
+    const data = await service.getTestSessionById(sessionId, userId, req.supabase);
     res.status(200).json({ success: true, data });
   } catch (error: any) {
     console.error('[TestSessionsRoutes] getTestSession error:', error);
