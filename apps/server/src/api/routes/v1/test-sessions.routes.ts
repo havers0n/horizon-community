@@ -53,7 +53,7 @@ router.post('/:id/submit', authenticateToken, async (req: any, res) => {
     const sessionId: string = req.params.id;
     const { answers } = req.body;
     const service = new TestSessionService(req.supabase!.system);
-    const result = await service.submitTest(sessionId, userId, answers);
+    const result = await service.submitTest(sessionId, userId, answers, req.supabase);
 
     // === КАДЕТСКИЙ ТРЕК: перевод стадии на cadet_training при успешной сдаче ===
     if (result?.passed === true) {
