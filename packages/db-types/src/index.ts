@@ -1643,6 +1643,30 @@ export type Database = {
       }
     }
     Functions: {
+      create_gallery_image: {
+        Args: {
+          p_department_id?: string
+          p_description: string
+          p_storage_path: string
+          p_title: string
+          p_uploader_user_id: string
+        }
+        Returns: {
+          approved_by_user_id: string | null
+          created_at: string
+          department_id: string | null
+          description: string | null
+          id: string
+          is_approved: boolean
+          storage_path: string
+          title: string
+          uploader_user_id: string
+        }[]
+      }
+      get_managed_department_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       has_permission: {
         Args:
           | {
@@ -1652,6 +1676,7 @@ export type Database = {
               p_user_id: string
             }
           | { p_code: string; p_user: string }
+          | { p_permission_code: string }
         Returns: boolean
       }
     }

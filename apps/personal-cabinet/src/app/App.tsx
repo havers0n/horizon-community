@@ -1,137 +1,28 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams, Link as RouterLink } from 'react-router-dom'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { AppProviders } from './providers/AppProviders'
+import { AppRouter } from './router/AppRouter'
+import { GlobalErrorBoundary } from '@/shared/ui/error-boundary'
 import { Toaster } from '@/shared/ui/toaster'
-import { TooltipProvider } from '@/shared/ui/tooltip'
-import { AuthProvider } from '@/features/auth'
-import { SessionProvider } from '@/shared/contexts/SessionContext'
-import { StageGuard } from '@/shared/ui/StageGuard'
-import { ThemeProvider } from '@/features/theme'
-import { ProtectedRoute } from '@/shared/ui/protected-route'
-// import { ConnectionStatus } from '@/shared/ui/connection-status'
-import { queryClient } from '@/shared/lib'
-import { useAuth } from '@/features/auth'
-import { useSession } from '@/shared/contexts/SessionContext'
-import { PermissionGuard } from '@/shared/ui/permission-guard'
-import { apiClient } from '@/shared/api/api-client'
-import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/ui/card'
-import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
-import { Switch } from '@/shared/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
-import { supabase } from '@/shared/lib/supabase'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
-import TiptapLink from '@tiptap/extension-link'
-import Image from '@tiptap/extension-image'
-import TextAlign from '@tiptap/extension-text-align'
-import Placeholder from '@tiptap/extension-placeholder'
-import { loadInitialTiptapDoc } from '@/lib/tiptapTransform'
-import { Extension } from '@tiptap/core'
-import Suggestion from '@tiptap/suggestion'
 
-// Lazy loaded pages
-const Homepage = React.lazy(() => import('@/pages/homepage'))
-const Login = React.lazy(() => import('@/pages/auth/login'))
-const Register = React.lazy(() => import('@/pages/auth/register'))
-const Dashboard = React.lazy(() => import('@/pages/dashboard'))
-const Profile = React.lazy(() => import('@/pages/profile'))
-const Settings = React.lazy(() => import('@/pages/settings'))
-const Departments = React.lazy(() => import('@/pages/departments'))
-const Applications = React.lazy(() => import('@/pages/applications'))
-const Reports = React.lazy(() => import('@/pages/reports'))
-const Tests = React.lazy(() => import('@/pages/tests'))
-const Support = React.lazy(() => import('@/pages/support'))
-const AdminPanel = React.lazy(() => import('@/pages/admin'))
-const FAQ = React.lazy(() => import('@/pages/faq'))
-const Gallery = React.lazy(() => import('@/pages/gallery'))
-const NotFound = React.lazy(() => import('@/pages/not-found'))
-const AdminTestsPage = React.lazy(() => import('@/pages/admin/tests'))
-const ApplicationTestPage = React.lazy(() => import('@/pages/applications/test'))
-const TestSessionPage = React.lazy(() => import('@/pages/tests/session'))
-const TestResultPage = React.lazy(() => import('@/pages/tests/result'))
-const AdminApplicationsPage = React.lazy(() => import('@/pages/admin/applications'))
-const AdminGalleryModerationPage = React.lazy(() => import('@/pages/admin/gallery-moderation'))
-
-// ===== Админка: Документация =====
-// Вспомогательные типы
-type DocCategory = {
-  id: string
-  title: string
-  description: string | null
-  parent_category_id: string | null
-  sort_order: number
-  is_internal: boolean
-}
-
-type DocumentItem = {
-  id: string
-  title: string
-  slug: string
-  category_id: string
-  content: any
-  is_published: boolean
-  is_internal: boolean
-  version: number
-  updated_at?: string | null
-}
-
-// Тип блока редактора
-type EditorBlock =
-  | { type: 'heading' | 'paragraph'; text: string; align?: 'left' | 'center' | 'right' }
-  | { type: 'code'; text: string }
-  | { type: 'image'; src: string; alt?: string }
-
-// Типы и компоненты для привязки департаментов к документу
-type Department = { id: string; name: string; full_name?: string }
-
-const DepartmentPicker: React.FC<{
-  value: string[]
-  onChange: (ids: string[]) => void
-  loadDepartments: () => Promise<Department[]>
-}> = ({ value, onChange, loadDepartments }) => {
-  const [items, setItems] = React.useState<Department[]>([])
-  const [loading, setLoading] = React.useState(false)
-
-  React.useEffect(() => {
-    let mounted = true
-    setLoading(true)
-    loadDepartments()
-      .then((list) => { if (mounted) setItems(list) })
-      .finally(() => { if (mounted) setLoading(false) })
-    return () => { mounted = false }
-  }, [loadDepartments])
-
-  const toggle = (id: string) => {
-    if (value.includes(id)) onChange(value.filter(v => v !== id))
-    else onChange([...value, id])
-  }
-
-  if (loading) return <div className="text-sm text-muted-foreground">Загрузка департаментов…</div>
-
+/**
+ * Main Application Component
+ * Responsible only for initializing providers and router
+ * Following separation of concerns principle
+ */
+function App() {
   return (
-    <div className="flex flex-wrap gap-2">
-      {items.map(dep => {
-        const active = value.includes(dep.id)
-        return (
-          <button
-            key={dep.id}
-            type="button"
-            onClick={() => toggle(dep.id)}
-            className={`px-2 py-1 rounded border text-sm ${active ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-accent'}`}
-            title={dep.full_name || dep.name}
-          >
-            {dep.name}
-          </button>
-        )
-      })}
-      {items.length === 0 && <div className="text-sm text-muted-foreground">Нет департаментов</div>}
-    </div>
+    <GlobalErrorBoundary>
+      <AppProviders>
+        <AppRouter />
+        <Toaster />
+      </AppProviders>
+    </GlobalErrorBoundary>
   )
 }
+
+export default App
+
+
 
 // Простая реализация Slash-меню по символу "/"
 const SlashCommands = Extension.create({

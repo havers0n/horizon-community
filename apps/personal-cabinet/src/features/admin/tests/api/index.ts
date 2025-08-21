@@ -127,3 +127,8 @@ export const listQualifications = async (department_id?: string): Promise<Qualif
 	const query = department_id ? `?department_id=${encodeURIComponent(department_id)}` : ''
 	return apiClient.get<QualificationDto[]>(`/qualifications${query}`)
 }
+
+// Current user's managed departments (id, name)
+export const listManagedDepartments = async (): Promise<DepartmentDto[]> => {
+	return apiClient.get<DepartmentDto[]>(`/me/managed-departments`)
+}

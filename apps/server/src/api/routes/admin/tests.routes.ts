@@ -6,7 +6,7 @@ import { TestCreateSchema, TestUpdateSchema } from '../../../core/schemas/test.s
 const router: Router = Router();
 
 // GET /api/v1/admin/tests
-router.get('/', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.get('/', authenticateToken, requirePermission('tests.view'), async (req: any, res) => {
   try {
     const service = new TestAdminService(req.supabase!.system);
     const { search, purpose } = req.query || {};
@@ -22,7 +22,7 @@ router.get('/', authenticateToken, requirePermission('tests.manage'), async (req
 });
 
 // GET /api/v1/admin/tests/:id
-router.get('/:id', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.get('/:id', authenticateToken, requirePermission('tests.view'), async (req: any, res) => {
   try {
     const service = new TestAdminService(req.supabase!.system);
     const test = await service.getTestById(req.params.id);
@@ -34,7 +34,7 @@ router.get('/:id', authenticateToken, requirePermission('tests.manage'), async (
 });
 
 // GET /api/v1/admin/tests/:id/questions
-router.get('/:id/questions', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.get('/:id/questions', authenticateToken, requirePermission('tests.view'), async (req: any, res) => {
   try {
     const service = new TestAdminService(req.supabase!.system);
     const questions = await service.getQuestionsForTest(req.params.id);
@@ -46,7 +46,7 @@ router.get('/:id/questions', authenticateToken, requirePermission('tests.manage'
 });
 
 // POST /api/v1/admin/tests
-router.post('/', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.post('/', authenticateToken, requirePermission('tests.create'), async (req: any, res) => {
   try {
     const userId = req.user!.id;
     const service = new TestAdminService(req.supabase!.system);
@@ -64,7 +64,7 @@ router.post('/', authenticateToken, requirePermission('tests.manage'), async (re
 });
 
 // PUT /api/v1/admin/tests/:id
-router.put('/:id', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.put('/:id', authenticateToken, requirePermission('tests.edit'), async (req: any, res) => {
   try {
     const testId = req.params.id;
     const service = new TestAdminService(req.supabase!.system);
@@ -78,7 +78,7 @@ router.put('/:id', authenticateToken, requirePermission('tests.manage'), async (
 });
 
 // DELETE /api/v1/admin/tests/:id
-router.delete('/:id', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.delete('/:id', authenticateToken, requirePermission('tests.delete'), async (req: any, res) => {
   try {
     const testId = req.params.id;
     const service = new TestAdminService(req.supabase!.system);
@@ -91,7 +91,7 @@ router.delete('/:id', authenticateToken, requirePermission('tests.manage'), asyn
 });
 
 // POST /api/v1/admin/tests/:id/questions
-router.post('/:id/questions', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
+router.post('/:id/questions', authenticateToken, requirePermission('tests.edit'), async (req: any, res) => {
   try {
     const testId = req.params.id;
     const service = new TestAdminService(req.supabase!.system);

@@ -9,6 +9,7 @@ import {
 	createTest,
 	updateTest,
 	listDepartments,
+	listManagedDepartments,
 	listRanks,
 	listQualifications,
 	type AdminTest,
@@ -71,6 +72,7 @@ function UnifiedTestForm({
 	const isCreate = mode === 'create'
 
 	const { data: departments } = useQuery({ queryKey: ['departments'], queryFn: listDepartments, staleTime: 300_000 })
+	const { data: managedDepartments } = useQuery({ queryKey: ['me','managed-departments'], queryFn: listManagedDepartments, staleTime: 300_000 })
 
 	const { data: test, isLoading: isTestLoading } = useQuery({
 		queryKey: ['admin-test', testId],
@@ -236,7 +238,7 @@ function UnifiedTestForm({
 											<SelectValue placeholder="Не выбрано" />
 										</SelectTrigger>
 										<SelectContent>
-											{(departments || []).map((d) => (
+											{(managedDepartments || []).map((d) => (
 												<SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
 											))}
 										</SelectContent>

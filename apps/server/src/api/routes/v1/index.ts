@@ -96,6 +96,39 @@ export function createV1Router(): Router {
     return res.status(200).json({ success: true, data: (req as any).session });
   });
 
+  // Профиль: управляемые департаменты текущего пользователя
+  // GET /api/v1/me/managed-departments
+  router.get('/me/managed-departments', async (req: any, res) => {
+    try {
+      const supa = req.supabase?.common;
+      if (!supa) {
+        return res.status(500).json({ success: false, error: 'Server configuration error: missing Supabase client' });
+      }
+      // Вызов функции, возвращающей массив UUID департаментов, которыми управляет пользователь
+      const { data, error } = await (supa.rpc as any)('get_managed_department_ids', {});
+      if (error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      const ids: string[] = Array.isArray(data) ? data : [];
+      if (ids.length === 0) {
+        return res.json({ success: true, data: [] });
+      }
+      // Подтягиваем названия департаментов для UX
+      const { data: deps, error: depsErr } = await supa
+        .from('departments' as any)
+        .select('id, name')
+        .in('id', ids as any)
+        .order('name', { ascending: true }) as any;
+      if (depsErr) {
+        return res.status(500).json({ success: false, error: depsErr.message });
+      }
+      return res.json({ success: true, data: deps ?? [] });
+    } catch (error) {
+      console.error('[V1] /me/managed-departments error:', error);
+      return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+
   // Справочники: Ranks
   // GET /api/v1/ranks?department_id=UUID
   router.get('/ranks', async (req: any, res) => {
