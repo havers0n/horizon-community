@@ -96,20 +96,30 @@ export class GalleryService {
    * Создать подписанный URL для загрузки файла в Storage
    */
   async createSignedUploadUrl(userId: string, fileName: string, fileType: string): Promise<{ signedUrl: string; filePath: string; }> {
+    console.log('[GalleryService] createSignedUploadUrl: start', { userId, fileName, fileType });
     try {
       if (!userId) throw new AppError('Unauthorized', 401);
       if (!fileName) throw new AppError('fileName is required', 400);
       if (!fileType) throw new AppError('fileType is required', 400);
 
-      const BUCKET_NAME = 'gallery';
+      // Генерируем уникальный путь, включая папку с ID пользователя
       const filePath = `public/${userId}/${Date.now()}-${fileName}`;
+
+      const BUCKET_NAME = 'gallery';
+
+      // Ключевое исправление: явно указываем contentType и запрещаем upsert
+      const uploadOptions = {
+        contentType: fileType,
+        upsert: false,
+      } as any;
 
       const { data, error } = await (this.publicDb.storage as any)
         .from(BUCKET_NAME)
-        .createSignedUploadUrl(filePath, { contentType: fileType } as any);
+        .createSignedUploadUrl(filePath, 600, uploadOptions);
 
       if (error) {
-        throw new AppError(error.message, 500);
+        console.error('[GalleryService] createSignedUploadUrl Supabase error:', error);
+        throw new AppError('Не удалось создать URL для загрузки', 500);
       }
 
       const signedUrl = (data as any)?.signedUrl as string | undefined;
@@ -117,11 +127,12 @@ export class GalleryService {
         throw new AppError('Failed to create signed upload URL', 500);
       }
 
+      console.log('[GalleryService] Signed URL created successfully');
       return { signedUrl, filePath };
-    } catch (err) {
-      console.error('[GalleryService] createSignedUploadUrl error:', err);
-      if (err instanceof AppError) throw err;
-      throw new AppError('Не удалось получить URL загрузки', 500);
+    } catch (error: any) {
+      console.error('[GalleryService] FATAL ERROR in createSignedUploadUrl:', { message: error?.message });
+      if (error instanceof AppError) throw error;
+      throw new AppError('Не удалось обработать запрос на загрузку', 500);
     }
   }
 
@@ -129,34 +140,33 @@ export class GalleryService {
    * Создать запись изображения в таблице common.gallery_images
    */
   async createImageRecord(userId: string, payload: { title: string; description?: string | null; storage_path: string; department_id?: string | null; }): Promise<any> {
+    console.log('[GalleryService] createImageRecord: start', { userId, data: payload });
     try {
       if (!userId) throw new AppError('Unauthorized', 401);
       if (!payload?.title) throw new AppError('title is required', 400);
       if (!payload?.storage_path) throw new AppError('storage_path is required', 400);
 
-      const insertData: any = {
-        title: payload.title,
-        description: payload.description ?? null,
-        storage_path: payload.storage_path,
-        department_id: payload.department_id ?? null,
-        user_id: userId,
-        is_approved: false,
-      };
-
-      const { data, error } = await (this.commonDb
-        .from('gallery_images' as any)
-        .insert(insertData)
-        .select('*') as any).single();
+      const { data: newImage, error } = await (this.commonDb as any)
+        .rpc('create_gallery_image', {
+          p_title: payload.title,
+          p_description: payload.description ?? null,
+          p_storage_path: payload.storage_path,
+          p_uploader_user_id: userId,
+          p_department_id: payload.department_id ?? null,
+        })
+        .single();
 
       if (error) {
-        throw new AppError(error.message, 500);
+        console.error('[GalleryService] RPC create_gallery_image error:', error);
+        throw new AppError(`Не удалось создать запись в галерее: ${error.message}`, 500);
       }
 
-      return data;
-    } catch (err) {
-      console.error('[GalleryService] createImageRecord error:', err);
-      if (err instanceof AppError) throw err;
-      throw new AppError('Не удалось сохранить запись изображения', 500);
+      console.log('[GalleryService] Image record created successfully via RPC!', newImage);
+      return newImage;
+    } catch (error: any) {
+      console.error('[GalleryService] FATAL ERROR in createImageRecord:', { message: error?.message });
+      if (error instanceof AppError) throw error;
+      throw new AppError('Не удалось обработать запрос на создание записи', 500);
     }
   }
 }
