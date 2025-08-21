@@ -101,7 +101,7 @@ export class GalleryService {
       if (!fileName) throw new AppError('fileName is required', 400);
       if (!fileType) throw new AppError('fileType is required', 400);
 
-      const BUCKET_NAME = 'gallery-images';
+      const BUCKET_NAME = 'gallery';
       const filePath = `public/${userId}/${Date.now()}-${fileName}`;
 
       const { data, error } = await (this.publicDb.storage as any)
