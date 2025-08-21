@@ -34,7 +34,7 @@ const AdminGalleryModerationPage: React.FC = () => {
 
   const approveMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.post(`/admin/gallery/${id}/approve`)
+      await apiClient.post(`/admin/gallery/${id}/approve`, {}, { headers: { 'Content-Type': 'application/json' } })
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pendingImages'] }),
   })
