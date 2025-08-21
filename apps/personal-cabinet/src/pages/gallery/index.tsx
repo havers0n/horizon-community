@@ -29,7 +29,7 @@ interface GalleryItem {
 // Маппер элементов API -> UI
 const mapToGalleryItems = (rows: any[]): GalleryItem[] => {
   const SUPABASE_URL = (import.meta as any).env.VITE_SUPABASE_URL as string
-  const BUCKET_NAME = 'gallery-images'
+  const BUCKET_NAME = 'gallery'
   const base = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`.replace(/\/$/, '')
   return (rows || []).map((r: any) => ({
     id: r.id,
