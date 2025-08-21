@@ -93,6 +93,70 @@ export class GalleryService {
   }
 
   /**
+   * Получить список изображений, ожидающих модерации (is_approved = false)
+   * С ручной агрегацией профилей и лайков
+   */
+  async getPendingImages(options: GetApprovedImagesOptions): Promise<any[]> {
+    console.log('[GalleryService] Starting getPendingImages with MANUAL JOIN logic...');
+    try {
+      const page = Math.max(1, Number.isFinite(Number(options.page)) ? Number(options.page) : 1);
+      const limit = Math.min(100, Math.max(1, Number.isFinite(Number(options.limit)) ? Number(options.limit) : 20));
+
+      // 1) Базовые записи
+      let imagesQuery: any = this.commonDb
+        .from('gallery_images' as any)
+        .select('id, storage_path, title, description, created_at, department_id, uploader_user_id, is_approved')
+        .eq('is_approved', false)
+        .order('created_at', { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
+
+      if (options.departmentId) {
+        imagesQuery = imagesQuery.eq('department_id', options.departmentId);
+      }
+
+      const { data: images, error: imagesError } = await imagesQuery;
+      if (imagesError) throw new Error(`DB error fetching pending images: ${imagesError.message}`);
+      if (!images || images.length === 0) return [];
+
+      // 2) Профили авторов
+      const uploaderIds: string[] = Array.from(new Set(images.map((img: any) => img.uploader_user_id).filter(Boolean)));
+      let profilesMap = new Map<string, any>();
+      if (uploaderIds.length > 0) {
+        const { data: profiles, error: profilesError } = await (this.publicDb as any)
+          .from('profiles')
+          .select('id, username')
+          .in('id', uploaderIds);
+        if (profilesError) throw new Error(`DB error fetching profiles: ${profilesError.message}`);
+        profilesMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      }
+
+      // 3) Лайки
+      const imageIds: string[] = images.map((img: any) => img.id).filter(Boolean);
+      let likesMap = new Map<string, number>();
+      if (imageIds.length > 0) {
+        const { data: likes, error: likesError } = await (this.commonDb as any)
+          .from('gallery_image_likes_count')
+          .select('image_id, like_count')
+          .in('image_id', imageIds);
+        if (likesError) console.warn('[GalleryService] Could not fetch likes for pending, defaulting to 0.');
+        likesMap = new Map((likes || []).map((l: any) => [l.image_id, l.like_count]));
+      }
+
+      // 4) Обогащение
+      const enrichedImages = images.map((image: any) => ({
+        ...image,
+        profiles: profilesMap.get(image.uploader_user_id) || { username: 'Неизвестный автор' },
+        gallery_image_likes: [{ count: likesMap.get(image.id) || 0 }],
+      }));
+
+      return enrichedImages;
+    } catch (error: any) {
+      console.error('[GalleryService] FATAL ERROR in getPendingImages:', { message: error?.message });
+      throw new AppError('Не удалось получить изображения на модерации', 500);
+    }
+  }
+
+  /**
    * Создать подписанный URL для загрузки файла в Storage
    */
   async createSignedUploadUrl(userId: string, fileName: string, fileType: string): Promise<{ signedUrl: string; filePath: string; }> {
