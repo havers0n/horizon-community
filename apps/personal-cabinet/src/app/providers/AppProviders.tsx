@@ -12,8 +12,9 @@ interface AppProvidersProps {
 }
 
 /**
- * Централизованная конфигурация всех провайдеров приложения
- * Следует принципу единственной ответственности
+ * Centralized configuration of all application providers
+ * Following single responsibility principle
+ * IMPORTANT: Provider order matters - SessionProvider must come before AuthProvider
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
@@ -21,11 +22,12 @@ export function AppProviders({ children }: AppProvidersProps) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <TooltipProvider>
-            <AuthProvider>
-              <SessionProvider>
+            {/* SessionProvider MUST come first - AuthProvider depends on it */}
+            <SessionProvider>
+              <AuthProvider>
                 {children}
-              </SessionProvider>
-            </AuthProvider>
+              </AuthProvider>
+            </SessionProvider>
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>

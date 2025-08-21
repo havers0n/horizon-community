@@ -8,10 +8,10 @@ interface PageLoaderProps {
 }
 
 /**
- * Компонент загрузки страниц
- * Используется для lazy loading и асинхронных операций
+ * Page loader component for consistent loading states
+ * Used for lazy loading and asynchronous operations
  */
-export function PageLoader({ className, message = 'Загрузка...' }: PageLoaderProps) {
+export function PageLoader({ className, message = 'Loading...' }: PageLoaderProps) {
   return (
     <div className={cn(
       'flex items-center justify-center min-h-screen',

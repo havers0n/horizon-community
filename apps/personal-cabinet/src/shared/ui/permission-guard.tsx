@@ -16,6 +16,13 @@ const Loading: React.FC = () => (
 export const PermissionGuard: React.FC<PermissionGuardProps> = ({ permission, children }) => {
   const { session, isLoading } = useSession()
 
+  // --- DEBUGGING LOGS ---
+  console.log('%c[PermissionGuard] Checking...', 'color: yellow; font-weight: bold;');
+  console.log('Required Permission:', permission);
+  console.log('Is Session Loading:', isLoading);
+  console.log('Full Session Object:', session);
+  // ---------------------
+
   if (isLoading) return <Loading />
 
   if (!session) {
@@ -23,6 +30,8 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({ permission, ch
   }
 
   const hasPermission = Array.isArray(session.permissions) && session.permissions.includes(permission)
+
+  console.log('%c[PermissionGuard] Decision:', 'color: yellow; font-weight: bold;', { hasPermission });
 
   if (!hasPermission) {
     return <Navigate to="/dashboard" replace />

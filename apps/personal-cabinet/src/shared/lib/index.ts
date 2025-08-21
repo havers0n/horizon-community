@@ -4,6 +4,9 @@ export * from './auth';
 // API client (унифицированный)
 export * from '../api/api-client';
 
+// Error handling
+export * from './error-handling';
+
 // Internationalization
 export * from './i18n';
 

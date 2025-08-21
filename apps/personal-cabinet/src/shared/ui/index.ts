@@ -19,6 +19,8 @@ export * from './use-toast'
 export * from './layout'
 export * from './status-badge'
 export * from './department-card'
+export * from './page-loader'
+export * from './error-boundary'
 
 // New UI components
 export * from './accordion'

@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
-import { login as loginApi, register as registerApi, logout as logoutApi, getCurrentUser, updateProfile as updateProfileApi, LoginCredentials, RegisterPayload } from '@/shared/api/auth-service'
+import { 
+  login as loginApi, 
+  register as registerApi, 
+  logout as logoutApi, 
+  getCurrentUser, 
+  updateProfile as updateProfileApi, 
+  LoginCredentials, 
+  RegisterPayload 
+} from '@/shared/api/auth-service'
+import { handleError, createAppError, ErrorType } from '@/shared/lib/error-handling'
 import type { Database } from '@roleplay-identity/db-types'
 
 type Profiles = Database['public']['Tables']['profiles']['Row']
@@ -98,7 +107,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const userData = await getCurrentUser()
         dispatch({ type: 'AUTH_SUCCESS', payload: userData })
       } catch (error) {
-        dispatch({ type: 'AUTH_FAILURE', payload: 'Authentication failed' })
+        // For auth check, don't show toast to avoid annoying users
+        const appError = handleError(error, { showToast: false })
+        dispatch({ type: 'AUTH_FAILURE', payload: appError.message })
       }
     }
 
@@ -111,8 +122,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await loginApi(credentials)
       dispatch({ type: 'AUTH_SUCCESS', payload: response.user })
     } catch (error) {
-      dispatch({ type: 'AUTH_FAILURE', payload: 'Login failed' })
-      throw error
+      const appError = handleError(error, {
+        fallbackMessage: 'Failed to log in. Please check your credentials'
+      })
+      dispatch({ type: 'AUTH_FAILURE', payload: appError.message })
+      throw appError
     }
   }
 
@@ -122,8 +136,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await registerApi(data)
       dispatch({ type: 'AUTH_SUCCESS', payload: response.user })
     } catch (error) {
-      dispatch({ type: 'AUTH_FAILURE', payload: 'Registration failed' })
-      throw error
+      const appError = handleError(error, {
+        fallbackMessage: 'Failed to create account. Please try again'
+      })
+      dispatch({ type: 'AUTH_FAILURE', payload: appError.message })
+      throw appError
     }
   }
 
@@ -131,7 +148,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await logoutApi()
     } catch (error) {
-      console.error('Logout error:', error)
+      // Log logout errors but don't block the process
+      handleError(error, {
+        showToast: false,
+        fallbackMessage: 'Error during logout'
+      })
     } finally {
       dispatch({ type: 'AUTH_LOGOUT' })
     }
@@ -142,8 +163,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = await updateProfileApi(data)
       dispatch({ type: 'UPDATE_USER', payload: updatedUser })
     } catch (error) {
-      dispatch({ type: 'AUTH_FAILURE', payload: 'Profile update failed' })
-      throw error
+      const appError = handleError(error, {
+        fallbackMessage: 'Failed to update profile'
+      })
+      dispatch({ type: 'AUTH_FAILURE', payload: appError.message })
+      throw appError
     }
   }
 
@@ -170,7 +194,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw createAppError(
+      ErrorType.UNKNOWN,
+      'useAuth must be used within an AuthProvider'
+    )
   }
   return context
 } 

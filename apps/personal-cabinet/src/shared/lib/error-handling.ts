@@ -1,6 +1,7 @@
 /**
- * Централизованная система обработки ошибок
- * Обеспечивает единообразную обработку ошибок по всему приложению
+ * Centralized error handling system
+ * Ensures consistent error handling across the application
+ * Following project specifications for error standardization
  */
 
 export enum ErrorType {
@@ -28,7 +29,7 @@ export interface ErrorHandlingOptions {
 }
 
 /**
- * Создает типизированную ошибку приложения
+ * Creates a typed application error
  */
 export function createAppError(
   type: ErrorType,
@@ -45,7 +46,7 @@ export function createAppError(
 }
 
 /**
- * Парсит ошибку API и возвращает типизированную ошибку
+ * Parses API error and returns typed error
  */
 export function parseApiError(error: unknown): AppError {
   // Axios error
@@ -58,28 +59,28 @@ export function parseApiError(error: unknown): AppError {
       case 400:
         return createAppError(
           ErrorType.VALIDATION,
-          data?.message || 'Некорректные данные',
+          data?.message || 'Invalid data provided',
           data?.details,
           error
         )
       case 401:
         return createAppError(
           ErrorType.AUTHENTICATION,
-          'Необходимо войти в систему',
+          'Authentication required',
           undefined,
           error
         )
       case 403:
         return createAppError(
           ErrorType.AUTHORIZATION,
-          'Недостаточно прав доступа',
+          'Insufficient permissions',
           undefined,
           error
         )
       case 404:
         return createAppError(
           ErrorType.NOT_FOUND,
-          'Ресурс не найден',
+          'Resource not found',
           undefined,
           error
         )
@@ -88,7 +89,7 @@ export function parseApiError(error: unknown): AppError {
       case 503:
         return createAppError(
           ErrorType.SERVER,
-          'Ошибка сервера. Попробуйте позже',
+          'Server error. Please try again later',
           undefined,
           error
         )
@@ -101,7 +102,7 @@ export function parseApiError(error: unknown): AppError {
     if (networkError.code === 'NETWORK_ERROR') {
       return createAppError(
         ErrorType.NETWORK,
-        'Ошибка сети. Проверьте подключение',
+        'Network error. Check your connection',
         undefined,
         error
       )
@@ -121,14 +122,14 @@ export function parseApiError(error: unknown): AppError {
   // Unknown error
   return createAppError(
     ErrorType.UNKNOWN,
-    'Произошла неизвестная ошибка',
+    'An unknown error occurred',
     undefined,
     error
   )
 }
 
 /**
- * Обрабатывает ошибку согласно настройкам
+ * Handles error according to options
  */
 export function handleError(
   error: unknown, 
@@ -152,11 +153,11 @@ export function handleError(
   }
   
   if (showToast) {
-    // Импортируем toast динамически чтобы избежать циклических зависимостей
+    // Import toast dynamically to avoid circular dependencies
     import('@/shared/ui/use-toast').then(({ toast }) => {
       toast({
         variant: 'destructive',
-        title: 'Ошибка',
+        title: 'Error',
         description: fallbackMessage || appError.message,
       })
     })
@@ -166,7 +167,7 @@ export function handleError(
 }
 
 /**
- * Хук для удобной обработки ошибок в компонентах
+ * Hook for convenient error handling in components
  */
 export function useErrorHandler() {
   return (error: unknown, options?: ErrorHandlingOptions) => {
@@ -175,7 +176,7 @@ export function useErrorHandler() {
 }
 
 /**
- * Декоратор для автоматической обработки ошибок в async функциях
+ * Decorator for automatic error handling in async functions
  */
 export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
   fn: T,

@@ -18,7 +18,8 @@ export const USER_ROLES = {
   'CITIZEN': 'citizen',
   'CANDIDATE': 'candidate',
   'STAFF': 'staff',
-  'ADMIN': 'admin'
+  'ADMIN': 'admin',
+  'SYSTEM_ADMIN': 'system_admin'
 } as const;
 
 // MDT-специфичные роли (для экстренных служб)
@@ -56,16 +57,18 @@ export const isCandidate = (role: string): boolean => {
   return role === USER_ROLES.CANDIDATE;
 };
 
+export const isAdmin = (role: string): boolean => {
+  // Администратор - это и 'admin', и 'system_admin', и MDT admin
+  return role === USER_ROLES.ADMIN || role === USER_ROLES.SYSTEM_ADMIN || role === MDT_ROLES.ADMIN;
+};
+
 export const isMember = (role: string): boolean => {
-  return role === USER_ROLES.STAFF || role === USER_ROLES.ADMIN;
+  // Участник - это Staff ИЛИ любой Администратор
+  return role === USER_ROLES.STAFF || isAdmin(role);
 };
 
 export const isCitizen = (role: string): boolean => {
   return role === USER_ROLES.CITIZEN;
-};
-
-export const isAdmin = (role: string): boolean => {
-  return role === USER_ROLES.ADMIN || role === MDT_ROLES.ADMIN;
 };
 
 export const isEmergencyService = (role: string): boolean => {
@@ -84,6 +87,7 @@ export const ROLE_DISPLAY_NAMES = {
   [USER_ROLES.CANDIDATE]: 'Кандидат',
   [USER_ROLES.STAFF]: 'Участник сообщества',
   [USER_ROLES.ADMIN]: 'Администратор',
+  [USER_ROLES.SYSTEM_ADMIN]: 'Системный администратор',
   [MDT_ROLES.LEO]: 'Полиция',
   [MDT_ROLES.EMS]: 'Скорая помощь',
   [MDT_ROLES.FD]: 'Пожарная служба',
@@ -95,6 +99,9 @@ export const getRoleDisplayName = (role: string): string => {
   if (role === USER_ROLES.ADMIN || role === MDT_ROLES.ADMIN) {
     return 'Администратор';
   }
+  if (role === USER_ROLES.SYSTEM_ADMIN) {
+    return 'Системный администратор';
+  }
   return ROLE_DISPLAY_NAMES[role as keyof typeof ROLE_DISPLAY_NAMES] || 'Неизвестная роль';
 };
 
@@ -104,6 +111,7 @@ export const ROLE_COLORS = {
   [USER_ROLES.CANDIDATE]: 'yellow',
   [USER_ROLES.STAFF]: 'green',
   [USER_ROLES.ADMIN]: 'red',
+  [USER_ROLES.SYSTEM_ADMIN]: 'purple',
   [MDT_ROLES.LEO]: 'blue',
   [MDT_ROLES.EMS]: 'red',
   [MDT_ROLES.FD]: 'orange',
@@ -114,6 +122,9 @@ export const ROLE_COLORS = {
 export const getRoleColor = (role: string): string => {
   if (role === USER_ROLES.ADMIN || role === MDT_ROLES.ADMIN) {
     return 'red';
+  }
+  if (role === USER_ROLES.SYSTEM_ADMIN) {
+    return 'purple';
   }
   return ROLE_COLORS[role as keyof typeof ROLE_COLORS] || 'gray';
 };

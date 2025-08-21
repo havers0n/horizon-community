@@ -3,9 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '@/shared/ui/protected-route'
 import { StageGuard } from '@/shared/ui/StageGuard'
 import { PermissionGuard } from '@/shared/ui/permission-guard'
-import { PageLoader } from '@/shared/ui/page-loader'
+import { PageLoader } from '../../shared/ui/page-loader'
 
-// Lazy loaded pages - централизованно
+// Lazy loaded pages - centralized for better organization
 const pages = {
   Homepage: React.lazy(() => import('@/pages/homepage')),
   Login: React.lazy(() => import('@/pages/auth/login')),
@@ -22,31 +22,37 @@ const pages = {
   FAQ: React.lazy(() => import('@/pages/faq')),
   Gallery: React.lazy(() => import('@/pages/gallery')),
   NotFound: React.lazy(() => import('@/pages/not-found')),
+  Documents: React.lazy(() => import('@/pages/documents')),
   
-  // Специализированные страницы
+  // Specialized pages
   AdminTests: React.lazy(() => import('@/pages/admin/tests')),
   ApplicationTest: React.lazy(() => import('@/pages/applications/test')),
   TestSession: React.lazy(() => import('@/pages/tests/session')),
   TestResult: React.lazy(() => import('@/pages/tests/result')),
   AdminApplications: React.lazy(() => import('@/pages/admin/applications')),
   AdminGalleryModeration: React.lazy(() => import('@/pages/admin/gallery-moderation')),
+  AdminDocuments: React.lazy(() => import('@/pages/admin/documents')),
+  DocumentEditor: React.lazy(() => import('@/pages/admin/documents/editor')),
 }
 
 /**
- * Конфигурация роутинга приложения
- * Выделена в отдельный компонент для лучшей организации
+ * Application routing configuration
+ * Separated into dedicated component for better organization
+ * Follows FSD architecture principles
  */
 export function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Публичные маршруты */}
+        {/* Public routes */}
         <Route path="/" element={<pages.Homepage />} />
         <Route path="/login" element={<pages.Login />} />
         <Route path="/register" element={<pages.Register />} />
         <Route path="/faq" element={<pages.FAQ />} />
+        <Route path="/docs" element={<pages.Documents />} />
+        <Route path="/documents" element={<pages.Documents />} />
         
-        {/* Защищенные маршруты */}
+        {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<pages.Dashboard />} />
           <Route path="/profile" element={<pages.Profile />} />
@@ -61,23 +67,28 @@ export function AppRouter() {
           <Route path="/support" element={<pages.Support />} />
           <Route path="/gallery" element={<pages.Gallery />} />
           
-          {/* Административные маршруты */}
+          {/* Administrative routes */}
           <Route 
             path="/admin/*" 
             element={
-              <PermissionGuard requiredPermission="admin">
-                <Routes>
-                  <Route index element={<pages.AdminPanel />} />
-                  <Route path="tests" element={<pages.AdminTests />} />
-                  <Route path="applications" element={<pages.AdminApplications />} />
-                  <Route path="gallery" element={<pages.AdminGalleryModeration />} />
-                </Routes>
-              </PermissionGuard>
+              <>
+                {console.log('%c[AppRouter] Admin route accessed!', 'color: orange; font-weight: bold;')}
+                <PermissionGuard permission="admin.panel.access">
+                  <Routes>
+                    <Route index element={<pages.AdminPanel />} />
+                    <Route path="tests" element={<pages.AdminTests />} />
+                    <Route path="applications" element={<pages.AdminApplications />} />
+                    <Route path="gallery" element={<pages.AdminGalleryModeration />} />
+                    <Route path="documents" element={<pages.AdminDocuments />} />
+                    <Route path="documents/editor/:id?" element={<pages.DocumentEditor />} />
+                  </Routes>
+                </PermissionGuard>
+              </>
             }
           />
         </Route>
         
-        {/* Перенаправления и 404 */}
+        {/* Redirects and 404 */}
         <Route path="/home" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<pages.NotFound />} />
       </Routes>

@@ -2,7 +2,6 @@
   // Этот файл теперь только для IDE и для указания ссылок на под-проекты
   "files": [], // Говорим, что этот конфиг сам по себе ничего не компилирует
   "references": [
-    { "path": "./apps/client" },
     { "path": "./apps/mdtclient" },
     { "path": "./apps/server" },
     { "path": "./apps/personal-cabinet" }, // ✅ Добавляем ссылку на personal-cabinet
