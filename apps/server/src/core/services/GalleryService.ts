@@ -42,7 +42,7 @@ export class GalleryService {
             description,
             created_at,
             department_id,
-            profiles ( username ),
+            profiles:uploader_user_id ( username ),
             gallery_image_likes ( count )
           `
         )
