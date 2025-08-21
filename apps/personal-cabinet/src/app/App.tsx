@@ -56,6 +56,7 @@ const ApplicationTestPage = React.lazy(() => import('@/pages/applications/test')
 const TestSessionPage = React.lazy(() => import('@/pages/tests/session'))
 const TestResultPage = React.lazy(() => import('@/pages/tests/result'))
 const AdminApplicationsPage = React.lazy(() => import('@/pages/admin/applications'))
+const AdminGalleryModerationPage = React.lazy(() => import('@/pages/admin/gallery-moderation'))
 
 // ===== Админка: Документация =====
 // Вспомогательные типы
@@ -1459,6 +1460,14 @@ function App() {
                         <AdminRoute>
                           <AdminApplicationsPage />
                         </AdminRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/gallery-moderation"
+                      element={
+                        <PermissionGuard permission="gallery.moderate">
+                          <AdminGalleryModerationPage />
+                        </PermissionGuard>
                       }
                     />
                     <Route
