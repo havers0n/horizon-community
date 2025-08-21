@@ -56,6 +56,10 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 	const { session, refetch: refetchSession } = useSession()
 	const [isUploading, setIsUploading] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
+	
+	// Получаем количество оставшихся попыток из сессии
+	const attemptsLeft = session?.attemptsLeft ?? 3
+	const canSubmit = attemptsLeft > 0
 
 	// Обеспечиваем установку токена в клиента Supabase перед запросами к Storage (важно для инкогнито-режима)
 	const ensureSupabaseAuth = async (): Promise<boolean> => {
@@ -144,6 +148,14 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 	})
 
 	const onSubmit = (data: EntryCadetApplicationFormData) => {
+		if (!canSubmit) {
+			toast({
+				title: 'Превышен лимит заявок',
+				description: 'У вас исчерпаны попытки подачи заявок на этот месяц. Попробуйте снова с 1 числа следующего месяца.',
+				variant: 'destructive'
+			})
+			return
+		}
 		mutation.mutate(data)
 	}
 	// watching to keep controlled select synced (value used implicitly by react-hook-form)
@@ -212,7 +224,33 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 						<UserPlus className="h-5 w-5" />
 						Заявка на вступление как кадет
 					</DialogTitle>
+					{canSubmit ? (
+						<div className="text-sm text-muted-foreground">
+							Осталось попыток: <span className="font-medium text-green-600">{attemptsLeft}</span> из 3 в этом месяце
+						</div>
+					) : (
+						<div className="text-sm text-destructive font-medium">
+							⚠️ Исчерпан лимит заявок на этот месяц (3 из 3 использовано)
+						</div>
+					)}
 				</DialogHeader>
+							
+				{/* Информация о лимитах */}
+				{!canSubmit && (
+					<div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-4">
+						<div className="flex items-start gap-3">
+							<div className="text-destructive text-xl">⚠️</div>
+							<div>
+								<h3 className="font-semibold text-destructive mb-1">Лимит заявок исчерпан</h3>
+								<p className="text-sm text-muted-foreground">
+									Вы можете подать максимум 3 заявки в календарный месяц. Ваш лимит будет обновлен 1 числа следующего месяца.
+									Если у вас есть вопросы, обращайтесь в службу поддержки.
+								</p>
+							</div>
+						</div>
+					</div>
+				)}
+							
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 						<Card>
@@ -415,8 +453,8 @@ export function EntryApplicationModal({ children, isOpen, onOpenChange }: EntryA
 						</Card>
 
 						<div className="flex justify-end gap-2">
-							<Button type="submit" disabled={mutation.isPending}>
-								{mutation.isPending ? 'Отправка...' : 'Отправить заявку'}
+							<Button type="submit" disabled={mutation.isPending || !canSubmit}>
+								{mutation.isPending ? 'Отправка...' : !canSubmit ? 'Лимит исчерпан' : 'Отправить заявку'}
 							</Button>
 							<Button type="button" variant="outline" onClick={() => setOpen(false)}>
 								Отмена

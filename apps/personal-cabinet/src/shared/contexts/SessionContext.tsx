@@ -7,6 +7,7 @@ export type UserSession = {
   roles: Array<{ code: string; name: string }>
   permissions: string[]
   statuses: string[]
+  attemptsLeft?: number
   cadetTracks?: Array<{
     id?: string
     department_id?: string | null
@@ -24,6 +25,39 @@ export type UserSession = {
     department_name?: string | null
     [key: string]: any
   }>
+  // Новые поля для полноценного профиля (этап 5)
+  memberships?: Array<{
+    status: {
+      id: string
+      code: string
+      name: string
+    }
+    rank: {
+      id: string
+      name: string
+      order_index?: number
+    }
+    department: {
+      id: string
+      name: string // Short name/abbreviation (LSPD, BCSO)
+      full_name?: string // Full department name (Los Santos Police Department)
+    }
+    position?: string
+    is_primary: boolean
+  }>
+  qualifications?: Array<{
+    id: string
+    name: string
+    department: {
+      id: string
+      name: string // Short name/abbreviation (LSPD, BCSO)
+      full_name?: string // Full department name (Los Santos Police Department)
+    }
+  }>
+  // Вычисляемые поля для совмещений (отображение через '/')
+  combinedRank?: string
+  combinedPosition?: string
+  combinedDepartment?: string
 }
 
 type SessionResponse = {

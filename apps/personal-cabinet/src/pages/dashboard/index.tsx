@@ -11,6 +11,8 @@ import { UsefulLinksWidget } from '@/widgets/dashboard/ui/useful-links-widget';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/shared/contexts/SessionContext';
 import { EntryApplicationModal } from '@/features/entry-application/ui/entry-application-modal';
+import { ApprovedApplicationMessage } from '@/features/applications/ui/approved-application-message';
+import { RejectedApplicationMessage } from '@/features/applications/ui/rejected-application-message';
 import { Button } from '@/shared/ui/button';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -286,6 +288,15 @@ export default function Dashboard() {
     ? session.applications.some(app => app?.status_code === 'awaiting_interview')
     : false;
 
+  // Проверяем статус заявок для отображения специальных сообщений
+  const approvedApp = Array.isArray(session.applications)
+    ? session.applications.find(app => app?.status_code === 'approved')
+    : null;
+  
+  const rejectedApp = Array.isArray(session.applications) 
+    ? session.applications.find(app => app?.status_code === 'rejected')
+    : null;
+
   // Производные данные для отображения департамента кандидата
   const awaitingApp = Array.isArray(session.applications)
     ? session.applications.find(app => app?.status_code === 'awaiting_interview')
@@ -332,35 +343,35 @@ export default function Dashboard() {
           // Спец. состояние для кандидата, ожидающего интервью
           isAwaitingInterview ? (
             <div className="space-y-6">
-              <Card className="card-horizon">
-                <CardContent className="p-6">
-                  <div className="flex flex-col gap-4">
-                    <Stack space="xs">
-                      <H2 className="text-xl font-semibold">Поздравляем! Вы прошли отбор</H2>
-                      <Muted>
-                        Ваша заявка одобрена. Следующий шаг — интервью. Пожалуйста, проверьте Discord для получения инструкции и назначения времени.
-                      </Muted>
-                      {awaitingDepartmentName && (
-                        <Muted>
-                          Департамент: <span className="font-medium">{awaitingDepartmentName}</span>
-                        </Muted>
-                      )}
-                    </Stack>
-                    <div>
-                      <a
-                        href="https://discord.gg/horizoncommunity"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-sm"
-                      >
-                        Перейти в Discord
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
+              <ApprovedApplicationMessage 
+                departmentName={awaitingDepartmentName || undefined}
+              />
               {/* Полезные ссылки */}
+              <UsefulLinksWidget links={transformedData.usefulLinks} />
+            </div>
+          ) : approvedApp ? (
+            // Отображение одобренной заявки
+            <div className="space-y-6">
+              <ApprovedApplicationMessage 
+                departmentName={approvedApp.department_name || undefined}
+              />
+              <UsefulLinksWidget links={transformedData.usefulLinks} />
+            </div>
+          ) : rejectedApp ? (
+            // Отображение отклонённой заявки
+            <div className="space-y-6">
+              <RejectedApplicationMessage 
+                departmentName={rejectedApp.department_name || undefined}
+                attemptsLeft={session?.attemptsLeft || 3}
+                rejectionReason={rejectedApp.rejection_reason || undefined}
+                onNewApplication={() => {
+                  // Логика подачи новой заявки
+                  const modal = document.querySelector('[data-entry-application-trigger]') as HTMLElement;
+                  if (modal) {
+                    modal.click();
+                  }
+                }}
+              />
               <UsefulLinksWidget links={transformedData.usefulLinks} />
             </div>
           ) : (
@@ -381,7 +392,7 @@ export default function Dashboard() {
                     {!(primaryRole.code === 'system_admin' || hasAdminPermission) && (
                       <div>
                         <EntryApplicationModal>
-                          <Button size="lg">Подать заявку на вступление</Button>
+                          <Button size="lg" data-entry-application-trigger>Подать заявку на вступление</Button>
                         </EntryApplicationModal>
                       </div>
                     )}

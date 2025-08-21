@@ -139,6 +139,45 @@ export class CabinetService {
   ) {}
 
   /**
+   * Подсчет заявок пользователя за текущий месяц
+   * Правило №2: Бизнес-логика в сервисе
+   */
+  private async getMonthlyApplicationCount(userId: string): Promise<number> {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+      const { data, error } = await (this.supabase as any)
+        .from('applications')
+        .select('id')
+        .eq('author_user_id', userId)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString());
+
+      if (error) {
+        console.error('Error counting monthly applications:', error);
+        return 0;
+      }
+
+      return data?.length || 0;
+    } catch (error) {
+      console.error('Error in getMonthlyApplicationCount:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Получить количество оставшихся попыток подачи заявок
+   * Лимит: 3 заявки в месяц
+   */
+  private async getAttemptsLeft(userId: string): Promise<number> {
+    const monthlyCount = await this.getMonthlyApplicationCount(userId);
+    const MAX_ATTEMPTS = 3;
+    return Math.max(0, MAX_ATTEMPTS - monthlyCount);
+  }
+
+  /**
    * Получить данные дашборда пользователя
    * Правило №2: Сервис содержит всю бизнес-логику
    */
@@ -180,7 +219,7 @@ export class CabinetService {
 
     // Базовые данные для всех ролей
     const baseData: DashboardData = {
-      user: this.formatUserProfile(typedProfile, character, role),
+      user: await this.formatUserProfile(typedProfile, character, role),
       activities,
       announcements,
       usefulLinks: this.getUsefulLinks(),
@@ -549,7 +588,9 @@ export class CabinetService {
   /**
    * Форматировать профиль пользователя
    */
-  private formatUserProfile(profile: ProfileWithStats, character: Character | null, role: string): DashboardData['user'] {
+  private async formatUserProfile(profile: ProfileWithStats, character: Character | null, role: string): Promise<DashboardData['user']> {
+    const attemptsLeft = await this.getAttemptsLeft(profile.id);
+    
     return {
       id: profile.id,
       email: profile.email,
@@ -563,7 +604,7 @@ export class CabinetService {
       isActive: true,
       gameWarnings: profile.user_stats?.warnings_game || 0,
       adminWarnings: profile.user_stats?.warnings_admin || 0,
-      attemptsLeft: 3,
+      attemptsLeft,
       profileImageUrl: character?.mugshot_url || null,
     };
   }

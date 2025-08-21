@@ -185,13 +185,50 @@ export async function authenticateToken(
 
 			const membershipsQuery = supa.common
 				.from('memberships' as any)
-				.select('status_id')
+				.select(`
+					status_id,
+					rank_id,
+					department_id,
+					is_primary,
+					statuses!inner(code, name),
+					ranks!inner(name, order_index),
+					departments!inner(name, full_name)
+				`)
 				.eq('user_id', userId);
 
 			const cadetTracksQuery = supa.common
 				.from('v_cadet_tracks_enriched' as any)
 				.select('*')
 				.eq('user_id', userId);
+
+			// 1) Получаем персонажей пользователя
+			const charactersRes = await supa.common
+				.from('characters' as any)
+				.select('id')
+				.eq('user_id', userId);
+
+			if (charactersRes.error) {
+				res.status(500).json({ success: false, error: charactersRes.error.message });
+				return;
+			}
+
+			const characterIds = (charactersRes.data || []).map((c: any) => c.id);
+
+			// 2) Получаем квалификации через character_qualifications (после того как знаем characterIds)
+			const qualificationsRes = characterIds.length > 0
+				? await supa.common
+					.from('character_qualifications' as any)
+					.select(`
+						qualification_id,
+						character_id,
+						qualifications!inner (
+							name,
+							department_id,
+							departments!inner ( name, full_name )
+						)
+					`)
+					.in('character_id', characterIds)
+				: { data: [], error: null } as any;
 
 			const [rolesRes, permsRpcRes, permsViewRes, membershipsRes, cadetTracksRes] = await Promise.all([
 				rolesQuery,
@@ -221,6 +258,10 @@ export async function authenticateToken(
 				res.status(500).json({ success: false, error: cadetTracksRes.error.message });
 				return;
 			}
+			if (qualificationsRes.error) {
+				res.status(500).json({ success: false, error: qualificationsRes.error.message });
+				return;
+			}
 
 			const roles = (rolesRes.data || [])
 				.map((r: any) => ({ code: r.role_name, name: r.display_name }))
@@ -230,19 +271,41 @@ export async function authenticateToken(
 				? (permsRpcRes!.data as string[])
 				: ((permsViewRes.data || []).map((p: any) => p.permission_code).filter(Boolean));
 
-			const statusIds: string[] = (membershipsRes.data || []).map((m: any) => m.status_id).filter(Boolean);
-			let statuses: string[] = [];
-			if (statusIds.length > 0) {
-				const statusesRes = await supa.common
-					.from('statuses' as any)
-					.select('code, id')
-					.in('id', statusIds as any);
-				if (statusesRes.error) {
-					res.status(500).json({ success: false, error: statusesRes.error.message });
-					return;
-				}
-				statuses = (statusesRes.data || []).map((s: any) => s.code).filter(Boolean);
-			}
+			// Обработка мембершипов (обогащенные данные)
+			const memberships = (membershipsRes.data || []).map((m: any) => ({
+				status: {
+					id: m.status_id,
+					code: m.statuses?.code,
+					name: m.statuses?.name,
+				},
+				rank: {
+					id: m.rank_id,
+					name: m.ranks?.name,
+					order_index: m.ranks?.order_index,
+				},
+				department: {
+					id: m.department_id,
+					name: m.departments?.name, // Короткое название (аббревиатура)
+					full_name: m.departments?.full_name, // Полное название
+				},
+				is_primary: m.is_primary,
+			}));
+
+			// Обработка квалификаций
+			const qualifications = (qualificationsRes.data || []).map((q: any) => ({
+				id: q.qualification_id,
+				name: q.qualifications?.name,
+				department: {
+					id: q.qualifications?.department_id,
+					name: q.qualifications?.departments?.name, // Короткое название
+					full_name: q.qualifications?.departments?.full_name, // Полное название
+				},
+			}));
+
+			// Статусы для обратной совместимости
+			const statuses = memberships
+				.map((m: any) => m.status?.code)
+				.filter(Boolean);
 
 			const cadetTracksRaw = (cadetTracksRes.data || []) as any[];
 			const cadetTracks = cadetTracksRaw.filter((t: any) => (typeof t.is_active === 'boolean' ? t.is_active : true));
@@ -256,6 +319,7 @@ export async function authenticateToken(
 				created_at?: string | null;
 				department_name?: string | null;
 			}> = [];
+			let attemptsLeft = 3; // По умолчанию 3 попытки
 			try {
 				const applicationsRes = await (supa.system as any)
 					.from('my_applications_view' as any)
@@ -274,6 +338,16 @@ export async function authenticateToken(
 						created_at: a.created_at ?? null,
 						department_name: a.department_name ?? null,
 					}));
+					
+					// Подсчет заявок за текущий месяц для определения оставшихся попыток
+					const now = new Date();
+					const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+					const monthlyApps = applications.filter(app => {
+						if (!app.created_at) return false;
+						const appDate = new Date(app.created_at);
+						return appDate >= startOfMonth;
+					});
+					attemptsLeft = Math.max(0, 3 - monthlyApps.length);
 				}
 			} catch (appsErr) {
 				console.warn('[AuthMiddleware] applications query threw error:', appsErr);
@@ -289,6 +363,23 @@ export async function authenticateToken(
 				statuses: unique(statuses),
 				cadetTracks,
 				applications,
+				attemptsLeft,
+				// Новые поля для полноценного профиля
+				memberships,
+				qualifications,
+				// Вычисляемые поля для совмещений (отображение через '/')
+				combinedRank: memberships
+					.filter((m: any) => m.rank?.name)
+					.map((m: any) => m.rank.name)
+					.join(' / '),
+				combinedPosition: memberships
+					.filter((m: any) => m.position)
+					.map((m: any) => m.position)
+					.join(' / '),
+				combinedDepartment: memberships
+					.filter((m: any) => m.department?.name)
+					.map((m: any) => m.department.name)
+					.join(' / '),
 			};
 
 			next();

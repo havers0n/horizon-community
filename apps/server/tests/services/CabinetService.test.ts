@@ -280,4 +280,142 @@ describe('CabinetService', () => {
       ).rejects.toThrow('User profile not found');
     });
   });
+
+  describe('Monthly Application Counting', () => {
+    describe('getMonthlyApplicationCount', () => {
+      it('should return correct count for applications in current month', async () => {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        
+        const mockApplications = [
+          { id: '1', author_user_id: 'test-user-id', created_at: startOfMonth.toISOString() },
+          { id: '2', author_user_id: 'test-user-id', created_at: new Date().toISOString() },
+        ];
+
+        (mockSupabase.from as jest.Mock).mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              gte: jest.fn().mockReturnValue({
+                lte: jest.fn().mockResolvedValue({
+                  data: mockApplications,
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        });
+
+        // Use reflection to access private method
+        const result = await (cabinetService as any).getMonthlyApplicationCount('test-user-id');
+
+        expect(result).toBe(2);
+        expect(mockSupabase.from).toHaveBeenCalledWith('applications');
+      });
+
+      it('should return 0 when no applications found', async () => {
+        (mockSupabase.from as jest.Mock).mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              gte: jest.fn().mockReturnValue({
+                lte: jest.fn().mockResolvedValue({
+                  data: [],
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        });
+
+        const result = await (cabinetService as any).getMonthlyApplicationCount('test-user-id');
+
+        expect(result).toBe(0);
+      });
+
+      it('should handle database errors gracefully', async () => {
+        (mockSupabase.from as jest.Mock).mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              gte: jest.fn().mockReturnValue({
+                lte: jest.fn().mockResolvedValue({
+                  data: null,
+                  error: { message: 'Database error' },
+                }),
+              }),
+            }),
+          }),
+        });
+
+        const result = await (cabinetService as any).getMonthlyApplicationCount('test-user-id');
+
+        expect(result).toBe(0);
+      });
+    });
+
+    describe('getAttemptsLeft', () => {
+      it('should return correct attempts left when user has submitted applications', async () => {
+        // Mock getMonthlyApplicationCount to return 1
+        jest.spyOn(cabinetService as any, 'getMonthlyApplicationCount').mockResolvedValue(1);
+
+        const result = await (cabinetService as any).getAttemptsLeft('test-user-id');
+
+        expect(result).toBe(2); // 3 - 1 = 2
+      });
+
+      it('should return 3 when user has no applications this month', async () => {
+        jest.spyOn(cabinetService as any, 'getMonthlyApplicationCount').mockResolvedValue(0);
+
+        const result = await (cabinetService as any).getAttemptsLeft('test-user-id');
+
+        expect(result).toBe(3);
+      });
+
+      it('should return 0 when user has reached the limit', async () => {
+        jest.spyOn(cabinetService as any, 'getMonthlyApplicationCount').mockResolvedValue(3);
+
+        const result = await (cabinetService as any).getAttemptsLeft('test-user-id');
+
+        expect(result).toBe(0);
+      });
+
+      it('should return 0 when user has exceeded the limit', async () => {
+        jest.spyOn(cabinetService as any, 'getMonthlyApplicationCount').mockResolvedValue(5);
+
+        const result = await (cabinetService as any).getAttemptsLeft('test-user-id');
+
+        expect(result).toBe(0);
+      });
+    });
+
+    describe('Monthly reset logic', () => {
+      it('should only count applications from current month', async () => {
+        const now = new Date();
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 15);
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 15);
+        
+        const mockApplications = [
+          { id: '1', author_user_id: 'test-user-id', created_at: thisMonth.toISOString() },
+          // This should not be counted as it's from last month
+          { id: '2', author_user_id: 'test-user-id', created_at: lastMonth.toISOString() },
+        ];
+
+        (mockSupabase.from as jest.Mock).mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              gte: jest.fn().mockReturnValue({
+                lte: jest.fn().mockResolvedValue({
+                  data: [mockApplications[0]], // Only current month application
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        });
+
+        const result = await (cabinetService as any).getMonthlyApplicationCount('test-user-id');
+
+        expect(result).toBe(1);
+      });
+    });
+  });
 }); 
