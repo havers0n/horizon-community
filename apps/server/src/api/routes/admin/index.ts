@@ -5,6 +5,7 @@ import userMetadataRoutes from './user-metadata';
 import testsRoutes from './tests.routes';
 import applicationsRoutes from './applications.routes';
 import { requirePermission } from '../../middleware/auth.middleware';
+import { GalleryService } from '../../../core/services/GalleryService';
 import { TestAdminService } from '../../../core/services/TestAdminService';
 
 // Простейшая транслитерация кириллицы в латиницу и нормализация slug
@@ -44,6 +45,48 @@ router.use('/user-metadata', userMetadataRoutes);
 router.use('/tests', testsRoutes);
 router.use('/', applicationsRoutes);
 
+// === Gallery Moderation ===
+// GET /api/v1/admin/gallery/pending
+router.get('/gallery/pending', requirePermission('gallery.moderate'), async (req: any, res) => {
+  try {
+    const service = new GalleryService({ common: req.supabase!.common, public: req.supabase!.public });
+    const page = Number(req.query?.page ?? 1);
+    const limit = Number(req.query?.limit ?? 20);
+    const departmentId = req.query?.department_id as string | undefined;
+    const data = await service.getPendingImages({ page, limit, departmentId });
+    return res.json({ success: true, data });
+  } catch (error: any) {
+    console.error('[AdminGallery] pending error:', error);
+    return res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// POST /api/v1/admin/gallery/:id/approve
+router.post('/gallery/:id/approve', requirePermission('gallery.moderate'), async (req: any, res) => {
+  try {
+    const service = new GalleryService({ common: req.supabase!.common, public: req.supabase!.public });
+    const id = req.params.id as string;
+    const updated = await service.approveImage(id);
+    return res.json({ success: true, data: updated });
+  } catch (error: any) {
+    console.error('[AdminGallery] approve error:', error);
+    return res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// DELETE /api/v1/admin/gallery/:id
+router.delete('/gallery/:id', requirePermission('gallery.moderate'), async (req: any, res) => {
+  try {
+    const service = new GalleryService({ common: req.supabase!.common, public: req.supabase!.public });
+    const id = req.params.id as string;
+    await service.deleteImageAsAdmin(id);
+    return res.status(204).send();
+  } catch (error: any) {
+    console.error('[AdminGallery] delete error:', error);
+    return res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
 // POST /api/v1/admin/questions/:questionId/options
 router.post('/questions/:questionId/options', requirePermission('tests.manage'), async (req: any, res) => {
   try {
@@ -54,6 +97,60 @@ router.post('/questions/:questionId/options', requirePermission('tests.manage'),
     res.status(201).json({ success: true, data: option });
   } catch (error: any) {
     console.error('[AdminQuestionsRoutes] addOption error:', error);
+    res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// PUT /api/v1/admin/questions/:id
+router.put('/questions/:id', requirePermission('tests.manage'), async (req: any, res) => {
+  try {
+    const id = req.params.id as string;
+    const { question_text, question_type } = req.body || {};
+    const service = new TestAdminService(req.supabase!.system);
+    const updated = await service.updateQuestion(id, { question_text, question_type });
+    res.status(200).json({ success: true, data: updated });
+  } catch (error: any) {
+    console.error('[AdminQuestionsRoutes] updateQuestion error:', error);
+    res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// DELETE /api/v1/admin/questions/:id
+router.delete('/questions/:id', requirePermission('tests.manage'), async (req: any, res) => {
+  try {
+    const id = req.params.id as string;
+    const service = new TestAdminService(req.supabase!.system);
+    await service.deleteQuestion(id);
+    res.status(204).send();
+  } catch (error: any) {
+    console.error('[AdminQuestionsRoutes] deleteQuestion error:', error);
+    res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// PUT /api/v1/admin/options/:id
+router.put('/options/:id', requirePermission('tests.manage'), async (req: any, res) => {
+  try {
+    const id = req.params.id as string;
+    const { option_text, is_correct } = req.body || {};
+    const service = new TestAdminService(req.supabase!.system);
+    const updated = await service.updateOption(id, { option_text, is_correct });
+    res.status(200).json({ success: true, data: updated });
+  } catch (error: any) {
+    console.error('[AdminOptionsRoutes] updateOption error:', error);
+    res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
+  }
+});
+
+// DELETE /api/v1/admin/options/:id
+router.delete('/options/:id', requirePermission('tests.manage'), async (req: any, res) => {
+  try {
+    const id = req.params.id as string;
+    const service = new TestAdminService(req.supabase!.system);
+    await service.deleteOption(id);
+    res.status(204).send();
+  } catch (error: any) {
+    console.error('[AdminOptionsRoutes] deleteOption error:', error);
     res.status(error?.statusCode || 500).json({ success: false, error: error?.message || 'Server error' });
   }
 });

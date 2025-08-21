@@ -157,6 +157,83 @@ export class GalleryService {
   }
 
   /**
+   * Одобрить изображение администратором (is_approved = true)
+   */
+  async approveImage(imageId: string): Promise<any> {
+    try {
+      if (!imageId) throw new AppError('imageId is required', 400);
+
+      const { data, error } = await (this.commonDb as any)
+        .from('gallery_images')
+        .update({ is_approved: true })
+        .eq('id', imageId)
+        .select('*')
+        .single();
+
+      if (error) {
+        throw new AppError(error.message, 500);
+      }
+
+      if (!data) {
+        throw new AppError('Image not found', 404);
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('[GalleryService] approveImage error:', error);
+      if (error instanceof AppError) throw error;
+      throw new AppError('Не удалось одобрить изображение', 500);
+    }
+  }
+
+  /**
+   * Удалить изображение администратором: запись в БД и файл в Storage
+   */
+  async deleteImageAsAdmin(imageId: string): Promise<void> {
+    try {
+      if (!imageId) throw new AppError('imageId is required', 400);
+
+      // Получим запись, чтобы знать путь в сторадже
+      const { data: img, error: fetchErr } = await (this.commonDb as any)
+        .from('gallery_images')
+        .select('id, storage_path')
+        .eq('id', imageId)
+        .single();
+      if (fetchErr) {
+        if ((fetchErr as any).code === 'PGRST116') {
+          throw new AppError('Image not found', 404);
+        }
+        throw new AppError(fetchErr.message, 500);
+      }
+
+      const storagePath: string | null = (img as any)?.storage_path ?? null;
+
+      // Сначала удалим запись из БД (или наоборот). Предпочтем удалить файл, затем запись.
+      if (storagePath) {
+        const { error: rmErr } = await (this.publicDb.storage as any)
+          .from('gallery')
+          .remove([storagePath]);
+        if (rmErr) {
+          // Логируем, но не блокируем удаление БД, чтобы не оставлять мусор
+          console.warn('[GalleryService] deleteImageAsAdmin: storage remove error (continuing):', rmErr);
+        }
+      }
+
+      const { error: delErr } = await (this.commonDb as any)
+        .from('gallery_images')
+        .delete()
+        .eq('id', imageId);
+      if (delErr) {
+        throw new AppError(delErr.message, 500);
+      }
+    } catch (error: any) {
+      console.error('[GalleryService] deleteImageAsAdmin error:', error);
+      if (error instanceof AppError) throw error;
+      throw new AppError('Не удалось удалить изображение', 500);
+    }
+  }
+
+  /**
    * Создать подписанный URL для загрузки файла в Storage
    */
   async createSignedUploadUrl(userId: string, fileName: string, fileType: string): Promise<{ signedUrl: string; filePath: string; }> {
