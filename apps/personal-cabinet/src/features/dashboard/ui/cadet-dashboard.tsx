@@ -99,7 +99,7 @@ function CadetTestBlock({ applicationId }: { applicationId?: string | null }) {
       <h3 className="text-xl font-semibold text-gray-100">Вступительный тест</h3>
       <p className="text-gray-300">Пройдите вступительный тест, чтобы перейти к тренировкам. Тест ограничен по времени и требует внимательности.</p>
       <div className="flex gap-4 items-center">
-        <Link to="/support" className="text-primary hover:underline">Документация по тесту</Link>
+        <Link to="/docs" className="text-primary hover:underline">Документация по тесту</Link>
         <Button onClick={handleStart} disabled={disabled}>
           {disabled ? 'Заявка не найдена' : (loading ? 'Запуск…' : 'Начать Вступительный Тест')}
         </Button>

@@ -106,7 +106,7 @@ async function makeRequest<T>(
 // ===== API SERVICE =====
 
 export class ApiService {
-  private baseUrl = '/api';
+  private baseUrl = '/api/v1';
 
   // === CHARACTERS API ===
   
@@ -478,8 +478,8 @@ export class ApiService {
   
   // Добавляем метод для получения данных текущего пользователя
   async getCurrentUser(): Promise<User> {
-    const response = await makeRequest<{ user: User; characters: any[] }>(`${this.baseUrl}/auth/me`);
-    return response.user; // Сервер возвращает { user, characters }, а не { success, data }
+    const response = await makeRequest<User>(`${this.baseUrl}/auth/me`);
+    return response;
   }
 
   async login(credentials: { email: string; password: string }): Promise<ApiResponse<any>> {

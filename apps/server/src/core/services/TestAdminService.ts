@@ -486,4 +486,85 @@ export class TestAdminService {
       throw error;
     }
   }
+
+  /**
+   * Обновить текст/тип вопроса
+   */
+  async updateQuestion(questionId: string, dto: Partial<Pick<SystemTestQuestion, 'question_text' | 'question_type'>>): Promise<SystemTestQuestion> {
+    const payload: any = {};
+    if (typeof dto.question_text === 'string') payload.question_text = dto.question_text;
+    if (typeof dto.question_type === 'string') payload.question_type = dto.question_type;
+
+    const { data, error } = await this.db
+      .from('test_questions')
+      .update(payload)
+      .eq('id', questionId)
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      console.error('[TestAdminService] updateQuestion error:', error, { questionId, payload });
+      throw new AppError('Не удалось обновить вопрос', 500);
+    }
+    return data as SystemTestQuestion;
+  }
+
+  /**
+   * Удалить вопрос (с каскадом удаления опций)
+   */
+  async deleteQuestion(questionId: string): Promise<void> {
+    // Удаляем все опции вопроса
+    const { error: delOptsErr } = await this.db
+      .from('test_question_options')
+      .delete()
+      .eq('question_id', questionId);
+    if (delOptsErr) {
+      console.error('[TestAdminService] deleteQuestion options error:', delOptsErr);
+      throw new AppError('Не удалось удалить варианты вопроса', 500);
+    }
+
+    const { error: delQErr } = await this.db
+      .from('test_questions')
+      .delete()
+      .eq('id', questionId);
+    if (delQErr) {
+      console.error('[TestAdminService] deleteQuestion error:', delQErr);
+      throw new AppError('Не удалось удалить вопрос', 500);
+    }
+  }
+
+  /**
+   * Обновить опцию вопроса
+   */
+  async updateOption(optionId: string, dto: Partial<Pick<SystemTestQuestionOption, 'option_text' | 'is_correct'>>): Promise<SystemTestQuestionOption> {
+    const payload: any = {};
+    if (typeof dto.option_text === 'string') payload.option_text = dto.option_text;
+    if (typeof dto.is_correct === 'boolean') payload.is_correct = dto.is_correct;
+
+    const { data, error } = await this.db
+      .from('test_question_options')
+      .update(payload)
+      .eq('id', optionId)
+      .select('*')
+      .single();
+    if (error || !data) {
+      console.error('[TestAdminService] updateOption error:', error, { optionId, payload });
+      throw new AppError('Не удалось обновить вариант ответа', 500);
+    }
+    return data as SystemTestQuestionOption;
+  }
+
+  /**
+   * Удалить опцию вопроса
+   */
+  async deleteOption(optionId: string): Promise<void> {
+    const { error } = await this.db
+      .from('test_question_options')
+      .delete()
+      .eq('id', optionId);
+    if (error) {
+      console.error('[TestAdminService] deleteOption error:', error);
+      throw new AppError('Не удалось удалить вариант ответа', 500);
+    }
+  }
 }

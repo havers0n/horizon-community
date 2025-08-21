@@ -263,7 +263,7 @@ export class TestSessionService {
 						test_questions (
 							id,
 							question_type,
-							test_question_options (id, is_correct)
+							test_question_options (id, is_correct, option_text)
 						)
 					)
 				`)
@@ -308,23 +308,48 @@ export class TestSessionService {
 			}
 			console.log('[TestSessionService] Step 3 OK: Session is in_progress.');
 
-			// Шаг 4: Подсчет результатов (логика остается прежней)
+			// Шаг 4: Подсчет результатов (поддержка ID и текстовых ответов, single/multiple)
 			console.log('[TestSessionService] Step 4: Calculating score...');
 			const test = session.tests;
 			let score = 0;
 			const totalQuestions = test.test_questions.length;
 
+			const toSortedUnique = (arr: string[]) => Array.from(new Set(arr)).sort();
+
 			for (const question of test.test_questions) {
 				const userAnswer = answers.find((a: any) => a.questionId === question.id);
 				if (!userAnswer) continue;
 
-				const correctOptions = question.test_question_options.filter((o: any) => o.is_correct).map((o: any) => o.id);
-				if (question.question_type === 'single_choice') {
-					if (correctOptions.includes((userAnswer as any).optionId)) {
-						score++;
-					}
+				// Собираем список выбранных ID опций из разных возможных форматов
+				let selectedIds: string[] = [];
+				if (Array.isArray((userAnswer as any).selectedOptionIds)) {
+					selectedIds = (userAnswer as any).selectedOptionIds as string[];
+				} else if (typeof (userAnswer as any).optionId === 'string') {
+					selectedIds = [(userAnswer as any).optionId as string];
+				} else if (typeof (userAnswer as any).answer === 'string') {
+					const text = String((userAnswer as any).answer);
+					const opt = (question as any).test_question_options.find((o: any) => o.option_text === text);
+					if (opt) selectedIds = [opt.id];
+				} else if (Array.isArray((userAnswer as any).answer)) {
+					const texts = (userAnswer as any).answer as string[];
+					selectedIds = texts
+						.map((t: string) => {
+							const found = (question as any).test_question_options.find((o: any) => o.option_text === t);
+							return found ? found.id : undefined;
+						})
+						.filter((v: any): v is string => typeof v === 'string');
+				}
+
+				const correctIds = (question as any).test_question_options
+					.filter((o: any) => !!o.is_correct)
+					.map((o: any) => o.id as string);
+
+				// Сравниваем множества выбранных и правильных ID — полный матч
+				if (toSortedUnique(selectedIds).join(',') === toSortedUnique(correctIds).join(',')) {
+					score++;
 				}
 			}
+
 			const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 			const passed = percentage >= test.passing_score_percent;
 			console.log(`[TestSessionService] Step 4 OK: Score calculated. ${score}/${totalQuestions} (${percentage}%), Passed: ${passed}`);

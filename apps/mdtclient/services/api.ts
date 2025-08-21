@@ -2,8 +2,8 @@
 const isNUI = typeof (window as any).GetParentResourceName === 'function';
 
 export const API_BASE_URL = isNUI
-  ? 'http://127.0.0.1:5000/api'  // Для FiveM NUI
-  : '/api';                      // Для браузера (через proxy)
+  ? 'http://127.0.0.1:5000/api/v1'  // Для FiveM NUI
+  : '/api/v1';                      // Для браузера (через proxy)
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -351,10 +351,21 @@ class ApiService {
   // === СУЩЕСТВУЮЩИЕ МЕТОДЫ ===
 
   async login(credentials: LoginData): Promise<ApiResponse<{ user: User; session: any }>> {
-    return this.request<{ user: User; session: any }>('/auth/login', {
+    const res = await this.request<any>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
+    if (res.success && res.data) {
+      const { user, access_token, refresh_token } = res.data as any;
+      return {
+        success: true,
+        data: {
+          user,
+          session: { access_token, refresh_token },
+        },
+      };
+    }
+    return res as ApiResponse<{ user: User; session: any }>;
   }
 
   async register(userData: RegisterData): Promise<ApiResponse<{ user: User }>> {
@@ -365,7 +376,33 @@ class ApiService {
   }
 
   async getCurrentUser(): Promise<ApiResponse<{ user: User; characters: Character[] }>> {
-    return this.request<{ user: User; characters: Character[] }>('/auth/me');
+    // Получаем профиль пользователя
+    const userRes = await this.request<User>('/auth/me');
+    if (!userRes.success || !userRes.data) {
+      return {
+        success: false,
+        error: userRes.error || 'Failed to fetch user',
+        message: userRes.message,
+      };
+    }
+
+    // Получаем персонажей текущего пользователя
+    const charactersRes = await this.request<Character[]>('/characters/my');
+    if (!charactersRes.success) {
+      return {
+        success: false,
+        error: charactersRes.error || 'Failed to fetch characters',
+        message: charactersRes.message,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        user: userRes.data as unknown as User,
+        characters: (charactersRes.data || []) as Character[],
+      },
+    };
   }
 
   async getUserCharacters(): Promise<ApiResponse<Character[]>> {

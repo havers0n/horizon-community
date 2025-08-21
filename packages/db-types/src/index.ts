@@ -754,6 +754,76 @@ export type Database = {
           },
         ]
       }
+      gallery_image_likes: {
+        Row: {
+          created_at: string
+          image_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          image_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          image_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_image_likes_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery_images: {
+        Row: {
+          approved_by_user_id: string | null
+          created_at: string
+          department_id: string | null
+          description: string | null
+          id: string
+          is_approved: boolean
+          storage_path: string
+          title: string
+          uploader_user_id: string
+        }
+        Insert: {
+          approved_by_user_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_approved?: boolean
+          storage_path: string
+          title: string
+          uploader_user_id: string
+        }
+        Update: {
+          approved_by_user_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_approved?: boolean
+          storage_path?: string
+          title?: string
+          uploader_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_images_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       impound_lots: {
         Row: {
           address: string | null
@@ -1460,6 +1530,21 @@ export type Database = {
       }
     }
     Views: {
+      gallery_image_likes_count: {
+        Row: {
+          image_id: string | null
+          like_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_image_likes_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_cadet_tracks_enriched: {
         Row: {
           application_id: string | null

@@ -309,6 +309,7 @@ function OptionsEditor({ question, testId }: { question: AdminQuestion, testId: 
                 <div className="flex items-center gap-2">
                   <input
                     type={question.question_type === 'single_choice' ? 'radio' : 'checkbox'}
+                    name={question.question_type === 'single_choice' ? `q-${question.id}-correct` : undefined}
                     checked={!!opt.is_correct}
                     onChange={(e) => handleToggleCorrect(opt, e.target.checked)}
                   />
@@ -327,6 +328,7 @@ function OptionsEditor({ question, testId }: { question: AdminQuestion, testId: 
               <div className="flex items-center gap-2">
                 <input
                   type={question.question_type === 'single_choice' ? 'radio' : 'checkbox'}
+                  name={question.question_type === 'single_choice' ? `q-${question.id}-correct` : undefined}
                   checked={newOptionCorrect}
                   onChange={(e) => setNewOptionCorrect(e.target.checked)}
                 />

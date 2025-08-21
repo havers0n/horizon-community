@@ -243,8 +243,15 @@ export class GalleryService {
       if (!fileName) throw new AppError('fileName is required', 400);
       if (!fileType) throw new AppError('fileType is required', 400);
 
-      // Генерируем уникальный путь, без префикса 'public/' для публичного бакета
-      const filePath = `${userId}/${Date.now()}-${fileName}`;
+      // --- НОРМАЛИЗАЦИЯ ИМЕНИ ФАЙЛА ---
+      // 1) Выделяем расширение
+      const dotIdx = fileName.lastIndexOf('.');
+      const extension = dotIdx > -1 ? fileName.slice(dotIdx + 1) : 'tmp';
+      const nameWithoutExtension = dotIdx > -1 ? fileName.slice(0, dotIdx) : fileName;
+      // 2) Санитизируем имя: только латиница, цифры, точка и дефис
+      const sanitizedName = nameWithoutExtension.replace(/[^a-zA-Z0-9.\-]/g, '_');
+      // 3) Собираем безопасный storage key (без 'public/')
+      const filePath = `${userId}/${Date.now()}-${sanitizedName}.${extension}`;
 
       const BUCKET_NAME = 'gallery';
 

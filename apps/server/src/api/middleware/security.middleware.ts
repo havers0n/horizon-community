@@ -10,7 +10,16 @@ import cors from 'cors';
  */
 export const apiRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // максимум 100 запросов с одного IP
+  // Повышаем лимит для /api/v1/admin/*, чтобы не мешать массовым CRUD-операциям
+  max: (req, _res) => {
+    const url = (req.originalUrl || req.url || '').toLowerCase();
+    return url.startsWith('/api/v1/admin/') ? 2000 : 100;
+  },
+  // Ключ — по userId, если аутентифицирован, иначе IP
+  keyGenerator: (req) => {
+    const userId = (req as any)?.user?.id;
+    return userId ? `user:${userId}` : req.ip;
+  },
   message: {
     error: 'Too many requests from this IP',
     code: 'RATE_LIMIT_EXCEEDED'

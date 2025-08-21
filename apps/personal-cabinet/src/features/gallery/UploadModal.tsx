@@ -5,6 +5,7 @@ import { Textarea } from '@/shared/ui/textarea'
 import { Button } from '@/shared/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { apiClient } from '@/shared/api/api-client'
+import { supabase } from '@/shared/lib/supabase'
 
 interface UploadModalProps {
   departments: Array<{ id: string; name: string; color: string }>
@@ -36,16 +37,21 @@ export function UploadModal({ departments, onSuccess }: UploadModalProps) {
       const signedUrl: string = signed.signedUrl
       const filePath: string = signed.filePath
 
-      // PUT файла в Supabase Storage
-      const putResp = await fetch(signedUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type || 'application/octet-stream',
-        },
-        body: file,
-      })
-      if (!putResp.ok) {
-        throw new Error('Ошибка загрузки файла в хранилище')
+      // Загрузка файла через официальный клиент Supabase
+      const token = (signedUrl.split('?token=')[1] || '').trim()
+      if (!token) throw new Error('Некорректный signedUrl: отсутствует token')
+
+      const { error: uploadError } = await supabase.storage
+        .from('gallery')
+        .uploadToSignedUrl(
+          filePath,
+          token,
+          file,
+          { contentType: file.type || 'application/octet-stream', upsert: false }
+        )
+      if (uploadError) {
+        console.error('[UploadModal] Supabase upload error:', uploadError)
+        throw new Error(uploadError.message || 'Ошибка загрузки файла в хранилище')
       }
 
       // Шаг B: создать запись в БД

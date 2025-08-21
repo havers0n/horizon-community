@@ -53,6 +53,14 @@ export default defineConfig(({ mode, command }) => {
               console.log('🔴 Proxy error:', err);
             });
             proxy.on('proxyReq', (proxyReq, req, _res) => {
+              // Принудительно прокидываем Origin для строгого CORS на бэкенде
+              const originHeader = (req.headers && (req.headers['origin'] as string)) || 'http://localhost:3001';
+              try {
+                proxyReq.setHeader('Origin', originHeader);
+              } catch (e) {
+                // проглатываем ошибки установки заголовка, но логируем для отладки
+                console.log('⚠️ Unable to set Origin header on proxyReq:', e);
+              }
               console.log('🔄 Proxying:', req.method, req.url, '→', proxyReq.path);
             });
             proxy.on('proxyRes', (proxyRes, req, _res) => {
