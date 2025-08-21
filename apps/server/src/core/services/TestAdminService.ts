@@ -100,12 +100,27 @@ export class TestAdminService {
   /**
    * Получить все тесты
    */
-  async getAllTests(): Promise<SystemTest[]> {
+  async getAllTests(filters?: { search?: string; purpose?: string }): Promise<SystemTest[]> {
     try {
-      const { data, error } = await this.db
+      let qb: any = this.db
         .from('tests')
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (filters?.purpose && typeof filters.purpose === 'string') {
+        const p = filters.purpose.toUpperCase();
+        if (p === 'ENTRY' || p === 'PROMOTION' || p === 'QUALIFICATION') {
+          qb = qb.eq('purpose', p);
+        }
+      }
+
+      if (filters?.search && filters.search.trim().length > 0) {
+        const s = filters.search.trim();
+        // ILIKE по title и description (description может быть null)
+        qb = qb.or(`title.ilike.%${s}%,description.ilike.%${s}%`);
+      }
+
+      const { data, error } = await qb;
 
       if (error) {
         console.error('[TestAdminService] getAllTests DB error:', error);

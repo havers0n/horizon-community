@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -388,8 +388,30 @@ export default function AdminTestsPage() {
 	const { data: tests, isLoading: isLoadingTests } = useQuery({
 		queryKey: ['admin-tests'],
 		queryFn: listTests,
-		staleTime: 60_000,
+		staleTime: 300_000,
 	})
+
+	// --- UI фильтры и дебаунс ---
+	const [search, setSearch] = useState('')
+	const [purposeFilter, setPurposeFilter] = useState<'all' | 'ENTRY' | 'PROMOTION' | 'QUALIFICATION'>('all')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
+
+	useEffect(() => {
+		const t = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 500)
+		return () => clearTimeout(t)
+	}, [search])
+
+	const filteredTests = useMemo(() => {
+		const arr = Array.isArray(tests) ? tests : []
+		return arr.filter((t) => {
+			const matchesPurpose = purposeFilter === 'all' ? true : (t.purpose || '').toUpperCase() === purposeFilter
+			if (!debouncedSearch) return matchesPurpose
+			const title = (t.title || '').toLowerCase()
+			const desc = (t.description || '').toLowerCase()
+			const matchesSearch = title.includes(debouncedSearch) || desc.includes(debouncedSearch)
+			return matchesPurpose && matchesSearch
+		})
+	}, [tests, debouncedSearch, purposeFilter])
 
 	const removeMutation = useMutation({
 		mutationFn: (id: string) => deleteTest(id),
@@ -432,6 +454,37 @@ export default function AdminTestsPage() {
 				</div>
 			</div>
 
+			{/* Панель фильтров */}
+			<Card className="mb-4">
+				<CardHeader>
+					<CardTitle>Фильтры</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+						<Input
+							placeholder="Поиск по названию/описанию"
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+						/>
+						<div>
+							<label className="text-sm text-muted-foreground">Назначение</label>
+							<Select value={purposeFilter} onValueChange={(v) => setPurposeFilter(v as any)}>
+								<SelectTrigger>
+									<SelectValue placeholder="Все" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">Все</SelectItem>
+									<SelectItem value="ENTRY">ENTRY</SelectItem>
+									<SelectItem value="PROMOTION">PROMOTION</SelectItem>
+									<SelectItem value="QUALIFICATION">QUALIFICATION</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<div />
+					</div>
+				</CardContent>
+			</Card>
+
 			<Card>
 				<CardHeader>
 					<CardTitle>Список тестов</CardTitle>
@@ -451,7 +504,7 @@ export default function AdminTestsPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{tests?.map((t: AdminTest) => (
+								{filteredTests.map((t: AdminTest) => (
 									<TableRow key={t.id}>
 										<TableCell className="text-muted-foreground font-mono">{t.id.slice(0, 8)}</TableCell>
 										<TableCell className="font-medium">{t.title}</TableCell>

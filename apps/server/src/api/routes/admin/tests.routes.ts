@@ -9,7 +9,11 @@ const router: Router = Router();
 router.get('/', authenticateToken, requirePermission('tests.manage'), async (req: any, res) => {
   try {
     const service = new TestAdminService(req.supabase!.system);
-    const tests = await service.getAllTests();
+    const { search, purpose } = req.query || {};
+    const tests = await service.getAllTests({
+      search: typeof search === 'string' ? search : undefined,
+      purpose: typeof purpose === 'string' ? purpose : undefined,
+    });
     res.status(200).json(tests);
   } catch (error: any) {
     console.error('[AdminTestsRoutes] getAllTests error:', error);
