@@ -50,8 +50,6 @@ const FAQ = React.lazy(() => import('@/pages/faq'))
 const Gallery = React.lazy(() => import('@/pages/gallery'))
 const NotFound = React.lazy(() => import('@/pages/not-found'))
 const AdminTestsPage = React.lazy(() => import('@/pages/admin/tests'))
-const AdminTestNewPage = React.lazy(() => import('@/pages/admin/tests/new'))
-const AdminTestEditPage = React.lazy(() => import('@/pages/admin/tests/edit'))
 const ApplicationTestPage = React.lazy(() => import('@/pages/applications/test'))
 const TestSessionPage = React.lazy(() => import('@/pages/tests/session'))
 const TestResultPage = React.lazy(() => import('@/pages/tests/result'))
@@ -1438,22 +1436,7 @@ function App() {
                         </AdminRoute>
                       }
                     />
-                    <Route
-                      path="/admin/tests/new"
-                      element={
-                        <AdminRoute>
-                          <AdminTestNewPage />
-                        </AdminRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/tests/:id/edit"
-                      element={
-                        <AdminRoute>
-                          <AdminTestEditPage />
-                        </AdminRoute>
-                      }
-                    />
+
                     <Route
                       path="/admin/applications"
                       element={
