@@ -243,8 +243,8 @@ export class GalleryService {
       if (!fileName) throw new AppError('fileName is required', 400);
       if (!fileType) throw new AppError('fileType is required', 400);
 
-      // Генерируем уникальный путь, включая папку с ID пользователя
-      const filePath = `public/${userId}/${Date.now()}-${fileName}`;
+      // Генерируем уникальный путь, без префикса 'public/' для публичного бакета
+      const filePath = `${userId}/${Date.now()}-${fileName}`;
 
       const BUCKET_NAME = 'gallery';
 
