@@ -13,6 +13,7 @@ import { CabinetService } from '../../../core/services/CabinetService';
 import { ApplicationService } from '../../../core/services/ApplicationService';
 import { ReportService } from '../../../core/services/ReportService';
 import { createCommonRoutes } from './common.routes';
+import { createGalleryRoutes } from './gallery.routes';
 
 // Временные заглушки для остальных роутов
 // TODO: Преобразовать все роуты в фабричные функции
@@ -87,6 +88,8 @@ export function createV1Router(): Router {
   // --- ШАГ 3: РЕГИСТРИСТРИРУЕМ ЗАЩИЩЕННЫЕ РОУТЫ ---
   // Общие справочники
   router.use('/common', createCommonRoutes());
+  // Галерея
+  router.use('/gallery', createGalleryRoutes());
   
   // Упрощенный обработчик: сессия уже собрана в authenticateToken
   router.get('/auth/me/session', (req, res) => {
@@ -281,148 +284,7 @@ export function createV1Router(): Router {
     }
   });
 
-  /**
-   * GALlERY: Изображения сообщества
-   * GET /api/v1/gallery/images — получить список одобренных изображений
-   * POST /api/v1/gallery/upload-url — получить подписанный URL для загрузки
-   * POST /api/v1/gallery — сохранить метаданные загруженного изображения
-   */
-  router.get('/gallery/images', async (req: any, res) => {
-    try {
-      const supaCommon = req.supabase?.common;
-      if (!supaCommon) {
-        return res.status(500).json({ success: false, error: 'Server configuration error: missing Supabase common client' });
-      }
-
-      const pageRaw = (req.query?.page as string | undefined) ?? '1';
-      const limitRaw = (req.query?.limit as string | undefined) ?? '20';
-      const departmentId = req.query?.department_id as string | undefined;
-
-      const page = Math.max(1, Number.isFinite(Number(pageRaw)) ? Number(pageRaw) : 1);
-      const limit = Math.min(100, Math.max(1, Number.isFinite(Number(limitRaw)) ? Number(limitRaw) : 20));
-      const from = (page - 1) * limit;
-      const to = page * limit - 1;
-
-      const qb: any = supaCommon
-        .from('gallery_images' as any)
-        .select(
-          [
-            'id',
-            'storage_path',
-            'title',
-            'description',
-            'created_at',
-            'department_id',
-          ].join(', ')
-        )
-        .eq('is_approved', true)
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (departmentId) {
-        qb.eq('department_id', departmentId);
-      }
-
-      const { data, error } = await qb;
-      if (error) {
-        return res.status(500).json({ success: false, error: error.message });
-      }
-
-      return res.json({ success: true, data: data ?? [] });
-    } catch (error: any) {
-      console.error('[V1] /gallery/images error:', error);
-      return res.status(500).json({ success: false, error: 'Internal server error' });
-    }
-  });
-
-  router.post('/gallery/upload-url', async (req: any, res) => {
-    try {
-      const supa = req.supabase?.public;
-      if (!supa) {
-        return res.status(500).json({ success: false, error: 'Server configuration error: missing Supabase client' });
-      }
-
-      const userId = (req.user?.id || req.session?.user?.id) as string | undefined;
-      if (!userId) {
-        return res.status(401).json({ success: false, error: 'Unauthorized' });
-      }
-
-      const { fileName, fileType } = (req.body ?? {}) as { fileName?: string; fileType?: string };
-      if (!fileName || typeof fileName !== 'string') {
-        return res.status(400).json({ success: false, error: 'fileName is required' });
-      }
-      if (!fileType || typeof fileType !== 'string') {
-        return res.status(400).json({ success: false, error: 'fileType is required' });
-      }
-
-      const BUCKET_NAME = 'gallery-images';
-      const filePath = `public/${userId}/${Date.now()}-${fileName}`;
-
-      const { data, error } = await (supa.storage as any)
-        .from(BUCKET_NAME)
-        .createSignedUploadUrl(filePath, { contentType: fileType } as any);
-
-      if (error) {
-        return res.status(500).json({ success: false, error: error.message });
-      }
-
-      return res.json({ success: true, data: { signedUrl: (data as any)?.signedUrl, filePath } });
-    } catch (error: any) {
-      console.error('[V1] /gallery/upload-url error:', error);
-      return res.status(500).json({ success: false, error: 'Internal server error' });
-    }
-  });
-
-  router.post('/gallery', async (req: any, res) => {
-    try {
-      const supaCommon = req.supabase?.common;
-      if (!supaCommon) {
-        return res.status(500).json({ success: false, error: 'Server configuration error: missing Supabase common client' });
-      }
-
-      const userId = (req.user?.id || req.session?.user?.id) as string | undefined;
-      if (!userId) {
-        return res.status(401).json({ success: false, error: 'Unauthorized' });
-      }
-
-      const { title, description, storage_path, department_id } = (req.body ?? {}) as {
-        title?: string;
-        description?: string;
-        storage_path?: string;
-        department_id?: string | null;
-      };
-
-      if (!title || typeof title !== 'string') {
-        return res.status(400).json({ success: false, error: 'title is required' });
-      }
-      if (!storage_path || typeof storage_path !== 'string') {
-        return res.status(400).json({ success: false, error: 'storage_path is required' });
-      }
-
-      const payload: any = {
-        title,
-        description: description ?? null,
-        storage_path,
-        department_id: department_id ?? null,
-        user_id: userId,
-        is_approved: false,
-      };
-
-      const { data, error } = await (supaCommon
-        .from('gallery_images' as any)
-        .insert(payload)
-        .select('*') as any).single();
-
-      if (error) {
-        return res.status(500).json({ success: false, error: error.message });
-      }
-
-      return res.status(201).json({ success: true, data });
-    } catch (error: any) {
-      console.error('[V1] /gallery (create) error:', error);
-      return res.status(500).json({ success: false, error: 'Internal server error' });
-    }
-  });
+  
 
   /**
    * GET /api/v1/dashboard-data

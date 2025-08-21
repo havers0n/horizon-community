@@ -1,5 +1,18 @@
 import { Layout } from '@/shared/ui/layout'
 import { GalleryWidget } from '@/features/gallery'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/shared/api/api-client'
+import { useState } from 'react'
+import { Button } from '@/shared/ui/button'
+import { UploadModal } from '@/features/gallery/UploadModal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from '@/shared/ui/dialog'
 
 // Типы для галереи
 interface GalleryItem {
@@ -13,89 +26,22 @@ interface GalleryItem {
   author?: string
 }
 
-// Данные галереи
-const galleryItems: GalleryItem[] = [
-  {
-    id: '1',
-    imageUrl: 'https://images.unsplash.com/photo-1605106702734-205df224ecce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Патруль ДПС',
-    description: 'Ежедневная патрульная служба на дорогах города',
-    department: 'SAHP',
-    alt: 'Патрульная машина ДПС',
-    date: '2024-01-15',
-    author: 'Officer Smith'
-  },
-  {
-    id: '2',
-    imageUrl: 'https://images.unsplash.com/photo-1608889825102-ebffa5a6e92f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Медицинская помощь',
-    description: 'Экстренная медицинская помощь на месте происшествия',
-    department: 'SAMS',
-    alt: 'Медицинская бригада',
-    date: '2024-01-14',
-    author: 'Dr. Johnson'
-  },
-  {
-    id: '3',
-    imageUrl: 'https://images.unsplash.com/photo-1608889825271-9696281ab804?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Полицейский рейд',
-    description: 'Совместная операция по задержанию преступников',
-    department: 'LSPD',
-    alt: 'Полицейская операция',
-    date: '2024-01-13',
-    author: 'Detective Brown'
-  },
-  {
-    id: '4',
-    imageUrl: 'https://images.unsplash.com/photo-1608889825102-ebffa5a6e92f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Пожарная служба',
-    description: 'Тушение пожара в жилом районе',
-    department: 'SAFR',
-    alt: 'Пожарная машина',
-    date: '2024-01-12',
-    author: 'Firefighter Wilson'
-  },
-  {
-    id: '5',
-    imageUrl: 'https://images.unsplash.com/photo-1605106702734-205df224ecce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Дорожный контроль',
-    description: 'Проверка документов на дорожном посту',
-    department: 'SAHP',
-    alt: 'Дорожный контроль',
-    date: '2024-01-11',
-    author: 'Officer Davis'
-  },
-  {
-    id: '6',
-    imageUrl: 'https://images.unsplash.com/photo-1608889825102-ebffa5a6e92f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Спасательная операция',
-    description: 'Спасение пострадавших из затонувшего автомобиля',
-    department: 'SAFR',
-    alt: 'Спасательная операция',
-    date: '2024-01-10',
-    author: 'Rescuer Miller'
-  },
-  {
-    id: '7',
-    imageUrl: 'https://images.unsplash.com/photo-1608889825271-9696281ab804?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Расследование',
-    description: 'Работа следователей на месте преступления',
-    department: 'LSPD',
-    alt: 'Расследование',
-    date: '2024-01-09',
-    author: 'Detective Garcia'
-  },
-  {
-    id: '8',
-    imageUrl: 'https://images.unsplash.com/photo-1608889825102-ebffa5a6e92f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    title: 'Экстренная помощь',
-    description: 'Оказание первой помощи пострадавшему',
-    department: 'SAMS',
-    alt: 'Экстренная помощь',
-    date: '2024-01-08',
-    author: 'Paramedic Taylor'
-  }
-]
+// Маппер элементов API -> UI
+const mapToGalleryItems = (rows: any[]): GalleryItem[] => {
+  const SUPABASE_URL = (import.meta as any).env.VITE_SUPABASE_URL as string
+  const BUCKET_NAME = 'gallery-images'
+  const base = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`.replace(/\/$/, '')
+  return (rows || []).map((r: any) => ({
+    id: r.id,
+    imageUrl: `${base}/${r.storage_path}`,
+    title: r.title,
+    description: r.description ?? undefined,
+    department: r.department_id || 'all',
+    alt: r.title || 'gallery image',
+    date: r.created_at,
+    author: r.profiles?.username ?? undefined,
+  }))
+}
 
 // Департаменты для фильтрации
 const departments = [
@@ -109,6 +55,17 @@ const departments = [
 ]
 
 export default function GalleryPage() {
+  const [open, setOpen] = useState(false)
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['gallery', '/gallery/images'],
+    queryFn: async () => {
+      const resp = await apiClient.get<any>('/gallery/images')
+      return resp?.data ?? []
+    },
+  })
+
+  const items = mapToGalleryItems(data || [])
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -119,12 +76,35 @@ export default function GalleryPage() {
           </p>
         </div>
 
-        <GalleryWidget
-          items={galleryItems}
-          departments={departments}
-          showFilter={true}
-          showUpload={false}
-        />
+        {isLoading && <div>Загрузка...</div>}
+        {isError && <div>Ошибка загрузки галереи</div>}
+        {!isLoading && !isError && (
+          <GalleryWidget
+            items={items}
+            departments={departments}
+            showFilter={true}
+          />
+        )}
+
+        <div className="mt-6">
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>Загрузить фото</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Загрузка изображения</DialogTitle>
+                <DialogDescription>Выберите файл и заполните поля</DialogDescription>
+              </DialogHeader>
+              <UploadModal
+                departments={departments}
+                onSuccess={() => {
+                  setOpen(false)
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     </Layout>
   )
