@@ -17,6 +17,12 @@ export * from './cabinet-service';
 // Public Service
 export * from './public-service';
 
+// User Management Service
+export { userManagementApi, type UserWithRoles, type Role, type GetUsersWithRolesParams, type UsersWithRolesPaginatedResponse } from './user-management';
+
+// Role Management Service
+export * from './role-management';
+
 export const api = {
 public: publicApi,
 cabinet: cabinetApi,

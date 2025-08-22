@@ -6,8 +6,8 @@ export { EntryApplicationWidget } from './entry-application'
 export { TestExamWidget } from './test-exam'
 export { NotificationsWidget } from './notifications'
 export { ForumWidget } from './forum'
+export { UserTable } from './user-table'
 
 // Админские виджеты
 export { AdminLeaveManagementWidget } from './admin/leave-management'
-export { AdminTestsWidget } from './admin/tests'
-export { AdminReportsWidget } from './admin/reports' 
+export { AdminTestsWidget } from './admin/tests' 

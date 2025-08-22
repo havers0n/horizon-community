@@ -24,7 +24,7 @@ const storageBase = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}`.rep
 
 const AdminGalleryModerationPage: React.FC = () => {
   const qc = useQueryClient()
-  const { isLoading } = useSession()
+  const { isLoading: isSessionLoading } = useSession()
   const { isLoggedIn, session } = usePermissions()
 
   const { data, isLoading, isError } = useQuery({
@@ -51,7 +51,7 @@ const AdminGalleryModerationPage: React.FC = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pendingImages'] }),
   })
 
-  if (isLoading) return <div className="container mx-auto px-4 py-6">Загрузка…</div>
+  if (isSessionLoading) return <div className="container mx-auto px-4 py-6">Загрузка…</div>
   if (!isLoggedIn || !(session?.permissions || []).includes('gallery.moderate')) {
     return <Navigate to="/dashboard" replace />
   }

@@ -1105,18 +1105,21 @@ export type Database = {
           code: string
           created_at: string | null
           description: string | null
+          display_name: string | null
           id: string
         }
         Insert: {
           code: string
           created_at?: string | null
           description?: string | null
+          display_name?: string | null
           id?: string
         }
         Update: {
           code?: string
           created_at?: string | null
           description?: string | null
+          display_name?: string | null
           id?: string
         }
         Relationships: []
@@ -2910,6 +2913,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_role_to_user: {
+        Args: { p_role_id: string; p_user_id: string }
+        Returns: undefined
+      }
       can_read_doc: {
         Args: { doc_id: string }
         Returns: boolean
@@ -2986,6 +2993,16 @@ export type Database = {
         Args: { p_data: Json }
         Returns: Json
       }
+      create_role: {
+        Args: { p_description: string; p_display_name: string; p_name: string }
+        Returns: {
+          created_at: string | null
+          description: string | null
+          display_name: string | null
+          id: string
+          name: string
+        }[]
+      }
       delete_bolo: {
         Args: { p_bolo_id: string }
         Returns: boolean
@@ -2997,6 +3014,10 @@ export type Database = {
       delete_character: {
         Args: { p_character_id: string }
         Returns: boolean
+      }
+      delete_role: {
+        Args: { p_role_id: string }
+        Returns: undefined
       }
       delete_unit_on_duty: {
         Args: { p_unit_id: string }
@@ -3143,6 +3164,24 @@ export type Database = {
           gallery: string[]
           id: string
           logo_url: string
+          name: string
+        }[]
+      }
+      get_all_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          code: string
+          description: string
+          display_name: string
+          id: string
+        }[]
+      }
+      get_all_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          description: string
+          display_name: string
+          id: string
           name: string
         }[]
       }
@@ -3476,6 +3515,12 @@ export type Database = {
           weight: string | null
         }[]
       }
+      get_role_permissions: {
+        Args: { p_role_id: string }
+        Returns: {
+          permission_id: string
+        }[]
+      }
       get_signal_by_id: {
         Args: { p_signal_id: string }
         Returns: {
@@ -3588,6 +3633,19 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: string[]
       }
+      get_users_with_roles: {
+        Args: { page?: number; page_limit?: number; search_query?: string }
+        Returns: {
+          email: string
+          id: string
+          roles: Json
+          username: string
+        }[]
+      }
+      grant_permission_to_role: {
+        Args: { p_permission_id: string; p_role_id: string }
+        Returns: undefined
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
@@ -3622,6 +3680,14 @@ export type Database = {
       }
       promote_candidate_to_cadet: {
         Args: { p_application_id: string }
+        Returns: undefined
+      }
+      revoke_permission_from_role: {
+        Args: { p_permission_id: string; p_role_id: string }
+        Returns: undefined
+      }
+      revoke_role_from_user: {
+        Args: { p_role_id: string; p_user_id: string }
         Returns: undefined
       }
       revoke_signal: {
@@ -3721,6 +3787,20 @@ export type Database = {
       update_character_medical_info: {
         Args: { p_character_id: string; p_new_medical_info: Json }
         Returns: Json
+      }
+      update_role: {
+        Args: {
+          p_description: string
+          p_display_name: string
+          p_role_id: string
+        }
+        Returns: {
+          created_at: string | null
+          description: string | null
+          display_name: string | null
+          id: string
+          name: string
+        }[]
       }
       update_signal: {
         Args: { p_data: Json; p_signal_id: string }
