@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -46,6 +46,8 @@ import {
 } from 'lucide-react'
 import { adminDocumentsApi } from '@/shared/api/documents'
 import type { Document, DocumentCategory } from '@/shared/types/documents'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 interface EditorState {
   title: string
@@ -63,6 +65,9 @@ export default function DocumentEditor() {
   const { toast } = useToast()
   const editorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { isLoading } = useSession()
+  const { isLoggedIn, session } = usePermissions()
+  const hasDocsManage = (session?.permissions || []).includes('documents.manage')
   
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -81,6 +86,10 @@ export default function DocumentEditor() {
   const isEditMode = !!id
 
   useEffect(() => {
+    if (!isLoggedIn || !hasDocsManage) {
+      setLoading(false)
+      return
+    }
     const fetchData = async () => {
       try {
         setLoading(true)
@@ -125,7 +134,7 @@ export default function DocumentEditor() {
     }
 
     fetchData()
-  }, [id, isEditMode])
+  }, [id, isEditMode, isLoggedIn, hasDocsManage])
 
   const handleSave = async () => {
     if (!editorState.title.trim() || !editorState.slug.trim() || !editorState.categoryId) {
@@ -435,6 +444,21 @@ export default function DocumentEditor() {
     `
     document.execCommand('insertHTML', false, tableHTML)
     editorRef.current?.focus()
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-gray-600 dark:text-gray-400">Загрузка…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isLoggedIn || !hasDocsManage) {
+    return <Navigate to="/dashboard" replace />
   }
 
   if (loading) {

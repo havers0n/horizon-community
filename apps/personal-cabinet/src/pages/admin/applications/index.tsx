@@ -13,6 +13,7 @@ import { useSession } from '@/shared/contexts/SessionContext'
 import { toast } from '@/shared/ui/use-toast'
 import { apiClient } from '@/shared/api/api-client'
 import { getPublicDepartments } from '@/shared/api/public-service'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 // Удалён локальный STATUSES: статусы теперь подтягиваются динамически из словаря
 
@@ -83,6 +84,7 @@ const StatusBadge: React.FC<{ name?: string | null }> = ({ name }) => {
 export default function AdminApplicationsPage() {
   const queryClient = useQueryClient()
   const { session, isLoading: isSessionLoading } = useSession()
+  const { isLoggedIn, session: permSession } = usePermissions()
   const [status, setStatus] = React.useState<string>('')
   const [department, setDepartment] = React.useState<string>('')
   const [page] = React.useState<number>(1)
@@ -254,7 +256,7 @@ export default function AdminApplicationsPage() {
     )
   }
 
-  const canManage = !!session?.permissions?.includes('applications.manage')
+  const canManage = isLoggedIn && !!(permSession?.permissions || []).includes('applications.manage')
   if (!canManage) {
     return <Navigate to="/dashboard" replace />
   }

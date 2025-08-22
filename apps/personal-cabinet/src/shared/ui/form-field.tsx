@@ -86,23 +86,20 @@ const FormLabel = React.forwardRef<
 FormLabel.displayName = 'FormLabel'
 
 interface FormControlProps
-  extends React.ComponentPropsWithoutRef<typeof Input> {}
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  className?: string
+}
 
 const FormControl = React.forwardRef<
-  React.ElementRef<typeof Input>,
+  HTMLInputElement,
   FormControlProps
->(({ ...props }, ref) => {
+>(({ className, ...props }, ref) => {
   const { error } = useFormField()
-  const { name, onBlur, onChange, value } = useFormContext().register(useFormField().name)
 
   return (
     <Input
       ref={ref}
-      name={name}
-      onChange={onChange}
-      onBlur={onBlur}
-      defaultValue={value}
-      className={cn(error && 'border-destructive')}
+      className={cn(error && 'border-destructive', className)}
       {...props}
     />
   )

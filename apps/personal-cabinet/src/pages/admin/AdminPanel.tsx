@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
@@ -6,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar'
 import { Progress } from '@/shared/ui/progress'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { 
   Users, 
   FileText, 
@@ -38,6 +41,18 @@ interface RecentActivity {
 }
 
 const AdminPanel: React.FC = () => {
+  const { isLoading } = useSession()
+  const { isLoggedIn, isAdmin } = usePermissions()
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">Загрузка...</div>
+    )
+  }
+
+  if (!isLoggedIn || !isAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeUsers: 0,

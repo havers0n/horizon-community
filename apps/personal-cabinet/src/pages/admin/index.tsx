@@ -1,10 +1,24 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { PageHeader, SectionCard } from '@/shared/ui/page-sections'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 export default function AdminPanelPage() {
+  const { isLoading } = useSession()
+  const { isLoggedIn, isAdmin } = usePermissions()
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-6 py-6">Загрузка...</div>
+    )
+  }
+
+  if (!isLoggedIn || !isAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
   return (
     <div className="container mx-auto px-6 py-6 space-y-6">
       <PageHeader title="Админ-панель" description="Управление системой и пользователями" />

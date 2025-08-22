@@ -16,8 +16,8 @@ import { RejectedApplicationMessage } from '@/features/applications/ui/rejected-
 import { Button } from '@/shared/ui/button';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { isCandidate, isMember, isCitizen, isAdmin } from '@roleplay-identity/shared-types';
 import { CadetDashboard } from '@/features/dashboard/ui/cadet-dashboard';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 
 
 // Loading component
@@ -79,8 +79,8 @@ export default function Dashboard() {
   };
 
   // Создание действий для QuickActionsWidget
-  const createQuickActions = (userRole: string) => {
-    if (isCandidate(userRole)) {
+  const createQuickActions = ({ isCandidate, isMember, isAdmin }: { isCandidate: boolean; isMember: boolean; isAdmin: boolean }) => {
+    if (isCandidate) {
       return [
         {
           id: '1',
@@ -99,7 +99,7 @@ export default function Dashboard() {
       ];
     }
 
-    if (isMember(userRole) || isAdmin(userRole)) {
+    if (isMember || isAdmin) {
       return [
         {
           id: '1',
@@ -143,33 +143,6 @@ export default function Dashboard() {
           action: () => handleQuickAction('complaint'),
           category: 'documentation' as const,
           variant: 'warning' as const,
-        },
-      ];
-    }
-
-    if (isCitizen(userRole)) {
-      return [
-        {
-          id: '1',
-          title: 'Подать заявку на вступление',
-          icon: 'FileText',
-          action: () => handleQuickAction('application'),
-          category: 'career' as const,
-        },
-        {
-          id: '2',
-          title: 'Подать жалобу',
-          icon: 'AlertTriangle',
-          action: () => handleQuickAction('complaint'),
-          category: 'documentation' as const,
-          variant: 'warning' as const,
-        },
-        {
-          id: '3',
-          title: 'Подать рапорт',
-          icon: 'FileText',
-          action: () => handleQuickAction('report'),
-          category: 'documentation' as const,
         },
       ];
     }
@@ -234,29 +207,18 @@ export default function Dashboard() {
     );
   }
 
-  // Вспомогательная функция: определить приоритетную роль
-  type RoleObj = { code: string; name: string };
-  const determinePrimaryRole = (roles: RoleObj[]): RoleObj => {
-    const fallback: RoleObj = { code: 'citizen', name: 'Гражданский' };
-    if (!Array.isArray(roles) || roles.length === 0) return fallback;
-    const byCode = (code: string) => roles.find(r => r.code === code);
-    return (
-      byCode('system_admin') ||
-      byCode('admin') ||
-      byCode('staff') ||
-      byCode('candidate') ||
-      byCode('citizen') ||
-      roles[0]
-    );
-  };
-
   // Преобразование данных для второстепенных виджетов
   const transformedData = transformDashboardData({
     user: {
       id: session.user.id,
       email: '',
       username: session.user.username,
-      role: determinePrimaryRole(session.roles).code,
+      role: ((): string => {
+        const permissions = new Set(session.permissions || []);
+        const isAdmin = permissions.has('admin.panel.access');
+        const isMember = permissions.has('community.member.access') || isAdmin;
+        return isAdmin ? 'admin' : isMember ? 'staff' : 'candidate';
+      })(),
       avatarUrl: null,
       firstName: null,
       lastName: null,
@@ -273,16 +235,10 @@ export default function Dashboard() {
     usefulLinks: [],
   } as any);
 
-  // Роли пользователя из сессии
-  const primaryRole = determinePrimaryRole(session.roles);
-  const hasRole = (code: string) => Array.isArray(session.roles) && session.roles.some(r => r.code === code);
-  // Кандидат определяется только по наличию роли 'candidate' и отсутствию админских/штатных ролей
-  const isCandidateRole = hasRole('candidate') && !hasRole('admin') && !hasRole('system_admin') && !hasRole('staff');
-  const isMemberRole = isMember(primaryRole.code);
-  const isCitizenRole = isCitizen(primaryRole.code);
-  const isAdminRole = isAdmin(primaryRole.code) || hasRole('system_admin');
-  const quickActions = createQuickActions(primaryRole.code);
-  const hasAdminPermission = Array.isArray(session.permissions) && session.permissions.includes('admin.panel.access');
+  // Права пользователя из новой модели
+  const { isCandidate, isMember, isAdmin } = usePermissions();
+  const quickActions = createQuickActions({ isCandidate, isMember, isAdmin });
+  const hasAdminPermission = isAdmin;
   // Проверяем, ожидает ли пользователь интервью
   const isAwaitingInterview = Array.isArray(session.applications)
     ? session.applications.some(app => app?.status_code === 'awaiting_interview')
@@ -313,11 +269,9 @@ export default function Dashboard() {
   // Отладочная информация (только в режиме разработки)
   if (process.env.NODE_ENV === 'development') {
     console.log('Dashboard Debug Info:', {
-      userRole: primaryRole.code,
-      isCandidate: isCandidateRole,
-      isMember: isMemberRole,
-      isCitizen: isCitizenRole,
-      isAdmin: isAdminRole,
+      isCandidate,
+      isMember,
+      isAdmin,
       userData: session.user
     });
   }
@@ -339,7 +293,7 @@ export default function Dashboard() {
         </div>
 
         {/* Role-based Dashboard */}
-        {isCandidateRole ? (
+        {isCandidate ? (
           // Спец. состояние для кандидата, ожидающего интервью
           isAwaitingInterview ? (
             <div className="space-y-6">
@@ -389,7 +343,7 @@ export default function Dashboard() {
                         </Muted>
                       )}
                     </Stack>
-                    {!(primaryRole.code === 'system_admin' || hasAdminPermission) && (
+                    {!hasAdminPermission && (
                       <div>
                         <EntryApplicationModal>
                           <Button size="lg" data-entry-application-trigger>Подать заявку на вступление</Button>
@@ -407,7 +361,7 @@ export default function Dashboard() {
               <UsefulLinksWidget links={transformedData.usefulLinks} />
             </div>
           )
-        ) : (isMemberRole || isAdminRole) ? (
+        ) : (isMember || isAdmin) ? (
           // Dashboard для участников сообщества и администраторов
           <div className="space-y-6">
             {/* Member Dashboard Grid */}
@@ -418,66 +372,7 @@ export default function Dashboard() {
                   userName: session.user.username || 'Пользователь',
                   departments: (Array.isArray(session.statuses) && session.statuses.length > 0)
                     ? session.statuses.join(', ')
-                    : (isAdminRole || hasAdminPermission ? 'Системная роль: Администратор' : 'Не указан'),
-                  rank: '-',
-                  unit: '-',
-                  status: ((Array.isArray(session.statuses) && session.statuses.length > 0) || isAdminRole || hasAdminPermission) ? 'Active' : 'Inactive',
-                  gameWarnings: 0,
-                  adminWarnings: 0,
-                  avatarUrl: undefined,
-                  initials: (session.user.username || 'П').slice(0, 2).toUpperCase(),
-                }
-              } />
-
-              {/* Quick Actions Widget */}
-              <QuickActionsWidget actions={quickActions} />
-
-              {/* Useful Links Widget */}
-              <UsefulLinksWidget links={transformedData.usefulLinks} />
-
-              {/* Feed Widget */}
-              <FeedWidget activities={transformedData.feed} />
-
-              {/* Announcements Widget */}
-              <AnnouncementsWidget announcements={transformedData.announcements} />
-            </div>
-          </div>
-        ) : isCitizenRole ? (
-          // Dashboard для граждан
-          <div className="space-y-6">
-            {/* Welcome Block для граждан */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <Stack space="xs">
-                    <H2 className="text-xl font-semibold">
-                       Добро пожаловать, {transformedData.profile.userName || "Пользователь"}!
-                    </H2>
-                    <Muted>
-                      Ваш статус: <span className="font-medium">{primaryRole?.name}</span>
-                    </Muted>
-                    <Muted>
-                      Добро пожаловать в личный кабинет. Здесь вы можете отслеживать свои активности и получать важную информацию.
-                    </Muted>
-                  </Stack>
-                  <div className="text-right">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
-                      Активен
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Citizen Dashboard Grid */}
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {/* Profile Widget */}
-              <ProfileWidget {
-                ...{
-                  userName: session.user.username || 'Пользователь',
-                  departments: (Array.isArray(session.statuses) && session.statuses.length > 0)
-                    ? session.statuses.join(', ')
-                    : (isAdminRole || hasAdminPermission ? 'Системная роль: Администратор' : 'Не указан'),
+                    : (isAdmin ? 'Системная роль: Администратор' : 'Не указан'),
                   rank: '-',
                   unit: '-',
                   status: ((Array.isArray(session.statuses) && session.statuses.length > 0) || isAdminRole || hasAdminPermission) ? 'Active' : 'Inactive',

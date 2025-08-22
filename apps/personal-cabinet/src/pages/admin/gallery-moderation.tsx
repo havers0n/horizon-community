@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/shared/api/api-client'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
+import { Navigate } from 'react-router-dom'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 type PendingImage = {
   id: string
@@ -21,6 +24,8 @@ const storageBase = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}`.rep
 
 const AdminGalleryModerationPage: React.FC = () => {
   const qc = useQueryClient()
+  const { isLoading } = useSession()
+  const { isLoggedIn, session } = usePermissions()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['pendingImages'],
@@ -47,6 +52,9 @@ const AdminGalleryModerationPage: React.FC = () => {
   })
 
   if (isLoading) return <div className="container mx-auto px-4 py-6">Загрузка…</div>
+  if (!isLoggedIn || !(session?.permissions || []).includes('gallery.moderate')) {
+    return <Navigate to="/dashboard" replace />
+  }
   if (isError) return <div className="container mx-auto px-4 py-6 text-red-400">Ошибка загрузки</div>
 
   const items = (data || [])

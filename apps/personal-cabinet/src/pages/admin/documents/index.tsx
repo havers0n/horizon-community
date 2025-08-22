@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -18,9 +18,14 @@ import {
 import { adminDocumentsApi } from '@/shared/api/documents'
 import type { Document, DocumentCategory } from '@/shared/types/documents'
 import { useToast } from '@/shared/ui/use-toast'
+import { useSession } from '@/shared/contexts/SessionContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 export default function AdminDocumentsPage() {
   const navigate = useNavigate()
+  const { isLoading } = useSession()
+  const { isLoggedIn, session } = usePermissions()
+  const hasDocsManage = (session?.permissions || []).includes('documents.manage')
   const [searchTerm, setSearchTerm] = useState('')
   const [documents, setDocuments] = useState<Document[]>([])
   const [categories, setCategories] = useState<DocumentCategory[]>([])
@@ -29,6 +34,10 @@ export default function AdminDocumentsPage() {
   const { toast } = useToast()
 
   useEffect(() => {
+    if (!isLoggedIn || !hasDocsManage) {
+      setLoading(false)
+      return
+    }
     const fetchData = async () => {
       try {
         setLoading(true)
@@ -173,6 +182,23 @@ export default function AdminDocumentsPage() {
     } else {
       return <Badge variant="outline">Черновик</Badge>
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <p className="text-gray-600 dark:text-gray-400">Загрузка…</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isLoggedIn || !hasDocsManage) {
+    return <Navigate to="/dashboard" replace />
   }
 
   if (loading) {

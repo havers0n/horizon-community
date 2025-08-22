@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { useSession } from '@/shared/contexts/SessionContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
@@ -381,7 +382,8 @@ function UnifiedTestForm({
 }
 
 export default function AdminTestsPage() {
-	const { session, isLoading } = useSession()
+	const { isLoading } = useSession()
+	const { isLoggedIn, session } = usePermissions()
 	const queryClient = useQueryClient()
 	const [isOpen, setIsOpen] = useState(false)
 	const [mode, setMode] = useState<'create' | 'edit'>('create')
@@ -432,7 +434,7 @@ export default function AdminTestsPage() {
 		)
 	}
 
-	if (!session?.permissions?.includes('tests.manage')) {
+	if (!isLoggedIn || !(session?.permissions || []).includes('tests.manage')) {
 		return <Navigate to="/dashboard" replace />
 	}
 

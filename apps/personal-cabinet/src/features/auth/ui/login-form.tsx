@@ -56,9 +56,11 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="your@email.com" {...field} />
-                  </FormControl>
+                  <FormControl
+                    type="email"
+                    placeholder="your@email.com"
+                    {...field}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -70,9 +72,11 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Пароль</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
+                  <FormControl
+                    type="password"
+                    placeholder="••••••••"
+                    {...field}
+                  />
                   <FormMessage />
                 </FormItem>
               )}

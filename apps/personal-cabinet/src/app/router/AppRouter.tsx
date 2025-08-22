@@ -44,6 +44,16 @@ export function AppRouter() {
         <Route path="/docs" element={<pages.Documents />} />
         <Route path="/documents" element={<pages.Documents />} />
         
+        {/* Temporary simplified admin tests route for debugging */}
+        <Route 
+          path="/admin/tests"
+          element={
+            <PermissionGuard permission="tests.view">
+              <pages.AdminTests />
+            </PermissionGuard>
+          }
+        />
+        
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<pages.Dashboard />} />

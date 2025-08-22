@@ -1103,16 +1103,19 @@ export type Database = {
       permissions: {
         Row: {
           code: string
+          created_at: string | null
           description: string | null
           id: string
         }
         Insert: {
           code: string
+          created_at?: string | null
           description?: string | null
           id?: string
         }
         Update: {
           code?: string
+          created_at?: string | null
           description?: string | null
           id?: string
         }
@@ -1285,14 +1288,17 @@ export type Database = {
       }
       role_permissions: {
         Row: {
+          created_at: string | null
           permission_id: string
           role_id: string
         }
         Insert: {
+          created_at?: string | null
           permission_id: string
           role_id: string
         }
         Update: {
+          created_at?: string | null
           permission_id?: string
           role_id?: string
         }
@@ -1315,18 +1321,21 @@ export type Database = {
       }
       roles: {
         Row: {
+          created_at: string | null
           description: string | null
           display_name: string | null
           id: string
           name: string
         }
         Insert: {
+          created_at?: string | null
           description?: string | null
           display_name?: string | null
           id?: string
           name: string
         }
         Update: {
+          created_at?: string | null
           description?: string | null
           display_name?: string | null
           id?: string
@@ -1668,15 +1677,11 @@ export type Database = {
         Returns: string[]
       }
       has_permission: {
-        Args:
-          | {
-              p_code: string
-              p_scope_id: string
-              p_scope_type: Database["common"]["Enums"]["scope_type"]
-              p_user_id: string
-            }
-          | { p_code: string; p_user: string }
-          | { p_permission_code: string }
+        Args: {
+          p_permission_code: string
+          p_scope_id?: string
+          p_scope_type?: string
+        }
         Returns: boolean
       }
     }
@@ -3603,19 +3608,7 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
-      has_permission: {
-        Args: {
-          p_permission_code: string
-          p_scope_id: string
-          p_scope_type: Database["common"]["Enums"]["scope_type"]
-        }
-        Returns: boolean
-      }
       is_guest_candidate: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_system_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
