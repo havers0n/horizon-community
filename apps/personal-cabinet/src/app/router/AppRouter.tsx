@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/shared/ui/protected-route'
 import { StageGuard } from '@/shared/ui/StageGuard'
 import { PermissionGuard } from '@/shared/ui/permission-guard'
 import { PageLoader } from '../../shared/ui/page-loader'
+import { AdminLayout } from '@/app/layouts/AdminLayout'
 
 // Lazy loaded pages - centralized for better organization
 const pages = {
@@ -25,6 +26,7 @@ const pages = {
   AdminGalleryModeration: React.lazy(() => import('@/pages/admin/gallery-moderation')),
   AdminDocuments: React.lazy(() => import('@/pages/admin/documents')),
   DocumentEditor: React.lazy(() => import('@/pages/admin/documents/editor')),
+  AdminRoles: React.lazy(() => import('@/pages/admin/roles')),
 }
 
 /**
@@ -65,18 +67,19 @@ export function AppRouter() {
           <Route 
             path="/admin/*" 
             element={
-              <>
-                <PermissionGuard permission="admin.panel.access">
+              <PermissionGuard permission="admin.panel.access">
+                <AdminLayout>
                   <Routes>
                     <Route index element={<pages.AdminPanel />} />
                     <Route path="tests" element={<pages.AdminTests />} />
                     <Route path="applications" element={<pages.AdminApplications />} />
+                    <Route path="roles" element={<pages.AdminRoles />} />
                     <Route path="gallery" element={<pages.AdminGalleryModeration />} />
                     <Route path="documents" element={<pages.AdminDocuments />} />
                     <Route path="documents/editor/:id?" element={<pages.DocumentEditor />} />
                   </Routes>
-                </PermissionGuard>
-              </>
+                </AdminLayout>
+              </PermissionGuard>
             }
           />
         </Route>

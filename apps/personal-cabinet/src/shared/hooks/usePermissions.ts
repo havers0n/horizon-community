@@ -8,6 +8,10 @@ export interface UserPermissions {
   isAdmin: boolean;
   // Добавляйте сюда другие ключевые флаги по мере необходимости
   session: NonNullable<ReturnType<typeof useSession>['session']>;
+  // Новые методы для работы с пермишенами
+  permissions: string[];
+  hasPermission: (permission: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
 }
 
 export function usePermissions(): UserPermissions {
@@ -21,6 +25,9 @@ export function usePermissions(): UserPermissions {
       isMember: false,
       isAdmin: false,
       session: null as any, // Возвращаем null-совместимый объект
+      permissions: [],
+      hasPermission: () => false,
+      hasAnyPermission: () => false,
     };
   }
 
@@ -40,6 +47,10 @@ export function usePermissions(): UserPermissions {
     isMember: isMember || isAdmin, // Админ всегда является и участником
     isAdmin,
     session,
+    permissions: session.permissions || [],
+    hasPermission: (permission: string) => permissions.has(permission),
+    hasAnyPermission: (checkPermissions: string[]) => 
+      checkPermissions.some(permission => permissions.has(permission)),
   };
 }
 
