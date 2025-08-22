@@ -7,7 +7,7 @@
     /* Светлая тема - HorizonCommunity */
     --background: 0 0% 100%; /* #FFFFFF */
     --foreground: 220 13% 10%; /* #1e2a3a */
-    --card: 45 20% 96%; /* #f5f3f0 */
+    --card: 45 20% 96%; /* Убрана прозрачность для повышения контраста */
     --card-foreground: 220 13% 10%; /* #1e2a3a */
     --popover: 0 0% 100%; /* #FFFFFF */
     --popover-foreground: 220 13% 10%; /* #1e2a3a */
@@ -16,7 +16,7 @@
     --secondary: 45 20% 96%; /* #f5f3f0 */
     --secondary-foreground: 220 13% 10%; /* #1e2a3a */
     --muted: 45 20% 96%; /* #f5f3f0 */
-    --muted-foreground: 220 13% 28%; /* #718096 */
+    --muted-foreground: 220 13% 25%; /* Darker gray for better contrast - #5a6b7a */
     --accent: 45 65% 67%; /* #c6a96b */
     --accent-foreground: 220 13% 10%; /* #1e2a3a */
     --destructive: 0 68% 68%; /* #E57373 */
@@ -25,26 +25,11 @@
     --input: 45 20% 89%; /* #e8e5e0 */
     --ring: 45 65% 67%; /* #c6a96b */
     --radius: 0.5rem;
+    
     /* Шрифты */
     --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-    /* Тени — базовые */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-
-    /* Тени — брендовые */
-    --shadow-horizon: 0 4px 14px 0 rgba(30, 42, 58, 0.25);
-    --shadow-horizon-lg: 0 10px 25px 0 rgba(30, 42, 58, 0.3);
-    --shadow-horizon-xl: 0 20px 40px 0 rgba(30, 42, 58, 0.35);
-
-    --shadow-gold: 0 4px 14px 0 rgba(198, 169, 107, 0.25);
-    --shadow-gold-lg: 0 10px 25px 0 rgba(198, 169, 107, 0.3);
-    --shadow-gold-xl: 0 20px 40px 0 rgba(198, 169, 107, 0.35);
     /* Поверхности для светлой темы */
     --surface-1: 0 0% 100%;
     --surface-2: 45 20% 96%;
@@ -57,48 +42,49 @@
     --warning-foreground: 220 13% 10%; /* #1e2a3a */
     --info: 199 89% 48%; /* #42A5F5 */
     --info-foreground: 0 0% 100%; /* #FFFFFF */
-    
-    /* Градиенты для светлой темы */
-    --gradient-primary: linear-gradient(135deg, #c6a96b 0%, #b89d5a 100%);
-    --gradient-secondary: linear-gradient(135deg, #f5f3f0 0%, #e8e5e0 100%);
-    --gradient-success: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
-    --gradient-warning: linear-gradient(135deg, #c6a96b 0%, #b89d5a 100%);
-    --gradient-error: linear-gradient(135deg, #E57373 0%, #EF5350 100%);
   }
 
   .dark {
     /* Темная тема - HorizonCommunity */
-    --background: 220 13% 10%; /* #1e2a3a */
+    --background: 220 13% 8%; /* Глубже, чем #1e2a3a */
     --foreground: 45 20% 96%; /* #f5f3f0 */
-    --card: 220 13% 15%; /* #2c3d42 */
-    --card-foreground: 45 20% 96%; /* #f5f3f0 */
-    --popover: 220 13% 10%; /* #1e2a3a */
-    --popover-foreground: 45 20% 96%; /* #f5f3f0 */
+
+    /* Иерархия поверхностей - без прозрачности для лучшей совместимости */
+    --surface-1: 220 13% 12%; /* Основная поверхность для карточек */
+    --surface-2: 220 13% 16%; /* Для вложенных элементов или hover-эффектов */
+    --surface-3: 220 13% 20%; /* Для акцентных деталей */
+
+    --card: 220 13% 12%; /* Карточка теперь использует surface-1 */
+    --card-foreground: 45 20% 96%;
+    
+    --popover: 220 13% 10%;
+    --popover-foreground: 45 20% 96%;
+    
     --primary: 45 65% 67%; /* #c6a96b */
-    --primary-foreground: 220 13% 10%; /* #1e2a3a */
-    --secondary: 220 13% 15%; /* #2c3d42 */
-    --secondary-foreground: 45 20% 96%; /* #f5f3f0 */
-    --muted: 220 13% 15%; /* #2c3d42 */
+    --primary-foreground: 220 13% 10%;
+    
+    --secondary: 220 13% 16%;
+    --secondary-foreground: 45 20% 96%;
+    
+    --muted: 220 13% 16%;
     --muted-foreground: 220 13% 60%; /* #718096 */
-    --accent: 220 13% 15%; /* #2c3d42 */
-    --accent-foreground: 45 20% 96%; /* #f5f3f0 */
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 45 20% 96%; /* #f5f3f0 */
-    --border: 220 13% 15%; /* #2c3d42 */
-    --input: 220 13% 15%; /* #2c3d42 */
-    --ring: 45 65% 67%; /* #c6a96b */
-    /* Поверхности для темной темы */
-    --surface-1: 220 13% 10%;
-    --surface-2: 220 13% 14%;
-    --surface-3: 220 13% 18%;
+    
+    --accent: 220 13% 16%;
+    --accent-foreground: 45 20% 96%;
+    
+    --destructive: 0 63% 40%; /* Более насыщенный красный */
+    --destructive-foreground: 45 20% 96%;
+    
+    --border: 220 13% 20%; /* Синхронизировано с surface-3 */
+    --input: 220 13% 18%; /* Чуть светлее для контраста */
+    --ring: 45 65% 67%;
+
     --success: 142.1 70.6% 45.3%;
-    --success-foreground: 144.9 80.4% 10%;
+    --success-foreground: 144.9 80.4% 90%;
     --warning: 45 65% 67%; /* #c6a96b */
-    --warning-foreground: 220 13% 10%; /* #1e2a3a */
+    --warning-foreground: 220 13% 10%;
     --info: 199 89% 48%;
-    --info-foreground: 45 20% 96%; /* #f5f3f0 */
-    /* При необходимости можно адаптировать тени под тёмную тему */
-    /* --shadow: 0 1px 3px 0 rgba(0,0,0,0.4), 0 1px 2px -1px rgba(0,0,0,0.35); */
+    --info-foreground: 45 20% 96%;
   }
 }
 
@@ -119,7 +105,7 @@
   }
   
   /* Точечные тёмные стили вместо глобальных переопределений */
-  .dark .card-horizon { @apply bg-gray-800 border-gray-700 shadow; }
+  /* Класс .card-horizon был удален, т.к. стили теперь управляются централизованно */
   .dark .nav-item.active { @apply bg-gray-700 text-white border-l-2 border-gold-500; }
 }
 
@@ -205,18 +191,9 @@
     @apply from-gold-600 to-gold-700;
   }
 
-  .card-horizon {
-    @apply bg-white border border-gray-200 shadow-sm;
-  }
-
-  .card-horizon:hover {
-    @apply shadow-md border-gray-300;
-  }
-
-  /* Тёмная адаптация карточек */
-  .dark .card-horizon {
-    @apply bg-gray-800 border-gray-700 shadow;
-  }
+  /* Классы .card-horizon и .dark .card-horizon были удалены. */
+  /* Стилизация карточек теперь централизована в компоненте Card */
+  /* и управляется через CSS переменные --card и --card-foreground. */
 
   .nav-item {
     @apply flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100;

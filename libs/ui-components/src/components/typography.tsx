@@ -36,7 +36,7 @@ export const H2 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       ref={ref}
       className={cn(
         headingBase,
-        "text-2xl md:text-3xl lg:text-4xl leading-tight",
+        "text-2xl md:text-3xl font-bold leading-tight",
         className
       )}
       {...props}
@@ -49,7 +49,7 @@ export const H3 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn(headingBase, "text-xl md:text-2xl leading-snug", className)}
+      className={cn(headingBase, "text-xl md:text-2xl font-semibold leading-snug", className)}
       {...props}
     />
   )
@@ -117,7 +117,7 @@ export const Muted = React.forwardRef<HTMLParagraphElement, ParagraphProps>(
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn(paragraphBase, "text-sm leading-6 text-muted-foreground", className)}
+      className={cn(paragraphBase, "text-sm leading-6 text-muted-foreground/80", className)}
       {...props}
     />
   )

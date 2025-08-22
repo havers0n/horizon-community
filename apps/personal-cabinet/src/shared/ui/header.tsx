@@ -48,12 +48,6 @@ export function Header({ onNotificationClick }: HeaderProps) {
             >
               Дашборд
             </a>
-            <a 
-              href="/tests" 
-              className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Тесты
-            </a>
           </nav>
 
           {/* Right side navigation */}

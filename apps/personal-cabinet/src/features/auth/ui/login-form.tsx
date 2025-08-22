@@ -1,13 +1,13 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useMutation } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
 import { useAuth } from '../ui/auth-provider'
 import { Link, useNavigate } from 'react-router-dom'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form-field'
 
 const loginSchema = z.object({
   email: z.string().email('Введите корректный email'),
@@ -17,31 +17,26 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
   const { signIn } = useAuth()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  const { mutate, isPending: isLoading, error } = useMutation({
+    mutationFn: ({ email, password }: LoginFormData) => signIn(email, password),
+    onSuccess: () => {
+      navigate('/dashboard')
+    },
   })
 
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
-    setError('')
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
 
-    try {
-      await signIn(data.email, data.password)
-      navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Неверный email или пароль')
-    } finally {
-      setIsLoading(false)
-    }
+  const onSubmit = (data: LoginFormData) => {
+    mutate(data)
   }
 
   return (
@@ -53,55 +48,57 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="your@email.com"
-              {...register('email')}
-              className={errors.email ? 'border-red-500' : ''}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="your@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Пароль</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              className={errors.password ? 'border-red-500' : ''}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Пароль</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
+
+            {error && (
+              <div className="text-sm text-red-500 text-center">{error.message || 'Неверный email или пароль'}</div>
             )}
-          </div>
 
-          {error && (
-            <div className="text-sm text-red-500 text-center">{error}</div>
-          )}
+            <Button type="submit" className="w-full" isLoading={isLoading}>
+              Войти
+            </Button>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Вход...' : 'Войти'}
-          </Button>
-
-          <div className="text-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              Нет аккаунта?{' '}
-            </span>
-            <Link
-              to="/register"
-              className="text-blue-600 hover:text-blue-500 font-medium"
-            >
-              Зарегистрироваться
-            </Link>
-          </div>
-        </form>
+            <div className="text-center text-sm">
+              <span className="text-gray-600 dark:text-gray-400">
+                Нет аккаунта?{' '}
+              </span>
+              <Link
+                to="/register"
+                className="text-blue-600 hover:text-blue-500 font-medium"
+              >
+                Зарегистрироваться
+              </Link>
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   )

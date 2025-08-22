@@ -34,7 +34,7 @@ export const FeedWidget: React.FC<FeedWidgetProps> = ({ activities }) => {
   };
 
   return (
-    <Card className="h-full bg-gray-800 border-gray-600">
+<Card className="h-full">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg font-semibold text-gray-100">
           Моя лента

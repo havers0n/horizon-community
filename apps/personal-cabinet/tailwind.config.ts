@@ -60,44 +60,31 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
         },
-        // Основная цветовая палитра HorizonCommunity
+        // HorizonCommunity brand colors - simplified
         horizon: {
-          50: "#f5f3f0",   // Самый светлый - основной фон
-          100: "#e8e5e0",  // Светлый - границы и фоны
-          200: "#d4d0cb",  // Светло-серый
-          300: "#c0bbb6",  // Средне-серый
-          400: "#a8a39e",  // Серый
-          500: "#718096",  // Основной серый цвет
-          600: "#5a6b7a",  // Темно-серый
-          700: "#43545e",  // Очень темно-серый
-          800: "#2c3d42",  // Почти черный
-          900: "#1e2a3a",  // Основной темный цвет
+          50: "#f5f3f0",
+          100: "#e8e5e0",
+          200: "#d4d0cb",
+          300: "#c0bbb6",
+          400: "#a8a39e",
+          500: "#718096", // Primary brand color
+          600: "#5a6b7a",
+          700: "#43545e",
+          800: "#2c3d42",
+          900: "#1e2a3a", // Main dark color
         },
-        // Золотая акцентная палитра
+        // Gold accent colors
         gold: {
-          50: "#fdfbf8",   // Самый светлый золотой
-          100: "#faf7f0",  // Светлый золотой
-          200: "#f5f0e0",  // Бледно-золотой
-          300: "#e8dcc0",  // Светло-золотой
-          400: "#d4c490",  // Средне-золотой
-          500: "#c6a96b",  // Основной золотой цвет
-          600: "#b89d5a",  // Темно-золотой
-          700: "#a89149",  // Очень темно-золотой
-          800: "#988538",  // Почти коричневый
-          900: "#887927",  // Коричневый
-        },
-        // Дополнительная темная палитра
-        dark: {
-          50: "#f5f3f0",   // Светлый фон
-          100: "#e8e5e0",  // Светло-серый
-          200: "#d4d0cb",  // Серый
-          300: "#a8a39e",  // Средне-серый
-          400: "#718096",  // Основной серый
-          500: "#5a6b7a",  // Темно-серый
-          600: "#43545e",  // Очень темно-серый
-          700: "#2c3d42",  // Почти черный
-          800: "#1e2a3a",  // Основной темный
-          900: "#161e28",  // Самый темный
+          50: "#fdfbf8",
+          100: "#faf7f0",
+          200: "#f5f0e0",
+          300: "#e8dcc0",
+          400: "#d4c490",
+          500: "#c6a96b", // Primary gold
+          600: "#b89d5a",
+          700: "#a89149",
+          800: "#988538",
+          900: "#887927",
         },
       },
       borderRadius: {
@@ -176,25 +163,19 @@ export default {
         "progress-fill": "progress-fill 1s ease-out",
       },
       boxShadow: {
-        sm: 'var(--shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05))',
-        DEFAULT: 'var(--shadow, 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1))',
-        md: 'var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1))',
-        lg: 'var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1))',
-        xl: 'var(--shadow-xl, 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04))',
-        '2xl': 'var(--shadow-2xl, 0 25px 50px -12px rgba(0,0,0,0.25))',
-        horizon: 'var(--shadow-horizon, 0 4px 14px 0 rgba(30, 42, 58, 0.25))',
-        'horizon-lg': 'var(--shadow-horizon-lg, 0 10px 25px 0 rgba(30, 42, 58, 0.3))',
-        'horizon-xl': 'var(--shadow-horizon-xl, 0 20px 40px 0 rgba(30, 42, 58, 0.35))',
-        gold: 'var(--shadow-gold, 0 4px 14px 0 rgba(198, 169, 107, 0.25))',
-        'gold-lg': 'var(--shadow-gold-lg, 0 10px 25px 0 rgba(198, 169, 107, 0.3))',
-        'gold-xl': 'var(--shadow-gold-xl, 0 20px 40px 0 rgba(198, 169, 107, 0.35))',
+        sm: '0 1px 2px 0 rgba(0,0,0,0.05)',
+        DEFAULT: '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
+        md: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)',
+        lg: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+        xl: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+        '2xl': '0 25px 50px -12px rgba(0,0,0,0.25)',
+        // Brand-specific shadows
+        horizon: '0 4px 14px 0 rgba(30, 42, 58, 0.25)',
+        gold: '0 4px 14px 0 rgba(198, 169, 107, 0.25)',
       },
       backgroundImage: {
         'gradient-horizon': 'linear-gradient(135deg, #1e2a3a 0%, #718096 100%)',
-        'gradient-horizon-subtle': 'linear-gradient(135deg, #e8e5e0 0%, #f5f3f0 100%)',
         'gradient-gold': 'linear-gradient(135deg, #c6a96b 0%, #b89d5a 100%)',
-        'gradient-gold-subtle': 'linear-gradient(135deg, #f5f3f0 0%, #e8e5e0 100%)',
-        'gradient-dark': 'linear-gradient(135deg, #1e2a3a 0%, #2c3d42 100%)',
       },
     },
   },

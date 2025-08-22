@@ -35,9 +35,9 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
   const documentationActions = actions.filter(action => action.category === 'documentation');
 
   return (
-    <Card className="h-full bg-gray-800 border-gray-600">
+    <Card className="h-full">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-gray-100">
+        <CardTitle className="text-lg font-semibold">
           Быстрые действия
         </CardTitle>
       </CardHeader>
@@ -45,7 +45,7 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
         {/* Career Actions */}
         {careerActions.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Карьера
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -55,11 +55,9 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
                   variant="outline"
                   size="sm"
                   onClick={action.action}
-                  className="h-auto p-3 flex flex-col items-center space-y-1 text-xs bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-gray-200"
+                  className="h-auto p-3 flex flex-col items-center justify-center space-y-1 text-xs"
                 >
-                  <div className="text-gray-400">
-                    {getActionIcon(action.icon)}
-                  </div>
+                  {getActionIcon(action.icon)}
                   <span className="text-center">{action.title}</span>
                 </Button>
               ))}
@@ -70,25 +68,19 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
         {/* Documentation Actions */}
         {documentationActions.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Документация
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {documentationActions.map((action) => (
                 <Button
                   key={action.id}
-                  variant={action.variant === 'warning' ? 'destructive' : 'outline'}
+                  variant={action.variant === 'warning' ? 'warning' : 'outline'}
                   size="sm"
                   onClick={action.action}
-                  className={`h-auto p-3 flex flex-col items-center space-y-1 text-xs ${
-                    action.variant === 'warning' 
-                      ? 'bg-red-900 border-red-700 text-red-200 hover:bg-red-800' 
-                      : 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-gray-200'
-                  }`}
+                  className="h-auto p-3 flex flex-col items-center justify-center space-y-1 text-xs"
                 >
-                  <div className={action.variant === 'warning' ? 'text-red-300' : 'text-gray-400'}>
-                    {getActionIcon(action.icon)}
-                  </div>
+                  {getActionIcon(action.icon)}
                   <span className="text-center">{action.title}</span>
                 </Button>
               ))}
@@ -99,10 +91,10 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
         {/* Empty State */}
         {actions.length === 0 && (
           <div className="text-center py-8">
-            <div className="text-gray-500 mb-2">
+            <div className="text-muted-foreground mb-2">
               <FileText className="w-8 h-8 mx-auto" />
             </div>
-            <p className="text-sm text-gray-400">Нет доступных действий</p>
+            <p className="text-sm text-muted-foreground">Нет доступных действий</p>
           </div>
         )}
       </CardContent>

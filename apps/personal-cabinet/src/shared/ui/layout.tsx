@@ -62,11 +62,6 @@ export function Layout({ children }: LayoutProps) {
 
   const navigation = [
     { name: "Главная", href: "/dashboard", icon: Home },
-    { name: "Департаменты", href: "/departments", icon: Building2 },
-    { name: "Заявки", href: "/applications", icon: ClipboardList },
-    { name: "Отчеты", href: "/reports", icon: FileText },
-    { name: "Тесты", href: "/tests", icon: BarChart3 },
-    { name: "Поддержка", href: "/support", icon: HelpCircle },
     { name: "Админ панель", href: "/admin", icon: Shield },
   ];
 
@@ -96,19 +91,22 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4">
+        <div className="container flex h-16 items-center justify-between px-4 max-w-7xl mx-auto">
           {/* Logo and Navigation */}
           <div className="flex items-center space-x-4">
-            <div className="h-8 w-8 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center">
+            <div className="h-8 w-8 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-xs">HC</span>
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-gold-500 to-gold-600 bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-gold-500 to-gold-600 bg-clip-text text-transparent hidden sm:block">
               HorizonCommunity
+            </span>
+            <span className="text-sm font-bold bg-gradient-to-r from-gold-500 to-gold-600 bg-clip-text text-transparent sm:hidden">
+              HC
             </span>
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-4">
+          <nav className="hidden lg:flex items-center space-x-2">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -117,28 +115,33 @@ export function Layout({ children }: LayoutProps) {
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
                   onClick={() => navigate(item.href)}
+                  className="text-xs xl:text-sm"
                 >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.name}
+                  <item.icon className="h-4 w-4 xl:mr-2" />
+                  <span className="hidden xl:inline">{item.name}</span>
                 </Button>
               );
             })}
           </nav>
 
           {/* User Menu and Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="transition-all duration-200"
+              onClick={() => {
+                const nextTheme = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
+                setTheme(nextTheme);
+              }}
+              className="transition-all duration-200 h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3"
+              title={`Текущая тема: ${theme === 'system' ? 'Системная' : theme === 'dark' ? 'Темная' : 'Светлая'}`}
             >
-              {theme === "dark" ? "🌞" : "🌙"}
+              {theme === 'dark' ? '🌙' : theme === 'light' ? '☀️' : '🖥️'}
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
+            <Button variant="ghost" size="sm" className="relative h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3">
               <Bell className="h-4 w-4" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
                 3
@@ -184,7 +187,7 @@ export function Layout({ children }: LayoutProps) {
             {/* Mobile Menu */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="md:hidden">
+                <Button variant="ghost" size="sm" className="lg:hidden h-8 w-8 p-0">
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>

@@ -1,5 +1,6 @@
 import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
+import { getStatusClasses, type StatusType } from "@/shared/config/design-system";
 
 interface StatusBadgeProps {
   status: string;
@@ -7,85 +8,68 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const getStatusConfig = (status: string) => {
+  const getStatusMapping = (status: string): StatusType => {
     switch (status.toLowerCase()) {
       case "approved":
       case "success":
-        return {
-          variant: "success" as const,
-          label: "Одобрено",
-          className: "bg-success/20 text-success border border-success/30"
-        };
+      case "active":
+      case "online":
+      case "completed":
+      case "finished":
+        return "approved";
       case "rejected":
       case "denied":
       case "failed":
-        return {
-          variant: "destructive" as const,
-          label: "Отклонено",
-          className: "bg-destructive/20 text-destructive border border-destructive/30"
-        };
+      case "cancelled":
+        return "rejected";
       case "pending":
       case "waiting":
       case "review":
-        return {
-          variant: "warning" as const,
-          label: "На рассмотрении",
-          className: "bg-warning/20 text-warning border border-warning/30"
-        };
-      case "active":
-      case "online":
-        return {
-          variant: "success" as const,
-          label: "Активно",
-          className: "bg-success/20 text-success border border-success/30"
-        };
+        return "pending";
       case "inactive":
       case "offline":
-        return {
-          variant: "secondary" as const,
-          label: "Неактивно",
-          className: "bg-muted text-muted-foreground border border-muted"
-        };
       case "draft":
-        return {
-          variant: "secondary" as const,
-          label: "Черновик",
-          className: "bg-muted text-muted-foreground border border-muted"
-        };
-      case "completed":
-      case "finished":
-        return {
-          variant: "success" as const,
-          label: "Завершено",
-          className: "bg-success/20 text-success border border-success/30"
-        };
-      case "cancelled":
-        return {
-          variant: "destructive" as const,
-          label: "Отменено",
-          className: "bg-destructive/20 text-destructive border border-destructive/30"
-        };
+        return "info";
       default:
-        return {
-          variant: "secondary" as const,
-          label: status,
-          className: "bg-muted text-muted-foreground border border-muted"
-        };
+        return "info";
     }
   };
 
-  const config = getStatusConfig(status);
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved": return "Одобрено";
+      case "rejected": return "Отклонено";
+      case "pending": return "На рассмотрении";
+      case "active": return "Активно";
+      case "inactive": return "Неактивно";
+      case "draft": return "Черновик";
+      case "completed": return "Завершено";
+      case "cancelled": return "Отменено";
+      case "online": return "В сети";
+      case "offline": return "Не в сети";
+      case "waiting": return "Ожидание";
+      case "review": return "На проверке";
+      case "success": return "Успешно";
+      case "failed": return "Ошибка";
+      case "finished": return "Завершено";
+      case "denied": return "Отказано";
+      default: return status;
+    }
+  };
+
+  const statusType = getStatusMapping(status);
+  const label = getStatusLabel(status);
+  const statusClasses = getStatusClasses(statusType, 'badge');
 
   return (
     <Badge
-      variant={config.variant}
       className={cn(
         "px-2 py-1 rounded-full text-xs font-medium transition-all duration-200",
-        config.className,
+        statusClasses,
         className
       )}
     >
-      {config.label}
+      {label}
     </Badge>
   );
 } 

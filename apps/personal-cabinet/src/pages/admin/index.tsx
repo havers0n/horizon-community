@@ -60,7 +60,9 @@ export default function AdminPanelPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button asChild className="w-full"><Link to="/admin/applications">Заявки кандидатов</Link></Button>
+                  <Button asChild className="w-full">
+                    <Link to="/admin/applications">Заявки кандидатов</Link>
+                  </Button>
                   <Button className="w-full">Просмотр всех пользователей</Button>
                   <Button variant="outline" className="w-full">Добавить пользователя</Button>
                   <Button variant="outline" className="w-full">Массовые операции</Button>
@@ -125,9 +127,13 @@ export default function AdminPanelPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button asChild className="w-full"><Link to="/admin/tests">Тесты и экзамены</Link></Button>
+                  <Button asChild className="w-full">
+                    <Link to="/admin/tests">Тесты и экзамены</Link>
+                  </Button>
                   <Button variant="outline" className="w-full">Шаблоны отчетов</Button>
-                  <Button asChild variant="outline" className="w-full"><Link to="/admin/documents">Документация</Link></Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/admin/documents">Документация</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

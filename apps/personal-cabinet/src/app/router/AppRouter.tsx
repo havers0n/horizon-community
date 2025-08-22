@@ -13,11 +13,6 @@ const pages = {
   Dashboard: React.lazy(() => import('@/pages/dashboard')),
   Profile: React.lazy(() => import('@/pages/profile')),
   Settings: React.lazy(() => import('@/pages/settings')),
-  Departments: React.lazy(() => import('@/pages/departments')),
-  Applications: React.lazy(() => import('@/pages/applications')),
-  Reports: React.lazy(() => import('@/pages/reports')),
-  Tests: React.lazy(() => import('@/pages/tests')),
-  Support: React.lazy(() => import('@/pages/support')),
   AdminPanel: React.lazy(() => import('@/pages/admin')),
   FAQ: React.lazy(() => import('@/pages/faq')),
   Gallery: React.lazy(() => import('@/pages/gallery')),
@@ -26,9 +21,6 @@ const pages = {
   
   // Specialized pages
   AdminTests: React.lazy(() => import('@/pages/admin/tests')),
-  ApplicationTest: React.lazy(() => import('@/pages/applications/test')),
-  TestSession: React.lazy(() => import('@/pages/tests/session')),
-  TestResult: React.lazy(() => import('@/pages/tests/result')),
   AdminApplications: React.lazy(() => import('@/pages/admin/applications')),
   AdminGalleryModeration: React.lazy(() => import('@/pages/admin/gallery-moderation')),
   AdminDocuments: React.lazy(() => import('@/pages/admin/documents')),
@@ -57,14 +49,6 @@ export function AppRouter() {
           <Route path="/dashboard" element={<pages.Dashboard />} />
           <Route path="/profile" element={<pages.Profile />} />
           <Route path="/settings" element={<pages.Settings />} />
-          <Route path="/departments" element={<pages.Departments />} />
-          <Route path="/applications" element={<pages.Applications />} />
-          <Route path="/applications/test/:testId" element={<pages.ApplicationTest />} />
-          <Route path="/reports" element={<pages.Reports />} />
-          <Route path="/tests" element={<pages.Tests />} />
-          <Route path="/tests/session/:sessionId" element={<pages.TestSession />} />
-          <Route path="/tests/result/:resultId" element={<pages.TestResult />} />
-          <Route path="/support" element={<pages.Support />} />
           <Route path="/gallery" element={<pages.Gallery />} />
           
           {/* Administrative routes */}
@@ -72,7 +56,6 @@ export function AppRouter() {
             path="/admin/*" 
             element={
               <>
-                {console.log('%c[AppRouter] Admin route accessed!', 'color: orange; font-weight: bold;')}
                 <PermissionGuard permission="admin.panel.access">
                   <Routes>
                     <Route index element={<pages.AdminPanel />} />

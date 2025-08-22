@@ -1,20 +1,3 @@
-import { useTheme as useNextTheme } from 'next-themes'
-
-export function useTheme() {
-  const { theme, setTheme, systemTheme } = useNextTheme()
-  
-  const toggleTheme = () => {
-    if (theme === 'dark') {
-      setTheme('light')
-    } else {
-      setTheme('dark')
-    }
-  }
-
-  return {
-    theme: theme || 'light',
-    setTheme,
-    toggleTheme,
-    systemTheme
-  }
-} 
+// This file is deprecated - use theme-provider.tsx instead
+// Re-export from theme-provider to maintain compatibility
+export { useTheme } from './theme-provider' 

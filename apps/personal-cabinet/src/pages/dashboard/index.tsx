@@ -20,12 +20,12 @@ import { isCandidate, isMember, isCitizen, isAdmin } from '@roleplay-identity/sh
 import { CadetDashboard } from '@/features/dashboard/ui/cadet-dashboard';
 
 
-// Компонент загрузки
+// Loading component
 const DashboardSkeleton = () => (
   <div className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {[...Array(6)].map((_, i) => (
-        <Card key={i} className="card-horizon">
+        <Card key={i}>
           <CardContent className="p-6">
             <Skeleton className="h-4 w-3/4 mb-4" />
             <Skeleton className="h-20 w-full" />
@@ -36,9 +36,9 @@ const DashboardSkeleton = () => (
   </div>
 );
 
-// Компонент ошибки
+// Error component
 const DashboardError = ({ error }: { error: Error }) => (
-  <Card className="card-horizon">
+  <Card>
     <CardContent className="p-6 text-center">
       <Stack space="sm" className="items-center">
         <H3>Ошибка загрузки данных</H3>
@@ -224,8 +224,8 @@ export default function Dashboard() {
             <Muted>Ваш прогресс и действия</Muted>
           </Stack>
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-400">
-              Департамент: <span className="font-medium text-gray-200">{cadetDepartmentName || 'Не указан'}</span>
+            <div className="text-sm text-muted-foreground">
+              Департамент: <span className="font-medium text-foreground">{cadetDepartmentName || 'Не указан'}</span>
             </div>
           </div>
           <CadetDashboard track={activeTrack} />
@@ -324,7 +324,7 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-6 py-6 space-y-6">
+      <div className="container mx-auto px-6 py-6 space-y-8">
         {/* Шапка страницы */}
         <div className="flex items-start justify-between">
           <Stack space="xs">
@@ -332,7 +332,7 @@ export default function Dashboard() {
             <Muted>Ваши быстрые действия и актуальная информация</Muted>
           </Stack>
           <div className="text-right">
-            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
               Активен
             </div>
           </div>
@@ -411,7 +411,7 @@ export default function Dashboard() {
           // Dashboard для участников сообщества и администраторов
           <div className="space-y-6">
             {/* Member Dashboard Grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* Profile Widget */}
               <ProfileWidget {
                 ...{
@@ -446,7 +446,7 @@ export default function Dashboard() {
           // Dashboard для граждан
           <div className="space-y-6">
             {/* Welcome Block для граждан */}
-            <Card className="card-horizon">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <Stack space="xs">
@@ -461,7 +461,7 @@ export default function Dashboard() {
                     </Muted>
                   </Stack>
                   <div className="text-right">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
                       Активен
                     </div>
                   </div>
@@ -470,7 +470,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Citizen Dashboard Grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* Profile Widget */}
               <ProfileWidget {
                 ...{
@@ -503,7 +503,7 @@ export default function Dashboard() {
           </div>
         ) : (
           // Fallback для неизвестных ролей
-          <Card className="card-horizon">
+          <Card>
             <CardContent className="p-6">
               <div className="text-center">
                 <Stack space="sm" className="items-center">
