@@ -3,6 +3,8 @@
 // Правило №1: Импортируем базовые типы
 import type { Database, Tables } from '@roleplay-identity/db-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { AppError } from '../../utils/AppError';
+import type { CreateLeaveRequestDto, LeaveRequest } from '../../types/services';
 
 // Интерфейсы для DI
 import type { ApplicationService } from './ApplicationService';
@@ -706,5 +708,207 @@ export class CabinetService {
       reputation: 0,
       achievements: 0,
     };
+  }
+
+  /**
+   * Создает новую заявку на отпуск
+   * Правило №２: Вся бизнес-логика в сервисе
+   */
+  public async createLeaveRequest(data: CreateLeaveRequestDto): Promise<string> {
+    try {
+      // Вызываем RPC функцию с параметрами
+      const { data: newLeaveId, error } = await this.supabase.rpc('create_leave_request', {
+        p_start_date: data.p_start_date,
+        p_end_date: data.p_end_date,
+        p_reason: data.p_reason,
+      });
+
+      if (error) {
+        console.error('Database error in createLeaveRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      if (!newLeaveId) {
+        throw new AppError('Failed to create leave request: no ID returned', 500);
+      }
+
+      return newLeaveId;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in createLeaveRequest:', error);
+      throw new AppError('Failed to create leave request', 500);
+    }
+  }
+
+  /**
+   * Получает историю заявок на отпуск пользователя
+   * Правило №２: Бизнес-логика в сервисе
+   */
+  public async getMyLeaves(): Promise<LeaveRequest[]> {
+    try {
+      // Вызываем RPC функцию для получения списка заявок
+      const { data, error } = await this.supabase.rpc('get_my_leaves');
+
+      if (error) {
+        console.error('Database error in getMyLeaves:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as LeaveRequest[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getMyLeaves:', error);
+      throw new AppError('Failed to get leave requests', 500);
+    }
+  }
+
+  /**
+   * Административные методы для управления заявками на отпуск
+   */
+
+  /**
+   * Получает все заявки на отпуск для администраторов
+   * TODO: Replace with real database calls once schema is updated
+   */
+  public async getAllLeaveRequests(filters?: {
+    status?: string;
+    department_id?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    items: any[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    try {
+      const { data, error } = await (this.supabase as any).rpc('get_all_leave_requests');
+      
+      if (error) {
+        throw new AppError(`Database RPC error: ${error.message}`, 500);
+      }
+      
+      let requests = (data || []) as any[];
+      
+      // Filter by status if provided
+      if (filters?.status && filters.status !== 'all') {
+        requests = requests.filter((req: any) => req.status_code === filters.status);
+      }
+      
+      // Apply pagination
+      const page = Math.max(1, filters?.page || 1);
+      const limit = Math.min(100, Math.max(1, filters?.limit || 20));
+      const offset = (page - 1) * limit;
+      const paginatedRequests = requests.slice(offset, offset + limit);
+      
+      return {
+        items: paginatedRequests,
+        total: requests.length,
+        page,
+        limit
+      };
+    } catch (error) {
+      console.error('Unexpected error in getAllLeaveRequests:', error);
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to get leave requests', 500);
+    }
+  }
+
+  /**
+   * Одобряет заявку на отпуск
+   * TODO: Replace with real database calls once schema is updated
+   */
+  public async approveLeaveRequest(requestId: string, approverId: string): Promise<any> {
+    try {
+      const { error } = await (this.supabase as any).rpc('approve_leave_request', {
+        p_leave_id: requestId
+      });
+      
+      if (error) {
+        throw new AppError(`Database RPC error on approve: ${error.message}`, 500);
+      }
+      
+      // Return success response
+      return {
+        success: true,
+        message: 'Leave request approved successfully'
+      };
+    } catch (error) {
+      console.error('Unexpected error in approveLeaveRequest:', error);
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to approve leave request', 500);
+    }
+  }
+
+  /**
+   * Отклоняет заявку на отпуск
+   * TODO: Replace with real database calls once schema is updated
+   */
+  public async rejectLeaveRequest(requestId: string, approverId: string, reason?: string): Promise<any> {
+    try {
+      const { error } = await (this.supabase as any).rpc('reject_leave_request', {
+        p_leave_id: requestId,
+        p_rejection_reason: reason || null
+      });
+      
+      if (error) {
+        throw new AppError(`Database RPC error on reject: ${error.message}`, 500);
+      }
+      
+      // Return success response
+      return {
+        success: true,
+        message: 'Leave request rejected successfully'
+      };
+    } catch (error) {
+      console.error('Unexpected error in rejectLeaveRequest:', error);
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to reject leave request', 500);
+    }
+  }
+
+  /**
+   * Получает конкретную заявку на отпуск по ID
+   * TODO: Replace with real database calls once schema is updated
+   */
+  public async getLeaveRequestById(requestId: string): Promise<any> {
+    try {
+      // Mock data retrieval
+      const mockRequest = {
+        id: requestId,
+        user_id: 'user1',
+        start_date: '2024-07-15',
+        end_date: '2024-07-30',
+        reason: 'Летний отпуск',
+        status_code: 'in_review',
+        status_name: 'На рассмотрении',
+        created_at: '2024-06-01T10:00:00Z',
+        updated_at: '2024-06-01T10:00:00Z',
+        users: {
+          username: 'ivan_petrov',
+          first_name: 'Иван',
+          last_name: 'Петров'
+        },
+        departments: {
+          name: 'IT Department'
+        }
+      };
+
+      return mockRequest;
+    } catch (error) {
+      console.error('Unexpected error in getLeaveRequestById:', error);
+      throw new AppError('Failed to get leave request', 500);
+    }
   }
 }

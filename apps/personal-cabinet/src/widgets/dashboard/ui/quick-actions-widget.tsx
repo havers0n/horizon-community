@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { QuickActionsWidgetProps } from '@/features/dashboard/model/types';
+import { LeaveRequestButton } from '@/features/request-leave';
 import { 
   ArrowUp,
   ArrowUpDown,
@@ -49,18 +50,27 @@ export const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ actions 
               Карьера
             </h4>
             <div className="grid grid-cols-2 gap-2">
-              {careerActions.map((action) => (
-                <Button
-                  key={action.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={action.action}
-                  className="h-auto p-3 flex flex-col items-center justify-center space-y-1 text-xs"
-                >
-                  {getActionIcon(action.icon)}
-                  <span className="text-center">{action.title}</span>
-                </Button>
-              ))}
+              {careerActions.map((action) => {
+                // Особая обработка для кнопки отпуска
+                if (action.title.includes('Отпуск')) {
+                  return (
+                    <LeaveRequestButton key={action.id} />
+                  );
+                }
+                
+                return (
+                  <Button
+                    key={action.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={action.action}
+                    className="h-auto p-3 flex flex-col items-center justify-center space-y-1 text-xs"
+                  >
+                    {getActionIcon(action.icon)}
+                    <span className="text-center">{action.title}</span>
+                  </Button>
+                );
+              })}
             </div>
           </div>
         )}

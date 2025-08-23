@@ -29,6 +29,24 @@ export interface UpdateSettingsData {
   };
 }
 
+// Типы для заявок на отпуск
+export interface LeaveRequest {
+  id: string; // uuid
+  start_date: string; // date string 'YYYY-MM-DD'
+  end_date: string; // date string 'YYYY-MM-DD'
+  reason: string;
+  created_at: string; // timestamp string
+  status_name: string; // e.g., 'На рассмотрении', 'Одобрен', 'Отклонен'
+  status_code: string; // e.g., 'in_review', 'approved', 'rejected'
+  approver_full_name: string | null;
+}
+
+export interface CreateLeaveRequestDto {
+  p_start_date: string; // date string 'YYYY-MM-DD'
+  p_end_date: string; // date string 'YYYY-MM-DD'
+  p_reason: string;
+}
+
 // API ответы
 export interface CabinetApiResponse<T> {
   success: boolean;
@@ -67,4 +85,15 @@ export const cabinetApi = {
       departmentsCount: number;
       lastActivity: string | null;
     }>>('/cabinet/stats'),
+
+  // Заявки на отпуск
+  createLeaveRequest: async (data: CreateLeaveRequestDto): Promise<LeaveRequest> => {
+    const response = await apiClient.post('/cabinet/rpc/create_leave_request', data);
+    return response.data || response;
+  },
+
+  getMyLeaves: async (): Promise<LeaveRequest[]> => {
+    const response = await apiClient.post('/cabinet/rpc/get_my_leaves', {});
+    return response.data || response;
+  },
 }; 

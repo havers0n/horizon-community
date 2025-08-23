@@ -944,6 +944,7 @@ export type Database = {
           id: string
           reason: string | null
           start_date: string
+          status_id: string | null
           user_id: string
         }
         Insert: {
@@ -954,6 +955,7 @@ export type Database = {
           id?: string
           reason?: string | null
           start_date: string
+          status_id?: string | null
           user_id: string
         }
         Update: {
@@ -964,6 +966,7 @@ export type Database = {
           id?: string
           reason?: string | null
           start_date?: string
+          status_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -979,6 +982,13 @@ export type Database = {
             columns: ["character_id"]
             isOneToOne: false
             referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaves_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -2921,6 +2931,35 @@ export type Database = {
         Args: { doc_id: string }
         Returns: boolean
       }
+      create_leave_request: {
+        Args: { p_end_date: string; p_reason: string; p_start_date: string }
+        Returns: string
+      }
+      create_membership: {
+        Args: {
+          p_department_id: string
+          p_division_id: string
+          p_is_primary: boolean
+          p_rank_id: string
+          p_user_id: string
+        }
+        Returns: {
+          active_character_id: string | null
+          badge_number: string | null
+          callsign: string | null
+          department_id: string
+          division_id: string | null
+          ended_at: string | null
+          id: string
+          is_primary: boolean
+          practice_hours: number
+          rank_id: string | null
+          started_at: string
+          status_id: string
+          trainings_completed: number
+          user_id: string
+        }[]
+      }
       create_new_application: {
         Args: { p_data: Json }
         Returns: Json
@@ -3014,6 +3053,10 @@ export type Database = {
       delete_character: {
         Args: { p_character_id: string }
         Returns: boolean
+      }
+      delete_membership: {
+        Args: { p_membership_id: string }
+        Returns: undefined
       }
       delete_role: {
         Args: { p_role_id: string }
@@ -3486,6 +3529,13 @@ export type Database = {
         Args: { p_owner_id: string }
         Returns: Database["public"]["CompositeTypes"]["character_with_profile"][]
       }
+      get_divisions_for_department: {
+        Args: { p_department_id: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       get_my_characters: {
         Args: Record<PropertyKey, never> | { p_user_id: string }
         Returns: {
@@ -3513,6 +3563,31 @@ export type Database = {
           updated_at: string | null
           user_id: string
           weight: string | null
+        }[]
+      }
+      get_my_dashboard_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_my_leaves: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approver_full_name: string
+          created_at: string
+          end_date: string
+          id: string
+          reason: string
+          start_date: string
+          status_code: string
+          status_name: string
+        }[]
+      }
+      get_ranks_for_department: {
+        Args: { p_department_id: string }
+        Returns: {
+          id: string
+          name: string
+          order: number
         }[]
       }
       get_role_permissions: {
@@ -3616,6 +3691,25 @@ export type Database = {
           id: string
           logo_url: string
           name: string
+        }[]
+      }
+      get_user_memberships: {
+        Args: { p_user_id: string }
+        Returns: {
+          active_character_id: string | null
+          badge_number: string | null
+          callsign: string | null
+          department_id: string
+          division_id: string | null
+          ended_at: string | null
+          id: string
+          is_primary: boolean
+          practice_hours: number
+          rank_id: string | null
+          started_at: string
+          status_id: string
+          trainings_completed: number
+          user_id: string
         }[]
       }
       get_user_notifications: {
@@ -3787,6 +3881,31 @@ export type Database = {
       update_character_medical_info: {
         Args: { p_character_id: string; p_new_medical_info: Json }
         Returns: Json
+      }
+      update_membership: {
+        Args: {
+          p_department_id: string
+          p_division_id: string
+          p_is_primary: boolean
+          p_membership_id: string
+          p_rank_id: string
+        }
+        Returns: {
+          active_character_id: string | null
+          badge_number: string | null
+          callsign: string | null
+          department_id: string
+          division_id: string | null
+          ended_at: string | null
+          id: string
+          is_primary: boolean
+          practice_hours: number
+          rank_id: string | null
+          started_at: string
+          status_id: string
+          trainings_completed: number
+          user_id: string
+        }[]
       }
       update_role: {
         Args: {

@@ -10,7 +10,8 @@ import {
   TestTube,
   Settings,
   BarChart3,
-  Database
+  Database,
+  CalendarDays
 } from 'lucide-react';
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -63,6 +64,12 @@ export const ADMIN_SIDEBAR_CONFIG: NavGroup[] = [
         href: '/admin/departments',
         icon: Building2,
         requiredPermissions: ['admin.departments.read', 'admin.departments.manage'],
+      },
+      {
+        label: 'Управление отпусками',
+        href: '/admin/leave-management',
+        icon: CalendarDays,
+        requiredPermissions: ['admin.leave.manage', 'admin.leave.approve'],
       },
     ],
   },

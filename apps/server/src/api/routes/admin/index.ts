@@ -4,6 +4,7 @@ import supportRoutes from './support.routes';
 import userMetadataRoutes from './user-metadata';
 import testsRoutes from './tests.routes';
 import applicationsRoutes from './applications.routes';
+import leaveRequestsRoutes from './leave-requests.routes';
 import { requirePermission } from '../../middleware/auth.middleware';
 import { GalleryService } from '../../../core/services/GalleryService';
 import { TestAdminService } from '../../../core/services/TestAdminService';
@@ -44,6 +45,7 @@ router.use('/support', supportRoutes);
 router.use('/user-metadata', userMetadataRoutes);
 router.use('/tests', testsRoutes);
 router.use('/', applicationsRoutes);
+router.use('/', leaveRequestsRoutes);
 
 // === Gallery Moderation ===
 // GET /api/v1/admin/gallery/pending

@@ -30,6 +30,20 @@ const updateSettingsSchema = z.object({
   }).optional(),
 });
 
+// Схема валидации для заявок на отпуск
+const createLeaveRequestSchema = z.object({
+  p_start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должна быть в формате YYYY-MM-DD'),
+  p_end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должна быть в формате YYYY-MM-DD'),
+  p_reason: z.string().min(10, 'Причина должна содержать минимум 10 символов').max(500, 'Причина не может превышать 500 символов'),
+}).refine((data) => {
+  const startDate = new Date(data.p_start_date);
+  const endDate = new Date(data.p_end_date);
+  return endDate >= startDate;
+}, {
+  message: 'Дата окончания отпуска не может быть раньше даты начала',
+  path: ['p_end_date'],
+});
+
 export function createCabinetRoutes(services: ServicesContainer): Router {
   const router = Router();
 
@@ -166,6 +180,28 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     authenticateToken,
     validateRequest({}), // Декларативная валидация (пустая для GET)
     (req, res, next) => buildController(req).getUserComplaints(req, res, next)
+  );
+
+  /**
+   * POST /api/v1/cabinet/rpc/create_leave_request
+   * Создать новую заявку на отпуск
+   */
+  router.post(
+    '/rpc/create_leave_request',
+    authenticateToken,
+    validateRequest({ body: createLeaveRequestSchema }),
+    (req, res, next) => buildController(req).createLeaveRequest(req, res, next)
+  );
+
+  /**
+   * POST /api/v1/cabinet/rpc/get_my_leaves
+   * Получить список заявок на отпуск пользователя
+   */
+  router.post(
+    '/rpc/get_my_leaves',
+    authenticateToken,
+    validateRequest({}), // Пустое тело для RPC вызова
+    (req, res, next) => buildController(req).getMyLeaves(req, res, next)
   );
 
   return router;

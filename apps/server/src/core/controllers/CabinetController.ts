@@ -2,6 +2,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import type { CabinetService } from '../services/CabinetService';
+import type { CreateLeaveRequestDto } from '../../types/services';
 
 export class CabinetController {
   constructor(private cabinetService: CabinetService) {}
@@ -179,4 +180,135 @@ export class CabinetController {
       next(error);
     }
   }
+
+  /**
+   * Создать новую заявку на отпуск
+   * Правило №３: Контроллер остается "тонким" - только связующее звено
+   */
+  public createLeaveRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const leaveData: CreateLeaveRequestDto = req.body;
+      
+      const newLeaveId = await this.cabinetService.createLeaveRequest(leaveData);
+      
+      res.status(201).json({
+        success: true,
+        data: { id: newLeaveId },
+        message: 'Leave request created successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Получить список заявок на отпуск пользователя
+   * Правило №３: Контроллер остается "тонким" - только связующее звено
+   */
+  public getMyLeaves = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const leaves = await this.cabinetService.getMyLeaves();
+      
+      res.status(200).json({
+        success: true,
+        data: leaves
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Административные методы для управления заявками на отпуск
+   */
+
+  /**
+   * Получить все заявки на отпуск (для администраторов)
+   */
+  public getAllLeaveRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { status, department_id, page, limit } = req.query;
+      
+      const filters = {
+        status: status as string,
+        department_id: department_id as string,
+        page: page ? parseInt(page as string) : undefined,
+        limit: limit ? parseInt(limit as string) : undefined,
+      };
+
+      const result = await this.cabinetService.getAllLeaveRequests(filters);
+      
+      res.status(200).json({
+        success: true,
+        data: result.items,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / result.limit)
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Получить конкретную заявку на отпуск по ID
+   */
+  public getLeaveRequestById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      
+      const leaveRequest = await this.cabinetService.getLeaveRequestById(id);
+      
+      res.status(200).json({
+        success: true,
+        data: leaveRequest
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Одобрить заявку на отпуск
+   */
+  public approveLeaveRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const approverId = req.user.id;
+      
+      const result = await this.cabinetService.approveLeaveRequest(id, approverId);
+      
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: 'Leave request approved successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Отклонить заявку на отпуск
+   */
+  public rejectLeaveRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      const approverId = req.user.id;
+      
+      const result = await this.cabinetService.rejectLeaveRequest(id, approverId, reason);
+      
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: 'Leave request rejected successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 } 

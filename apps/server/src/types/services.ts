@@ -20,6 +20,59 @@ import type { DepartmentService } from '../core/services/DepartmentService';
 import type { TestAdminService } from '../core/services/TestAdminService';
 import type { TestSessionService } from '../core/services/TestSessionService';
 
+// Leave request types
+export interface CreateLeaveRequestDto {
+  p_start_date: string; // date string 'YYYY-MM-DD'
+  p_end_date: string;   // date string 'YYYY-MM-DD'
+  p_reason: string;
+}
+
+export interface LeaveRequest {
+  id: string;
+  user_id: string;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status_code: string;
+  status_name: string;
+  created_at: string;
+  updated_at: string;
+  approver_id?: string;
+  rejection_reason?: string;
+  department_id?: string;
+  users?: {
+    username: string;
+    first_name?: string;
+    last_name?: string;
+  };
+  departments?: {
+    name: string;
+  };
+  approver?: {
+    username: string;
+    first_name?: string;
+    last_name?: string;
+  };
+}
+
+export interface AdminLeaveRequestFilters {
+  status?: string;
+  department_id?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface LeaveRequest {
+  id: string; // uuid
+  start_date: string; // date string 'YYYY-MM-DD'
+  end_date: string;   // date string 'YYYY-MM-DD'
+  reason: string;
+  created_at: string; // timestamp string
+  status_name: string; // e.g., 'На рассмотрении', 'Одобрен', 'Отклонен'
+  status_code: string; // e.g., 'in_review', 'approved', 'rejected'
+  approver_full_name: string | null;
+}
+
 /**
  * Интерфейс для контейнера всех сервисов
  * Теперь все сервисы - это экземпляры, а не классы

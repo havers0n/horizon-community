@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PermissionGuard } from '@/shared/ui/permission-guard';
 import { UserTable } from '@/widgets/user-table';
 import { ManageUserRolesModal } from '@/features/manage-user-roles';
+import { ManageUserCareerModal } from '@/features/manage-user-career';
 import { type UserWithRoles } from '@/shared/api/user-management';
 
 /**
@@ -12,6 +13,7 @@ import { type UserWithRoles } from '@/shared/api/user-management';
 export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isCareerModalOpen, setIsCareerModalOpen] = useState(false);
 
   // --- НАЧАЛО БЛОКА ЛОГИРОВАНИЯ АДМИН КОМПОНЕНТА ---
   React.useEffect(() => {
@@ -29,9 +31,21 @@ export default function AdminUsersPage() {
     setIsManageModalOpen(true);
   };
 
+  // Handle career management action
+  const handleManageCareer = (user: UserWithRoles) => {
+    setSelectedUser(user);
+    setIsCareerModalOpen(true);
+  };
+
   // Handle modal close
   const handleCloseModal = () => {
     setIsManageModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  // Handle career modal close
+  const handleCloseCareerModal = () => {
+    setIsCareerModalOpen(false);
     setSelectedUser(null);
   };
 
@@ -49,7 +63,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Users Table */}
-        <UserTable onManageUser={handleManageUser} />
+        <UserTable onManageUser={handleManageUser} onManageCareer={handleManageCareer} />
 
         {/* Manage User Roles Modal */}
         {isManageModalOpen && selectedUser && (
@@ -57,6 +71,15 @@ export default function AdminUsersPage() {
             user={selectedUser}
             open={isManageModalOpen}
             onClose={handleCloseModal}
+          />
+        )}
+
+        {/* Manage User Career Modal */}
+        {isCareerModalOpen && selectedUser && (
+          <ManageUserCareerModal
+            user={selectedUser}
+            open={isCareerModalOpen}
+            onClose={handleCloseCareerModal}
           />
         )}
       </div>

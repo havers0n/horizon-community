@@ -2,7 +2,7 @@ import { Layout } from '@/shared/ui';
 import { Card, CardContent, Skeleton } from '@/shared/ui';
 import { H2, H3, Muted, Stack } from '@/shared/ui';
 import { transformDashboardData } from '@/features/dashboard/model/types';
-import { ProfileWidget } from '@/widgets/dashboard/ui/profile-widget';
+import { ProfileSummaryWidget } from '@/widgets/profile-summary';
 import { FeedWidget } from '@/widgets/dashboard/ui/feed-widget';
 import { QuickActionsWidget } from '@/widgets/dashboard/ui/quick-actions-widget';
 import { AnnouncementsWidget } from '@/widgets/dashboard/ui/announcements-widget';
@@ -65,7 +65,8 @@ export default function Dashboard() {
         navigate('/applications/combination');
         break;
       case 'vacation':
-        navigate('/applications/vacation');
+        // Для отпуска используем встроенный компонент LeaveRequestButton
+        // Кнопка будет открывать модальное окно напрямую
         break;
       case 'report':
         navigate('/reports/new');
@@ -366,22 +367,8 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Member Dashboard Grid */}
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {/* Profile Widget */}
-              <ProfileWidget {
-                ...{
-                  userName: session.user.username || 'Пользователь',
-                  departments: (Array.isArray(session.statuses) && session.statuses.length > 0)
-                    ? session.statuses.join(', ')
-                    : (isAdmin ? 'Системная роль: Администратор' : 'Не указан'),
-                  rank: '-',
-                  unit: '-',
-                  status: ((Array.isArray(session.statuses) && session.statuses.length > 0) || isAdminRole || hasAdminPermission) ? 'Active' : 'Inactive',
-                  gameWarnings: 0,
-                  adminWarnings: 0,
-                  avatarUrl: undefined,
-                  initials: (session.user.username || 'П').slice(0, 2).toUpperCase(),
-                }
-              } />
+              {/* Profile Summary Widget */}
+              <ProfileSummaryWidget />
 
               {/* Quick Actions Widget */}
               <QuickActionsWidget actions={quickActions} />

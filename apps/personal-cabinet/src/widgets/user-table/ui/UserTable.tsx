@@ -6,17 +6,19 @@ import { Input } from '@/shared/ui/input';
 import { Badge } from '@/shared/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { Settings, Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Settings, Search, Users, ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useDebounce } from '@/shared/hooks/use-debounce';
 import { userManagementApi, type UserWithRoles } from '@/shared/api/user-management';
+import { PermissionGuard } from '@/shared/ui/permission-guard';
 
 interface UserTableProps {
   onManageUser?: (user: UserWithRoles) => void;
+  onManageCareer?: (user: UserWithRoles) => void;
   className?: string;
 }
 
-export function UserTable({ onManageUser, className }: UserTableProps) {
+export function UserTable({ onManageUser, onManageCareer, className }: UserTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageLimit = 20;
@@ -157,6 +159,11 @@ export function UserTable({ onManageUser, className }: UserTableProps) {
     onManageUser?.(user);
   };
 
+  // Handle manage career button click
+  const handleManageCareer = (user: UserWithRoles) => {
+    onManageCareer?.(user);
+  };
+
   // Format date for display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
@@ -292,15 +299,29 @@ export function UserTable({ onManageUser, className }: UserTableProps) {
                           {user.last_sign_in_at ? formatDate(user.last_sign_in_at) : 'Никогда'}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleManageUser(user)}
-                            className="h-8 w-8 p-0"
-                            title="Управлять ролями"
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleManageUser(user)}
+                              className="h-8 w-8 p-0"
+                              title="Управлять ролями"
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            
+                            <PermissionGuard permission="memberships.manage">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleManageCareer(user)}
+                                className="h-8 w-8 p-0"
+                                title="Управлять карьерой"
+                              >
+                                <TrendingUp className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
