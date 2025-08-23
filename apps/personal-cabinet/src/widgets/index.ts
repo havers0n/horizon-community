@@ -2,6 +2,8 @@
 export { LeaveManagementWidget } from './leave-management'
 export { TransferDepartmentWidget } from './transfer-department'
 export { JointPositionsWidget } from './joint-positions'
+export { MyJointPositionsHistoryTable } from './my-joint-positions-history'
+export { MyTransfersHistoryTable } from './my-transfers-history'
 export { EntryApplicationWidget } from './entry-application'
 export { TestExamWidget } from './test-exam'
 export { NotificationsWidget } from './notifications'

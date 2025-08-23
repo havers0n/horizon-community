@@ -11,7 +11,8 @@ import {
   Settings,
   BarChart3,
   Database,
-  CalendarDays
+  CalendarDays,
+  UserX
 } from 'lucide-react';
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -70,6 +71,12 @@ export const ADMIN_SIDEBAR_CONFIG: NavGroup[] = [
         href: '/admin/leave-management',
         icon: CalendarDays,
         requiredPermissions: ['admin.leave.manage', 'admin.leave.approve'],
+      },
+      {
+        label: 'Управление совмещениями',
+        href: '/admin/joint-positions',
+        icon: UserX,
+        requiredPermissions: ['admin.joint_positions.manage'],
       },
     ],
   },

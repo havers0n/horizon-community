@@ -73,6 +73,82 @@ export interface LeaveRequest {
   approver_full_name: string | null;
 }
 
+// Joint Position Request types
+export interface CreateJointPositionRequestDto {
+  p_secondary_department_id: string; // uuid
+  p_reason: string;
+}
+
+export interface JointPositionRequest {
+  id: string; // uuid
+  user_id: string; // uuid
+  secondary_department_id: string; // uuid
+  reason: string;
+  status_code: string; // e.g., 'pending', 'approved', 'rejected'
+  status_name: string; // e.g., 'Ожидает рассмотрения', 'Одобрен', 'Отклонен'
+  created_at: string; // timestamp string
+  updated_at: string; // timestamp string
+  approver_id?: string; // uuid
+  rejection_reason?: string;
+  // Related data
+  secondary_department?: {
+    id: string;
+    name: string;
+    code?: string;
+  };
+  approver?: {
+    username: string;
+    first_name?: string;
+    last_name?: string;
+  };
+}
+
+export interface AvailableDepartment {
+  id: string; // uuid
+  name: string;
+  code?: string;
+  description?: string;
+  is_available_for_joint?: boolean;
+}
+
+// Transfer Request types
+export interface CreateTransferRequestDto {
+  p_target_department_id: string; // uuid
+  p_reason: string;
+}
+
+export interface TransferRequest {
+  id: string; // uuid
+  user_id: string; // uuid
+  target_department_id: string; // uuid
+  reason: string;
+  status_code: string; // e.g., 'pending', 'approved', 'rejected'
+  status_name: string; // e.g., 'Ожидает рассмотрения', 'Одобрен', 'Отклонен'
+  created_at: string; // timestamp string
+  updated_at: string; // timestamp string
+  approver_id?: string; // uuid
+  rejection_reason?: string;
+  // Related data
+  target_department?: {
+    id: string;
+    name: string;
+    code?: string;
+  };
+  approver?: {
+    username: string;
+    first_name?: string;
+    last_name?: string;
+  };
+}
+
+export interface AvailableTransferDepartment {
+  id: string; // uuid
+  name: string;
+  code?: string;
+  description?: string;
+  is_available_for_transfer?: boolean;
+}
+
 /**
  * Интерфейс для контейнера всех сервисов
  * Теперь все сервисы - это экземпляры, а не классы

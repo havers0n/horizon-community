@@ -8,6 +8,7 @@ import { createAuthRoutes } from '../auth'; // <-- Импортируем фаб
 // import { createTestRoutes } from './tests';
 import { authenticateToken } from '../../middleware/auth.middleware';
 import testSessionsRoutes from './test-sessions.routes';
+import { createSupportRoutes } from './support';
 import adminRouter from '../admin';
 import { CabinetService } from '../../../core/services/CabinetService';
 import { ApplicationService } from '../../../core/services/ApplicationService';
@@ -573,6 +574,7 @@ export function createV1Router(): Router {
 
   // Подключаем новые админские роуты, включая admin/tests
   router.use('/admin', adminRouter);
+  router.use('/support', createSupportRoutes({} as any));
   router.use('/characters', createCharacterRoutes({} as any));
   router.use('/cabinet', createCabinetRoutes({} as any));
   router.use('/applications', createApplicationRoutes({} as any));

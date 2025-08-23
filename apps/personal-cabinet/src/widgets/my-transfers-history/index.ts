@@ -1,0 +1,1 @@
+export { MyTransfersHistoryTable } from './ui/MyTransfersHistoryTable';

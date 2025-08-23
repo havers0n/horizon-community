@@ -4,7 +4,31 @@
 import type { Database, Tables } from '@roleplay-identity/db-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../../utils/AppError';
-import type { CreateLeaveRequestDto, LeaveRequest } from '../../types/services';
+import type { 
+  CreateLeaveRequestDto, 
+  LeaveRequest, 
+  CreateJointPositionRequestDto, 
+  JointPositionRequest, 
+  AvailableDepartment,
+  CreateTransferRequestDto,
+  TransferRequest,
+  AvailableTransferDepartment
+} from '../../types/services';
+
+// Admin types for joint position management
+export interface AdminJointPositionRequest {
+  id: string;
+  created_at: string;
+  reason: string;
+  status_code: string;
+  status_name: string;
+  primary_department_name: string;
+  secondary_department_name: string;
+  user_full_name: string;
+  user_username: string;
+  approver_full_name: string | null;
+  rejection_reason: string | null;
+}
 
 // Интерфейсы для DI
 import type { ApplicationService } from './ApplicationService';
@@ -909,6 +933,282 @@ export class CabinetService {
     } catch (error) {
       console.error('Unexpected error in getLeaveRequestById:', error);
       throw new AppError('Failed to get leave request', 500);
+    }
+  }
+
+  /**
+   * Получает список департаментов, доступных для совмещения
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getAvailableJointDepartments(supabase: SupabaseClient): Promise<AvailableDepartment[]> {
+    try {
+      // Вызываем RPC функцию get_available_departments_for_joint_position
+      const { data, error } = await (supabase as any).rpc('get_available_departments_for_joint_position');
+
+      if (error) {
+        console.error('Database error in getAvailableJointDepartments:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as AvailableDepartment[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getAvailableJointDepartments:', error);
+      throw new AppError('Failed to get available departments for joint position', 500);
+    }
+  }
+
+  /**
+   * Создает новую заявку на совмещение
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async createJointPositionRequest(
+    supabase: SupabaseClient, 
+    data: { p_secondary_department_id: string; p_reason: string; }
+  ): Promise<string> {
+    try {
+      // Вызываем RPC функцию create_joint_position_request
+      const { data: newRequestId, error } = await (supabase as any).rpc('create_joint_position_request', {
+        p_secondary_department_id: data.p_secondary_department_id,
+        p_reason: data.p_reason,
+      });
+
+      if (error) {
+        console.error('Database error in createJointPositionRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      if (!newRequestId) {
+        throw new AppError('Failed to create joint position request: no ID returned', 500);
+      }
+
+      return newRequestId;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in createJointPositionRequest:', error);
+      throw new AppError('Failed to create joint position request', 500);
+    }
+  }
+
+  /**
+   * Получает историю заявок на совмещение текущего пользователя
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getMyJointPositionRequests(supabase: SupabaseClient): Promise<JointPositionRequest[]> {
+    try {
+      // Вызываем RPC функцию get_my_joint_position_requests
+      const { data, error } = await (supabase as any).rpc('get_my_joint_position_requests');
+
+      if (error) {
+        console.error('Database error in getMyJointPositionRequests:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as JointPositionRequest[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getMyJointPositionRequests:', error);
+      throw new AppError('Failed to get joint position requests', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Получает все заявки на совмещение для администрирования
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getAllJointPositionRequests(supabase: SupabaseClient): Promise<AdminJointPositionRequest[]> {
+    try {
+      // Вызываем RPC функцию get_all_joint_position_requests
+      const { data, error } = await (supabase as any).rpc('get_all_joint_position_requests');
+
+      if (error) {
+        console.error('Database error in getAllJointPositionRequests:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as AdminJointPositionRequest[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getAllJointPositionRequests:', error);
+      throw new AppError('Failed to get all joint position requests', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Одобряет заявку на совмещение
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async approveJointPositionRequest(supabase: SupabaseClient, requestId: string): Promise<void> {
+    try {
+      // Вызываем RPC функцию approve_joint_position_request
+      const { error } = await (supabase as any).rpc('approve_joint_position_request', {
+        p_request_id: requestId
+      });
+
+      if (error) {
+        console.error('Database error in approveJointPositionRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in approveJointPositionRequest:', error);
+      throw new AppError('Failed to approve joint position request', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Отклоняет заявку на совмещение с указанием причины
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async rejectJointPositionRequest(supabase: SupabaseClient, requestId: string, reason: string): Promise<void> {
+    try {
+      // Вызываем RPC функцию reject_joint_position_request
+      const { error } = await (supabase as any).rpc('reject_joint_position_request', {
+        p_request_id: requestId,
+        p_reason: reason
+      });
+
+      if (error) {
+        console.error('Database error in rejectJointPositionRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in rejectJointPositionRequest:', error);
+      throw new AppError('Failed to reject joint position request', 500);
+    }
+  }
+
+  /**
+   * Получает список департаментов, доступных для перевода
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getAvailableTransferDepartments(supabase: SupabaseClient): Promise<AvailableTransferDepartment[]> {
+    try {
+      // Вызываем RPC функцию get_available_departments_for_transfer
+      const { data, error } = await (supabase as any).rpc('get_available_departments_for_transfer');
+
+      if (error) {
+        console.error('Database error in getAvailableTransferDepartments:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as AvailableTransferDepartment[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getAvailableTransferDepartments:', error);
+      throw new AppError('Failed to get available departments for transfer', 500);
+    }
+  }
+
+  /**
+   * Создает новую заявку на перевод
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async createTransferRequest(
+    supabase: SupabaseClient, 
+    data: { p_target_department_id: string; p_reason: string; }
+  ): Promise<string> {
+    try {
+      // Вызываем RPC функцию create_transfer_request
+      const { data: newRequestId, error } = await (supabase as any).rpc('create_transfer_request', {
+        p_target_department_id: data.p_target_department_id,
+        p_reason: data.p_reason,
+      });
+
+      if (error) {
+        console.error('Database error in createTransferRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      if (!newRequestId) {
+        throw new AppError('Failed to create transfer request: no ID returned', 500);
+      }
+
+      return newRequestId;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in createTransferRequest:', error);
+      throw new AppError('Failed to create transfer request', 500);
+    }
+  }
+
+  /**
+   * Создает новый тикет в службу поддержки
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async createSupportTicket(
+    supabase: SupabaseClient, 
+    data: { p_title: string; p_initial_message: string; }
+  ): Promise<string> {
+    try {
+      // Вызываем RPC функцию create_support_ticket
+      const { data: newTicketId, error } = await (supabase as any).rpc('create_support_ticket', {
+        p_title: data.p_title,
+        p_initial_message: data.p_initial_message,
+      });
+
+      if (error) {
+        console.error('Database error in createSupportTicket:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      if (!newTicketId) {
+        throw new AppError('Failed to create support ticket: no ID returned', 500);
+      }
+
+      return newTicketId;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in createSupportTicket:', error);
+      throw new AppError('Failed to create support ticket', 500);
+    }
+  }
+
+  /**
+   * Получает историю заявок на перевод текущего пользователя
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getMyTransferRequests(supabase: SupabaseClient): Promise<TransferRequest[]> {
+    try {
+      // Вызываем RPC функцию get_my_transfer_requests
+      const { data, error } = await (supabase as any).rpc('get_my_transfer_requests');
+
+      if (error) {
+        console.error('Database error in getMyTransferRequests:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as TransferRequest[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getMyTransferRequests:', error);
+      throw new AppError('Failed to get transfer requests', 500);
     }
   }
 }

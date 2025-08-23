@@ -3,10 +3,9 @@ import { Card, CardContent, Skeleton } from '@/shared/ui';
 import { H2, H3, Muted, Stack } from '@/shared/ui';
 import { transformDashboardData } from '@/features/dashboard/model/types';
 import { ProfileSummaryWidget } from '@/widgets/profile-summary';
-import { FeedWidget } from '@/widgets/dashboard/ui/feed-widget';
 import { QuickActionsWidget } from '@/widgets/dashboard/ui/quick-actions-widget';
-import { AnnouncementsWidget } from '@/widgets/dashboard/ui/announcements-widget';
 import { UsefulLinksWidget } from '@/widgets/dashboard/ui/useful-links-widget';
+import { EventsWidget } from '@/widgets/dashboard/ui/events-widget';
 // Упрощаем дашборд под новую модель сессии: статистика и статусы временно отключены
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/shared/contexts/SessionContext';
@@ -52,105 +51,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { session, isLoading, error } = useSession();
 
-  // Обработчики для быстрых действий
-  const handleQuickAction = (action: string) => {
-    switch (action) {
-      case 'promotion':
-        navigate('/applications/promotion');
-        break;
-      case 'transfer':
-        navigate('/applications/transfer');
-        break;
-      case 'combination':
-        navigate('/applications/combination');
-        break;
-      case 'vacation':
-        // Для отпуска используем встроенный компонент LeaveRequestButton
-        // Кнопка будет открывать модальное окно напрямую
-        break;
-      case 'report':
-        navigate('/reports/new');
-        break;
-      case 'complaint':
-        navigate('/complaints/new');
-        break;
-      default:
-        toast.info('Функция в разработке');
-    }
-  };
 
-  // Создание действий для QuickActionsWidget
-  const createQuickActions = ({ isCandidate, isMember, isAdmin }: { isCandidate: boolean; isMember: boolean; isAdmin: boolean }) => {
-    if (isCandidate) {
-      return [
-        {
-          id: '1',
-          title: 'Подать заявку',
-          icon: 'FileText',
-          action: () => handleQuickAction('application'),
-          category: 'career' as const,
-        },
-        {
-          id: '2',
-          title: 'Пройти тест',
-          icon: 'Book',
-          action: () => handleQuickAction('test'),
-          category: 'career' as const,
-        },
-      ];
-    }
-
-    if (isMember || isAdmin) {
-      return [
-        {
-          id: '1',
-          title: '↑ Повышение',
-          icon: 'ArrowUp',
-          action: () => handleQuickAction('promotion'),
-          category: 'career' as const,
-        },
-        {
-          id: '2',
-          title: '⇄ Перевод',
-          icon: 'ArrowUpDown',
-          action: () => handleQuickAction('transfer'),
-          category: 'career' as const,
-        },
-        {
-          id: '3',
-          title: '⚯ Комбинация',
-          icon: 'Link',
-          action: () => handleQuickAction('combination'),
-          category: 'career' as const,
-        },
-        {
-          id: '4',
-          title: '✈ Отпуск',
-          icon: 'Plane',
-          action: () => handleQuickAction('vacation'),
-          category: 'career' as const,
-        },
-        {
-          id: '5',
-          title: 'Подать рапорт',
-          icon: 'FileText',
-          action: () => handleQuickAction('report'),
-          category: 'documentation' as const,
-        },
-        {
-          id: '6',
-          title: '▲ Подать жалобу',
-          icon: 'AlertTriangle',
-          action: () => handleQuickAction('complaint'),
-          category: 'documentation' as const,
-          variant: 'warning' as const,
-        },
-      ];
-    }
-
-    // Fallback для неизвестных ролей
-    return [];
-  };
 
   // Обработка состояний загрузки и ошибок
   if (isLoading) {
@@ -238,7 +139,6 @@ export default function Dashboard() {
 
   // Права пользователя из новой модели
   const { isCandidate, isMember, isAdmin } = usePermissions();
-  const quickActions = createQuickActions({ isCandidate, isMember, isAdmin });
   const hasAdminPermission = isAdmin;
   // Проверяем, ожидает ли пользователь интервью
   const isAwaitingInterview = Array.isArray(session.applications)
@@ -371,16 +271,15 @@ export default function Dashboard() {
               <ProfileSummaryWidget />
 
               {/* Quick Actions Widget */}
-              <QuickActionsWidget actions={quickActions} />
+              <QuickActionsWidget />
 
-              {/* Useful Links Widget */}
-              <UsefulLinksWidget links={transformedData.usefulLinks} />
+              {/* Events Widget (Notifications + Community Announcements) */}
+              <EventsWidget />
 
-              {/* Feed Widget */}
-              <FeedWidget activities={transformedData.feed} />
-
-              {/* Announcements Widget */}
-              <AnnouncementsWidget announcements={transformedData.announcements} />
+              {/* Useful Links moved down (less priority) */}
+              <div className="lg:col-span-3">
+                <UsefulLinksWidget links={transformedData.usefulLinks} />
+              </div>
             </div>
           </div>
         ) : (

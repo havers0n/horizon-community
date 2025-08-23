@@ -44,6 +44,18 @@ const createLeaveRequestSchema = z.object({
   path: ['p_end_date'],
 });
 
+// Схема валидации для заявок на совмещение
+const createJointPositionRequestSchema = z.object({
+  p_secondary_department_id: z.string().uuid('Идентификатор департамента должен быть валидным UUID'),
+  p_reason: z.string().min(10, 'Причина должна содержать минимум 10 символов').max(1000, 'Причина не может превышать 1000 символов'),
+});
+
+// Схема валидации для заявок на перевод
+const createTransferRequestSchema = z.object({
+  p_target_department_id: z.string().uuid('Идентификатор департамента должен быть валидным UUID'),
+  p_reason: z.string().min(10, 'Причина должна содержать минимум 10 символов').max(1000, 'Причина не может превышать 1000 символов'),
+});
+
 export function createCabinetRoutes(services: ServicesContainer): Router {
   const router = Router();
 
@@ -202,6 +214,72 @@ export function createCabinetRoutes(services: ServicesContainer): Router {
     authenticateToken,
     validateRequest({}), // Пустое тело для RPC вызова
     (req, res, next) => buildController(req).getMyLeaves(req, res, next)
+  );
+
+  /**
+   * GET /api/v1/cabinet/joint-positions/available-departments
+   * Получить список департаментов, доступных для совмещения
+   */
+  router.get(
+    '/joint-positions/available-departments',
+    authenticateToken,
+    validateRequest({}), // Пустая валидация для GET запроса
+    (req, res, next) => buildController(req).getAvailableJointDepartments(req, res, next)
+  );
+
+  /**
+   * POST /api/v1/cabinet/joint-positions/requests
+   * Создать новую заявку на совмещение
+   */
+  router.post(
+    '/joint-positions/requests',
+    authenticateToken,
+    validateRequest({ body: createJointPositionRequestSchema }), // Валидация с Zod
+    (req, res, next) => buildController(req).createJointPositionRequest(req, res, next)
+  );
+
+  /**
+   * GET /api/v1/cabinet/joint-positions/my-requests
+   * Получить список заявок на совмещение пользователя
+   */
+  router.get(
+    '/joint-positions/my-requests',
+    authenticateToken,
+    validateRequest({}), // Пустая валидация для GET запроса
+    (req, res, next) => buildController(req).getMyJointPositionRequests(req, res, next)
+  );
+
+  /**
+   * GET /api/v1/cabinet/transfers/available-departments
+   * Получить список департаментов, доступных для перевода
+   */
+  router.get(
+    '/transfers/available-departments',
+    authenticateToken,
+    validateRequest({}), // Пустая валидация для GET запроса
+    (req, res, next) => buildController(req).getAvailableTransferDepartments(req, res, next)
+  );
+
+  /**
+   * POST /api/v1/cabinet/transfers/requests
+   * Создать новую заявку на перевод
+   */
+  router.post(
+    '/transfers/requests',
+    authenticateToken,
+    validateRequest({ body: createTransferRequestSchema }), // Валидация с Zod
+    (req, res, next) => buildController(req).createTransferRequest(req, res, next)
+  );
+
+  /**
+   * GET /api/v1/cabinet/transfers/my-requests
+   * Получить список заявок на перевод пользователя
+   */
+  router.get(
+    '/transfers/my-requests',
+    authenticateToken,
+    validateRequest({}), // Пустая валидация для GET запроса
+    (req, res, next) => buildController(req).getMyTransferRequests(req, res, next)
   );
 
   return router;

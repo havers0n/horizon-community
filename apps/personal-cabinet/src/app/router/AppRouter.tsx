@@ -29,6 +29,7 @@ const pages = {
   DocumentEditor: React.lazy(() => import('@/pages/admin/documents/editor')),
   AdminRoles: React.lazy(() => import('@/pages/admin/roles')),
   AdminLeaveManagement: React.lazy(() => import('@/pages/admin/leave-management')),
+  AdminJointPositions: React.lazy(() => import('@/pages/admin/joint-positions')),
 }
 
 /**
@@ -81,6 +82,7 @@ export function AppRouter() {
                     <Route path="documents" element={<pages.AdminDocuments />} />
                     <Route path="documents/editor/:id?" element={<pages.DocumentEditor />} />
                     <Route path="leave-management" element={<pages.AdminLeaveManagement />} />
+                    <Route path="joint-positions" element={<pages.AdminJointPositions />} />
                   </Routes>
                 </AdminLayout>
               </PermissionGuard>

@@ -15,17 +15,12 @@ export const apiRateLimiter = rateLimit({
     const url = (req.originalUrl || req.url || '').toLowerCase();
     return url.startsWith('/api/v1/admin/') ? 2000 : 100;
   },
-  // Ключ — по userId, если аутентифицирован, иначе IP
-  keyGenerator: (req) => {
-    const userId = (req as any)?.user?.id;
-    return userId ? `user:${userId}` : req.ip;
-  },
   message: {
     error: 'Too many requests from this IP',
     code: 'RATE_LIMIT_EXCEEDED'
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardHeaders: true, // Включаем стандартные заголовки
+  legacyHeaders: false, // Отключаем устаревшие
   skipSuccessfulRequests: false,
   skipFailedRequests: false
 });

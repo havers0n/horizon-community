@@ -1,0 +1,1 @@
+export { MyJointPositionsHistoryTable } from './ui/MyJointPositionsHistoryTable';

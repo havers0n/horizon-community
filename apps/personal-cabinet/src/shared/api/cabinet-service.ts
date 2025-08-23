@@ -47,6 +47,66 @@ export interface CreateLeaveRequestDto {
   p_reason: string;
 }
 
+// Типы для заявок на совмещение должностей
+export interface JointPositionRequest {
+  id: string;
+  start_date: string;
+  reason: string;
+  created_at: string;
+  status_name: string;
+  status_code: string;
+  primary_department_name: string;
+  secondary_department_name: string;
+  approver_full_name: string | null;
+}
+
+export interface AvailableDepartment {
+  id: string;
+  name: string;
+}
+
+export interface CreateJointPositionRequestDto {
+  p_secondary_department_id: string;
+  p_reason: string;
+}
+
+// Типы для заявок на перевод
+export interface TransferRequest {
+  id: string;
+  reason: string;
+  created_at: string;
+  status_name: string;
+  status_code: string;
+  current_department_name: string;
+  target_department_name: string;
+  approver_full_name: string | null;
+}
+
+export interface AvailableTransferDepartment {
+  id: string;
+  name: string;
+}
+
+export interface CreateTransferRequestDto {
+  p_target_department_id: string;
+  p_reason: string;
+}
+
+// Типы для тикетов службы поддержки
+export interface SupportTicket {
+  id: string;
+  title: string;
+  initial_message: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSupportTicketDto {
+  p_title: string;
+  p_initial_message: string;
+}
+
 // API ответы
 export interface CabinetApiResponse<T> {
   success: boolean;
@@ -94,6 +154,44 @@ export const cabinetApi = {
 
   getMyLeaves: async (): Promise<LeaveRequest[]> => {
     const response = await apiClient.post('/cabinet/rpc/get_my_leaves', {});
+    return response.data || response;
+  },
+
+  // Заявки на совмещение должностей
+  getAvailableJointDepartments: async (): Promise<AvailableDepartment[]> => {
+    const response = await apiClient.get<CabinetApiResponse<AvailableDepartment[]>>('/cabinet/joint-positions/available-departments');
+    return response.data || response;
+  },
+
+  createJointPositionRequest: async (data: CreateJointPositionRequestDto): Promise<JointPositionRequest> => {
+    const response = await apiClient.post<CabinetApiResponse<JointPositionRequest>>('/cabinet/joint-positions/requests', data);
+    return response.data || response;
+  },
+
+  getMyJointPositionRequests: async (): Promise<JointPositionRequest[]> => {
+    const response = await apiClient.get<CabinetApiResponse<JointPositionRequest[]>>('/cabinet/joint-positions/my-requests');
+    return response.data || response;
+  },
+
+  // Тикеты службы поддержки
+  createSupportTicket: async (data: CreateSupportTicketDto): Promise<{ id: string }> => {
+    const response = await apiClient.post<CabinetApiResponse<{ id: string }>>('/support/tickets', data);
+    return response.data || response;
+  },
+
+  // Заявки на перевод
+  getAvailableTransferDepartments: async (): Promise<AvailableTransferDepartment[]> => {
+    const response = await apiClient.get<CabinetApiResponse<AvailableTransferDepartment[]>>('/cabinet/transfers/available-departments');
+    return response.data || response;
+  },
+
+  createTransferRequest: async (data: CreateTransferRequestDto): Promise<TransferRequest> => {
+    const response = await apiClient.post<CabinetApiResponse<TransferRequest>>('/cabinet/transfers/requests', data);
+    return response.data || response;
+  },
+
+  getMyTransferRequests: async (): Promise<TransferRequest[]> => {
+    const response = await apiClient.get<CabinetApiResponse<TransferRequest[]>>('/cabinet/transfers/my-requests');
     return response.data || response;
   },
 }; 

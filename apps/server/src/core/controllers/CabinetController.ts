@@ -2,7 +2,11 @@
 
 import { Request, Response, NextFunction } from 'express';
 import type { CabinetService } from '../services/CabinetService';
-import type { CreateLeaveRequestDto } from '../../types/services';
+import type { 
+  CreateLeaveRequestDto, 
+  CreateJointPositionRequestDto,
+  CreateTransferRequestDto
+} from '../../types/services';
 
 export class CabinetController {
   constructor(private cabinetService: CabinetService) {}
@@ -306,6 +310,305 @@ export class CabinetController {
         success: true,
         data: result,
         message: 'Leave request rejected successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Получить список департаментов, доступных для совмещения
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getAvailableJointDepartments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const departments = await this.cabinetService.getAvailableJointDepartments(supabase);
+      
+      res.status(200).json({
+        success: true,
+        data: departments
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Создать новую заявку на совмещение
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public createJointPositionRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const requestData: CreateJointPositionRequestDto = req.body;
+      
+      const newRequestId = await this.cabinetService.createJointPositionRequest(supabase, {
+        p_secondary_department_id: requestData.p_secondary_department_id,
+        p_reason: requestData.p_reason,
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: { id: newRequestId },
+        message: 'Заявка на совмещение успешно создана'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Получить список заявок на совмещение пользователя
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getMyJointPositionRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const requests = await this.cabinetService.getMyJointPositionRequests(supabase);
+      
+      res.status(200).json({
+        success: true,
+        data: requests
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Получить все заявки на совмещение для администрирования
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getAllJointPositionRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const requests = await this.cabinetService.getAllJointPositionRequests(supabase);
+      
+      res.status(200).json({
+        success: true,
+        data: requests
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Одобрить заявку на совмещение
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public approveJointPositionRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      
+      await this.cabinetService.approveJointPositionRequest(supabase, id);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Заявка на совмещение успешно одобрена'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Отклонить заявку на совмещение
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public rejectJointPositionRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      const { reason } = req.body;
+      
+      if (!reason || typeof reason !== 'string') {
+        res.status(400).json({
+          success: false,
+          error: 'Причина отклонения обязательна'
+        });
+        return;
+      }
+      
+      await this.cabinetService.rejectJointPositionRequest(supabase, id, reason);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Заявка на совмещение отклонена'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Получить список департаментов, доступных для перевода
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getAvailableTransferDepartments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const departments = await this.cabinetService.getAvailableTransferDepartments(supabase);
+      
+      res.status(200).json({
+        success: true,
+        data: departments
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Создать новую заявку на перевод
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public createTransferRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const requestData: CreateTransferRequestDto = req.body;
+      
+      const newRequestId = await this.cabinetService.createTransferRequest(supabase, {
+        p_target_department_id: requestData.p_target_department_id,
+        p_reason: requestData.p_reason,
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: { id: newRequestId },
+        message: 'Заявка на перевод успешно создана'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Создать новый тикет в службу поддержки
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public createSupportTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const { p_title, p_initial_message } = req.body;
+      
+      if (!p_title || !p_initial_message) {
+        res.status(400).json({
+          success: false,
+          error: 'Заголовок и сообщение обязательны'
+        });
+        return;
+      }
+      
+      const newTicketId = await this.cabinetService.createSupportTicket(supabase, {
+        p_title,
+        p_initial_message,
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: { id: newTicketId },
+        message: 'Тикет в службу поддержки успешно создан'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Получить список заявок на перевод пользователя
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getMyTransferRequests = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const requests = await this.cabinetService.getMyTransferRequests(supabase);
+      
+      res.status(200).json({
+        success: true,
+        data: requests
       });
     } catch (error) {
       next(error);
