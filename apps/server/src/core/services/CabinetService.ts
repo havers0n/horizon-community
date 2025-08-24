@@ -1289,22 +1289,79 @@ export class CabinetService {
    */
   public async getSupportTicketDetails(supabase: SupabaseClient, ticketId: string): Promise<any> {
     try {
+      console.log('[CabinetService] getSupportTicketDetails: Начинаем получение деталей тикета', { ticketId });
+      
       // Вызываем RPC функцию get_support_ticket_details
       const { data, error } = await (supabase as any).rpc('get_support_ticket_details', {
         p_ticket_id: ticketId
       });
 
+      console.log('[CabinetService] getSupportTicketDetails: RPC ответ', { data, error });
+
       if (error) {
-        console.error('Database error in getSupportTicketDetails:', error);
+        console.error('[CabinetService] getSupportTicketDetails: Ошибка БД:', error);
         throw new AppError(`Database error: ${error.message}`, 500);
       }
 
-      return data;
+      // Проверяем, что данные существуют и имеют правильную структуру
+      if (!data) {
+        console.warn('[CabinetService] getSupportTicketDetails: Данные отсутствуют');
+        return {
+          ticket: null,
+          messages: [],
+          error: 'Тикет не найден'
+        };
+      }
+
+      // Проверяем структуру данных
+      if (typeof data === 'object' && data !== null) {
+        console.log('[CabinetService] getSupportTicketDetails: Структура данных:', {
+          hasTicket: !!data.ticket,
+          hasMessages: !!data.messages,
+          ticketKeys: data.ticket ? Object.keys(data.ticket) : [],
+          messagesLength: data.messages ? data.messages.length : 0
+        });
+
+        // Валидируем и нормализуем данные
+        const normalizedData = {
+          ticket: data.ticket || null,
+          messages: Array.isArray(data.messages) ? data.messages : [],
+          error: null
+        };
+
+        // Проверяем обязательные поля тикета
+        if (normalizedData.ticket) {
+          if (!normalizedData.ticket.id) {
+            console.error('[CabinetService] getSupportTicketDetails: Тикет без ID');
+            normalizedData.error = 'Некорректные данные тикета';
+          }
+          
+          // Проверяем и нормализуем дату
+          if (normalizedData.ticket.created_at) {
+            const date = new Date(normalizedData.ticket.created_at);
+            if (isNaN(date.getTime())) {
+              console.warn('[CabinetService] getSupportTicketDetails: Некорректная дата создания:', normalizedData.ticket.created_at);
+              normalizedData.ticket.created_at = new Date().toISOString(); // Fallback
+            }
+          }
+        }
+
+        console.log('[CabinetService] getSupportTicketDetails: Нормализованные данные:', normalizedData);
+        return normalizedData;
+      }
+
+      console.warn('[CabinetService] getSupportTicketDetails: Неожиданный формат данных:', typeof data);
+      return {
+        ticket: null,
+        messages: [],
+        error: 'Неожиданный формат данных'
+      };
+
     } catch (error) {
       if (error instanceof AppError) {
         throw error;
       }
-      console.error('Unexpected error in getSupportTicketDetails:', error);
+      console.error('[CabinetService] getSupportTicketDetails: Неожиданная ошибка:', error);
       throw new AppError('Failed to get support ticket details', 500);
     }
   }
@@ -1319,23 +1376,41 @@ export class CabinetService {
     content: string
   ): Promise<any> {
     try {
+      console.log('[CabinetService] addMessageToSupportTicket: Начинаем добавление сообщения', {
+        ticketId,
+        contentLength: content.length,
+        contentPreview: content.substring(0, 50) + '...'
+      });
+
       // Вызываем RPC функцию add_message_to_support_ticket
       const { data, error } = await (supabase as any).rpc('add_message_to_support_ticket', {
         p_ticket_id: ticketId,
         p_content: content
       });
 
+      console.log('[CabinetService] addMessageToSupportTicket: RPC ответ', { data, error });
+
       if (error) {
-        console.error('Database error in addMessageToSupportTicket:', error);
+        console.error('[CabinetService] addMessageToSupportTicket: Ошибка БД:', error);
         throw new AppError(`Database error: ${error.message}`, 500);
       }
 
-      return data;
+      console.log('[CabinetService] addMessageToSupportTicket: Сообщение успешно добавлено, ID:', data);
+      
+      // Возвращаем обновленные данные тикета с сообщениями
+      const updatedTicketDetails = await this.getSupportTicketDetails(supabase, ticketId);
+      
+      console.log('[CabinetService] addMessageToSupportTicket: Обновленные данные тикета:', {
+        hasTicket: !!updatedTicketDetails?.ticket,
+        messagesCount: updatedTicketDetails?.messages?.length || 0
+      });
+
+      return updatedTicketDetails;
     } catch (error) {
       if (error instanceof AppError) {
         throw error;
       }
-      console.error('Unexpected error in addMessageToSupportTicket:', error);
+      console.error('[CabinetService] addMessageToSupportTicket: Неожиданная ошибка:', error);
       throw new AppError('Failed to add message to support ticket', 500);
     }
   }

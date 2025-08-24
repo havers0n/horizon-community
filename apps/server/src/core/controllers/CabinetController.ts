@@ -692,8 +692,11 @@ export class CabinetController {
    */
   public getSupportTicketDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      console.log('[CabinetController] getSupportTicketDetails: Начинаем обработку запроса');
+      
       const supabase = (req as any).supabase?.system;
       if (!supabase) {
+        console.error('[CabinetController] getSupportTicketDetails: Отсутствует Supabase system client');
         res.status(500).json({ 
           success: false, 
           error: 'Server configuration error: missing Supabase system client' 
@@ -702,8 +705,10 @@ export class CabinetController {
       }
 
       const { id } = req.params;
+      console.log('[CabinetController] getSupportTicketDetails: ID тикета:', id);
       
       if (!id) {
+        console.warn('[CabinetController] getSupportTicketDetails: ID тикета не предоставлен');
         res.status(400).json({
           success: false,
           error: 'ID тикета обязателен'
@@ -711,9 +716,38 @@ export class CabinetController {
         return;
       }
 
+      console.log('[CabinetController] getSupportTicketDetails: Вызываем сервис');
       const ticketDetails = await this.cabinetService.getSupportTicketDetails(supabase, id);
       
+      console.log('[CabinetController] getSupportTicketDetails: Результат сервиса:', {
+        hasData: !!ticketDetails,
+        hasTicket: !!ticketDetails?.ticket,
+        hasMessages: !!ticketDetails?.messages,
+        error: ticketDetails?.error
+      });
+      
       if (!ticketDetails) {
+        console.warn('[CabinetController] getSupportTicketDetails: Сервис вернул null');
+        res.status(404).json({
+          success: false,
+          error: 'Тикет не найден'
+        });
+        return;
+      }
+
+      // Проверяем наличие ошибки в данных
+      if (ticketDetails.error) {
+        console.warn('[CabinetController] getSupportTicketDetails: Ошибка в данных:', ticketDetails.error);
+        res.status(404).json({
+          success: false,
+          error: ticketDetails.error
+        });
+        return;
+      }
+
+      // Проверяем, что тикет существует
+      if (!ticketDetails.ticket) {
+        console.warn('[CabinetController] getSupportTicketDetails: Тикет отсутствует в данных');
         res.status(404).json({
           success: false,
           error: 'Тикет не найден'
@@ -721,11 +755,13 @@ export class CabinetController {
         return;
       }
       
+      console.log('[CabinetController] getSupportTicketDetails: Отправляем успешный ответ');
       res.status(200).json({
         success: true,
         data: ticketDetails
       });
     } catch (error) {
+      console.error('[CabinetController] getSupportTicketDetails: Ошибка обработки:', error);
       next(error);
     }
   };
@@ -736,8 +772,11 @@ export class CabinetController {
    */
   public addMessageToSupportTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      console.log('[CabinetController] addMessageToSupportTicket: Начинаем обработку запроса');
+      
       const supabase = (req as any).supabase?.system;
       if (!supabase) {
+        console.error('[CabinetController] addMessageToSupportTicket: Отсутствует Supabase system client');
         res.status(500).json({ 
           success: false, 
           error: 'Server configuration error: missing Supabase system client' 
@@ -748,7 +787,14 @@ export class CabinetController {
       const { id } = req.params;
       const { content } = req.body;
       
+      console.log('[CabinetController] addMessageToSupportTicket: Параметры запроса', {
+        ticketId: id,
+        contentLength: content?.length,
+        contentPreview: content?.substring(0, 50) + '...'
+      });
+      
       if (!id || !content) {
+        console.warn('[CabinetController] addMessageToSupportTicket: Отсутствуют обязательные параметры');
         res.status(400).json({
           success: false,
           error: 'ID тикета и содержимое сообщения обязательны'
@@ -756,14 +802,33 @@ export class CabinetController {
         return;
       }
       
+      console.log('[CabinetController] addMessageToSupportTicket: Вызываем сервис');
       const result = await this.cabinetService.addMessageToSupportTicket(supabase, id, content);
       
+      console.log('[CabinetController] addMessageToSupportTicket: Результат сервиса', {
+        hasData: !!result,
+        hasTicket: !!result?.ticket,
+        hasMessages: !!result?.messages,
+        messagesCount: result?.messages?.length || 0
+      });
+      
+      if (!result) {
+        console.warn('[CabinetController] addMessageToSupportTicket: Сервис вернул null');
+        res.status(500).json({
+          success: false,
+          error: 'Ошибка добавления сообщения'
+        });
+        return;
+      }
+      
+      console.log('[CabinetController] addMessageToSupportTicket: Отправляем успешный ответ');
       res.status(200).json({
         success: true,
         data: result,
         message: 'Ответ успешно добавлен'
       });
     } catch (error) {
+      console.error('[CabinetController] addMessageToSupportTicket: Ошибка обработки:', error);
       next(error);
     }
   };

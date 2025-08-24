@@ -25,6 +25,7 @@ export const useAllSupportTickets = () => {
     queryFn: getAllSupportTickets,
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Refetch every minute for real-time updates
+    select: (data) => data.data, // Извлекаем массив тикетов
   })
 }
 
@@ -33,8 +34,10 @@ export const useSupportTicketDetails = (ticketId: string | null) => {
     queryKey: QUERY_KEYS.TICKET_DETAILS(ticketId || ''),
     queryFn: () => getSupportTicketDetails(ticketId!),
     enabled: !!ticketId,
-    staleTime: 10 * 1000, // 10 seconds for more frequent updates in details
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time chat
+    staleTime: 5 * 1000, // 5 seconds for faster updates in chat
+    refetchInterval: 15 * 1000, // Refetch every 15 seconds for real-time chat
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnMount: true, // Always refetch on mount
   })
 }
 
@@ -45,13 +48,28 @@ export const useAddSupportMessage = () => {
   return useMutation({
     mutationFn: ({ ticketId, dto }: { ticketId: string; dto: AddMessageDto }) =>
       addMessageToSupportTicket(ticketId, dto),
-    onSuccess: (_, { ticketId }) => {
-      // Invalidate both the ticket details and the tickets list
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TICKET_DETAILS(ticketId) })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ALL_TICKETS })
-      toast.success('Ответ успешно отправлен')
+    onSuccess: (updatedTicketData, variables) => {
+      console.log('[useAddSupportMessage] Сообщение успешно добавлено, обновляем кэш');
+      console.log('[useAddSupportMessage] Обновленные данные:', {
+        ticketId: variables.ticketId,
+        messagesCount: updatedTicketData.messages?.length || 0
+      });
+      
+      // Обновляем кэш деталей тикета с новыми данными
+      queryClient.setQueryData(
+        QUERY_KEYS.TICKET_DETAILS(variables.ticketId),
+        updatedTicketData
+      );
+      
+      // Инвалидируем общий список тикетов для обновления счетчиков
+      queryClient.invalidateQueries({ 
+        queryKey: QUERY_KEYS.ALL_TICKETS 
+      });
+      
+      toast.success('Ответ успешно отправлен');
     },
     onError: (error: any) => {
+      console.error('[useAddSupportMessage] Ошибка добавления сообщения:', error);
       toast.error(error?.error || 'Ошибка отправки ответа')
     }
   })
@@ -106,7 +124,11 @@ export const getStatusDisplayName = (status: string) => {
       return 'Закрытые'
     case 'pending':
       return 'Ожидание'
+    case 'open':
+      return 'Открытые'
+    case 'resolved':
+      return 'Решено'
     default:
-      return status
+      return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
   }
 }
