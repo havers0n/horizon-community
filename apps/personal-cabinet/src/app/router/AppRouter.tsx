@@ -22,6 +22,7 @@ const pages = {
   
   // Specialized pages
   AdminTests: React.lazy(() => import('@/pages/admin/tests')),
+  AdminSupport: React.lazy(() => import('@/pages/admin/AdminSupport')),
   AdminApplications: React.lazy(() => import('@/pages/admin/applications')),
   AdminUsers: React.lazy(() => import('@/pages/admin/users')),
   AdminGalleryModeration: React.lazy(() => import('@/pages/admin/gallery-moderation')),
@@ -75,6 +76,7 @@ export function AppRouter() {
                   <Routes>
                     <Route index element={<pages.AdminPanel />} />
                     <Route path="tests" element={<pages.AdminTests />} />
+                    <Route path="support" element={<pages.AdminSupport />} />
                     <Route path="applications" element={<pages.AdminApplications />} />
                     <Route path="users" element={<pages.AdminUsers />} />
                     <Route path="roles" element={<pages.AdminRoles />} />

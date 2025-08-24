@@ -12,7 +12,8 @@ import {
   BarChart3,
   Database,
   CalendarDays,
-  UserX
+  UserX,
+  MessageSquare
 } from 'lucide-react';
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -88,6 +89,12 @@ export const ADMIN_SIDEBAR_CONFIG: NavGroup[] = [
         href: '/admin/applications',
         icon: FileText,
         requiredPermissions: ['applications.manage', 'applications.approve'],
+      },
+      {
+        label: 'Служба поддержки',
+        href: '/admin/support',
+        icon: MessageSquare,
+        requiredPermissions: ['admin.support.manage'],
       },
       {
         label: 'Модерация Галереи',

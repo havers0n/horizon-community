@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { cabinetApi, type CreateSupportTicketDto } from '@/shared/api/cabinet-service';
+import { cabinetApi, type CreateSupportTicketDto, type CreateComplaintDto } from '@/shared/api/cabinet-service';
 import { toast } from 'sonner';
 
 /**
@@ -25,6 +25,38 @@ export const useCreateSupportTicket = () => {
     onError: (error: any) => {
       // Show error toast
       const errorMessage = error?.response?.data?.error || error?.message || 'Произошла ошибка при создании тикета';
+      toast.error(errorMessage);
+    },
+    // Configure appropriate staleTime for caching as per project specifications
+    meta: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  });
+};
+
+/**
+ * React Query mutation hook for creating complaints
+ * Following the React Query integration pattern from project specifications
+ */
+export const useCreateComplaint = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateComplaintDto) => {
+      return await cabinetApi.createComplaint(data);
+    },
+    onSuccess: () => {
+      // Show success toast
+      toast.success('Жалоба успешно зарегистрирована и отправлена на рассмотрение.');
+      
+      // Invalidate complaints queries if they exist in the future
+      queryClient.invalidateQueries({ 
+        queryKey: ['complaints'] 
+      });
+    },
+    onError: (error: any) => {
+      // Show error toast
+      const errorMessage = error?.response?.data?.error || error?.message || 'Произошла ошибка при создании жалобы';
       toast.error(errorMessage);
     },
     // Configure appropriate staleTime for caching as per project specifications

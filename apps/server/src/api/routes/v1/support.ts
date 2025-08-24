@@ -20,6 +20,20 @@ const createSupportTicketSchema = z.object({
     .max(2000, 'Сообщение должно содержать от 10 до 2000 символов'),
 });
 
+// Схема валидации для жалоб
+const createComplaintSchema = z.object({
+  p_incident_date: z.string().min(1, 'Дата инцидента обязательна'),
+  p_title: z.string()
+    .min(5, 'Заголовок должен содержать от 5 до 200 символов')
+    .max(200, 'Заголовок должен содержать от 5 до 200 символов'),
+  p_type: z.string().min(1, 'Тип жалобы обязателен'),
+  p_participants: z.array(z.string()).min(1, 'Укажите хотя бы одного участника'),
+  p_description: z.string()
+    .min(10, 'Описание должно содержать от 10 до 2000 символов')
+    .max(2000, 'Описание должно содержать от 10 до 2000 символов'),
+  p_evidence: z.string().optional(),
+});
+
 export function createSupportRoutes(services: ServicesContainer): Router {
   const router = Router();
 
@@ -46,6 +60,17 @@ export function createSupportRoutes(services: ServicesContainer): Router {
     authenticateToken,
     validateRequest({ body: createSupportTicketSchema }),
     (req, res, next) => buildController(req).createSupportTicket(req, res, next)
+  );
+
+  /**
+   * POST /api/v1/support/complaints
+   * Создание новой жалобы
+   */
+  router.post(
+    '/complaints',
+    authenticateToken,
+    validateRequest({ body: createComplaintSchema }),
+    (req, res, next) => buildController(req).createComplaint(req, res, next)
   );
 
   return router;

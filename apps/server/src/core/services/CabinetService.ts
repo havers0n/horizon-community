@@ -12,7 +12,8 @@ import type {
   AvailableDepartment,
   CreateTransferRequestDto,
   TransferRequest,
-  AvailableTransferDepartment
+  AvailableTransferDepartment,
+  CreateComplaintDto
 } from '../../types/services';
 
 // Admin types for joint position management
@@ -1188,6 +1189,51 @@ export class CabinetService {
   }
 
   /**
+   * Создает новую жалобу
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async createComplaint(
+    supabase: SupabaseClient, 
+    data: {
+      p_incident_date: string;
+      p_title: string;
+      p_type: string;
+      p_participants: string[];
+      p_description: string;
+      p_evidence?: string;
+    }
+  ): Promise<string> {
+    try {
+      // Вызываем RPC функцию create_complaint
+      const { data: newComplaintId, error } = await (supabase as any).rpc('create_complaint', {
+        p_incident_date: data.p_incident_date,
+        p_title: data.p_title,
+        p_type: data.p_type,
+        p_participants: data.p_participants, // Массив строк автоматически преобразуется в JSONB
+        p_description: data.p_description,
+        p_evidence: data.p_evidence || '',
+      });
+
+      if (error) {
+        console.error('Database error in createComplaint:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      if (!newComplaintId) {
+        throw new AppError('Failed to create complaint: no ID returned', 500);
+      }
+
+      return newComplaintId;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in createComplaint:', error);
+      throw new AppError('Failed to create complaint', 500);
+    }
+  }
+
+  /**
    * Получает историю заявок на перевод текущего пользователя
    * Правило №2: Вся бизнес-логика в сервисе
    */
@@ -1209,6 +1255,119 @@ export class CabinetService {
       }
       console.error('Unexpected error in getMyTransferRequests:', error);
       throw new AppError('Failed to get transfer requests', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Получает все тикеты поддержки для администрирования
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getAllSupportTickets(supabase: SupabaseClient): Promise<any[]> {
+    try {
+      // Вызываем RPC функцию get_all_support_tickets
+      const { data, error } = await (supabase as any).rpc('get_all_support_tickets');
+
+      if (error) {
+        console.error('Database error in getAllSupportTickets:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as any[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getAllSupportTickets:', error);
+      throw new AppError('Failed to get all support tickets', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Получает детали конкретного тикета поддержки и всю переписку по нему
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getSupportTicketDetails(supabase: SupabaseClient, ticketId: string): Promise<any> {
+    try {
+      // Вызываем RPC функцию get_support_ticket_details
+      const { data, error } = await (supabase as any).rpc('get_support_ticket_details', {
+        p_ticket_id: ticketId
+      });
+
+      if (error) {
+        console.error('Database error in getSupportTicketDetails:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getSupportTicketDetails:', error);
+      throw new AppError('Failed to get support ticket details', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Добавляет ответ администратора в тикет поддержки
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async addMessageToSupportTicket(
+    supabase: SupabaseClient, 
+    ticketId: string, 
+    content: string
+  ): Promise<any> {
+    try {
+      // Вызываем RPC функцию add_message_to_support_ticket
+      const { data, error } = await (supabase as any).rpc('add_message_to_support_ticket', {
+        p_ticket_id: ticketId,
+        p_content: content
+      });
+
+      if (error) {
+        console.error('Database error in addMessageToSupportTicket:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in addMessageToSupportTicket:', error);
+      throw new AppError('Failed to add message to support ticket', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Изменяет статус тикета поддержки (например, закрывает тикет)
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async changeSupportTicketStatus(
+    supabase: SupabaseClient, 
+    ticketId: string, 
+    statusCode: string
+  ): Promise<any> {
+    try {
+      // Вызываем RPC функцию change_support_ticket_status
+      const { data, error } = await (supabase as any).rpc('change_support_ticket_status', {
+        p_ticket_id: ticketId,
+        p_status_code: statusCode
+      });
+
+      if (error) {
+        console.error('Database error in changeSupportTicketStatus:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in changeSupportTicketStatus:', error);
+      throw new AppError('Failed to change support ticket status', 500);
     }
   }
 }

@@ -943,6 +943,7 @@ export type Database = {
           end_date: string
           id: string
           reason: string | null
+          review_comment: string | null
           start_date: string
           status_id: string | null
           user_id: string
@@ -954,6 +955,7 @@ export type Database = {
           end_date: string
           id?: string
           reason?: string | null
+          review_comment?: string | null
           start_date: string
           status_id?: string | null
           user_id: string
@@ -965,6 +967,7 @@ export type Database = {
           end_date?: string
           id?: string
           reason?: string | null
+          review_comment?: string | null
           start_date?: string
           status_id?: string | null
           user_id?: string
@@ -1411,6 +1414,101 @@ export type Database = {
             columns: ["kind_id"]
             isOneToOne: false
             referencedRelation: "status_kinds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_requests: {
+        Row: {
+          approved_by_character_id: string | null
+          character_id: string
+          created_at: string
+          id: string
+          reason: string | null
+          review_comment: string | null
+          source_department_id: string
+          source_division_id: string | null
+          status_id: string
+          target_department_id: string
+          target_division_id: string | null
+          user_id: string
+        }
+        Insert: {
+          approved_by_character_id?: string | null
+          character_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          review_comment?: string | null
+          source_department_id: string
+          source_division_id?: string | null
+          status_id: string
+          target_department_id: string
+          target_division_id?: string | null
+          user_id: string
+        }
+        Update: {
+          approved_by_character_id?: string | null
+          character_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          review_comment?: string | null
+          source_department_id?: string
+          source_division_id?: string | null
+          status_id?: string
+          target_department_id?: string
+          target_division_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_requests_approved_by_character_id_fkey"
+            columns: ["approved_by_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_requests_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_requests_source_department_id_fkey"
+            columns: ["source_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_requests_source_division_id_fkey"
+            columns: ["source_division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_requests_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_requests_target_department_id_fkey"
+            columns: ["target_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_requests_target_division_id_fkey"
+            columns: ["target_division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
             referencedColumns: ["id"]
           },
         ]
@@ -1904,6 +2002,7 @@ export type Database = {
           participants: Json | null
           status_id: string
           title: string
+          type: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1917,6 +2016,7 @@ export type Database = {
           participants?: Json | null
           status_id: string
           title: string
+          type?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1930,6 +2030,7 @@ export type Database = {
           participants?: Json | null
           status_id?: string
           title?: string
+          type?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -2707,6 +2808,7 @@ export type Database = {
           id: string
           primary_department_id: string
           reason: string | null
+          review_comment: string | null
           secondary_department_id: string
           start_date: string | null
           status_id: string
@@ -2720,6 +2822,7 @@ export type Database = {
           id?: string
           primary_department_id: string
           reason?: string | null
+          review_comment?: string | null
           secondary_department_id: string
           start_date?: string | null
           status_id: string
@@ -2733,6 +2836,7 @@ export type Database = {
           id?: string
           primary_department_id?: string
           reason?: string | null
+          review_comment?: string | null
           secondary_department_id?: string
           start_date?: string | null
           status_id?: string
@@ -2923,6 +3027,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_message_to_support_ticket: {
+        Args: { p_content: string; p_ticket_id: string }
+        Returns: string
+      }
+      approve_joint_position_request: {
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
+      approve_leave_request: {
+        Args: { p_leave_id: string }
+        Returns: undefined
+      }
       assign_role_to_user: {
         Args: { p_role_id: string; p_user_id: string }
         Returns: undefined
@@ -2930,6 +3046,33 @@ export type Database = {
       can_read_doc: {
         Args: { doc_id: string }
         Returns: boolean
+      }
+      change_support_ticket_status: {
+        Args: { p_status_code: string; p_ticket_id: string }
+        Returns: undefined
+      }
+      create_complaint: {
+        Args:
+          | {
+              p_description: string
+              p_evidence: string
+              p_incident_date: string
+              p_participants: Json
+              p_title: string
+            }
+          | {
+              p_description: string
+              p_evidence: string
+              p_incident_date: string
+              p_participants: Json
+              p_title: string
+              p_type: string
+            }
+        Returns: string
+      }
+      create_joint_position_request: {
+        Args: { p_reason: string; p_secondary_department_id: string }
+        Returns: string
       }
       create_leave_request: {
         Args: { p_end_date: string; p_reason: string; p_start_date: string }
@@ -3041,6 +3184,14 @@ export type Database = {
           id: string
           name: string
         }[]
+      }
+      create_support_ticket: {
+        Args: { p_initial_message: string; p_title: string }
+        Returns: string
+      }
+      create_transfer_request: {
+        Args: { p_reason: string; p_target_department_id: string }
+        Returns: string
       }
       delete_bolo: {
         Args: { p_bolo_id: string }
@@ -3210,6 +3361,36 @@ export type Database = {
           name: string
         }[]
       }
+      get_all_joint_position_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approver_full_name: string
+          created_at: string
+          id: string
+          primary_department_name: string
+          reason: string
+          requester_full_name: string
+          review_comment: string
+          secondary_department_name: string
+          status_code: string
+          status_name: string
+        }[]
+      }
+      get_all_leave_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approver_full_name: string
+          created_at: string
+          end_date: string
+          id: string
+          reason: string
+          requester_full_name: string
+          review_comment: string
+          start_date: string
+          status_code: string
+          status_name: string
+        }[]
+      }
       get_all_permissions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3224,6 +3405,32 @@ export type Database = {
         Returns: {
           description: string
           display_name: string
+          id: string
+          name: string
+        }[]
+      }
+      get_all_support_tickets: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          author_username: string
+          created_at: string
+          id: string
+          status_code: string
+          status_name: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      get_available_departments_for_joint_position: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
+      get_available_departments_for_transfer: {
+        Args: Record<PropertyKey, never>
+        Returns: {
           id: string
           name: string
         }[]
@@ -3569,6 +3776,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_my_joint_position_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approver_full_name: string
+          created_at: string
+          id: string
+          primary_department_name: string
+          reason: string
+          secondary_department_name: string
+          start_date: string
+          status_code: string
+          status_name: string
+        }[]
+      }
       get_my_leaves: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3580,6 +3801,18 @@ export type Database = {
           start_date: string
           status_code: string
           status_name: string
+        }[]
+      }
+      get_my_transfer_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          reason: string
+          source_department_name: string
+          status_code: string
+          status_name: string
+          target_department_name: string
         }[]
       }
       get_ranks_for_department: {
@@ -3611,6 +3844,10 @@ export type Database = {
           title: string
           type_id: string | null
         }[]
+      }
+      get_support_ticket_details: {
+        Args: { p_ticket_id: string }
+        Returns: Json
       }
       get_unit_by_id: {
         Args: { p_unit_id: string }
@@ -3774,6 +4011,14 @@ export type Database = {
       }
       promote_candidate_to_cadet: {
         Args: { p_application_id: string }
+        Returns: undefined
+      }
+      reject_joint_position_request: {
+        Args: { p_reason: string; p_request_id: string }
+        Returns: undefined
+      }
+      reject_leave_request: {
+        Args: { p_leave_id: string; p_rejection_reason: string }
         Returns: undefined
       }
       revoke_permission_from_role: {

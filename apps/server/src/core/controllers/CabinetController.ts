@@ -5,7 +5,8 @@ import type { CabinetService } from '../services/CabinetService';
 import type { 
   CreateLeaveRequestDto, 
   CreateJointPositionRequestDto,
-  CreateTransferRequestDto
+  CreateTransferRequestDto,
+  CreateComplaintDto
 } from '../../types/services';
 
 export class CabinetController {
@@ -590,6 +591,50 @@ export class CabinetController {
   };
 
   /**
+   * Создать новую жалобу
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public createComplaint = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.public;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase client' 
+        });
+        return;
+      }
+
+      const { p_incident_date, p_title, p_type, p_participants, p_description, p_evidence } = req.body;
+      
+      if (!p_incident_date || !p_title || !p_type || !p_participants || !p_description) {
+        res.status(400).json({
+          success: false,
+          error: 'Все обязательные поля должны быть заполнены'
+        });
+        return;
+      }
+      
+      const newComplaintId = await this.cabinetService.createComplaint(supabase, {
+        p_incident_date,
+        p_title,
+        p_type,
+        p_participants,
+        p_description,
+        p_evidence: p_evidence || '',
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: { id: newComplaintId },
+        message: 'Жалоба успешно зарегистрирована'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * Получить список заявок на перевод пользователя
    * Правило №3: Контроллер остается "тонким" - только связующее звено
    */
@@ -609,6 +654,152 @@ export class CabinetController {
       res.status(200).json({
         success: true,
         data: requests
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Получить все тикеты поддержки
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getAllSupportTickets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.system;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase system client' 
+        });
+        return;
+      }
+
+      const tickets = await this.cabinetService.getAllSupportTickets(supabase);
+      
+      res.status(200).json({
+        success: true,
+        data: tickets
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Получить детали конкретного тикета поддержки
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public getSupportTicketDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.system;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase system client' 
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: 'ID тикета обязателен'
+        });
+        return;
+      }
+
+      const ticketDetails = await this.cabinetService.getSupportTicketDetails(supabase, id);
+      
+      if (!ticketDetails) {
+        res.status(404).json({
+          success: false,
+          error: 'Тикет не найден'
+        });
+        return;
+      }
+      
+      res.status(200).json({
+        success: true,
+        data: ticketDetails
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Добавить ответ в тикет поддержки
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public addMessageToSupportTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.system;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase system client' 
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      const { content } = req.body;
+      
+      if (!id || !content) {
+        res.status(400).json({
+          success: false,
+          error: 'ID тикета и содержимое сообщения обязательны'
+        });
+        return;
+      }
+      
+      const result = await this.cabinetService.addMessageToSupportTicket(supabase, id, content);
+      
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: 'Ответ успешно добавлен'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * [ADMIN] Изменить статус тикета поддержки
+   * Правило №3: Контроллер остается "тонким" - только связующее звено
+   */
+  public changeSupportTicketStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const supabase = (req as any).supabase?.system;
+      if (!supabase) {
+        res.status(500).json({ 
+          success: false, 
+          error: 'Server configuration error: missing Supabase system client' 
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      const { status_code } = req.body;
+      
+      if (!id || !status_code) {
+        res.status(400).json({
+          success: false,
+          error: 'ID тикета и код статуса обязательны'
+        });
+        return;
+      }
+      
+      const result = await this.cabinetService.changeSupportTicketStatus(supabase, id, status_code);
+      
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: 'Статус тикета успешно изменен'
       });
     } catch (error) {
       next(error);

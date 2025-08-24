@@ -107,6 +107,29 @@ export interface CreateSupportTicketDto {
   p_initial_message: string;
 }
 
+// Типы для жалоб
+export interface Complaint {
+  id: string;
+  incident_date: string;
+  title: string;
+  type: string;
+  participants: string[];
+  description: string;
+  evidence?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateComplaintDto {
+  p_incident_date: string; // timestamptz format
+  p_title: string;
+  p_type: string;
+  p_participants: string[]; // Will be converted to JSONB
+  p_description: string;
+  p_evidence?: string;
+}
+
 // API ответы
 export interface CabinetApiResponse<T> {
   success: boolean;
@@ -176,6 +199,21 @@ export const cabinetApi = {
   // Тикеты службы поддержки
   createSupportTicket: async (data: CreateSupportTicketDto): Promise<{ id: string }> => {
     const response = await apiClient.post<CabinetApiResponse<{ id: string }>>('/support/tickets', data);
+    return response.data || response;
+  },
+
+  // Жалобы
+  createComplaint: async (data: CreateComplaintDto): Promise<{ id: string }> => {
+    // Convert participants array to JSONB format for the RPC function
+    const rpcData = {
+      p_incident_date: data.p_incident_date,
+      p_title: data.p_title,
+      p_type: data.p_type,
+      p_participants: data.p_participants, // Will be automatically converted to JSONB by API
+      p_description: data.p_description,
+      p_evidence: data.p_evidence || ''
+    };
+    const response = await apiClient.post<CabinetApiResponse<{ id: string }>>('/support/complaints', rpcData);
     return response.data || response;
   },
 

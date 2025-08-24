@@ -149,6 +149,37 @@ export interface AvailableTransferDepartment {
   is_available_for_transfer?: boolean;
 }
 
+// Complaint types
+export interface CreateComplaintDto {
+  p_incident_date: string; // timestamptz format
+  p_title: string;
+  p_type: string;
+  p_participants: string[]; // Will be converted to JSONB
+  p_description: string;
+  p_evidence?: string;
+}
+
+export interface Complaint {
+  id: string; // uuid
+  user_id: string; // uuid
+  incident_date: string; // timestamp string
+  title: string;
+  type: string;
+  participants: string[]; // JSON array
+  description: string;
+  evidence?: string;
+  status_code: string; // e.g., 'pending', 'under_review', 'resolved', 'closed'
+  status_name: string; // e.g., 'Ожидает рассмотрения', 'На рассмотрении', 'Решена', 'Закрыта'
+  created_at: string; // timestamp string
+  updated_at: string; // timestamp string
+  // Related data
+  user?: {
+    username: string;
+    first_name?: string;
+    last_name?: string;
+  };
+}
+
 /**
  * Интерфейс для контейнера всех сервисов
  * Теперь все сервисы - это экземпляры, а не классы
