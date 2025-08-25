@@ -2,6 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cabinetApi, type CreateSupportTicketDto, type CreateComplaintDto } from '@/shared/api/cabinet-service';
 import { toast } from 'sonner';
 
+// Экспортируем хуки из hooks.ts
+export { useSupportTicketDetails, useAddSupportMessage, useMySupportTickets } from './hooks';
+
 /**
  * React Query mutation hook for creating support tickets
  * Following the React Query integration pattern from project specifications

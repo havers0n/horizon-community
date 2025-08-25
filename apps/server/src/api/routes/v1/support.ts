@@ -20,6 +20,13 @@ const createSupportTicketSchema = z.object({
     .max(2000, 'Сообщение должно содержать от 10 до 2000 символов'),
 });
 
+// Схема валидации для добавления сообщений пользователями
+const addSupportMessageSchema = z.object({
+  content: z.string()
+    .min(1, 'Сообщение не может быть пустым')
+    .max(2000, 'Сообщение должно содержать не более 2000 символов'),
+});
+
 // Схема валидации для жалоб
 const createComplaintSchema = z.object({
   p_incident_date: z.string().min(1, 'Дата инцидента обязательна'),
@@ -63,6 +70,17 @@ export function createSupportRoutes(services: ServicesContainer): Router {
   );
 
   /**
+   * POST /api/v1/support/tickets/:id/messages
+   * Добавление сообщения в тикет (для автора тикета)
+   */
+  router.post(
+    '/tickets/:id/messages',
+    authenticateToken,
+    validateRequest({ body: addSupportMessageSchema }),
+    (req, res, next) => buildController(req).addMessageToSupportTicketForUser(req, res, next)
+  );
+
+  /**
    * POST /api/v1/support/complaints
    * Создание новой жалобы
    */
@@ -71,6 +89,16 @@ export function createSupportRoutes(services: ServicesContainer): Router {
     authenticateToken,
     validateRequest({ body: createComplaintSchema }),
     (req, res, next) => buildController(req).createComplaint(req, res, next)
+  );
+
+  /**
+   * GET /api/v1/support/tickets/:id
+   * Получение деталей конкретного тикета (для автора)
+   */
+  router.get(
+    '/tickets/:id',
+    authenticateToken,
+    (req, res, next) => buildController(req).getSupportTicketDetailsForUser(req, res, next)
   );
 
   return router;

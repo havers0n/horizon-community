@@ -49,4 +49,5 @@ export { AnnouncementsWidget } from './ui/announcements-widget';
 export { UsefulLinksWidget } from './ui/useful-links-widget';
 export { StatisticsWidget } from './ui/statistics-widget';
 export { ApplicationStatusWidget } from './ui/application-status-widget';
-export { NextStepsWidget } from './ui/next-steps-widget'; 
+export { NextStepsWidget } from './ui/next-steps-widget';
+export { EventsWidget } from './ui/events-widget'; 

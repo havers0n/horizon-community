@@ -1,10 +1,4 @@
-// Notifications feature exports
-export * from './ui'
-export * from './model'
-export * from './api'
-
-// Feature object for lazy loading
-export const NotificationsFeature = {
-  NotificationList: () => import('./ui/notification-list').then(m => ({ default: m.default })),
-  Settings: () => import('./ui/notification-settings').then(m => ({ default: m.default }))
-} 
+export { default as NotificationList } from './ui/notification-list'
+export { NotificationsModal } from './ui/notifications-modal'
+export { default as NotificationSettings } from './ui/notification-settings'
+export { useNotifications, useMarkAsRead, useMarkAllAsRead, useNotificationClick } from './model/useNotifications' 

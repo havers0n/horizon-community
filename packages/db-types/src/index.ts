@@ -3027,16 +3027,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      add_message_to_support_ticket: {
-        Args: { p_content: string; p_ticket_id: string }
-        Returns: string
-      }
       approve_joint_position_request: {
         Args: { p_request_id: string }
         Returns: undefined
       }
       approve_leave_request: {
         Args: { p_leave_id: string }
+        Returns: undefined
+      }
+      approve_transfer_request: {
+        Args: { p_request_id: string }
         Returns: undefined
       }
       assign_role_to_user: {
@@ -3046,10 +3046,6 @@ export type Database = {
       can_read_doc: {
         Args: { doc_id: string }
         Returns: boolean
-      }
-      change_support_ticket_status: {
-        Args: { p_status_code: string; p_ticket_id: string }
-        Returns: undefined
       }
       create_complaint: {
         Args:
@@ -3409,16 +3405,19 @@ export type Database = {
           name: string
         }[]
       }
-      get_all_support_tickets: {
+      get_all_transfer_requests: {
         Args: Record<PropertyKey, never>
         Returns: {
-          author_username: string
+          approver_full_name: string
           created_at: string
           id: string
+          reason: string
+          requester_full_name: string
+          review_comment: string
+          source_department_name: string
           status_code: string
           status_name: string
-          title: string
-          updated_at: string
+          target_department_name: string
         }[]
       }
       get_available_departments_for_joint_position: {
@@ -3803,6 +3802,16 @@ export type Database = {
           status_name: string
         }[]
       }
+      get_my_notifications: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string
+        }[]
+      }
       get_my_transfer_requests: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3844,10 +3853,6 @@ export type Database = {
           title: string
           type_id: string | null
         }[]
-      }
-      get_support_ticket_details: {
-        Args: { p_ticket_id: string }
-        Returns: Json
       }
       get_unit_by_id: {
         Args: { p_unit_id: string }
@@ -4019,6 +4024,10 @@ export type Database = {
       }
       reject_leave_request: {
         Args: { p_leave_id: string; p_rejection_reason: string }
+        Returns: undefined
+      }
+      reject_transfer_request: {
+        Args: { p_reason: string; p_request_id: string }
         Returns: undefined
       }
       revoke_permission_from_role: {
@@ -4630,7 +4639,30 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      add_message_to_support_ticket: {
+        Args: { p_content: string; p_ticket_id: string }
+        Returns: string
+      }
+      change_support_ticket_status: {
+        Args: { p_status_code: string; p_ticket_id: string }
+        Returns: undefined
+      }
+      get_all_support_tickets: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          author_username: string
+          created_at: string
+          id: string
+          status_code: string
+          status_name: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      get_support_ticket_details: {
+        Args: { p_ticket_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       test_purpose: "entry" | "promotion" | "qualification"

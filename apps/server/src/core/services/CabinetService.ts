@@ -1416,6 +1416,80 @@ export class CabinetService {
   }
 
   /**
+   * [USER] Добавляет сообщение пользователя в тикет поддержки (с проверкой прав)
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async addMessageToSupportTicketForUser(
+    supabase: SupabaseClient, 
+    ticketId: string, 
+    userId: string,
+    content: string
+  ): Promise<any> {
+    try {
+      console.log('[CabinetService] addMessageToSupportTicketForUser: Начинаем добавление сообщения', {
+        ticketId,
+        userId,
+        contentLength: content.length,
+        contentPreview: content.substring(0, 50) + '...'
+      });
+
+      // Сначала проверяем, что пользователь является автором тикета
+      const { data: ticketAuthor, error: authorError } = await supabase
+        .from('support_tickets')
+        .select('author_user_id')
+        .eq('id', ticketId)
+        .single();
+
+      if (authorError || !ticketAuthor) {
+        console.warn('[CabinetService] addMessageToSupportTicketForUser: Тикет не найден');
+        throw new AppError('Ticket not found', 404);
+      }
+
+      // ПРОВЕРКА АВТОРСТВА
+      if (ticketAuthor.author_user_id !== userId) {
+        console.warn('[CabinetService] addMessageToSupportTicketForUser: Доступ запрещен', {
+          ticketAuthorId: ticketAuthor.author_user_id,
+          requestingUserId: userId
+        });
+        throw new AppError('Access denied', 403);
+      }
+
+      console.log('[CabinetService] addMessageToSupportTicketForUser: Авторство подтверждено, добавляем сообщение');
+
+      // Вызываем RPC функцию add_message_to_support_ticket
+      const { data, error } = await (supabase as any).rpc('add_message_to_support_ticket', {
+        p_ticket_id: ticketId,
+        p_content: content
+      });
+
+      console.log('[CabinetService] addMessageToSupportTicketForUser: RPC ответ', { data, error });
+
+      if (error) {
+        console.error('[CabinetService] addMessageToSupportTicketForUser: Ошибка БД:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      console.log('[CabinetService] addMessageToSupportTicketForUser: Сообщение успешно добавлено, ID:', data);
+      
+      // Возвращаем обновленные данные тикета с сообщениями
+      const updatedTicketDetails = await this.getSupportTicketDetailsForUser(supabase, ticketId, userId);
+      
+      console.log('[CabinetService] addMessageToSupportTicketForUser: Обновленные данные тикета:', {
+        hasTicket: !!updatedTicketDetails?.ticket,
+        messagesCount: updatedTicketDetails?.messages?.length || 0
+      });
+
+      return updatedTicketDetails;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('[CabinetService] addMessageToSupportTicketForUser: Неожиданная ошибка:', error);
+      throw new AppError('Failed to add message to support ticket', 500);
+    }
+  }
+
+  /**
    * [ADMIN] Изменяет статус тикета поддержки (например, закрывает тикет)
    * Правило №2: Вся бизнес-логика в сервисе
    */
@@ -1443,6 +1517,71 @@ export class CabinetService {
       }
       console.error('Unexpected error in changeSupportTicketStatus:', error);
       throw new AppError('Failed to change support ticket status', 500);
+    }
+  }
+
+  /**
+   * Получить детали тикета поддержки для автора тикета
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getSupportTicketDetailsForUser(
+    supabase: SupabaseClient,
+    ticketId: string,
+    userId: string
+  ): Promise<any> {
+    try {
+      console.log('[CabinetService] getSupportTicketDetailsForUser: Начинаем получение деталей тикета', { 
+        ticketId, 
+        userId 
+      });
+      
+      // Сначала получаем автора тикета для проверки прав
+      const { data: ticketAuthor, error: authorError } = await supabase
+        .from('support_tickets')
+        .select('author_user_id')
+        .eq('id', ticketId)
+        .single();
+
+      if (authorError || !ticketAuthor) {
+        console.warn('[CabinetService] getSupportTicketDetailsForUser: Тикет не найден');
+        throw new AppError('Ticket not found', 404);
+      }
+
+      // ПРОВЕРКА АВТОРСТВА
+      if (ticketAuthor.author_user_id !== userId) {
+        console.warn('[CabinetService] getSupportTicketDetailsForUser: Доступ запрещен', {
+          ticketAuthorId: ticketAuthor.author_user_id,
+          requestingUserId: userId
+        });
+        throw new AppError('Access denied', 403);
+      }
+
+      console.log('[CabinetService] getSupportTicketDetailsForUser: Авторство подтверждено, получаем детали');
+      
+      // ВЫЗЫВАЕМ ПРАВИЛЬНУЮ RPC-ФУНКЦИЮ
+      const { data, error } = await (supabase as any).rpc('get_support_ticket_details', {
+        p_ticket_id: ticketId
+      });
+
+      if (error) {
+        console.error('[CabinetService] getSupportTicketDetailsForUser: Ошибка RPC:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      console.log('[CabinetService] getSupportTicketDetailsForUser: Детали получены:', {
+        hasData: !!data,
+        hasTicket: !!data?.ticket,
+        hasMessages: !!data?.messages,
+        messagesCount: data?.messages?.length || 0
+      });
+
+      return data;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('[CabinetService] getSupportTicketDetailsForUser: Неожиданная ошибка:', error);
+      throw new AppError('Failed to get support ticket details for user', 500);
     }
   }
 }

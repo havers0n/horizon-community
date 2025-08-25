@@ -1,20 +1,45 @@
 // API functions for notifications
-import { apiClient } from '@/shared/api/api-client'
+import { cabinetApi } from '@/shared/api/cabinet-service'
 
 export interface ApiNotification {
   id: string
-  message: string
-  type: 'success' | 'error' | 'info' | 'warning'
-  isRead: boolean
-  createdAt: string
+  content: string
   link?: string
-  userId: string
+  is_read: boolean
+  created_at: string
+  type: string
+  metadata?: Record<string, any>
 }
 
 export const getNotifications = async (): Promise<ApiNotification[]> => {
-  return apiClient.get<ApiNotification[]>('/notifications')
+  const { data, error } = await cabinetApi.supabase.rpc('get_my_notifications')
+  
+  if (error) {
+    throw new Error(error.message)
+  }
+  
+  return data || []
 }
 
 export const markAsRead = async (id: string): Promise<void> => {
-  return apiClient.patch(`/notifications/${id}/read`)
+  const { error } = await cabinetApi.supabase
+    .from('mdt.notifications')
+    .update({ is_read: true })
+    .eq('id', id)
+  
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const markAllAsRead = async (): Promise<void> => {
+  const { error } = await cabinetApi.supabase
+    .from('mdt.notifications')
+    .update({ is_read: true })
+    .eq('recipient_user_id', (await cabinetApi.supabase.auth.getUser()).data.user?.id)
+    .eq('is_read', false)
+  
+  if (error) {
+    throw new Error(error.message)
+  }
 } 

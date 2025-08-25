@@ -9,6 +9,7 @@ export { TestExamWidget } from './test-exam'
 export { NotificationsWidget } from './notifications'
 export { ForumWidget } from './forum'
 export { UserTable } from './user-table'
+export { SupportChatContainer } from './support-chat-container'
 
 // Админские виджеты
 export { AdminLeaveManagementWidget } from './admin/leave-management'

@@ -3,6 +3,7 @@ import { AppProviders } from './providers/AppProviders'
 import { AppRouter } from './router/AppRouter'
 import { GlobalErrorBoundary } from '@/shared/ui/error-boundary'
 import { Toaster } from '@/shared/ui/toaster'
+import { SupportChatContainer } from '@/widgets/support-chat-container'
 
 /**
  * Main Application Component
@@ -15,6 +16,7 @@ function App() {
       <AppProviders>
         <AppRouter />
         <Toaster />
+        <SupportChatContainer />
       </AppProviders>
     </GlobalErrorBoundary>
   )

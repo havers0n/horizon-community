@@ -1,5 +1,6 @@
 import { apiClient } from './api-client';
 import type { Database } from '@roleplay-identity/db-types';
+import { createClient } from '@supabase/supabase-js'
 
 // Типы из БД - исправленные схемы
 type UserProfile = Database['public']['Tables']['profiles']['Row'];
@@ -102,6 +103,18 @@ export interface SupportTicket {
   updated_at: string;
 }
 
+export interface SupportMessage {
+  id: string;
+  content: string;
+  createdAt: string;
+  isFromUser: boolean;
+}
+
+export interface SupportTicketDetails {
+  ticket: SupportTicket;
+  messages: SupportMessage[];
+}
+
 export interface CreateSupportTicketDto {
   p_title: string;
   p_initial_message: string;
@@ -139,6 +152,18 @@ export interface CabinetApiResponse<T> {
 
 // Cabinet API сервис
 export const cabinetApi = {
+  // Supabase клиент для прямых запросов
+  supabase: (() => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Missing Supabase environment variables')
+    }
+    
+    return createClient(supabaseUrl, supabaseAnonKey)
+  })(),
+
   // Профиль пользователя
   getProfile: () => 
     apiClient.get<CabinetApiResponse<UserProfile>>('/cabinet/profile'),
@@ -199,6 +224,24 @@ export const cabinetApi = {
   // Тикеты службы поддержки
   createSupportTicket: async (data: CreateSupportTicketDto): Promise<{ id: string }> => {
     const response = await apiClient.post<CabinetApiResponse<{ id: string }>>('/support/tickets', data);
+    return response.data || response;
+  },
+
+  // Новые методы для работы с тикетами поддержки
+  getSupportTicketById: async (ticketId: string): Promise<SupportTicketDetails> => {
+    const response = await apiClient.get<CabinetApiResponse<SupportTicketDetails>>(`/support/tickets/${ticketId}`);
+    return response.data || response;
+  },
+
+  addSupportMessage: async (ticketId: string, data: { message: string }): Promise<SupportTicketDetails> => {
+    const response = await apiClient.post<CabinetApiResponse<SupportTicketDetails>>(`/support/tickets/${ticketId}/messages`, {
+      content: data.message // Преобразуем message в content для соответствия API
+    });
+    return response.data || response;
+  },
+
+  getMySupportTickets: async (): Promise<SupportTicket[]> => {
+    const response = await apiClient.get<CabinetApiResponse<SupportTicket[]>>('/support/tickets/my');
     return response.data || response;
   },
 
