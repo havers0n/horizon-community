@@ -50,4 +50,7 @@ export * from './request-joint-position'
 export * from './request-transfer'
 
 // Request Career Change (Combined)
-export * from './request-career-change' 
+export * from './request-career-change'
+
+// Manage Transfers (Admin)
+export * from './admin/manage-transfers'

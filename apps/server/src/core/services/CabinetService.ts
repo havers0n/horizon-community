@@ -1259,6 +1259,80 @@ export class CabinetService {
   }
 
   /**
+   * [ADMIN] Получает все заявки на перевод для администрирования
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async getAllTransferRequests(supabase: SupabaseClient): Promise<AdminTransferRequest[]> {
+    try {
+      // Вызываем RPC функцию get_all_transfer_requests
+      const { data, error } = await (supabase as any).rpc('get_all_transfer_requests');
+
+      if (error) {
+        console.error('Database error in getAllTransferRequests:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+
+      // Возвращаем пустой массив, если данных нет
+      return (data || []) as AdminTransferRequest[];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in getAllTransferRequests:', error);
+      throw new AppError('Failed to get all transfer requests', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Одобряет заявку на перевод
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async approveTransferRequest(supabase: SupabaseClient, requestId: string): Promise<void> {
+    try {
+      // Вызываем RPC функцию approve_transfer_request
+      const { error } = await (supabase as any).rpc('approve_transfer_request', {
+        p_request_id: requestId
+      });
+
+      if (error) {
+        console.error('Database error in approveTransferRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in approveTransferRequest:', error);
+      throw new AppError('Failed to approve transfer request', 500);
+    }
+  }
+
+  /**
+   * [ADMIN] Отклоняет заявку на перевод с указанием причины
+   * Правило №2: Вся бизнес-логика в сервисе
+   */
+  public async rejectTransferRequest(supabase: SupabaseClient, requestId: string, reason: string): Promise<void> {
+    try {
+      // Вызываем RPC функцию reject_transfer_request
+      const { error } = await (supabase as any).rpc('reject_transfer_request', {
+        p_request_id: requestId,
+        p_reason: reason
+      });
+
+      if (error) {
+        console.error('Database error in rejectTransferRequest:', error);
+        throw new AppError(`Database error: ${error.message}`, 500);
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      console.error('Unexpected error in rejectTransferRequest:', error);
+      throw new AppError('Failed to reject transfer request', 500);
+    }
+  }
+
+  /**
    * [ADMIN] Получает все тикеты поддержки для администрирования
    * Правило №2: Вся бизнес-логика в сервисе
    */

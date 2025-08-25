@@ -13,7 +13,8 @@ import {
   Database,
   CalendarDays,
   UserX,
-  MessageSquare
+  MessageSquare,
+  ArrowLeftRight
 } from 'lucide-react';
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -78,6 +79,12 @@ export const ADMIN_SIDEBAR_CONFIG: NavGroup[] = [
         href: '/admin/joint-positions',
         icon: UserX,
         requiredPermissions: ['admin.joint_positions.manage'],
+      },
+      {
+        label: 'Управление переводами',
+        href: '/admin/transfers',
+        icon: ArrowLeftRight,
+        requiredPermissions: ['admin.transfers.manage'],
       },
     ],
   },

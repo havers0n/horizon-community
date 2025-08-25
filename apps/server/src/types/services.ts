@@ -103,6 +103,20 @@ export interface JointPositionRequest {
   };
 }
 
+// Admin Transfer Request types
+export interface AdminTransferRequest {
+  id: string;
+  created_at: string;
+  reason: string;
+  status_code: string;
+  status_name: string;
+  source_department_name: string;
+  target_department_name: string;
+  requester_full_name: string;
+  approver_full_name: string | null;
+  review_comment: string | null;
+}
+
 export interface AvailableDepartment {
   id: string; // uuid
   name: string;

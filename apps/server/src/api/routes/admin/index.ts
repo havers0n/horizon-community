@@ -6,6 +6,7 @@ import testsRoutes from './tests.routes';
 import applicationsRoutes from './applications.routes';
 import leaveRequestsRoutes from './leave-requests.routes';
 import jointPositionsRoutes from './joint-positions.routes';
+import transfersRoutes from './transfers.routes';
 import { requirePermission } from '../../middleware/auth.middleware';
 import { GalleryService } from '../../../core/services/GalleryService';
 import { TestAdminService } from '../../../core/services/TestAdminService';
@@ -48,6 +49,7 @@ router.use('/tests', testsRoutes);
 router.use('/', applicationsRoutes);
 router.use('/', leaveRequestsRoutes);
 router.use('/', jointPositionsRoutes);
+router.use('/', transfersRoutes);
 
 // === Gallery Moderation ===
 // GET /api/v1/admin/gallery/pending

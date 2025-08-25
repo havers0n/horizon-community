@@ -13,4 +13,5 @@ export { SupportChatContainer } from './support-chat-container'
 
 // Админские виджеты
 export { AdminLeaveManagementWidget } from './admin/leave-management'
-export { AdminTestsWidget } from './admin/tests' 
+export { AdminTestsWidget } from './admin/tests'
+export { AdminTransfersWidget } from './admin/transfers'
