@@ -150,17 +150,19 @@ export function PendingJointPositionRequests() {
       return { previousRequests }
     },
     onSuccess: () => {
-      // Invalidate and refetch specific queries
-      queryClient.invalidateQueries({ 
+      // Refetch specific queries for all three tabs to ensure fresh data
+      queryClient.refetchQueries({ 
         queryKey: ['admin-joint-position-requests', { status: 'in_review' }] 
       })
-      queryClient.invalidateQueries({ 
+      queryClient.refetchQueries({ 
         queryKey: ['admin-joint-position-requests', { status: 'approved' }] 
       })
-      // Also invalidate the general query without status filter
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-joint-position-requests', { status: 'rejected' }] 
+      })
+      // Also invalidate all admin-joint-position-requests queries to ensure consistency
       queryClient.invalidateQueries({ 
-        queryKey: ['admin-joint-position-requests'],
-        exact: false
+        queryKey: ['admin-joint-position-requests'] 
       })
       toast({
         title: 'Успешно',
@@ -201,17 +203,19 @@ export function PendingJointPositionRequests() {
       return { previousRequests }
     },
     onSuccess: () => {
-      // Invalidate and refetch specific queries
-      queryClient.invalidateQueries({ 
+      // Refetch specific queries for all three tabs to ensure fresh data
+      queryClient.refetchQueries({ 
         queryKey: ['admin-joint-position-requests', { status: 'in_review' }] 
       })
-      queryClient.invalidateQueries({ 
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-joint-position-requests', { status: 'approved' }] 
+      })
+      queryClient.refetchQueries({ 
         queryKey: ['admin-joint-position-requests', { status: 'rejected' }] 
       })
-      // Also invalidate the general query without status filter
+      // Also invalidate all admin-joint-position-requests queries to ensure consistency
       queryClient.invalidateQueries({ 
-        queryKey: ['admin-joint-position-requests'],
-        exact: false
+        queryKey: ['admin-joint-position-requests'] 
       })
       toast({
         title: 'Успешно',

@@ -36,6 +36,9 @@ export function RejectedRequests() {
   const { data: response, isLoading, error } = useQuery({
     queryKey: ['admin-transfer-requests', { status: 'rejected' }],
     queryFn: () => getAllTransferRequests({ status: 'rejected', page: 1, limit: 50 }),
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 
   if (isLoading) {

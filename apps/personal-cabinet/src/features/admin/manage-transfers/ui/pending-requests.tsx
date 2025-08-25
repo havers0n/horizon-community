@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -8,9 +9,8 @@ import { Check, X, AlertCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog'
 import { Textarea } from '@/shared/ui/textarea'
 import { Label } from '@/shared/ui/label'
-import { useState } from 'react'
-import { getAllTransferRequests, approveTransferRequest, rejectTransferRequest } from '../api'
-import { AdminTransferRequest, formatEmployeeName, formatSourceDepartmentName, formatTargetDepartmentName, formatCreatedAt, getStatusVariant, getStatusText } from '../model'
+import { getAllTransferRequests, approveTransferRequest, rejectTransferRequest, AdminTransferRequest } from '../api'
+import { formatEmployeeName, formatSourceDepartmentName, formatTargetDepartmentName, formatCreatedAt, getStatusVariant, getStatusText } from '../model'
 
 const LoadingSkeleton = () => (
   <div className="space-y-3">
@@ -46,20 +46,55 @@ export function PendingRequests() {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
 
   const { data: response, isLoading, error } = useQuery({
-    queryKey: ['admin-transfer-requests', { status: 'pending' }],
-    queryFn: () => getAllTransferRequests({ status: 'pending', page: 1, limit: 50 }),
+    queryKey: ['admin-transfer-requests', { status: 'in_review' }],
+    queryFn: () => getAllTransferRequests({ status: 'in_review', page: 1, limit: 50 }),
   })
 
   const approveMutation = useMutation({
     mutationFn: approveTransferRequest,
+    onMutate: async (requestId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['admin-transfer-requests', { status: 'in_review' }] })
+      
+      // Snapshot the previous value
+      const previousRequests = queryClient.getQueryData(['admin-transfer-requests', { status: 'in_review' }])
+      
+      // Optimistically update to remove the approved request
+      queryClient.setQueryData(['admin-transfer-requests', { status: 'in_review' }], (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.filter((req: AdminTransferRequest) => req.id !== requestId)
+        }
+      })
+      
+      return { previousRequests }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-transfer-requests'] })
+      // Refetch specific queries for all three tabs to ensure fresh data
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-transfer-requests', { status: 'in_review' }] 
+      })
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-transfer-requests', { status: 'approved' }] 
+      })
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-transfer-requests', { status: 'rejected' }] 
+      })
+      // Also invalidate all admin-transfer-requests queries to ensure consistency
+      queryClient.invalidateQueries({ 
+        queryKey: ['admin-transfer-requests'] 
+      })
       toast({
         title: 'Успешно',
         description: 'Заявка на перевод одобрена',
       })
     },
-    onError: (error: any) => {
+    onError: (error: any, requestId, context: any) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousRequests) {
+        queryClient.setQueryData(['admin-transfer-requests', { status: 'in_review' }], context.previousRequests)
+      }
       toast({
         title: 'Ошибка',
         description: error.message || 'Не удалось одобрить заявку на перевод',
@@ -70,8 +105,39 @@ export function PendingRequests() {
 
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => rejectTransferRequest(id, reason),
+    onMutate: async ({ id: requestId }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['admin-transfer-requests', { status: 'in_review' }] })
+      
+      // Snapshot the previous value
+      const previousRequests = queryClient.getQueryData(['admin-transfer-requests', { status: 'in_review' }])
+      
+      // Optimistically update to remove the rejected request
+      queryClient.setQueryData(['admin-transfer-requests', { status: 'in_review' }], (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.filter((req: AdminTransferRequest) => req.id !== requestId)
+        }
+      })
+      
+      return { previousRequests }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-transfer-requests'] })
+      // Refetch specific queries for all three tabs to ensure fresh data
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-transfer-requests', { status: 'in_review' }] 
+      })
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-transfer-requests', { status: 'approved' }] 
+      })
+      queryClient.refetchQueries({ 
+        queryKey: ['admin-transfer-requests', { status: 'rejected' }] 
+      })
+      // Also invalidate all admin-transfer-requests queries to ensure consistency
+      queryClient.invalidateQueries({ 
+        queryKey: ['admin-transfer-requests'] 
+      })
       toast({
         title: 'Успешно',
         description: 'Заявка на перевод отклонена',
@@ -80,7 +146,11 @@ export function PendingRequests() {
       setRejectReason('')
       setRequestToReject(null)
     },
-    onError: (error: any) => {
+    onError: (error: any, { id: requestId }, context: any) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousRequests) {
+        queryClient.setQueryData(['admin-transfer-requests', { status: 'in_review' }], context.previousRequests)
+      }
       toast({
         title: 'Ошибка',
         description: error.message || 'Не удалось отклонить заявку на перевод',
