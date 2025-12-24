@@ -139,3 +139,11 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Project-specific files and directories
+deployment.tar.gz
+backup/
+uploads/
+test-results/
+test-reports/
+tatus
